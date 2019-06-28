@@ -1,0 +1,498 @@
+{
+  "contractName": "ProxyRegistryInterface",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "proxies",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity 0.5.0;\n\nimport \"./DSProxyInterface.sol\";\n\ncontract ProxyRegistryInterface {\n    function proxies(address _owner) public view returns(DSProxyInterface);\n    function build(address) public returns (address);\n}",
+  "sourcePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/interfaces/ProxyRegistryInterface.sol",
+  "ast": {
+    "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/interfaces/ProxyRegistryInterface.sol",
+    "exportedSymbols": {
+      "ProxyRegistryInterface": [
+        6754
+      ]
+    },
+    "id": 6755,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6738,
+        "literals": [
+          "solidity",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:22:36"
+      },
+      {
+        "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/interfaces/DSProxyInterface.sol",
+        "file": "./DSProxyInterface.sol",
+        "id": 6739,
+        "nodeType": "ImportDirective",
+        "scope": 6755,
+        "sourceUnit": 6399,
+        "src": "24:32:36",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 6754,
+        "linearizedBaseContracts": [
+          6754
+        ],
+        "name": "ProxyRegistryInterface",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 6746,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "proxies",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6742,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6741,
+                  "name": "_owner",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6746,
+                  "src": "113:14:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6740,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "113:7:36",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "112:16:36"
+            },
+            "returnParameters": {
+              "id": 6745,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6744,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6746,
+                  "src": "149:16:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_DSProxyInterface_$6398",
+                    "typeString": "contract DSProxyInterface"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6743,
+                    "name": "DSProxyInterface",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6398,
+                    "src": "149:16:36",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_DSProxyInterface_$6398",
+                      "typeString": "contract DSProxyInterface"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "148:18:36"
+            },
+            "scope": 6754,
+            "src": "96:71:36",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 6753,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "build",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6749,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6748,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6753,
+                  "src": "187:7:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6747,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "187:7:36",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "186:9:36"
+            },
+            "returnParameters": {
+              "id": 6752,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6751,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6753,
+                  "src": "212:7:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6750,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "212:7:36",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "211:9:36"
+            },
+            "scope": 6754,
+            "src": "172:49:36",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 6755,
+        "src": "58:165:36"
+      }
+    ],
+    "src": "0:223:36"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/interfaces/ProxyRegistryInterface.sol",
+    "exportedSymbols": {
+      "ProxyRegistryInterface": [
+        6754
+      ]
+    },
+    "id": 6755,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6738,
+        "literals": [
+          "solidity",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:22:36"
+      },
+      {
+        "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/interfaces/DSProxyInterface.sol",
+        "file": "./DSProxyInterface.sol",
+        "id": 6739,
+        "nodeType": "ImportDirective",
+        "scope": 6755,
+        "sourceUnit": 6399,
+        "src": "24:32:36",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 6754,
+        "linearizedBaseContracts": [
+          6754
+        ],
+        "name": "ProxyRegistryInterface",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 6746,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "proxies",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6742,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6741,
+                  "name": "_owner",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6746,
+                  "src": "113:14:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6740,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "113:7:36",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "112:16:36"
+            },
+            "returnParameters": {
+              "id": 6745,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6744,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6746,
+                  "src": "149:16:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_DSProxyInterface_$6398",
+                    "typeString": "contract DSProxyInterface"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6743,
+                    "name": "DSProxyInterface",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6398,
+                    "src": "149:16:36",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_DSProxyInterface_$6398",
+                      "typeString": "contract DSProxyInterface"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "148:18:36"
+            },
+            "scope": 6754,
+            "src": "96:71:36",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 6753,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "build",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6749,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6748,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6753,
+                  "src": "187:7:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6747,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "187:7:36",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "186:9:36"
+            },
+            "returnParameters": {
+              "id": 6752,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6751,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6753,
+                  "src": "212:7:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6750,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "212:7:36",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "211:9:36"
+            },
+            "scope": 6754,
+            "src": "172:49:36",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 6755,
+        "src": "58:165:36"
+      }
+    ],
+    "src": "0:223:36"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.0+commit.1d4f565a.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.0",
+  "updatedAt": "2019-06-28T08:20:24.972Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}

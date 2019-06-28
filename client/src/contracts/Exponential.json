@@ -1,0 +1,4579 @@
+{
+  "contractName": "Exponential",
+  "abi": [],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603580601d6000396000f3fe6080604052600080fdfea165627a7a7230582012c1d99fd232231cd5a3a68ebdf46f6735df2f3db76f17c054bc842f0e126aba0029",
+  "deployedBytecode": "0x6080604052600080fdfea165627a7a7230582012c1d99fd232231cd5a3a68ebdf46f6735df2f3db76f17c054bc842f0e126aba0029",
+  "sourceMap": "54:1606:26:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;54:1606:26;;;;;;;",
+  "deployedSourceMap": "54:1606:26:-;;;;;",
+  "source": "pragma solidity ^0.5.0;\n\nimport \"./CarefulMath.sol\";\n\ncontract Exponential is CarefulMath {\n    uint constant expScale = 1e18;\n    uint constant halfExpScale = expScale/2;\n    uint constant mantissaOne = expScale;\n\n    struct Exp {\n        uint mantissa;\n    }\n\n    function divScalarByExp(uint scalar, Exp memory divisor) pure internal returns (MathError, Exp memory) {\n        (MathError err0, uint numerator) = mulUInt(expScale, scalar);\n        if (err0 != MathError.NO_ERROR) {\n            return (err0, Exp({mantissa: 0}));\n        }\n        return getExp(numerator, divisor.mantissa);\n    }\n\n    function divScalarByExpTruncate(uint scalar, Exp memory divisor) pure internal returns (MathError, uint) {\n        (MathError err, Exp memory fraction) = divScalarByExp(scalar, divisor);\n        if (err != MathError.NO_ERROR) {\n            return (err, 0);\n        }\n\n        return (MathError.NO_ERROR, truncate(fraction));\n    }\n\n    function getExp(uint num, uint denom) pure internal returns (MathError, Exp memory) {\n        (MathError err0, uint scaledNumerator) = mulUInt(num, expScale);\n        if (err0 != MathError.NO_ERROR) {\n            return (err0, Exp({mantissa: 0}));\n        }\n\n        (MathError err1, uint rational) = divUInt(scaledNumerator, denom);\n        if (err1 != MathError.NO_ERROR) {\n            return (err1, Exp({mantissa: 0}));\n        }\n\n        return (MathError.NO_ERROR, Exp({mantissa: rational}));\n    }\n\n    function truncate(Exp memory exp) pure internal returns (uint) {\n        // Note: We are not using careful math here as we're performing a division that cannot fail\n        return exp.mantissa / expScale;\n    }\n}",
+  "sourcePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/compound/Exponential.sol",
+  "ast": {
+    "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/compound/Exponential.sol",
+    "exportedSymbols": {
+      "Exponential": [
+        6235
+      ]
+    },
+    "id": 6236,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6066,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:26"
+      },
+      {
+        "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/compound/CarefulMath.sol",
+        "file": "./CarefulMath.sol",
+        "id": 6067,
+        "nodeType": "ImportDirective",
+        "scope": 6236,
+        "sourceUnit": 4994,
+        "src": "25:27:26",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 6068,
+              "name": "CarefulMath",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 4993,
+              "src": "78:11:26",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_CarefulMath_$4993",
+                "typeString": "contract CarefulMath"
+              }
+            },
+            "id": 6069,
+            "nodeType": "InheritanceSpecifier",
+            "src": "78:11:26"
+          }
+        ],
+        "contractDependencies": [
+          4993
+        ],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 6235,
+        "linearizedBaseContracts": [
+          6235,
+          4993
+        ],
+        "name": "Exponential",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": true,
+            "id": 6072,
+            "name": "expScale",
+            "nodeType": "VariableDeclaration",
+            "scope": 6235,
+            "src": "96:29:26",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 6070,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "96:4:26",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "31653138",
+              "id": 6071,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "121:4:26",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_1000000000000000000_by_1",
+                "typeString": "int_const 1000000000000000000"
+              },
+              "value": "1e18"
+            },
+            "visibility": "internal"
+          },
+          {
+            "constant": true,
+            "id": 6077,
+            "name": "halfExpScale",
+            "nodeType": "VariableDeclaration",
+            "scope": 6235,
+            "src": "131:39:26",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 6073,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "131:4:26",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "commonType": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              },
+              "id": 6076,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "lValueRequested": false,
+              "leftExpression": {
+                "argumentTypes": null,
+                "id": 6074,
+                "name": "expScale",
+                "nodeType": "Identifier",
+                "overloadedDeclarations": [],
+                "referencedDeclaration": 6072,
+                "src": "160:8:26",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                }
+              },
+              "nodeType": "BinaryOperation",
+              "operator": "/",
+              "rightExpression": {
+                "argumentTypes": null,
+                "hexValue": "32",
+                "id": 6075,
+                "isConstant": false,
+                "isLValue": false,
+                "isPure": true,
+                "kind": "number",
+                "lValueRequested": false,
+                "nodeType": "Literal",
+                "src": "169:1:26",
+                "subdenomination": null,
+                "typeDescriptions": {
+                  "typeIdentifier": "t_rational_2_by_1",
+                  "typeString": "int_const 2"
+                },
+                "value": "2"
+              },
+              "src": "160:10:26",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "internal"
+          },
+          {
+            "constant": true,
+            "id": 6080,
+            "name": "mantissaOne",
+            "nodeType": "VariableDeclaration",
+            "scope": 6235,
+            "src": "176:36:26",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 6078,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "176:4:26",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "id": 6079,
+              "name": "expScale",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 6072,
+              "src": "204:8:26",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "internal"
+          },
+          {
+            "canonicalName": "Exponential.Exp",
+            "id": 6083,
+            "members": [
+              {
+                "constant": false,
+                "id": 6082,
+                "name": "mantissa",
+                "nodeType": "VariableDeclaration",
+                "scope": 6083,
+                "src": "240:13:26",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 6081,
+                  "name": "uint",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "240:4:26",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "Exp",
+            "nodeType": "StructDefinition",
+            "scope": 6235,
+            "src": "219:41:26",
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 6121,
+              "nodeType": "Block",
+              "src": "369:228:26",
+              "statements": [
+                {
+                  "assignments": [
+                    6095,
+                    6097
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 6095,
+                      "name": "err0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6121,
+                      "src": "380:14:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      },
+                      "typeName": {
+                        "contractScope": null,
+                        "id": 6094,
+                        "name": "MathError",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 4917,
+                        "src": "380:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_enum$_MathError_$4917",
+                          "typeString": "enum CarefulMath.MathError"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 6097,
+                      "name": "numerator",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6121,
+                      "src": "396:14:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 6096,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "396:4:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 6102,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 6099,
+                        "name": "expScale",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6072,
+                        "src": "422:8:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 6100,
+                        "name": "scalar",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6085,
+                        "src": "432:6:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 6098,
+                      "name": "mulUInt",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 4963,
+                      "src": "414:7:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_enum$_MathError_$4917_$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (enum CarefulMath.MathError,uint256)"
+                      }
+                    },
+                    "id": 6101,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "414:25:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_uint256_$",
+                      "typeString": "tuple(enum CarefulMath.MathError,uint256)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "379:60:26"
+                },
+                {
+                  "condition": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_enum$_MathError_$4917",
+                      "typeString": "enum CarefulMath.MathError"
+                    },
+                    "id": 6106,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "id": 6103,
+                      "name": "err0",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6095,
+                      "src": "453:4:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 6104,
+                        "name": "MathError",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4917,
+                        "src": "461:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_enum$_MathError_$4917_$",
+                          "typeString": "type(enum CarefulMath.MathError)"
+                        }
+                      },
+                      "id": 6105,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "memberName": "NO_ERROR",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": null,
+                      "src": "461:18:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "src": "453:26:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": null,
+                  "id": 6114,
+                  "nodeType": "IfStatement",
+                  "src": "449:90:26",
+                  "trueBody": {
+                    "id": 6113,
+                    "nodeType": "Block",
+                    "src": "481:58:26",
+                    "statements": [
+                      {
+                        "expression": {
+                          "argumentTypes": null,
+                          "components": [
+                            {
+                              "argumentTypes": null,
+                              "id": 6107,
+                              "name": "err0",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 6095,
+                              "src": "503:4:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_enum$_MathError_$4917",
+                                "typeString": "enum CarefulMath.MathError"
+                              }
+                            },
+                            {
+                              "argumentTypes": null,
+                              "arguments": [
+                                {
+                                  "argumentTypes": null,
+                                  "hexValue": "30",
+                                  "id": 6109,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "number",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "524:1:26",
+                                  "subdenomination": null,
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_rational_0_by_1",
+                                    "typeString": "int_const 0"
+                                  },
+                                  "value": "0"
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": null,
+                                "id": 6108,
+                                "name": "Exp",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 6083,
+                                "src": "509:3:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_struct$_Exp_$6083_storage_ptr_$",
+                                  "typeString": "type(struct Exponential.Exp storage pointer)"
+                                }
+                              },
+                              "id": 6110,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "structConstructorCall",
+                              "lValueRequested": false,
+                              "names": [
+                                "mantissa"
+                              ],
+                              "nodeType": "FunctionCall",
+                              "src": "509:18:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Exp_$6083_memory",
+                                "typeString": "struct Exponential.Exp memory"
+                              }
+                            }
+                          ],
+                          "id": 6111,
+                          "isConstant": false,
+                          "isInlineArray": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "nodeType": "TupleExpression",
+                          "src": "502:26:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_$",
+                            "typeString": "tuple(enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                          }
+                        },
+                        "functionReturnParameters": 6093,
+                        "id": 6112,
+                        "nodeType": "Return",
+                        "src": "495:33:26"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 6116,
+                        "name": "numerator",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6097,
+                        "src": "562:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 6117,
+                          "name": "divisor",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6087,
+                          "src": "573:7:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                            "typeString": "struct Exponential.Exp memory"
+                          }
+                        },
+                        "id": 6118,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "mantissa",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 6082,
+                        "src": "573:16:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 6115,
+                      "name": "getExp",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6221,
+                      "src": "555:6:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_ptr_$",
+                        "typeString": "function (uint256,uint256) pure returns (enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                      }
+                    },
+                    "id": 6119,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "555:35:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_ptr_$",
+                      "typeString": "tuple(enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                    }
+                  },
+                  "functionReturnParameters": 6093,
+                  "id": 6120,
+                  "nodeType": "Return",
+                  "src": "548:42:26"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 6122,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "divScalarByExp",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6088,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6085,
+                  "name": "scalar",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6122,
+                  "src": "290:11:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6084,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "290:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6087,
+                  "name": "divisor",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6122,
+                  "src": "303:18:26",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                    "typeString": "struct Exponential.Exp"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6086,
+                    "name": "Exp",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6083,
+                    "src": "303:3:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Exp_$6083_storage_ptr",
+                      "typeString": "struct Exponential.Exp"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "289:33:26"
+            },
+            "returnParameters": {
+              "id": 6093,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6090,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6122,
+                  "src": "346:9:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_MathError_$4917",
+                    "typeString": "enum CarefulMath.MathError"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6089,
+                    "name": "MathError",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 4917,
+                    "src": "346:9:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_MathError_$4917",
+                      "typeString": "enum CarefulMath.MathError"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6092,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6122,
+                  "src": "357:10:26",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                    "typeString": "struct Exponential.Exp"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6091,
+                    "name": "Exp",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6083,
+                    "src": "357:3:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Exp_$6083_storage_ptr",
+                      "typeString": "struct Exponential.Exp"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "345:23:26"
+            },
+            "scope": 6235,
+            "src": "266:331:26",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 6159,
+              "nodeType": "Block",
+              "src": "708:225:26",
+              "statements": [
+                {
+                  "assignments": [
+                    6134,
+                    6136
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 6134,
+                      "name": "err",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6159,
+                      "src": "719:13:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      },
+                      "typeName": {
+                        "contractScope": null,
+                        "id": 6133,
+                        "name": "MathError",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 4917,
+                        "src": "719:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_enum$_MathError_$4917",
+                          "typeString": "enum CarefulMath.MathError"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 6136,
+                      "name": "fraction",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6159,
+                      "src": "734:19:26",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                        "typeString": "struct Exponential.Exp"
+                      },
+                      "typeName": {
+                        "contractScope": null,
+                        "id": 6135,
+                        "name": "Exp",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 6083,
+                        "src": "734:3:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Exp_$6083_storage_ptr",
+                          "typeString": "struct Exponential.Exp"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 6141,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 6138,
+                        "name": "scalar",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6124,
+                        "src": "772:6:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 6139,
+                        "name": "divisor",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6126,
+                        "src": "780:7:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                          "typeString": "struct Exponential.Exp memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                          "typeString": "struct Exponential.Exp memory"
+                        }
+                      ],
+                      "id": 6137,
+                      "name": "divScalarByExp",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6122,
+                      "src": "757:14:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_struct$_Exp_$6083_memory_ptr_$returns$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_ptr_$",
+                        "typeString": "function (uint256,struct Exponential.Exp memory) pure returns (enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                      }
+                    },
+                    "id": 6140,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "757:31:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_ptr_$",
+                      "typeString": "tuple(enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "718:70:26"
+                },
+                {
+                  "condition": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_enum$_MathError_$4917",
+                      "typeString": "enum CarefulMath.MathError"
+                    },
+                    "id": 6145,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "id": 6142,
+                      "name": "err",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6134,
+                      "src": "802:3:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 6143,
+                        "name": "MathError",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4917,
+                        "src": "809:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_enum$_MathError_$4917_$",
+                          "typeString": "type(enum CarefulMath.MathError)"
+                        }
+                      },
+                      "id": 6144,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "memberName": "NO_ERROR",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": null,
+                      "src": "809:18:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "src": "802:25:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": null,
+                  "id": 6151,
+                  "nodeType": "IfStatement",
+                  "src": "798:71:26",
+                  "trueBody": {
+                    "id": 6150,
+                    "nodeType": "Block",
+                    "src": "829:40:26",
+                    "statements": [
+                      {
+                        "expression": {
+                          "argumentTypes": null,
+                          "components": [
+                            {
+                              "argumentTypes": null,
+                              "id": 6146,
+                              "name": "err",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 6134,
+                              "src": "851:3:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_enum$_MathError_$4917",
+                                "typeString": "enum CarefulMath.MathError"
+                              }
+                            },
+                            {
+                              "argumentTypes": null,
+                              "hexValue": "30",
+                              "id": 6147,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "856:1:26",
+                              "subdenomination": null,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            }
+                          ],
+                          "id": 6148,
+                          "isConstant": false,
+                          "isInlineArray": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "nodeType": "TupleExpression",
+                          "src": "850:8:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_rational_0_by_1_$",
+                            "typeString": "tuple(enum CarefulMath.MathError,int_const 0)"
+                          }
+                        },
+                        "functionReturnParameters": 6132,
+                        "id": 6149,
+                        "nodeType": "Return",
+                        "src": "843:15:26"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "components": [
+                      {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 6152,
+                          "name": "MathError",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 4917,
+                          "src": "887:9:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_enum$_MathError_$4917_$",
+                            "typeString": "type(enum CarefulMath.MathError)"
+                          }
+                        },
+                        "id": 6153,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "memberName": "NO_ERROR",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": null,
+                        "src": "887:18:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_enum$_MathError_$4917",
+                          "typeString": "enum CarefulMath.MathError"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "id": 6155,
+                            "name": "fraction",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6136,
+                            "src": "916:8:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                              "typeString": "struct Exponential.Exp memory"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                              "typeString": "struct Exponential.Exp memory"
+                            }
+                          ],
+                          "id": 6154,
+                          "name": "truncate",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6234,
+                          "src": "907:8:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_pure$_t_struct$_Exp_$6083_memory_ptr_$returns$_t_uint256_$",
+                            "typeString": "function (struct Exponential.Exp memory) pure returns (uint256)"
+                          }
+                        },
+                        "id": 6156,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "907:18:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "id": 6157,
+                    "isConstant": false,
+                    "isInlineArray": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "TupleExpression",
+                    "src": "886:40:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_uint256_$",
+                      "typeString": "tuple(enum CarefulMath.MathError,uint256)"
+                    }
+                  },
+                  "functionReturnParameters": 6132,
+                  "id": 6158,
+                  "nodeType": "Return",
+                  "src": "879:47:26"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 6160,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "divScalarByExpTruncate",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6127,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6124,
+                  "name": "scalar",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6160,
+                  "src": "635:11:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6123,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "635:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6126,
+                  "name": "divisor",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6160,
+                  "src": "648:18:26",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                    "typeString": "struct Exponential.Exp"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6125,
+                    "name": "Exp",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6083,
+                    "src": "648:3:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Exp_$6083_storage_ptr",
+                      "typeString": "struct Exponential.Exp"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "634:33:26"
+            },
+            "returnParameters": {
+              "id": 6132,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6129,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6160,
+                  "src": "691:9:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_MathError_$4917",
+                    "typeString": "enum CarefulMath.MathError"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6128,
+                    "name": "MathError",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 4917,
+                    "src": "691:9:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_MathError_$4917",
+                      "typeString": "enum CarefulMath.MathError"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6131,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6160,
+                  "src": "702:4:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6130,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "702:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "690:17:26"
+            },
+            "scope": 6235,
+            "src": "603:330:26",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 6220,
+              "nodeType": "Block",
+              "src": "1023:419:26",
+              "statements": [
+                {
+                  "assignments": [
+                    6172,
+                    6174
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 6172,
+                      "name": "err0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6220,
+                      "src": "1034:14:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      },
+                      "typeName": {
+                        "contractScope": null,
+                        "id": 6171,
+                        "name": "MathError",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 4917,
+                        "src": "1034:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_enum$_MathError_$4917",
+                          "typeString": "enum CarefulMath.MathError"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 6174,
+                      "name": "scaledNumerator",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6220,
+                      "src": "1050:20:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 6173,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1050:4:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 6179,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 6176,
+                        "name": "num",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6162,
+                        "src": "1082:3:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 6177,
+                        "name": "expScale",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6072,
+                        "src": "1087:8:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 6175,
+                      "name": "mulUInt",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 4963,
+                      "src": "1074:7:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_enum$_MathError_$4917_$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (enum CarefulMath.MathError,uint256)"
+                      }
+                    },
+                    "id": 6178,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1074:22:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_uint256_$",
+                      "typeString": "tuple(enum CarefulMath.MathError,uint256)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1033:63:26"
+                },
+                {
+                  "condition": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_enum$_MathError_$4917",
+                      "typeString": "enum CarefulMath.MathError"
+                    },
+                    "id": 6183,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "id": 6180,
+                      "name": "err0",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6172,
+                      "src": "1110:4:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 6181,
+                        "name": "MathError",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4917,
+                        "src": "1118:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_enum$_MathError_$4917_$",
+                          "typeString": "type(enum CarefulMath.MathError)"
+                        }
+                      },
+                      "id": 6182,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "memberName": "NO_ERROR",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": null,
+                      "src": "1118:18:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "src": "1110:26:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": null,
+                  "id": 6191,
+                  "nodeType": "IfStatement",
+                  "src": "1106:90:26",
+                  "trueBody": {
+                    "id": 6190,
+                    "nodeType": "Block",
+                    "src": "1138:58:26",
+                    "statements": [
+                      {
+                        "expression": {
+                          "argumentTypes": null,
+                          "components": [
+                            {
+                              "argumentTypes": null,
+                              "id": 6184,
+                              "name": "err0",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 6172,
+                              "src": "1160:4:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_enum$_MathError_$4917",
+                                "typeString": "enum CarefulMath.MathError"
+                              }
+                            },
+                            {
+                              "argumentTypes": null,
+                              "arguments": [
+                                {
+                                  "argumentTypes": null,
+                                  "hexValue": "30",
+                                  "id": 6186,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "number",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1181:1:26",
+                                  "subdenomination": null,
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_rational_0_by_1",
+                                    "typeString": "int_const 0"
+                                  },
+                                  "value": "0"
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": null,
+                                "id": 6185,
+                                "name": "Exp",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 6083,
+                                "src": "1166:3:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_struct$_Exp_$6083_storage_ptr_$",
+                                  "typeString": "type(struct Exponential.Exp storage pointer)"
+                                }
+                              },
+                              "id": 6187,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "structConstructorCall",
+                              "lValueRequested": false,
+                              "names": [
+                                "mantissa"
+                              ],
+                              "nodeType": "FunctionCall",
+                              "src": "1166:18:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Exp_$6083_memory",
+                                "typeString": "struct Exponential.Exp memory"
+                              }
+                            }
+                          ],
+                          "id": 6188,
+                          "isConstant": false,
+                          "isInlineArray": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "nodeType": "TupleExpression",
+                          "src": "1159:26:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_$",
+                            "typeString": "tuple(enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                          }
+                        },
+                        "functionReturnParameters": 6170,
+                        "id": 6189,
+                        "nodeType": "Return",
+                        "src": "1152:33:26"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "assignments": [
+                    6193,
+                    6195
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 6193,
+                      "name": "err1",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6220,
+                      "src": "1207:14:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      },
+                      "typeName": {
+                        "contractScope": null,
+                        "id": 6192,
+                        "name": "MathError",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 4917,
+                        "src": "1207:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_enum$_MathError_$4917",
+                          "typeString": "enum CarefulMath.MathError"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 6195,
+                      "name": "rational",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6220,
+                      "src": "1223:13:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 6194,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1223:4:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 6200,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 6197,
+                        "name": "scaledNumerator",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6174,
+                        "src": "1248:15:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 6198,
+                        "name": "denom",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6164,
+                        "src": "1265:5:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 6196,
+                      "name": "divUInt",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 4992,
+                      "src": "1240:7:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_enum$_MathError_$4917_$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (enum CarefulMath.MathError,uint256)"
+                      }
+                    },
+                    "id": 6199,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1240:31:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_uint256_$",
+                      "typeString": "tuple(enum CarefulMath.MathError,uint256)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1206:65:26"
+                },
+                {
+                  "condition": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_enum$_MathError_$4917",
+                      "typeString": "enum CarefulMath.MathError"
+                    },
+                    "id": 6204,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "id": 6201,
+                      "name": "err1",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6193,
+                      "src": "1285:4:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 6202,
+                        "name": "MathError",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4917,
+                        "src": "1293:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_enum$_MathError_$4917_$",
+                          "typeString": "type(enum CarefulMath.MathError)"
+                        }
+                      },
+                      "id": 6203,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "memberName": "NO_ERROR",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": null,
+                      "src": "1293:18:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "src": "1285:26:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": null,
+                  "id": 6212,
+                  "nodeType": "IfStatement",
+                  "src": "1281:90:26",
+                  "trueBody": {
+                    "id": 6211,
+                    "nodeType": "Block",
+                    "src": "1313:58:26",
+                    "statements": [
+                      {
+                        "expression": {
+                          "argumentTypes": null,
+                          "components": [
+                            {
+                              "argumentTypes": null,
+                              "id": 6205,
+                              "name": "err1",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 6193,
+                              "src": "1335:4:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_enum$_MathError_$4917",
+                                "typeString": "enum CarefulMath.MathError"
+                              }
+                            },
+                            {
+                              "argumentTypes": null,
+                              "arguments": [
+                                {
+                                  "argumentTypes": null,
+                                  "hexValue": "30",
+                                  "id": 6207,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "number",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1356:1:26",
+                                  "subdenomination": null,
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_rational_0_by_1",
+                                    "typeString": "int_const 0"
+                                  },
+                                  "value": "0"
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": null,
+                                "id": 6206,
+                                "name": "Exp",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 6083,
+                                "src": "1341:3:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_struct$_Exp_$6083_storage_ptr_$",
+                                  "typeString": "type(struct Exponential.Exp storage pointer)"
+                                }
+                              },
+                              "id": 6208,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "structConstructorCall",
+                              "lValueRequested": false,
+                              "names": [
+                                "mantissa"
+                              ],
+                              "nodeType": "FunctionCall",
+                              "src": "1341:18:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Exp_$6083_memory",
+                                "typeString": "struct Exponential.Exp memory"
+                              }
+                            }
+                          ],
+                          "id": 6209,
+                          "isConstant": false,
+                          "isInlineArray": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "nodeType": "TupleExpression",
+                          "src": "1334:26:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_$",
+                            "typeString": "tuple(enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                          }
+                        },
+                        "functionReturnParameters": 6170,
+                        "id": 6210,
+                        "nodeType": "Return",
+                        "src": "1327:33:26"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "components": [
+                      {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 6213,
+                          "name": "MathError",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 4917,
+                          "src": "1389:9:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_enum$_MathError_$4917_$",
+                            "typeString": "type(enum CarefulMath.MathError)"
+                          }
+                        },
+                        "id": 6214,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "memberName": "NO_ERROR",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": null,
+                        "src": "1389:18:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_enum$_MathError_$4917",
+                          "typeString": "enum CarefulMath.MathError"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "id": 6216,
+                            "name": "rational",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6195,
+                            "src": "1424:8:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 6215,
+                          "name": "Exp",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6083,
+                          "src": "1409:3:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_struct$_Exp_$6083_storage_ptr_$",
+                            "typeString": "type(struct Exponential.Exp storage pointer)"
+                          }
+                        },
+                        "id": 6217,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "structConstructorCall",
+                        "lValueRequested": false,
+                        "names": [
+                          "mantissa"
+                        ],
+                        "nodeType": "FunctionCall",
+                        "src": "1409:25:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Exp_$6083_memory",
+                          "typeString": "struct Exponential.Exp memory"
+                        }
+                      }
+                    ],
+                    "id": 6218,
+                    "isConstant": false,
+                    "isInlineArray": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "TupleExpression",
+                    "src": "1388:47:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_$",
+                      "typeString": "tuple(enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                    }
+                  },
+                  "functionReturnParameters": 6170,
+                  "id": 6219,
+                  "nodeType": "Return",
+                  "src": "1381:54:26"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 6221,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getExp",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6165,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6162,
+                  "name": "num",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6221,
+                  "src": "955:8:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6161,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "955:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6164,
+                  "name": "denom",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6221,
+                  "src": "965:10:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6163,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "965:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "954:22:26"
+            },
+            "returnParameters": {
+              "id": 6170,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6167,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6221,
+                  "src": "1000:9:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_MathError_$4917",
+                    "typeString": "enum CarefulMath.MathError"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6166,
+                    "name": "MathError",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 4917,
+                    "src": "1000:9:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_MathError_$4917",
+                      "typeString": "enum CarefulMath.MathError"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6169,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6221,
+                  "src": "1011:10:26",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                    "typeString": "struct Exponential.Exp"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6168,
+                    "name": "Exp",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6083,
+                    "src": "1011:3:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Exp_$6083_storage_ptr",
+                      "typeString": "struct Exponential.Exp"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "999:23:26"
+            },
+            "scope": 6235,
+            "src": "939:503:26",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 6233,
+              "nodeType": "Block",
+              "src": "1511:147:26",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    },
+                    "id": 6231,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 6228,
+                        "name": "exp",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6223,
+                        "src": "1628:3:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                          "typeString": "struct Exponential.Exp memory"
+                        }
+                      },
+                      "id": 6229,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "mantissa",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 6082,
+                      "src": "1628:12:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "/",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "id": 6230,
+                      "name": "expScale",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6072,
+                      "src": "1643:8:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "1628:23:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "functionReturnParameters": 6227,
+                  "id": 6232,
+                  "nodeType": "Return",
+                  "src": "1621:30:26"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 6234,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "truncate",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6224,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6223,
+                  "name": "exp",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6234,
+                  "src": "1466:14:26",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                    "typeString": "struct Exponential.Exp"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6222,
+                    "name": "Exp",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6083,
+                    "src": "1466:3:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Exp_$6083_storage_ptr",
+                      "typeString": "struct Exponential.Exp"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1465:16:26"
+            },
+            "returnParameters": {
+              "id": 6227,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6226,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6234,
+                  "src": "1505:4:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6225,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1505:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1504:6:26"
+            },
+            "scope": 6235,
+            "src": "1448:210:26",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 6236,
+        "src": "54:1606:26"
+      }
+    ],
+    "src": "0:1660:26"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/compound/Exponential.sol",
+    "exportedSymbols": {
+      "Exponential": [
+        6235
+      ]
+    },
+    "id": 6236,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6066,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:26"
+      },
+      {
+        "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/compound/CarefulMath.sol",
+        "file": "./CarefulMath.sol",
+        "id": 6067,
+        "nodeType": "ImportDirective",
+        "scope": 6236,
+        "sourceUnit": 4994,
+        "src": "25:27:26",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 6068,
+              "name": "CarefulMath",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 4993,
+              "src": "78:11:26",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_CarefulMath_$4993",
+                "typeString": "contract CarefulMath"
+              }
+            },
+            "id": 6069,
+            "nodeType": "InheritanceSpecifier",
+            "src": "78:11:26"
+          }
+        ],
+        "contractDependencies": [
+          4993
+        ],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 6235,
+        "linearizedBaseContracts": [
+          6235,
+          4993
+        ],
+        "name": "Exponential",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": true,
+            "id": 6072,
+            "name": "expScale",
+            "nodeType": "VariableDeclaration",
+            "scope": 6235,
+            "src": "96:29:26",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 6070,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "96:4:26",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "31653138",
+              "id": 6071,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "121:4:26",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_1000000000000000000_by_1",
+                "typeString": "int_const 1000000000000000000"
+              },
+              "value": "1e18"
+            },
+            "visibility": "internal"
+          },
+          {
+            "constant": true,
+            "id": 6077,
+            "name": "halfExpScale",
+            "nodeType": "VariableDeclaration",
+            "scope": 6235,
+            "src": "131:39:26",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 6073,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "131:4:26",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "commonType": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              },
+              "id": 6076,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "lValueRequested": false,
+              "leftExpression": {
+                "argumentTypes": null,
+                "id": 6074,
+                "name": "expScale",
+                "nodeType": "Identifier",
+                "overloadedDeclarations": [],
+                "referencedDeclaration": 6072,
+                "src": "160:8:26",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                }
+              },
+              "nodeType": "BinaryOperation",
+              "operator": "/",
+              "rightExpression": {
+                "argumentTypes": null,
+                "hexValue": "32",
+                "id": 6075,
+                "isConstant": false,
+                "isLValue": false,
+                "isPure": true,
+                "kind": "number",
+                "lValueRequested": false,
+                "nodeType": "Literal",
+                "src": "169:1:26",
+                "subdenomination": null,
+                "typeDescriptions": {
+                  "typeIdentifier": "t_rational_2_by_1",
+                  "typeString": "int_const 2"
+                },
+                "value": "2"
+              },
+              "src": "160:10:26",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "internal"
+          },
+          {
+            "constant": true,
+            "id": 6080,
+            "name": "mantissaOne",
+            "nodeType": "VariableDeclaration",
+            "scope": 6235,
+            "src": "176:36:26",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 6078,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "176:4:26",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "id": 6079,
+              "name": "expScale",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 6072,
+              "src": "204:8:26",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "internal"
+          },
+          {
+            "canonicalName": "Exponential.Exp",
+            "id": 6083,
+            "members": [
+              {
+                "constant": false,
+                "id": 6082,
+                "name": "mantissa",
+                "nodeType": "VariableDeclaration",
+                "scope": 6083,
+                "src": "240:13:26",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 6081,
+                  "name": "uint",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "240:4:26",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "Exp",
+            "nodeType": "StructDefinition",
+            "scope": 6235,
+            "src": "219:41:26",
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 6121,
+              "nodeType": "Block",
+              "src": "369:228:26",
+              "statements": [
+                {
+                  "assignments": [
+                    6095,
+                    6097
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 6095,
+                      "name": "err0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6121,
+                      "src": "380:14:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      },
+                      "typeName": {
+                        "contractScope": null,
+                        "id": 6094,
+                        "name": "MathError",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 4917,
+                        "src": "380:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_enum$_MathError_$4917",
+                          "typeString": "enum CarefulMath.MathError"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 6097,
+                      "name": "numerator",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6121,
+                      "src": "396:14:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 6096,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "396:4:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 6102,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 6099,
+                        "name": "expScale",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6072,
+                        "src": "422:8:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 6100,
+                        "name": "scalar",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6085,
+                        "src": "432:6:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 6098,
+                      "name": "mulUInt",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 4963,
+                      "src": "414:7:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_enum$_MathError_$4917_$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (enum CarefulMath.MathError,uint256)"
+                      }
+                    },
+                    "id": 6101,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "414:25:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_uint256_$",
+                      "typeString": "tuple(enum CarefulMath.MathError,uint256)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "379:60:26"
+                },
+                {
+                  "condition": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_enum$_MathError_$4917",
+                      "typeString": "enum CarefulMath.MathError"
+                    },
+                    "id": 6106,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "id": 6103,
+                      "name": "err0",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6095,
+                      "src": "453:4:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 6104,
+                        "name": "MathError",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4917,
+                        "src": "461:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_enum$_MathError_$4917_$",
+                          "typeString": "type(enum CarefulMath.MathError)"
+                        }
+                      },
+                      "id": 6105,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "memberName": "NO_ERROR",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": null,
+                      "src": "461:18:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "src": "453:26:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": null,
+                  "id": 6114,
+                  "nodeType": "IfStatement",
+                  "src": "449:90:26",
+                  "trueBody": {
+                    "id": 6113,
+                    "nodeType": "Block",
+                    "src": "481:58:26",
+                    "statements": [
+                      {
+                        "expression": {
+                          "argumentTypes": null,
+                          "components": [
+                            {
+                              "argumentTypes": null,
+                              "id": 6107,
+                              "name": "err0",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 6095,
+                              "src": "503:4:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_enum$_MathError_$4917",
+                                "typeString": "enum CarefulMath.MathError"
+                              }
+                            },
+                            {
+                              "argumentTypes": null,
+                              "arguments": [
+                                {
+                                  "argumentTypes": null,
+                                  "hexValue": "30",
+                                  "id": 6109,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "number",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "524:1:26",
+                                  "subdenomination": null,
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_rational_0_by_1",
+                                    "typeString": "int_const 0"
+                                  },
+                                  "value": "0"
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": null,
+                                "id": 6108,
+                                "name": "Exp",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 6083,
+                                "src": "509:3:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_struct$_Exp_$6083_storage_ptr_$",
+                                  "typeString": "type(struct Exponential.Exp storage pointer)"
+                                }
+                              },
+                              "id": 6110,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "structConstructorCall",
+                              "lValueRequested": false,
+                              "names": [
+                                "mantissa"
+                              ],
+                              "nodeType": "FunctionCall",
+                              "src": "509:18:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Exp_$6083_memory",
+                                "typeString": "struct Exponential.Exp memory"
+                              }
+                            }
+                          ],
+                          "id": 6111,
+                          "isConstant": false,
+                          "isInlineArray": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "nodeType": "TupleExpression",
+                          "src": "502:26:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_$",
+                            "typeString": "tuple(enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                          }
+                        },
+                        "functionReturnParameters": 6093,
+                        "id": 6112,
+                        "nodeType": "Return",
+                        "src": "495:33:26"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 6116,
+                        "name": "numerator",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6097,
+                        "src": "562:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 6117,
+                          "name": "divisor",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6087,
+                          "src": "573:7:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                            "typeString": "struct Exponential.Exp memory"
+                          }
+                        },
+                        "id": 6118,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "mantissa",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 6082,
+                        "src": "573:16:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 6115,
+                      "name": "getExp",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6221,
+                      "src": "555:6:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_ptr_$",
+                        "typeString": "function (uint256,uint256) pure returns (enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                      }
+                    },
+                    "id": 6119,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "555:35:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_ptr_$",
+                      "typeString": "tuple(enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                    }
+                  },
+                  "functionReturnParameters": 6093,
+                  "id": 6120,
+                  "nodeType": "Return",
+                  "src": "548:42:26"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 6122,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "divScalarByExp",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6088,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6085,
+                  "name": "scalar",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6122,
+                  "src": "290:11:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6084,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "290:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6087,
+                  "name": "divisor",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6122,
+                  "src": "303:18:26",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                    "typeString": "struct Exponential.Exp"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6086,
+                    "name": "Exp",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6083,
+                    "src": "303:3:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Exp_$6083_storage_ptr",
+                      "typeString": "struct Exponential.Exp"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "289:33:26"
+            },
+            "returnParameters": {
+              "id": 6093,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6090,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6122,
+                  "src": "346:9:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_MathError_$4917",
+                    "typeString": "enum CarefulMath.MathError"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6089,
+                    "name": "MathError",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 4917,
+                    "src": "346:9:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_MathError_$4917",
+                      "typeString": "enum CarefulMath.MathError"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6092,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6122,
+                  "src": "357:10:26",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                    "typeString": "struct Exponential.Exp"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6091,
+                    "name": "Exp",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6083,
+                    "src": "357:3:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Exp_$6083_storage_ptr",
+                      "typeString": "struct Exponential.Exp"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "345:23:26"
+            },
+            "scope": 6235,
+            "src": "266:331:26",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 6159,
+              "nodeType": "Block",
+              "src": "708:225:26",
+              "statements": [
+                {
+                  "assignments": [
+                    6134,
+                    6136
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 6134,
+                      "name": "err",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6159,
+                      "src": "719:13:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      },
+                      "typeName": {
+                        "contractScope": null,
+                        "id": 6133,
+                        "name": "MathError",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 4917,
+                        "src": "719:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_enum$_MathError_$4917",
+                          "typeString": "enum CarefulMath.MathError"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 6136,
+                      "name": "fraction",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6159,
+                      "src": "734:19:26",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                        "typeString": "struct Exponential.Exp"
+                      },
+                      "typeName": {
+                        "contractScope": null,
+                        "id": 6135,
+                        "name": "Exp",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 6083,
+                        "src": "734:3:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Exp_$6083_storage_ptr",
+                          "typeString": "struct Exponential.Exp"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 6141,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 6138,
+                        "name": "scalar",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6124,
+                        "src": "772:6:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 6139,
+                        "name": "divisor",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6126,
+                        "src": "780:7:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                          "typeString": "struct Exponential.Exp memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                          "typeString": "struct Exponential.Exp memory"
+                        }
+                      ],
+                      "id": 6137,
+                      "name": "divScalarByExp",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6122,
+                      "src": "757:14:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_struct$_Exp_$6083_memory_ptr_$returns$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_ptr_$",
+                        "typeString": "function (uint256,struct Exponential.Exp memory) pure returns (enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                      }
+                    },
+                    "id": 6140,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "757:31:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_ptr_$",
+                      "typeString": "tuple(enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "718:70:26"
+                },
+                {
+                  "condition": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_enum$_MathError_$4917",
+                      "typeString": "enum CarefulMath.MathError"
+                    },
+                    "id": 6145,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "id": 6142,
+                      "name": "err",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6134,
+                      "src": "802:3:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 6143,
+                        "name": "MathError",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4917,
+                        "src": "809:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_enum$_MathError_$4917_$",
+                          "typeString": "type(enum CarefulMath.MathError)"
+                        }
+                      },
+                      "id": 6144,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "memberName": "NO_ERROR",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": null,
+                      "src": "809:18:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "src": "802:25:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": null,
+                  "id": 6151,
+                  "nodeType": "IfStatement",
+                  "src": "798:71:26",
+                  "trueBody": {
+                    "id": 6150,
+                    "nodeType": "Block",
+                    "src": "829:40:26",
+                    "statements": [
+                      {
+                        "expression": {
+                          "argumentTypes": null,
+                          "components": [
+                            {
+                              "argumentTypes": null,
+                              "id": 6146,
+                              "name": "err",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 6134,
+                              "src": "851:3:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_enum$_MathError_$4917",
+                                "typeString": "enum CarefulMath.MathError"
+                              }
+                            },
+                            {
+                              "argumentTypes": null,
+                              "hexValue": "30",
+                              "id": 6147,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "856:1:26",
+                              "subdenomination": null,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            }
+                          ],
+                          "id": 6148,
+                          "isConstant": false,
+                          "isInlineArray": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "nodeType": "TupleExpression",
+                          "src": "850:8:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_rational_0_by_1_$",
+                            "typeString": "tuple(enum CarefulMath.MathError,int_const 0)"
+                          }
+                        },
+                        "functionReturnParameters": 6132,
+                        "id": 6149,
+                        "nodeType": "Return",
+                        "src": "843:15:26"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "components": [
+                      {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 6152,
+                          "name": "MathError",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 4917,
+                          "src": "887:9:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_enum$_MathError_$4917_$",
+                            "typeString": "type(enum CarefulMath.MathError)"
+                          }
+                        },
+                        "id": 6153,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "memberName": "NO_ERROR",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": null,
+                        "src": "887:18:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_enum$_MathError_$4917",
+                          "typeString": "enum CarefulMath.MathError"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "id": 6155,
+                            "name": "fraction",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6136,
+                            "src": "916:8:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                              "typeString": "struct Exponential.Exp memory"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                              "typeString": "struct Exponential.Exp memory"
+                            }
+                          ],
+                          "id": 6154,
+                          "name": "truncate",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6234,
+                          "src": "907:8:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_pure$_t_struct$_Exp_$6083_memory_ptr_$returns$_t_uint256_$",
+                            "typeString": "function (struct Exponential.Exp memory) pure returns (uint256)"
+                          }
+                        },
+                        "id": 6156,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "907:18:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "id": 6157,
+                    "isConstant": false,
+                    "isInlineArray": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "TupleExpression",
+                    "src": "886:40:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_uint256_$",
+                      "typeString": "tuple(enum CarefulMath.MathError,uint256)"
+                    }
+                  },
+                  "functionReturnParameters": 6132,
+                  "id": 6158,
+                  "nodeType": "Return",
+                  "src": "879:47:26"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 6160,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "divScalarByExpTruncate",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6127,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6124,
+                  "name": "scalar",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6160,
+                  "src": "635:11:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6123,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "635:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6126,
+                  "name": "divisor",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6160,
+                  "src": "648:18:26",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                    "typeString": "struct Exponential.Exp"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6125,
+                    "name": "Exp",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6083,
+                    "src": "648:3:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Exp_$6083_storage_ptr",
+                      "typeString": "struct Exponential.Exp"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "634:33:26"
+            },
+            "returnParameters": {
+              "id": 6132,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6129,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6160,
+                  "src": "691:9:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_MathError_$4917",
+                    "typeString": "enum CarefulMath.MathError"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6128,
+                    "name": "MathError",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 4917,
+                    "src": "691:9:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_MathError_$4917",
+                      "typeString": "enum CarefulMath.MathError"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6131,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6160,
+                  "src": "702:4:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6130,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "702:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "690:17:26"
+            },
+            "scope": 6235,
+            "src": "603:330:26",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 6220,
+              "nodeType": "Block",
+              "src": "1023:419:26",
+              "statements": [
+                {
+                  "assignments": [
+                    6172,
+                    6174
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 6172,
+                      "name": "err0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6220,
+                      "src": "1034:14:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      },
+                      "typeName": {
+                        "contractScope": null,
+                        "id": 6171,
+                        "name": "MathError",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 4917,
+                        "src": "1034:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_enum$_MathError_$4917",
+                          "typeString": "enum CarefulMath.MathError"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 6174,
+                      "name": "scaledNumerator",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6220,
+                      "src": "1050:20:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 6173,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1050:4:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 6179,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 6176,
+                        "name": "num",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6162,
+                        "src": "1082:3:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 6177,
+                        "name": "expScale",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6072,
+                        "src": "1087:8:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 6175,
+                      "name": "mulUInt",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 4963,
+                      "src": "1074:7:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_enum$_MathError_$4917_$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (enum CarefulMath.MathError,uint256)"
+                      }
+                    },
+                    "id": 6178,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1074:22:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_uint256_$",
+                      "typeString": "tuple(enum CarefulMath.MathError,uint256)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1033:63:26"
+                },
+                {
+                  "condition": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_enum$_MathError_$4917",
+                      "typeString": "enum CarefulMath.MathError"
+                    },
+                    "id": 6183,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "id": 6180,
+                      "name": "err0",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6172,
+                      "src": "1110:4:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 6181,
+                        "name": "MathError",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4917,
+                        "src": "1118:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_enum$_MathError_$4917_$",
+                          "typeString": "type(enum CarefulMath.MathError)"
+                        }
+                      },
+                      "id": 6182,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "memberName": "NO_ERROR",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": null,
+                      "src": "1118:18:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "src": "1110:26:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": null,
+                  "id": 6191,
+                  "nodeType": "IfStatement",
+                  "src": "1106:90:26",
+                  "trueBody": {
+                    "id": 6190,
+                    "nodeType": "Block",
+                    "src": "1138:58:26",
+                    "statements": [
+                      {
+                        "expression": {
+                          "argumentTypes": null,
+                          "components": [
+                            {
+                              "argumentTypes": null,
+                              "id": 6184,
+                              "name": "err0",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 6172,
+                              "src": "1160:4:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_enum$_MathError_$4917",
+                                "typeString": "enum CarefulMath.MathError"
+                              }
+                            },
+                            {
+                              "argumentTypes": null,
+                              "arguments": [
+                                {
+                                  "argumentTypes": null,
+                                  "hexValue": "30",
+                                  "id": 6186,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "number",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1181:1:26",
+                                  "subdenomination": null,
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_rational_0_by_1",
+                                    "typeString": "int_const 0"
+                                  },
+                                  "value": "0"
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": null,
+                                "id": 6185,
+                                "name": "Exp",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 6083,
+                                "src": "1166:3:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_struct$_Exp_$6083_storage_ptr_$",
+                                  "typeString": "type(struct Exponential.Exp storage pointer)"
+                                }
+                              },
+                              "id": 6187,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "structConstructorCall",
+                              "lValueRequested": false,
+                              "names": [
+                                "mantissa"
+                              ],
+                              "nodeType": "FunctionCall",
+                              "src": "1166:18:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Exp_$6083_memory",
+                                "typeString": "struct Exponential.Exp memory"
+                              }
+                            }
+                          ],
+                          "id": 6188,
+                          "isConstant": false,
+                          "isInlineArray": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "nodeType": "TupleExpression",
+                          "src": "1159:26:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_$",
+                            "typeString": "tuple(enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                          }
+                        },
+                        "functionReturnParameters": 6170,
+                        "id": 6189,
+                        "nodeType": "Return",
+                        "src": "1152:33:26"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "assignments": [
+                    6193,
+                    6195
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 6193,
+                      "name": "err1",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6220,
+                      "src": "1207:14:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      },
+                      "typeName": {
+                        "contractScope": null,
+                        "id": 6192,
+                        "name": "MathError",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 4917,
+                        "src": "1207:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_enum$_MathError_$4917",
+                          "typeString": "enum CarefulMath.MathError"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 6195,
+                      "name": "rational",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 6220,
+                      "src": "1223:13:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 6194,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1223:4:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 6200,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 6197,
+                        "name": "scaledNumerator",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6174,
+                        "src": "1248:15:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 6198,
+                        "name": "denom",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6164,
+                        "src": "1265:5:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 6196,
+                      "name": "divUInt",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 4992,
+                      "src": "1240:7:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_enum$_MathError_$4917_$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (enum CarefulMath.MathError,uint256)"
+                      }
+                    },
+                    "id": 6199,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1240:31:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_uint256_$",
+                      "typeString": "tuple(enum CarefulMath.MathError,uint256)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1206:65:26"
+                },
+                {
+                  "condition": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_enum$_MathError_$4917",
+                      "typeString": "enum CarefulMath.MathError"
+                    },
+                    "id": 6204,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "id": 6201,
+                      "name": "err1",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6193,
+                      "src": "1285:4:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 6202,
+                        "name": "MathError",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4917,
+                        "src": "1293:9:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_enum$_MathError_$4917_$",
+                          "typeString": "type(enum CarefulMath.MathError)"
+                        }
+                      },
+                      "id": 6203,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "memberName": "NO_ERROR",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": null,
+                      "src": "1293:18:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_MathError_$4917",
+                        "typeString": "enum CarefulMath.MathError"
+                      }
+                    },
+                    "src": "1285:26:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": null,
+                  "id": 6212,
+                  "nodeType": "IfStatement",
+                  "src": "1281:90:26",
+                  "trueBody": {
+                    "id": 6211,
+                    "nodeType": "Block",
+                    "src": "1313:58:26",
+                    "statements": [
+                      {
+                        "expression": {
+                          "argumentTypes": null,
+                          "components": [
+                            {
+                              "argumentTypes": null,
+                              "id": 6205,
+                              "name": "err1",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 6193,
+                              "src": "1335:4:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_enum$_MathError_$4917",
+                                "typeString": "enum CarefulMath.MathError"
+                              }
+                            },
+                            {
+                              "argumentTypes": null,
+                              "arguments": [
+                                {
+                                  "argumentTypes": null,
+                                  "hexValue": "30",
+                                  "id": 6207,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "number",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1356:1:26",
+                                  "subdenomination": null,
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_rational_0_by_1",
+                                    "typeString": "int_const 0"
+                                  },
+                                  "value": "0"
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": null,
+                                "id": 6206,
+                                "name": "Exp",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 6083,
+                                "src": "1341:3:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_struct$_Exp_$6083_storage_ptr_$",
+                                  "typeString": "type(struct Exponential.Exp storage pointer)"
+                                }
+                              },
+                              "id": 6208,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "structConstructorCall",
+                              "lValueRequested": false,
+                              "names": [
+                                "mantissa"
+                              ],
+                              "nodeType": "FunctionCall",
+                              "src": "1341:18:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Exp_$6083_memory",
+                                "typeString": "struct Exponential.Exp memory"
+                              }
+                            }
+                          ],
+                          "id": 6209,
+                          "isConstant": false,
+                          "isInlineArray": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "nodeType": "TupleExpression",
+                          "src": "1334:26:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_$",
+                            "typeString": "tuple(enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                          }
+                        },
+                        "functionReturnParameters": 6170,
+                        "id": 6210,
+                        "nodeType": "Return",
+                        "src": "1327:33:26"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "components": [
+                      {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 6213,
+                          "name": "MathError",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 4917,
+                          "src": "1389:9:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_enum$_MathError_$4917_$",
+                            "typeString": "type(enum CarefulMath.MathError)"
+                          }
+                        },
+                        "id": 6214,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "memberName": "NO_ERROR",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": null,
+                        "src": "1389:18:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_enum$_MathError_$4917",
+                          "typeString": "enum CarefulMath.MathError"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "id": 6216,
+                            "name": "rational",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6195,
+                            "src": "1424:8:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 6215,
+                          "name": "Exp",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6083,
+                          "src": "1409:3:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_struct$_Exp_$6083_storage_ptr_$",
+                            "typeString": "type(struct Exponential.Exp storage pointer)"
+                          }
+                        },
+                        "id": 6217,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "structConstructorCall",
+                        "lValueRequested": false,
+                        "names": [
+                          "mantissa"
+                        ],
+                        "nodeType": "FunctionCall",
+                        "src": "1409:25:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Exp_$6083_memory",
+                          "typeString": "struct Exponential.Exp memory"
+                        }
+                      }
+                    ],
+                    "id": 6218,
+                    "isConstant": false,
+                    "isInlineArray": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "TupleExpression",
+                    "src": "1388:47:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_enum$_MathError_$4917_$_t_struct$_Exp_$6083_memory_$",
+                      "typeString": "tuple(enum CarefulMath.MathError,struct Exponential.Exp memory)"
+                    }
+                  },
+                  "functionReturnParameters": 6170,
+                  "id": 6219,
+                  "nodeType": "Return",
+                  "src": "1381:54:26"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 6221,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getExp",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6165,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6162,
+                  "name": "num",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6221,
+                  "src": "955:8:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6161,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "955:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6164,
+                  "name": "denom",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6221,
+                  "src": "965:10:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6163,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "965:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "954:22:26"
+            },
+            "returnParameters": {
+              "id": 6170,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6167,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6221,
+                  "src": "1000:9:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_MathError_$4917",
+                    "typeString": "enum CarefulMath.MathError"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6166,
+                    "name": "MathError",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 4917,
+                    "src": "1000:9:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_MathError_$4917",
+                      "typeString": "enum CarefulMath.MathError"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6169,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6221,
+                  "src": "1011:10:26",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                    "typeString": "struct Exponential.Exp"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6168,
+                    "name": "Exp",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6083,
+                    "src": "1011:3:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Exp_$6083_storage_ptr",
+                      "typeString": "struct Exponential.Exp"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "999:23:26"
+            },
+            "scope": 6235,
+            "src": "939:503:26",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 6233,
+              "nodeType": "Block",
+              "src": "1511:147:26",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    },
+                    "id": 6231,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 6228,
+                        "name": "exp",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 6223,
+                        "src": "1628:3:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                          "typeString": "struct Exponential.Exp memory"
+                        }
+                      },
+                      "id": 6229,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "mantissa",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 6082,
+                      "src": "1628:12:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "/",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "id": 6230,
+                      "name": "expScale",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6072,
+                      "src": "1643:8:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "1628:23:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "functionReturnParameters": 6227,
+                  "id": 6232,
+                  "nodeType": "Return",
+                  "src": "1621:30:26"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 6234,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "truncate",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6224,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6223,
+                  "name": "exp",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6234,
+                  "src": "1466:14:26",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Exp_$6083_memory_ptr",
+                    "typeString": "struct Exponential.Exp"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6222,
+                    "name": "Exp",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6083,
+                    "src": "1466:3:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Exp_$6083_storage_ptr",
+                      "typeString": "struct Exponential.Exp"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1465:16:26"
+            },
+            "returnParameters": {
+              "id": 6227,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6226,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6234,
+                  "src": "1505:4:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6225,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1505:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1504:6:26"
+            },
+            "scope": 6235,
+            "src": "1448:210:26",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 6236,
+        "src": "54:1606:26"
+      }
+    ],
+    "src": "0:1660:26"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.0+commit.1d4f565a.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.0",
+  "updatedAt": "2019-06-28T08:20:24.969Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}
