@@ -2,17 +2,19 @@ pragma solidity ^0.5.0;
 
 import "./interfaces/TubInterface.sol";
 import "./interfaces/ProxyRegistryInterface.sol";
+import "./interfaces/GasTokenInterface.sol";
 import "./interfaces/ERC20.sol";
 import "./DS/DSMath.sol";
 
-
 contract Monitor is DSMath {
-
     // KOVAN
     PipInterface pip = PipInterface(0xA944bd4b25C9F186A846fd5668941AA3d3B8425F);
     TubInterface tub = TubInterface(0xa71937147b55Deb8a530C7229C442Fd3F31b7db2);
     ProxyRegistryInterface registry = ProxyRegistryInterface(0x64A436ae831C1672AE81F674CAb8B6775df3475C);
-    address public constant VOX_ADDRESS = 0xBb4339c0aB5B1d9f14Bd6e3426444A1e9d86A1d9;
+    GasTokenInterface gasToken = GasTokenInterface(0x0000000000170CcC93903185bE5A2094C870Df62);
+
+    uint constant public REPAY_GAS_TOKEN = 30;
+    uint constant public BOOST_GAS_TOKEN = 19;
 
     address public saverProxy;
     address public owner;
@@ -75,6 +77,10 @@ contract Monitor is DSMath {
 
     /// @dev Should be callable by onlyApproved
     function repayFor(bytes32 _cdpId, uint _amount) public onlyApproved {
+        if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
+            gasToken.free(BOOST_GAS_TOKEN);
+        }
+
         CdpHolder memory holder = holders[_cdpId];
 
         require(holder.owner != address(0));
@@ -85,11 +91,19 @@ contract Monitor is DSMath {
         emit CdpRepay(_cdpId, msg.sender);
     }
 
+    event T(uint, uint);
+
     /// @dev Should be callable by onlyApproved
     function boostFor(bytes32 _cdpId, uint _amount) public onlyApproved {
+        if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
+            gasToken.free(REPAY_GAS_TOKEN);
+        }
+
         CdpHolder memory holder = holders[_cdpId];
 
         require(holder.owner != address(0));
+
+        emit T(getRatio(_cdpId), holders[_cdpId].maxRatio);
 
         require(getRatio(_cdpId) >= holders[_cdpId].maxRatio);
 

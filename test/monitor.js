@@ -6,9 +6,9 @@ const MonitorProxy = artifacts.require("./MonitorProxy.sol");
 
 contract("Monitor", accounts => {
 
-    let monitor, monitorProxy, registry, proxy;
+    let monitor, monitorProxy, registry, proxy, currRatio;
 
-    const MONITOR_ADDRESS = "0xF616061894779932a94C02447FE69C05A6D76e97";
+    const MONITOR_ADDRESS = "0xf11f4f67A646315c48bFeBB34f54A14002c6e585";
 
     const cdpIdBytes32 = "0x0000000000000000000000000000000000000000000000000000000000001751";
 
@@ -16,7 +16,7 @@ contract("Monitor", accounts => {
 
     before(async () => {
         monitor = await Monitor.at(MONITOR_ADDRESS);
-        monitorProxy = await MonitorProxy.at("0x8b87f3fD702CA3d930a3263db99C6E9DD18Edb1A");
+        monitorProxy = await MonitorProxy.at("0xd87eCaa4E007f06E593709CC8834060e068bf285");
 
         registry = await ProxyRegistryInterface.at("0x64a436ae831c1672ae81f674cab8b6775df3475c");
 
@@ -32,63 +32,68 @@ contract("Monitor", accounts => {
       }
 
       it('...should get CDPs ratio', async () => {
-        const res = await monitor.getDaiAmount.call('0xa71937147b55Deb8a530C7229C442Fd3F31b7db2', cdpIdBytes32, web3.utils.toWei('1.50', 'ether'));
+        const res = await monitor.getRatio.call(cdpIdBytes32);
 
-        console.log(res.toString());
+        currRatio = res.toString() / 1e18;
+
+        console.log(currRatio);
       });
       
-    //   it('...should subscribe the CDP for monitoring', async () => {
-    //     const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MonitorProxy, 'subscribe'),
-    //      [cdpIdBytes32, web3.utils.toWei('1.80', 'ether'), web3.utils.toWei('1.92', 'ether'), web3.utils.toWei('1.90', 'ether'), web3.utils.toWei('10', 'ether'), MONITOR_ADDRESS]);
+      it('...should subscribe the CDP for monitoring', async () => {
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MonitorProxy, 'subscribe'),
+         [cdpIdBytes32, web3.utils.toWei('1.95', 'ether'), web3.utils.toWei('1.98', 'ether'), web3.utils.toWei('1.90', 'ether'), web3.utils.toWei('10', 'ether'), MONITOR_ADDRESS]);
 
-    //     try {
-    //         const tx = await proxy.methods['execute(address,bytes)'](MonitorProxy.address, data, {from: account});
+        try {
+            const tx = await proxy.methods['execute(address,bytes)'](MonitorProxy.address, data, {from: account});
 
-    //         console.log(tx);
+            const subInfo = await monitor.methods['holders(bytes32)'].call(cdpIdBytes32);
+
+            console.log(subInfo);
+            
+        } catch(err) {
+            console.log(err);
+        }
+      });
+
+      it('...should authorize another address to be a caller', async () => {
+
+        try {
+            const tx = await monitor.addCaller(accounts[1], {from: account});
+
+        } catch(err) {
+            console.log(err);
+        }
+      });
+
+
+      // it('...should call the boostFor method for the user', async () => {
+
+      //   const amount = web3.utils.toWei('2', 'ether'); // 2 dai
+
+      //   try {
+      //       const tx = await monitor.boostFor(cdpIdBytes32, amount, {from: accounts[1]});
+
+      //       console.log(tx);
 
             
-    //     } catch(err) {
-    //         console.log(err);
-    //     }
-    //   });
+      //   } catch(err) {
+      //       console.log(err);
+      //   }
+      // }); 
 
-    //   it('...should authorize another address to be a caller', async () => {
+       it('...should call the repayFor method for the user', async () => {
+        const amount = web3.utils.toWei('0.01', 'ether');
 
-    //     try {
-    //         const tx = await monitor.addCaller(accounts[1], {from: account});
+        try {
+            const tx = await monitor.repayFor(cdpIdBytes32, amount, {from: accounts[1]});
 
-    //         console.log(tx);
-
-    //     } catch(err) {
-    //         console.log(err);
-    //     }
-    //   });
-
-    //   it('...should call the repayFor method for the user', async () => {
-
-    //     try {
-    //         const tx = await monitor.repayFor(cdpIdBytes32, '1000000000000000', {from: accounts[1]});
-
-    //         console.log(tx);
+            console.log(tx);
 
             
-    //     } catch(err) {
-    //         console.log(err);
-    //     }
-    //   }); 
-
-    //   it('...should call the boostFor method for the user', async () => {
-
-    //     try {
-    //         const tx = await monitor.boostFor(cdpIdBytes32, {from: accounts[1]});
-
-    //         console.log(tx);
-
-            
-    //     } catch(err) {
-    //         console.log(err);
-    //     }
-    //   }); 
+        } catch(err) {
+            console.log(err);
+        }
+      }); 
 
 
 });
