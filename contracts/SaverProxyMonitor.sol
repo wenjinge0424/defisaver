@@ -29,11 +29,11 @@ contract SaverProxy is DSMath {
     /// @param _cup Id of the CDP
     /// @param _amount Amount of Eth to sell
     /// @param _minPrice Minimum acaptable ETH/DAI price
-    function repay(bytes32 _cup, uint _amount, uint _minPrice, uint _exchangeType) public {
+    function repay(bytes32 _cup, uint _amount, uint _minPrice, uint _borrowedAmount) public {
         address exchangeWrapper;
         uint ethDaiPrice;
 
-        (exchangeWrapper, ethDaiPrice) = getBestPrice(_amount, ETHER_ADDRESS, DAI_ADDRESS, _exchangeType);
+        (exchangeWrapper, ethDaiPrice) = getBestPrice(_amount, ETHER_ADDRESS, DAI_ADDRESS, 0);
 
         require(ethDaiPrice > _minPrice, "Slppage hit");
 
@@ -52,7 +52,7 @@ contract SaverProxy is DSMath {
 
         withdrawEth(tub, _cup, _amount);
 
-        uint daiAmount = wmul(_amount, ethDaiPrice);
+        uint daiAmount = add(wmul(_amount, ethDaiPrice), _borrowedAmount);
         uint cdpWholeDebt = getDebt(tub, _cup);
 
         uint mkrAmount = stabilityFeeInMkr(tub, _cup, sub(daiAmount, daiAmount / SERVICE_FEE));
@@ -73,8 +73,10 @@ contract SaverProxy is DSMath {
         (daiAmount, ) = ExchangeInterface(exchangeWrapper).swapEtherToToken.
                             value(_amount)(_amount, DAI_ADDRESS, uint(-1));
 
-         // Take a fee from the user in dai
-         daiAmount = sub(daiAmount, takeFee(daiAmount));
+        daiAmount = add(daiAmount, _borrowedAmount);
+
+        // Take a fee from the user in dai
+        daiAmount = sub(daiAmount, takeFee(daiAmount));
         
         if (daiAmount > cdpWholeDebt) {
             tub.wipe(_cup, cdpWholeDebt);
@@ -82,6 +84,11 @@ contract SaverProxy is DSMath {
         } else {
             tub.wipe(_cup, daiAmount);
             // require(getRatio(tub, _cup) > startingRatio, "ratio must be better off at the end");
+        }
+
+        if (_borrowedAmount > 0) {
+            tub.draw(_cup, _borrowedAmount);
+            ERC20(DAI_ADDRESS).transfer(msg.sender, _borrowedAmount);
         }
 
         SaverLogger(LOGGER_ADDRESS).LogRepay(uint(_cup), msg.sender, _amount, daiAmount);
@@ -92,11 +99,11 @@ contract SaverProxy is DSMath {
     /// @param _cup Id of the CDP
     /// @param _amount Amount of Dai to sell
     /// @param _minPrice Minimum acaptable ETH/DAI price
-    function boost(bytes32 _cup, uint _amount, uint _minPrice, uint _exchangeType) public {
+    function boost(bytes32 _cup, uint _amount, uint _minPrice, uint _borrowedAmount) public {
         address exchangeWrapper;
         uint daiEthPrice;
 
-        (exchangeWrapper, daiEthPrice) = getBestPrice(_amount, DAI_ADDRESS, ETHER_ADDRESS, _exchangeType);
+        (exchangeWrapper, daiEthPrice) = getBestPrice(_amount, DAI_ADDRESS, ETHER_ADDRESS, 0);
 
         require(wdiv(1000000000000000000, daiEthPrice) < _minPrice, "Slippage hit");
 
@@ -116,10 +123,17 @@ contract SaverProxy is DSMath {
         
         tub.draw(_cup, _amount);
 
+        _amount = add(_amount, _borrowedAmount);
+
         // Take a fee from the user in dai
         _amount = sub(_amount, takeFee(_amount));
         
         uint ethAmount = swapDaiAndLockEth(tub, _cup, _amount, exchangeWrapper);
+
+        if (_borrowedAmount > 0) {
+            tub.draw(_cup, _borrowedAmount);
+            ERC20(DAI_ADDRESS).transfer(msg.sender, _borrowedAmount);
+        }
 
         // require(tub.ink(_cup) > startingCollateral, "collateral must be bigger than starting point");
         

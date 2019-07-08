@@ -8,7 +8,7 @@ contract("Monitor", accounts => {
 
     let monitor, monitorProxy, registry, proxy, currRatio;
 
-    const MONITOR_ADDRESS = "0xf11f4f67A646315c48bFeBB34f54A14002c6e585";
+    const MONITOR_ADDRESS = "0x1379c57bD8EFa07B9D198c773413EaA0fF3190Ea";
 
     const cdpIdBytes32 = "0x0000000000000000000000000000000000000000000000000000000000001751";
 
@@ -41,7 +41,7 @@ contract("Monitor", accounts => {
       
       it('...should subscribe the CDP for monitoring', async () => {
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MonitorProxy, 'subscribe'),
-         [cdpIdBytes32, web3.utils.toWei('1.95', 'ether'), web3.utils.toWei('1.98', 'ether'), web3.utils.toWei('1.90', 'ether'), web3.utils.toWei('10', 'ether'), MONITOR_ADDRESS]);
+         [cdpIdBytes32, web3.utils.toWei('1.85', 'ether'), web3.utils.toWei('1.92', 'ether'), web3.utils.toWei('1.90', 'ether'), web3.utils.toWei('10', 'ether'), MONITOR_ADDRESS]);
 
         try {
             const tx = await proxy.methods['execute(address,bytes)'](MonitorProxy.address, data, {from: account});
@@ -66,26 +66,12 @@ contract("Monitor", accounts => {
       });
 
 
-      // it('...should call the boostFor method for the user', async () => {
+      it('...should call the boostFor method for the user', async () => {
 
-      //   const amount = web3.utils.toWei('2', 'ether'); // 2 dai
-
-      //   try {
-      //       const tx = await monitor.boostFor(cdpIdBytes32, amount, {from: accounts[1]});
-
-      //       console.log(tx);
-
-            
-      //   } catch(err) {
-      //       console.log(err);
-      //   }
-      // }); 
-
-       it('...should call the repayFor method for the user', async () => {
-        const amount = web3.utils.toWei('0.01', 'ether');
+        const amount = web3.utils.toWei('2', 'ether'); // 2 dai
 
         try {
-            const tx = await monitor.repayFor(cdpIdBytes32, amount, {from: accounts[1]});
+            const tx = await monitor.boostFor(cdpIdBytes32, amount, {from: accounts[1]});
 
             console.log(tx);
 
@@ -94,6 +80,20 @@ contract("Monitor", accounts => {
             console.log(err);
         }
       }); 
+
+      //  it('...should call the repayFor method for the user', async () => {
+      //   const amount = web3.utils.toWei('0.01', 'ether');
+
+      //   try {
+      //       const tx = await monitor.repayFor(cdpIdBytes32, amount, {from: accounts[1]});
+
+      //       console.log(tx);
+
+            
+      //   } catch(err) {
+      //       console.log(err);
+      //   }
+      // }); 
 
 
 });

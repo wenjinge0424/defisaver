@@ -1,5 +1,6 @@
 pragma solidity ^0.5.0;
 
+import "./DecenterMonitorLending.sol";
 import "./interfaces/TubInterface.sol";
 import "./interfaces/ProxyRegistryInterface.sol";
 import "./interfaces/GasTokenInterface.sol";
@@ -18,6 +19,7 @@ contract Monitor is DSMath {
 
     address public saverProxy;
     address public owner;
+    DecenterMonitorLending public lendingContract;
 
     struct CdpHolder {
         uint minRatio;
@@ -49,7 +51,7 @@ contract Monitor is DSMath {
     constructor() public {
         approvedCallers[msg.sender] = true;
         owner = msg.sender;
-        saverProxy = 0x8bc58Dc76bB856Bf623d8483dC9590b3d6924ec9;
+        saverProxy = 0x338AFf575afb87321B20c053aDDB1a21d5112aD6;
     }
 
     /// @dev Users DSProxy should call this
@@ -76,7 +78,7 @@ contract Monitor is DSMath {
     }
 
     /// @dev Should be callable by onlyApproved
-    function repayFor(bytes32 _cdpId, uint _amount) public onlyApproved {
+    function repayFor(bytes32 _cdpId, uint _amount, uint _borrowAmount) public onlyApproved {
         if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
             gasToken.free(BOOST_GAS_TOKEN);
         }
@@ -86,12 +88,18 @@ contract Monitor is DSMath {
         require(holder.owner != address(0));
         require(getRatio(_cdpId) <= holders[_cdpId].minRatio);
 
+        if (_borrowAmount > 0) {
+            lendingContract.borrow(_borrowAmount, holder.owner);
+        }
+
         DSProxyInterface(holder.owner).execute(saverProxy, abi.encodeWithSignature("repay(bytes32,uint256,uint256,uint256)", _cdpId, _amount, 0, 2));
+
+        if (_borrowAmount > 0) {
+            lendingContract.deposit(_borrowAmount);
+        }
 
         emit CdpRepay(_cdpId, msg.sender);
     }
-
-    event T(uint, uint);
 
     /// @dev Should be callable by onlyApproved
     function boostFor(bytes32 _cdpId, uint _amount) public onlyApproved {
@@ -103,13 +111,21 @@ contract Monitor is DSMath {
 
         require(holder.owner != address(0));
 
-        emit T(getRatio(_cdpId), holders[_cdpId].maxRatio);
-
         require(getRatio(_cdpId) >= holders[_cdpId].maxRatio);
 
         DSProxyInterface(holder.owner).execute(saverProxy, abi.encodeWithSignature("boost(bytes32,uint256,uint256,uint256)", _cdpId, _amount, uint(-1), 2));
 
         emit CdpBoost(_cdpId, msg.sender);
+    }
+
+    function getRatio(bytes32 _cdpId) public returns(uint) {
+        return (rdiv(rmul(rmul(tub.ink(_cdpId), tub.tag()), WAD), tub.tab(_cdpId)));
+    }
+
+    function isOwner(address _owner, bytes32 _cdpId) internal returns(bool) {
+        require(tub.lad(_cdpId) == _owner);
+        
+        return true;
     }
 
     // Owner only operations
@@ -121,13 +137,7 @@ contract Monitor is DSMath {
         approvedCallers[_caller] = false;
     }
 
-    function getRatio(bytes32 _cdpId) public returns(uint) {
-        return (rdiv(rmul(rmul(tub.ink(_cdpId), tub.tag()), WAD), tub.tab(_cdpId)));
-    }
-
-    function isOwner(address _owner, bytes32 _cdpId) internal returns(bool) {
-        require(tub.lad(_cdpId) == _owner);
-        
-        return true;
+    function setLendingContract(address _lendingAddress) public onlyOwner {
+        lendingContract = DecenterMonitorLending(_lendingAddress);
     }
  }
