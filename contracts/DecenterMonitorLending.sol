@@ -1,6 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "./interfaces/CTokenInterface.sol";
+import "./compound/StupidExchange.sol";
 
 contract DecenterMonitorLending {
 
@@ -14,6 +15,9 @@ contract DecenterMonitorLending {
     constructor(address _owner, address _monitor) public {
         owner = _owner;
         monitor = _monitor;
+
+        dai.approve(address(cDai), uint(-1));
+        cDai.approve(address(cDai), uint(-1));
     }
 
     function borrow(uint _daiAmount, address _to) public {
