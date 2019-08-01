@@ -9,6 +9,7 @@ const MarketplaceProxy = artifacts.require("./MarketplaceProxy.sol");
 const SaverLogger = artifacts.require("./SaverLogger.sol");
 const CompoundProxy = artifacts.require("./CompoundProxy.sol");
 const DecenterMonitorLending = artifacts.require("./DecenterMonitorLending.sol");
+const SavingsProxy = artifacts.require("./SavingsProxy.sol");
 
 require('dotenv').config();
 
@@ -16,6 +17,10 @@ module.exports = function(deployer, network) {
   let deployAgain = (process.env.DEPLOY_AGAIN === 'true') ? true : false;
 
   console.log(network);
+
+    if (network == 'dydx') {
+        deployer.deploy(SavingsProxy).then(console.log);
+    }
 
   if (network == 'kovan') {
     //deployer.deploy(Eth2DaiWrapper, {gas: 6720000, overwrite: deployAgain});
@@ -36,7 +41,7 @@ module.exports = function(deployer, network) {
 
   } else if (network == 'rinkeby') {
     deployer.deploy(UniswapWrapper, {gas: 6720000, overwrite: deployAgain});
-  } else {
+  } else if (network != "dydx") {
     deployer.deploy(Monitor, {gas: 6720000, overwrite: deployAgain});
     // deployer.deploy(CompoundProxy, {gas: 6720000, overwrite: deployAgain});
 
