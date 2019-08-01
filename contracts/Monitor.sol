@@ -1,6 +1,5 @@
 pragma solidity ^0.5.0;
 
-import "./DecenterMonitorLending.sol";
 import "./interfaces/TubInterface.sol";
 import "./interfaces/ProxyRegistryInterface.sol";
 import "./interfaces/GasTokenInterface.sol";
@@ -19,7 +18,6 @@ contract Monitor is DSMath {
 
     address public saverProxy;
     address public owner;
-    DecenterMonitorLending public lendingContract;
 
     struct CdpHolder {
         uint minRatio;
@@ -30,10 +28,15 @@ contract Monitor is DSMath {
     }
 
     mapping(bytes32 => CdpHolder) public holders;
+
+    uint public changeIndex;
+
+    /// @dev This will be Bot addresses which will trigger the calls
     mapping(address => bool) public approvedCallers;
 
     event Subscribed(address indexed owner, bytes32 cdpId);
     event Unsubscribed(address indexed owner, bytes32 cdpId);
+    event Updated(address indexed owner, bytes32 cdpId);
 
     event CdpRepay(bytes32 indexed cdpId, address caller);
     event CdpBoost(bytes32 indexed cdpId, address caller);
@@ -51,12 +54,15 @@ contract Monitor is DSMath {
     constructor() public {
         approvedCallers[msg.sender] = true;
         owner = msg.sender;
-        saverProxy = 0x338AFf575afb87321B20c053aDDB1a21d5112aD6;
+        saverProxy = 0x043125335E8feD7421F4aF91F7123b605b30F593;
+        changeIndex = 0;
     }
 
     /// @dev Users DSProxy should call this
     function subscribe(bytes32 _cdpId, uint _minRatio, uint _maxRatio, uint _optimalRatio, uint _slippageLimit) public {
         require(isOwner(msg.sender, _cdpId));
+
+        bool isCreated = holders[_cdpId].owner == address(0) ? true : false;
 
         holders[_cdpId] = CdpHolder({
             minRatio: _minRatio,
@@ -66,7 +72,13 @@ contract Monitor is DSMath {
             owner: msg.sender
         });
 
-        emit Subscribed(msg.sender, _cdpId);
+        changeIndex++;
+
+        if (isCreated) {
+            emit Subscribed(msg.sender, _cdpId);
+        } else {
+            emit Updated(msg.sender, _cdpId);
+        }
     }
 
     function unsubscribe(bytes32 _cdpId) public {
@@ -74,38 +86,32 @@ contract Monitor is DSMath {
 
         delete holders[_cdpId];
 
+        changeIndex++;
+
         emit Unsubscribed(msg.sender, _cdpId);
     }
 
     /// @dev Should be callable by onlyApproved
-    function repayFor(bytes32 _cdpId, uint _amount, uint _borrowAmount) public onlyApproved {
-        if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
-            gasToken.free(BOOST_GAS_TOKEN);
-        }
+    function repayFor(bytes32 _cdpId, uint _amount) public onlyApproved {
+        // if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
+        //     gasToken.free(BOOST_GAS_TOKEN);
+        // }
 
         CdpHolder memory holder = holders[_cdpId];
 
         require(holder.owner != address(0));
         require(getRatio(_cdpId) <= holders[_cdpId].minRatio);
 
-        if (_borrowAmount > 0) {
-            lendingContract.borrow(_borrowAmount, holder.owner);
-        }
-
         DSProxyInterface(holder.owner).execute(saverProxy, abi.encodeWithSignature("repay(bytes32,uint256,uint256,uint256)", _cdpId, _amount, 0, 2));
-
-        if (_borrowAmount > 0) {
-            lendingContract.deposit(_borrowAmount);
-        }
 
         emit CdpRepay(_cdpId, msg.sender);
     }
 
     /// @dev Should be callable by onlyApproved
     function boostFor(bytes32 _cdpId, uint _amount) public onlyApproved {
-        if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
-            gasToken.free(REPAY_GAS_TOKEN);
-        }
+        // if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
+        //     gasToken.free(REPAY_GAS_TOKEN);
+        // }
 
         CdpHolder memory holder = holders[_cdpId];
 
@@ -135,9 +141,5 @@ contract Monitor is DSMath {
 
     function removeCaller(address _caller) public onlyOwner {
         approvedCallers[_caller] = false;
-    }
-
-    function setLendingContract(address _lendingAddress) public onlyOwner {
-        lendingContract = DecenterMonitorLending(_lendingAddress);
     }
  }
