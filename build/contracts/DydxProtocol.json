@@ -1,0 +1,575 @@
+{
+  "contractName": "DydxProtocol",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_user",
+          "type": "address"
+        },
+        {
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "deposit",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_user",
+          "type": "address"
+        },
+        {
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdraw",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.7+commit.6da8b019\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"_user\",\"type\":\"address\"},{\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"deposit\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_user\",\"type\":\"address\"},{\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/DydxProtocol.sol\":\"DydxProtocol\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/ProtocolInterface.sol\":{\"keccak256\":\"0x50b1d86ba98473abc5c93aa2ceeffb2906472574d277fb9389b07eee8dcc5c3d\",\"urls\":[\"bzzr://8b03d6a8a32cf5d824fc78c837157099faccfb941158f9693fbfe19d3a617535\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/DydxProtocol.sol\":{\"keccak256\":\"0x69e1f7fa33b914206c97e8b7119c7aa5761d9c59b028e037fdb8d12091916d3e\",\"urls\":[\"bzzr://4e40c4ed3047cb144b3186dbeefde70cd059442d136b1551c1cb8a225e3eb3e5\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Account.sol\":{\"keccak256\":\"0x4c27c617b01972ddb8ca160454284ed09f3ec6f7abd667c31ca9f38805738d33\",\"urls\":[\"bzzr://ad0dd4229cea4f8c5b877a653766cf413d733e442cfc448ffd715e786d7b5216\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Actions.sol\":{\"keccak256\":\"0xa3def9f1d58c1a353cd5412df8027674226000fd0b1cf52f3e11d6b4428fe2dc\",\"urls\":[\"bzzr://955e36c7bd9e222b58764b755169056c4225fc0561fdd88bb71ce7f1e2782a41\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Math.sol\":{\"keccak256\":\"0x05162cffa6d5479b6555e03af67b75e63d85272a3c3d3d2630a127ffa811ba41\",\"urls\":[\"bzzr://0e784dccf35201ef16030ec531028252d590936d75f0200f368a7e5981046af4\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Require.sol\":{\"keccak256\":\"0x6ecb512d52bb5cb36ba26b98877240e0b23eb3310df5dc61f82c655dc974d04b\",\"urls\":[\"bzzr://826485117e00106f438a7e64ecc32b2c3705e02d9bd6035dbdc5f9faaa19482c\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Types.sol\":{\"keccak256\":\"0x35c04c154e9ef818a3e1b59eb748565645864d5f8f2bc696c1f425a8ade9ab00\",\"urls\":[\"bzzr://8b2db9cb583f79fc2b74a70b270667f6a3bc54c3afef6a2d56e0d2ec5b8ca725\"]},\"openzeppelin-solidity/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x965012d27b4262d7a41f5028cbb30c51ebd9ecd4be8fb30380aaa7a3c64fbc8b\",\"urls\":[\"bzzr://41ca38f6b0fa4b77b0feec43e422cfbec48b7eb38a41edf0b85c77e8d9a296b1\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50610101806100206000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c806347e7ef24146037578063f3fef3a3146082575b600080fd5b608060048036036040811015604b57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291908035906020019092919050505060cd565b005b60cb60048036036040811015609657600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291908035906020019092919050505060d1565b005b5050565b505056fea165627a7a72305820de438b6cdb349baa85770b89b50acf39add0cea43c24e27af49780d06d2e81df0029",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060325760003560e01c806347e7ef24146037578063f3fef3a3146082575b600080fd5b608060048036036040811015604b57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291908035906020019092919050505060cd565b005b60cb60048036036040811015609657600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291908035906020019092919050505060d1565b005b5050565b505056fea165627a7a72305820de438b6cdb349baa85770b89b50acf39add0cea43c24e27af49780d06d2e81df0029",
+  "sourceMap": "89:181:46:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;89:181:46;;;;;;;",
+  "deployedSourceMap": "89:181:46:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;89:181:46;;;;;;;;;;;;;;;;;;;;;;;;139:61;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;139:61:46;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;206:62;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;206:62:46;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;139:61;;;:::o;206:62::-;;;:::o",
+  "source": "pragma solidity ^0.5.0;\n\nimport \"../ProtocolInterface.sol\";\nimport \"./lib/Actions.sol\";\n\ncontract DydxProtocol is ProtocolInterface {\n\n    function deposit(address _user, uint _amount) public {\n\n    }\n\n    function withdraw(address _user, uint _amount) public {\n\n    }\n}\n",
+  "sourcePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/DydxProtocol.sol",
+  "ast": {
+    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/DydxProtocol.sol",
+    "exportedSymbols": {
+      "DydxProtocol": [
+        7567
+      ]
+    },
+    "id": 7568,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 7546,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:46"
+      },
+      {
+        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/ProtocolInterface.sol",
+        "file": "../ProtocolInterface.sol",
+        "id": 7547,
+        "nodeType": "ImportDirective",
+        "scope": 7568,
+        "sourceUnit": 7518,
+        "src": "25:34:46",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Actions.sol",
+        "file": "./lib/Actions.sol",
+        "id": 7548,
+        "nodeType": "ImportDirective",
+        "scope": 7568,
+        "sourceUnit": 8153,
+        "src": "60:27:46",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 7549,
+              "name": "ProtocolInterface",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7517,
+              "src": "114:17:46",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_ProtocolInterface_$7517",
+                "typeString": "contract ProtocolInterface"
+              }
+            },
+            "id": 7550,
+            "nodeType": "InheritanceSpecifier",
+            "src": "114:17:46"
+          }
+        ],
+        "contractDependencies": [
+          7517
+        ],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 7567,
+        "linearizedBaseContracts": [
+          7567,
+          7517
+        ],
+        "name": "DydxProtocol",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 7557,
+              "nodeType": "Block",
+              "src": "192:8:46",
+              "statements": []
+            },
+            "documentation": null,
+            "id": 7558,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "deposit",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 7555,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7552,
+                  "name": "_user",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7558,
+                  "src": "156:13:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7551,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "156:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 7554,
+                  "name": "_amount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7558,
+                  "src": "171:12:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 7553,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "171:4:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "155:29:46"
+            },
+            "returnParameters": {
+              "id": 7556,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "192:0:46"
+            },
+            "scope": 7567,
+            "src": "139:61:46",
+            "stateMutability": "nonpayable",
+            "superFunction": 7509,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 7565,
+              "nodeType": "Block",
+              "src": "260:8:46",
+              "statements": []
+            },
+            "documentation": null,
+            "id": 7566,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "withdraw",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 7563,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7560,
+                  "name": "_user",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7566,
+                  "src": "224:13:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7559,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "224:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 7562,
+                  "name": "_amount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7566,
+                  "src": "239:12:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 7561,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "239:4:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "223:29:46"
+            },
+            "returnParameters": {
+              "id": 7564,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "260:0:46"
+            },
+            "scope": 7567,
+            "src": "206:62:46",
+            "stateMutability": "nonpayable",
+            "superFunction": 7516,
+            "visibility": "public"
+          }
+        ],
+        "scope": 7568,
+        "src": "89:181:46"
+      }
+    ],
+    "src": "0:271:46"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/DydxProtocol.sol",
+    "exportedSymbols": {
+      "DydxProtocol": [
+        7567
+      ]
+    },
+    "id": 7568,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 7546,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:46"
+      },
+      {
+        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/ProtocolInterface.sol",
+        "file": "../ProtocolInterface.sol",
+        "id": 7547,
+        "nodeType": "ImportDirective",
+        "scope": 7568,
+        "sourceUnit": 7518,
+        "src": "25:34:46",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Actions.sol",
+        "file": "./lib/Actions.sol",
+        "id": 7548,
+        "nodeType": "ImportDirective",
+        "scope": 7568,
+        "sourceUnit": 8153,
+        "src": "60:27:46",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 7549,
+              "name": "ProtocolInterface",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7517,
+              "src": "114:17:46",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_ProtocolInterface_$7517",
+                "typeString": "contract ProtocolInterface"
+              }
+            },
+            "id": 7550,
+            "nodeType": "InheritanceSpecifier",
+            "src": "114:17:46"
+          }
+        ],
+        "contractDependencies": [
+          7517
+        ],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 7567,
+        "linearizedBaseContracts": [
+          7567,
+          7517
+        ],
+        "name": "DydxProtocol",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 7557,
+              "nodeType": "Block",
+              "src": "192:8:46",
+              "statements": []
+            },
+            "documentation": null,
+            "id": 7558,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "deposit",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 7555,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7552,
+                  "name": "_user",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7558,
+                  "src": "156:13:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7551,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "156:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 7554,
+                  "name": "_amount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7558,
+                  "src": "171:12:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 7553,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "171:4:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "155:29:46"
+            },
+            "returnParameters": {
+              "id": 7556,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "192:0:46"
+            },
+            "scope": 7567,
+            "src": "139:61:46",
+            "stateMutability": "nonpayable",
+            "superFunction": 7509,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 7565,
+              "nodeType": "Block",
+              "src": "260:8:46",
+              "statements": []
+            },
+            "documentation": null,
+            "id": 7566,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "withdraw",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 7563,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7560,
+                  "name": "_user",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7566,
+                  "src": "224:13:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7559,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "224:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 7562,
+                  "name": "_amount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7566,
+                  "src": "239:12:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 7561,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "239:4:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "223:29:46"
+            },
+            "returnParameters": {
+              "id": 7564,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "260:0:46"
+            },
+            "scope": 7567,
+            "src": "206:62:46",
+            "stateMutability": "nonpayable",
+            "superFunction": 7516,
+            "visibility": "public"
+          }
+        ],
+        "scope": 7568,
+        "src": "89:181:46"
+      }
+    ],
+    "src": "0:271:46"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-08-01T13:30:59.861Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}

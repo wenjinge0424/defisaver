@@ -30,9 +30,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "0.5.0",
+      version: "0.5.7",
     }
  },
-  contracts_build_directory: path.join(__dirname, "client/src/contracts")
-
 }

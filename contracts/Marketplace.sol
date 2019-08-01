@@ -1,4 +1,4 @@
-pragma solidity 0.5.0;
+pragma solidity ^0.5.0;
 
 import "./DS/DSMath.sol";
 import "./DS/DSAuth.sol";
@@ -14,7 +14,7 @@ contract Marketplace is DSAuth, DSMath {
         uint discount;
         bool active;
     }
- 
+
     mapping (bytes32 => SaleItem) public items;
     mapping (bytes32 => uint) public itemPos;
     bytes32[] public itemsArr;
@@ -81,7 +81,7 @@ contract Marketplace is DSAuth, DSMath {
         item.active = false;
 
         // give the cup to the buyer, him becoming the lad that owns the cup
-        DSProxyInterface(item.proxy).execute(marketplaceProxy, 
+        DSProxyInterface(item.proxy).execute(marketplaceProxy,
             abi.encodeWithSignature("give(bytes32,address)", _cup, _newOwner));
 
         item.owner.transfer(sub(cdpPrice, feeAmount)); // transfer money to the seller
@@ -99,7 +99,7 @@ contract Marketplace is DSAuth, DSMath {
     function cancel(bytes32 _cup) public {
         require(isOwner(msg.sender, _cup), "msg.sender must proxy which owns the cup");
         require(isOnSale(_cup), "only cancel cdps that are on sale");
-        
+
         removeItem(_cup);
     }
 
@@ -165,7 +165,7 @@ contract Marketplace is DSAuth, DSMath {
         itemsArr.length--;
     }
 
-    function isOwner(address _owner, bytes32 _cup) internal view returns(bool) {         
+    function isOwner(address _owner, bytes32 _cup) internal view returns(bool) {
         require(tub.lad(_cup) == _owner);
 
         return true;

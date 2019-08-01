@@ -1,4 +1,4 @@
-pragma solidity 0.5.0;
+pragma solidity ^0.5.0;
 
 import "./interfaces/ERC20.sol";
 import "./interfaces/KyberNetworkProxyInterface.sol";
@@ -37,14 +37,14 @@ contract KyberWrapper is ExchangeInterface {
 
         return (destAmount, balance);
     }
-    
+
     function swapTokenToEther (address _tokenAddress, uint _amount, uint _maxAmount) external returns(uint) {
         uint minRate;
         ERC20 ETH_TOKEN_ADDRESS = ERC20(ETHER_ADDRESS);
         ERC20 token = ERC20(_tokenAddress);
-        
+
         KyberNetworkProxyInterface _kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
-        
+
         (, minRate) = _kyberNetworkProxy.getExpectedRate(token, ETH_TOKEN_ADDRESS, _amount);
 
         // Mitigate ERC20 Approve front-running attack, by initially setting, allowance to 0
