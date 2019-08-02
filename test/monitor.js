@@ -9,7 +9,7 @@ contract("Monitor", accounts => {
 
     let monitor, monitorProxy, registry, proxy, currRatio, decenterLending, daiToken;
 
-    const MONITOR_ADDRESS = "0x82d1f372b4F3384Abf94DcAd6f69a426Fe2a9625";
+    const MONITOR_ADDRESS = "0x1a19D66869fb818742BeD9A13b599ecc92fc8998";
     const DECENTER_MONITOR_LENDING = "0x32a5ee0d96397fab5254f6c28dc9cefa647be3fb";
 
     const cdpIdBytes32 = "0x0000000000000000000000000000000000000000000000000000000000001751";
@@ -18,7 +18,7 @@ contract("Monitor", accounts => {
 
     before(async () => {
         monitor = await Monitor.at(MONITOR_ADDRESS);
-        monitorProxy = await MonitorProxy.at("0xd87eCaa4E007f06E593709CC8834060e068bf285");
+        monitorProxy = await MonitorProxy.at("0xF963d81c925718AA167897b0A8A1B2E8a8cAfD66");
 
         registry = await ProxyRegistryInterface.at("0x64a436ae831c1672ae81f674cab8b6775df3475c");
 
