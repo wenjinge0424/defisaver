@@ -62,7 +62,13 @@ contract("Monitor", accounts => {
       
       it('...should subscribe the CDP for monitoring', async () => {
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MonitorProxy, 'subscribe'),
-         [cdpIdBytes32, web3.utils.toWei('1.70', 'ether'), web3.utils.toWei('1.90', 'ether'), web3.utils.toWei('1.80', 'ether'), web3.utils.toWei('10', 'ether'), MONITOR_ADDRESS]);
+         [cdpIdBytes32, 
+          web3.utils.toWei('1.70', 'ether'), // minRatio
+          web3.utils.toWei('1.90', 'ether'), // maxRatio
+          web3.utils.toWei('1.80', 'ether'), // optimalBoostRatio
+          web3.utils.toWei('1.80', 'ether'), // optimalRepay Ratio
+          web3.utils.toWei('10', 'ether'), // slippage
+          MONITOR_ADDRESS]);
 
         try {
             const tx = await proxy.methods['execute(address,bytes)'](MonitorProxy.address, data, {from: account});
