@@ -10,7 +10,8 @@ const SaverLogger = artifacts.require("./SaverLogger.sol");
 const CompoundProxy = artifacts.require("./CompoundProxy.sol");
 const DecenterMonitorLending = artifacts.require("./DecenterMonitorLending.sol");
 const SavingsProxy = artifacts.require("./SavingsProxy.sol");
-const DydxProtocol = artifacts.require("./DydxProtocol.sol");
+const DydxSavingsProtocol = artifacts.require("./DydxSavingsProtocol.sol");
+const CompoundSavingsProtocol = artifacts.require("./CompoundSavingsProtocol.sol");
 
 require('dotenv').config();
 
@@ -36,9 +37,11 @@ module.exports = function(deployer, network) {
 
     // deployer.deploy(Monitor, {gas: 6720000, overwrite: deployAgain});
 
-    deployer.deploy(DydxProtocol,
-        "0x4EC3570cADaAEE08Ae384779B0f3A45EF85289DE",
-        "0xC4375B7De8af5a38a93548eb8453a498222C4fF2",
+    deployer.deploy(DydxSavingsProtocol,
+        {gas: 8000000, overwrite: deployAgain}
+    )
+
+    deployer.deploy(CompoundSavingsProtocol,
         {gas: 8000000, overwrite: deployAgain}
     )
 

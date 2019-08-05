@@ -25,17 +25,20 @@ contract ISoloMargin {
         );
 }
 
-contract DydxProtocol is ProtocolInterface {
+contract DydxSavingsProtocol is ProtocolInterface {
+
+    // kovan
+    address public constant SOLO_MARGIN_ADDRESS = 0x4EC3570cADaAEE08Ae384779B0f3A45EF85289DE;
+    address public constant MAKER_DAI_ADDRESS = 0xC4375B7De8af5a38a93548eb8453a498222C4fF2;
 
     ISoloMargin public soloMargin;
     ERC20 public dai;
 
     uint daiMarketId = 1;
 
-    constructor(address _soloMargin, address _daiAddress) public {
-        soloMargin = ISoloMargin(_soloMargin);
-        dai = ERC20(_daiAddress);
-        // dai.approve(address(soloMargin), uint(-1));
+    constructor() public {
+        soloMargin = ISoloMargin(SOLO_MARGIN_ADDRESS);
+        dai = ERC20(MAKER_DAI_ADDRESS);
     }
 
     function deposit(address _user, uint _amount) public {
