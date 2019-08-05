@@ -35,14 +35,12 @@ contract DydxProtocol is ProtocolInterface {
     constructor(address _soloMargin, address _daiAddress) public {
         soloMargin = ISoloMargin(_soloMargin);
         dai = ERC20(_daiAddress);
-        dai.approve(address(soloMargin), uint(-1));
+        // dai.approve(address(soloMargin), uint(-1));
     }
 
     function deposit(address _user, uint _amount) public {
-        require(dai.transferFrom(_user, address(this), _amount));
-
         Account.Info[] memory accounts = new Account.Info[](1);
-        accounts[0] = getAccount(address(this), 0);
+        accounts[0] = getAccount(_user, 0);
 
         Actions.ActionArgs[] memory actions = new Actions.ActionArgs[](1);
         Types.AssetAmount memory amount = Types.AssetAmount({
@@ -57,7 +55,7 @@ contract DydxProtocol is ProtocolInterface {
             accountId: 0,
             amount: amount,
             primaryMarketId: daiMarketId,
-            otherAddress: address(this),
+            otherAddress: _user,
             secondaryMarketId: 0, //not used
             otherAccountId: 0, //not used
             data: "" //not used
@@ -67,7 +65,29 @@ contract DydxProtocol is ProtocolInterface {
     }
 
     function withdraw(address _user, uint _amount) public {
+        Account.Info[] memory accounts = new Account.Info[](1);
+        accounts[0] = getAccount(_user, 0);
 
+        Actions.ActionArgs[] memory actions = new Actions.ActionArgs[](1);
+        Types.AssetAmount memory amount = Types.AssetAmount({
+            sign: false,
+            denomination: Types.AssetDenomination.Wei,
+            ref: Types.AssetReference.Delta,
+            value: _amount
+        });
+
+        actions[0] = Actions.ActionArgs({
+            actionType: Actions.ActionType.Withdraw,
+            accountId: 0,
+            amount: amount,
+            primaryMarketId: daiMarketId,
+            otherAddress: _user,
+            secondaryMarketId: 0, //not used
+            otherAccountId: 0, //not used
+            data: "" //not used
+        });
+
+        soloMargin.operate(accounts, actions);
     }
 
     function getWeiBalance(address _user, uint _index) public view returns(Types.Wei memory) {
