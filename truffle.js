@@ -9,7 +9,7 @@ module.exports = {
   networks: {
     kovan: {
         provider: function() {
-            return new HDWalletProvider(mnemonic, process.env.KOVAN_INFURA_ENDPOINT, 0, 15);
+            return new HDWalletProvider(mnemonic, "https://kovan.decenter.com", 0, 15);
         },
         network_id: '42',
         gasPrice: 3000000000,

@@ -12,12 +12,25 @@ contract ISoloMargin {
         Account.Info[] memory accounts,
         Actions.ActionArgs[] memory actions
     ) public;
+
+    function getAccountBalances(
+        Account.Info memory account
+    )
+        public
+        view
+        returns (
+            address[] memory,
+            Types.Par[] memory,
+            Types.Wei[] memory
+        );
 }
 
 contract DydxProtocol is ProtocolInterface {
 
     ISoloMargin public soloMargin;
     ERC20 public dai;
+
+    uint daiMarketId = 1;
 
     constructor(address _soloMargin, address _daiAddress) public {
         soloMargin = ISoloMargin(_soloMargin);
@@ -29,10 +42,7 @@ contract DydxProtocol is ProtocolInterface {
         require(dai.transferFrom(_user, address(this), _amount));
 
         Account.Info[] memory accounts = new Account.Info[](1);
-        accounts[0] = Account.Info({
-            owner: address(this),
-            number: 0
-        });
+        accounts[0] = getAccount(address(this), 0);
 
         Actions.ActionArgs[] memory actions = new Actions.ActionArgs[](1);
         Types.AssetAmount memory amount = Types.AssetAmount({
@@ -46,7 +56,7 @@ contract DydxProtocol is ProtocolInterface {
             actionType: Actions.ActionType.Deposit,
             accountId: 0,
             amount: amount,
-            primaryMarketId: 1, //dai market id
+            primaryMarketId: daiMarketId,
             otherAddress: address(this),
             secondaryMarketId: 0, //not used
             otherAccountId: 0, //not used
@@ -58,5 +68,29 @@ contract DydxProtocol is ProtocolInterface {
 
     function withdraw(address _user, uint _amount) public {
 
+    }
+
+    function getWeiBalance(address _user, uint _index) public view returns(Types.Wei memory) {
+
+        Types.Wei[] memory weiBalances;
+        (,,weiBalances) = soloMargin.getAccountBalances(getAccount(_user, _index));
+
+        return weiBalances[daiMarketId];
+    }
+
+    function getParBalance(address _user, uint _index) public view returns(Types.Par memory) {
+        Types.Par[] memory parBalances;
+        (,parBalances,) = soloMargin.getAccountBalances(getAccount(_user, _index));
+
+        return parBalances[daiMarketId];
+    }
+
+    function getAccount(address _user, uint _index) public view returns(Account.Info memory) {
+        Account.Info memory account = Account.Info({
+            owner: _user,
+            number: _index
+        });
+
+        return account;
     }
 }
