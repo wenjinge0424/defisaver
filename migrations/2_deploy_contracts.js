@@ -9,9 +9,6 @@ const MarketplaceProxy = artifacts.require("./MarketplaceProxy.sol");
 const SaverLogger = artifacts.require("./SaverLogger.sol");
 const CompoundProxy = artifacts.require("./CompoundProxy.sol");
 const DecenterMonitorLending = artifacts.require("./DecenterMonitorLending.sol");
-const SavingsProxy = artifacts.require("./SavingsProxy.sol");
-const DydxSavingsProtocol = artifacts.require("./DydxSavingsProtocol.sol");
-const CompoundSavingsProtocol = artifacts.require("./CompoundSavingsProtocol.sol");
 
 require('dotenv').config();
 
@@ -19,10 +16,6 @@ module.exports = function(deployer, network) {
   let deployAgain = (process.env.DEPLOY_AGAIN === 'true') ? true : false;
 
   console.log(network);
-
-    if (network == 'dydx') {
-        deployer.deploy(SavingsProxy).then(console.log);
-    }
 
   if (network == 'kovan') {
     //deployer.deploy(Eth2DaiWrapper, {gas: 6720000, overwrite: deployAgain});
@@ -37,13 +30,6 @@ module.exports = function(deployer, network) {
 
     // deployer.deploy(Monitor, {gas: 6720000, overwrite: deployAgain});
 
-    deployer.deploy(DydxSavingsProtocol,
-        {gas: 8000000, overwrite: deployAgain}
-    )
-
-    deployer.deploy(CompoundSavingsProtocol,
-        {gas: 8000000, overwrite: deployAgain}
-    )
 
     //  deployer.deploy(Monitor, {gas: 6720000, overwrite: deployAgain}).then(() => {
     //     return deployer.deploy(DecenterMonitorLending, '0x93cdB0a93Fc36f6a53ED21eCf6305Ab80D06becA', Monitor.address, {gas: 6720000, overwrite: deployAgain});
@@ -51,7 +37,7 @@ module.exports = function(deployer, network) {
 
   } else if (network == 'rinkeby') {
     deployer.deploy(UniswapWrapper, {gas: 6720000, overwrite: deployAgain});
-  } else if (network != "dydx") {
+  } else {
     deployer.deploy(Monitor, {gas: 6720000, overwrite: deployAgain});
     // deployer.deploy(CompoundProxy, {gas: 6720000, overwrite: deployAgain});
 

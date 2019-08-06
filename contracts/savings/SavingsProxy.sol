@@ -9,12 +9,10 @@ contract SavingsProxy {
 
     mapping(bytes32 => address) public protocols;
 
-    constructor(address[] memory _protocols) public {
-        require(_protocols.length == 3);
-
-        protocols[getKeyValue(SavingsProtocol.Compound)] = _protocols[0];
-        protocols[getKeyValue(SavingsProtocol.Dydx)] = _protocols[1];
-        protocols[getKeyValue(SavingsProtocol.Fulcrum)] = _protocols[2];
+    constructor(address _compoundProtocol, address _dydxProtocol, address _fulcrumProtocol) public {
+        protocols[getKeyValue(SavingsProtocol.Compound)] = _compoundProtocol;
+        protocols[getKeyValue(SavingsProtocol.Dydx)] = _dydxProtocol;
+        protocols[getKeyValue(SavingsProtocol.Fulcrum)] = _fulcrumProtocol;
     }
 
     function deposit(SavingsProtocol _protocol, uint _amount) public {
