@@ -12,7 +12,7 @@ contract KyberWrapper is ExchangeInterface {
 
     address constant WALLET_ID = 0x54b44C6B18fc0b4A1010B21d524c338D1f8065F6;
 
-    function swapEtherToToken (uint _ethAmount, address _tokenAddress, uint _maxAmount) external payable returns(uint, uint) {
+    function swapEtherToToken(uint _ethAmount, address _tokenAddress, uint _maxAmount) external payable returns(uint, uint) {
         uint minRate;
         ERC20 ETH_TOKEN_ADDRESS = ERC20(ETHER_ADDRESS);
         ERC20 token = ERC20(_tokenAddress);
@@ -38,7 +38,7 @@ contract KyberWrapper is ExchangeInterface {
         return (destAmount, balance);
     }
 
-    function swapTokenToEther (address _tokenAddress, uint _amount, uint _maxAmount) external returns(uint) {
+    function swapTokenToEther(address _tokenAddress, uint _amount, uint _maxAmount) external returns(uint) {
         uint minRate;
         ERC20 ETH_TOKEN_ADDRESS = ERC20(ETHER_ADDRESS);
         ERC20 token = ERC20(_tokenAddress);
