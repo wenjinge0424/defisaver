@@ -117,14 +117,15 @@
       "type": "function"
     }
   ],
+  "metadata": "",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity 0.5.0;\n\n\ncontract DSGuard {\n    function canCall(address src_, address dst_, bytes4 sig) public view returns (bool);\n\n    function permit(bytes32 src, bytes32 dst, bytes32 sig) public;\n    function forbid(bytes32 src, bytes32 dst, bytes32 sig) public;\n\n    function permit(address src, address dst, bytes32 sig) public;\n    function forbid(address src, address dst, bytes32 sig) public;\n\n}\n\n\ncontract DSGuardFactory {\n    function newGuard() public returns (DSGuard guard);\n}",
-  "sourcePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/DS/DSGuard.sol",
+  "sourcePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/DS/DSGuard.sol",
   "ast": {
-    "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/DS/DSGuard.sol",
+    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/DS/DSGuard.sol",
     "exportedSymbols": {
       "DSGuard": [
         220
@@ -803,7 +804,7 @@
     "src": "0:491:3"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/DS/DSGuard.sol",
+    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/DS/DSGuard.sol",
     "exportedSymbols": {
       "DSGuard": [
         220
@@ -1486,8 +1487,8 @@
     "version": "0.5.0+commit.1d4f565a.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.0",
-  "updatedAt": "2019-06-28T08:20:24.929Z",
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-08-07T12:56:57.958Z",
   "devdoc": {
     "methods": {}
   },

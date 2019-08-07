@@ -39,14 +39,15 @@
       "type": "event"
     }
   ],
-  "bytecode": "0x6080604052348015600f57600080fd5b50603580601d6000396000f3fe6080604052600080fdfea165627a7a723058207f915e66d13b60e2655d3b2fc354e9cb2fa3212809394478419ea5f72924038c0029",
-  "deployedBytecode": "0x6080604052600080fdfea165627a7a723058207f915e66d13b60e2655d3b2fc354e9cb2fa3212809394478419ea5f72924038c0029",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.0+commit.1d4f565a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":true,\"inputs\":[{\"indexed\":true,\"name\":\"sig\",\"type\":\"bytes4\"},{\"indexed\":true,\"name\":\"guy\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"foo\",\"type\":\"bytes32\"},{\"indexed\":true,\"name\":\"bar\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"fax\",\"type\":\"bytes\"}],\"name\":\"LogNote\",\"type\":\"event\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/DS/DSNote.sol\":\"DSNote\"},\"evmVersion\":\"byzantium\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/DS/DSNote.sol\":{\"keccak256\":\"0x4e4171faf0d7fe65d42dcbb19b1d0cf8a2acfd675e281c605f4b5b1f4dcd3dee\",\"urls\":[\"bzzr://7be519d764779598c8f9ed7f835d2330af647a0d77800fcf5bb1265cee9284e1\"]}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603580601d6000396000f3fe6080604052600080fdfea165627a7a7230582062e1a5f93d6be8a9cca65d043334795f4e4ecae827639254cc0644ab6a27298c0029",
+  "deployedBytecode": "0x6080604052600080fdfea165627a7a7230582062e1a5f93d6be8a9cca65d043334795f4e4ecae827639254cc0644ab6a27298c0029",
   "sourceMap": "24:497:5:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;24:497:5;;;;;;;",
   "deployedSourceMap": "24:497:5:-;;;;;",
   "source": "pragma solidity 0.5.0;\n\ncontract DSNote {\n    event LogNote(\n        bytes4   indexed  sig,\n        address  indexed  guy,\n        bytes32  indexed  foo,\n        bytes32  indexed  bar,\n        uint              wad,\n        bytes             fax\n    ) anonymous;\n\n    modifier note {\n        bytes32 foo;\n        bytes32 bar;\n\n        assembly {\n            foo := calldataload(4)\n            bar := calldataload(36)\n        }\n\n        emit LogNote(msg.sig, msg.sender, foo, bar, msg.value, msg.data);\n\n        _;\n    }\n}",
-  "sourcePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/DS/DSNote.sol",
+  "sourcePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/DS/DSNote.sol",
   "ast": {
-    "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/DS/DSNote.sol",
+    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/DS/DSNote.sol",
     "exportedSymbols": {
       "DSNote": [
         568
@@ -374,7 +375,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7211,
+                          "referencedDeclaration": 8006,
                           "src": "449:3:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -403,7 +404,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7211,
+                          "referencedDeclaration": 8006,
                           "src": "458:3:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -458,7 +459,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7211,
+                          "referencedDeclaration": 8006,
                           "src": "480:3:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -487,7 +488,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7211,
+                          "referencedDeclaration": 8006,
                           "src": "491:3:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -593,7 +594,7 @@
     "src": "0:521:5"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/DS/DSNote.sol",
+    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/DS/DSNote.sol",
     "exportedSymbols": {
       "DSNote": [
         568
@@ -921,7 +922,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7211,
+                          "referencedDeclaration": 8006,
                           "src": "449:3:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -950,7 +951,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7211,
+                          "referencedDeclaration": 8006,
                           "src": "458:3:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1005,7 +1006,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7211,
+                          "referencedDeclaration": 8006,
                           "src": "480:3:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1034,7 +1035,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7211,
+                          "referencedDeclaration": 8006,
                           "src": "491:3:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1144,8 +1145,8 @@
     "version": "0.5.0+commit.1d4f565a.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.0",
-  "updatedAt": "2019-06-28T08:20:24.930Z",
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-08-07T12:56:57.981Z",
   "devdoc": {
     "methods": {}
   },
