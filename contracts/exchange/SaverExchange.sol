@@ -17,6 +17,8 @@ contract SaverExchange is DSMath {
 
 
     function swapDaiToEth(uint _amount, uint _minPrice, uint _exchangeType) public {
+        require(ERC20(DAI_ADDRESS).transferFrom(msg.sender, address(this), _amount));
+
         uint fee = takeFee(_amount);
         _amount = sub(_amount, fee);
 
@@ -25,9 +27,8 @@ contract SaverExchange is DSMath {
         (exchangeWrapper, daiEthPrice) = getBestPrice(_amount, DAI_ADDRESS, ETHER_ADDRESS, _exchangeType);
 
         require(wdiv(1000000000000000000, daiEthPrice) < _minPrice, "Slippage hit");
-    
-        require(ERC20(DAI_ADDRESS).transferFrom(msg.sender, address(this), _amount));
 
+        ERC20(DAI_ADDRESS).transfer(exchangeWrapper, _amount);
         ExchangeInterface(exchangeWrapper).swapTokenToEther(DAI_ADDRESS, _amount, uint(-1));
 
         uint daiBalance = ERC20(DAI_ADDRESS).balanceOf(address(this));
@@ -45,7 +46,7 @@ contract SaverExchange is DSMath {
         uint ethDaiPrice;
         (exchangeWrapper, ethDaiPrice) = getBestPrice(_amount, ETHER_ADDRESS, DAI_ADDRESS, _exchangeType);
 
-        require(ethDaiPrice > _minPrice, "Slppage hit");
+        require(ethDaiPrice > _minPrice, "Slippage hit");
         
         uint ethReturned;
         uint daiReturned;
@@ -67,7 +68,7 @@ contract SaverExchange is DSMath {
     /// @param _srcToken Address of the source token
     /// @param _destToken Address of the destination token
     /// @return (address, uint) The address of the best exchange and the exchange price
-    function getBestPrice(uint _amount, address _srcToken, address _destToken, uint _exchangeType) internal returns (address, uint) {
+    function getBestPrice(uint _amount, address _srcToken, address _destToken, uint _exchangeType) public returns (address, uint) {
         uint expectedRateKyber;
         uint expectedRateUniswap;
         uint expectedRateEth2Dai;
@@ -89,29 +90,17 @@ contract SaverExchange is DSMath {
             return (UNISWAP_WRAPPER, expectedRateUniswap);
         }
 
-        if (expectedRateEth2Dai > expectedRateKyber && expectedRateEth2Dai > expectedRateUniswap) {
+        if ((expectedRateEth2Dai >= expectedRateKyber) && (expectedRateEth2Dai >= expectedRateUniswap)) {
             return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
         }
 
-        if (expectedRateKyber > expectedRateUniswap && expectedRateKyber > expectedRateEth2Dai) {
+        if ((expectedRateKyber >= expectedRateUniswap) && (expectedRateKyber >= expectedRateEth2Dai)) {
             return (KYBER_WRAPPER, expectedRateKyber);
         }
 
-        if (expectedRateUniswap > expectedRateKyber && expectedRateUniswap > expectedRateEth2Dai) {
+        if ((expectedRateUniswap >= expectedRateKyber) && (expectedRateUniswap >= expectedRateEth2Dai)) {
             return (UNISWAP_WRAPPER, expectedRateUniswap);
         }
-    }
-
-    /// @notice Returns expected rate for Eth -> Dai conversion
-    /// @param _amount Amount of Ether
-    function estimatedDaiPrice(uint _amount) internal returns (uint expectedRate) {
-        (expectedRate, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(ETHER_ADDRESS, DAI_ADDRESS, _amount);
-    }
-
-    /// @notice Returns expected rate for Dai -> Eth conversion
-    /// @param _amount Amount of Dai
-    function estimatedEthPrice(uint _amount) internal returns (uint expectedRate) {
-        (expectedRate, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(DAI_ADDRESS, ETHER_ADDRESS, _amount);
     }
 
     /// @notice Takes a feePercentage and sends it to wallet
@@ -119,6 +108,11 @@ contract SaverExchange is DSMath {
     /// @return feeAmount Amount in Dai owner earned on the fee
     function takeFee(uint _amount) internal returns (uint feeAmount) {
         feeAmount = _amount / SERVICE_FEE;
-        ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
+        if (feeAmount > 0) {
+            ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
+        }
     }
+
+    // receive eth from wrappers
+    function() external payable {}
 }
