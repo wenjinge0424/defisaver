@@ -7,10 +7,6 @@
         {
           "name": "",
           "type": "bytes32"
-        },
-        {
-          "name": "_protocol",
-          "type": "uint256"
         }
       ],
       "name": "protocols",
@@ -25,7 +21,6 @@
       "type": "function"
     },
     {
-      "constant": false,
       "inputs": [
         {
           "name": "_compoundProtocol",
@@ -40,8 +35,6 @@
           "type": "address"
         }
       ],
-      "name": "withdraw",
-      "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "constructor"
@@ -153,280 +146,13 @@
         "src": "0:23:45"
       },
       {
-        "baseContracts": [],
-        "contractDependencies": [],
-        "contractKind": "contract",
-        "documentation": null,
-        "fullyImplemented": true,
         "id": 7520,
-        "linearizedBaseContracts": [
-          7544
-        ],
-        "name": "SavingsProxy",
-        "nodeType": "PragmaDirective",
-        "nodes": [
-          {
-            "body": {
-              "id": 7526,
-              "nodeType": "Block",
-              "src": "109:8:45",
-              "statements": []
-            },
-            "documentation": null,
-            "id": 7527,
-            "implemented": true,
-            "kind": "function",
-            "modifiers": [],
-            "name": "deposit",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 7524,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 7521,
-                  "name": "_amount",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7527,
-                  "src": "72:12:45",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 7520,
-                    "name": "uint",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "72:4:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 7523,
-                  "name": "_protocol",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7527,
-                  "src": "86:14:45",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 7522,
-                    "name": "uint",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "86:4:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "71:30:45"
-            },
-            "returnParameters": {
-              "id": 7525,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "109:0:45"
-            },
-            "scope": 7544,
-            "src": "55:62:45",
-            "stateMutability": "nonpayable",
-            "superFunction": null,
-            "visibility": "public"
-          },
-          {
-            "body": {
-              "id": 7534,
-              "nodeType": "Block",
-              "src": "178:8:45",
-              "statements": []
-            },
-            "documentation": null,
-            "id": 7535,
-            "implemented": true,
-            "kind": "function",
-            "modifiers": [],
-            "name": "withdraw",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 7532,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 7529,
-                  "name": "_amount",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7535,
-                  "src": "141:12:45",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 7528,
-                    "name": "uint",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "141:4:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 7531,
-                  "name": "_protocol",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7535,
-                  "src": "155:14:45",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 7530,
-                    "name": "uint",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "155:4:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "140:30:45"
-            },
-            "returnParameters": {
-              "id": 7533,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "178:0:45"
-            },
-            "scope": 7544,
-            "src": "123:63:45",
-            "stateMutability": "nonpayable",
-            "superFunction": null,
-            "visibility": "public"
-          },
-          {
-            "body": {
-              "id": 7542,
-              "nodeType": "Block",
-              "src": "235:8:45",
-              "statements": []
-            },
-            "documentation": null,
-            "id": 7543,
-            "implemented": true,
-            "kind": "function",
-            "modifiers": [],
-            "name": "swap",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 7540,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 7537,
-                  "name": "_from",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7543,
-                  "src": "206:10:45",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 7536,
-                    "name": "uint",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "206:4:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 7539,
-                  "name": "_to",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7543,
-                  "src": "218:8:45",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 7538,
-                    "name": "uint",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "218:4:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "205:22:45"
-            },
-            "returnParameters": {
-              "id": 7541,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "235:0:45"
-            },
-            "scope": 7544,
-            "src": "192:51:45",
-            "stateMutability": "nonpayable",
-            "superFunction": null,
-            "visibility": "public"
-          }
-        ],
-        "scope": 7545,
-        "src": "24:33:45",
         "literals": [
           "experimental",
           "ABIEncoderV2"
-        ]
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "24:33:45"
       },
       {
         "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/ProtocolInterface.sol",
@@ -534,108 +260,11 @@
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "arguments": [
-                      {
-                        "argumentTypes": null,
-                        "commonType": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        },
-                        "id": 7539,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": false,
-                        "lValueRequested": false,
-                        "leftExpression": {
-                          "argumentTypes": null,
-                          "expression": {
-                            "argumentTypes": null,
-                            "id": 7536,
-                            "name": "_protocols",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 7532,
-                            "src": "294:10:45",
-                            "typeDescriptions": {
-                              "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
-                              "typeString": "address[] memory"
-                            }
-                          },
-                          "id": 7537,
-                          "isConstant": false,
-                          "isLValue": false,
-                          "isPure": false,
-                          "lValueRequested": false,
-                          "memberName": "length",
-                          "nodeType": "MemberAccess",
-                          "referencedDeclaration": null,
-                          "src": "294:17:45",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_uint256",
-                            "typeString": "uint256"
-                          }
-                        },
-                        "nodeType": "BinaryOperation",
-                        "operator": "==",
-                        "rightExpression": {
-                          "argumentTypes": null,
-                          "hexValue": "33",
-                          "id": 7538,
-                          "isConstant": false,
-                          "isLValue": false,
-                          "isPure": true,
-                          "kind": "number",
-                          "lValueRequested": false,
-                          "nodeType": "Literal",
-                          "src": "315:1:45",
-                          "subdenomination": null,
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_rational_3_by_1",
-                            "typeString": "int_const 3"
-                          },
-                          "value": "3"
-                        },
-                        "src": "294:22:45",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bool",
-                          "typeString": "bool"
-                        }
-                      }
-                    ],
-                    "expression": {
-                      "argumentTypes": [
-                        {
-                          "typeIdentifier": "t_bool",
-                          "typeString": "bool"
-                        }
-                      ],
-                      "id": 7535,
-                      "name": "require",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [
-                        10411,
-                        10412
-                      ],
-                      "referencedDeclaration": 10411,
-                      "src": "286:7:45",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
-                        "typeString": "function (bool) pure"
-                      }
-                    },
                     "id": 7545,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
-                    "kind": "functionCall",
                     "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "Assignment",
-                    "src": "333:68:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    },
                     "leftHandSide": {
                       "argumentTypes": null,
                       "baseExpression": {
@@ -728,6 +357,7 @@
                         "typeString": "address"
                       }
                     },
+                    "nodeType": "Assignment",
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
@@ -741,6 +371,11 @@
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
+                    },
+                    "src": "333:68:45",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
                     }
                   },
                   "id": 7546,
@@ -851,51 +486,16 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "baseExpression": {
-                        "argumentTypes": null,
-                        "id": 7548,
-                        "name": "_protocols",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7532,
-                        "src": "379:10:45",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
-                          "typeString": "address[] memory"
-                        }
-                      },
                       "id": 7553,
-                      "indexExpression": {
-                        "argumentTypes": null,
-                        "hexValue": "30",
-                        "id": 7549,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": true,
-                        "kind": "number",
-                        "lValueRequested": false,
-                        "nodeType": "Literal",
-                        "src": "390:1:45",
-                        "subdenomination": null,
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_rational_0_by_1",
-                          "typeString": "int_const 0"
-                        },
-                        "value": "0"
-                      },
-                      "isConstant": false,
-                      "isLValue": true,
-                      "isPure": false,
-                      "lValueRequested": false,
+                      "name": "_dydxProtocol",
                       "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7533,
                       "src": "458:13:45",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
-                      },
-                      "name": "_dydxProtocol",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7533
+                      }
                     },
                     "src": "411:60:45",
                     "typeDescriptions": {
@@ -1011,51 +611,16 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "baseExpression": {
-                        "argumentTypes": null,
-                        "id": 7559,
-                        "name": "_protocols",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7532,
-                        "src": "449:10:45",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
-                          "typeString": "address[] memory"
-                        }
-                      },
                       "id": 7562,
-                      "indexExpression": {
-                        "argumentTypes": null,
-                        "hexValue": "31",
-                        "id": 7560,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": true,
-                        "kind": "number",
-                        "lValueRequested": false,
-                        "nodeType": "Literal",
-                        "src": "460:1:45",
-                        "subdenomination": null,
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_rational_1_by_1",
-                          "typeString": "int_const 1"
-                        },
-                        "value": "1"
-                      },
-                      "isConstant": false,
-                      "isLValue": true,
-                      "isPure": false,
-                      "lValueRequested": false,
+                      "name": "_fulcrumProtocol",
                       "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7535,
                       "src": "531:16:45",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
-                      },
-                      "name": "_fulcrumProtocol",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7535
+                      }
                     },
                     "src": "481:66:45",
                     "typeDescriptions": {
@@ -1066,163 +631,6 @@
                   "id": 7564,
                   "nodeType": "ExpressionStatement",
                   "src": "481:66:45"
-                },
-                {
-                  "expression": {
-                    "argumentTypes": null,
-                    "id": 7573,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "lValueRequested": false,
-                    "leftHandSide": {
-                      "argumentTypes": null,
-                      "baseExpression": {
-                        "argumentTypes": null,
-                        "id": 7564,
-                        "name": "protocols",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7529,
-                        "src": "472:9:45",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_address_$",
-                          "typeString": "mapping(bytes32 => address)"
-                        }
-                      },
-                      "id": 7569,
-                      "indexExpression": {
-                        "argumentTypes": null,
-                        "arguments": [
-                          {
-                            "argumentTypes": null,
-                            "expression": {
-                              "argumentTypes": null,
-                              "id": 7566,
-                              "name": "SavingsProtocol",
-                              "nodeType": "Identifier",
-                              "overloadedDeclarations": [],
-                              "referencedDeclaration": 7525,
-                              "src": "494:15:45",
-                              "typeDescriptions": {
-                                "typeIdentifier": "t_type$_t_enum$_SavingsProtocol_$7525_$",
-                                "typeString": "type(enum SavingsProxy.SavingsProtocol)"
-                              }
-                            },
-                            "id": 7567,
-                            "isConstant": false,
-                            "isLValue": false,
-                            "isPure": true,
-                            "lValueRequested": false,
-                            "memberName": "Fulcrum",
-                            "nodeType": "MemberAccess",
-                            "referencedDeclaration": null,
-                            "src": "494:23:45",
-                            "typeDescriptions": {
-                              "typeIdentifier": "t_enum$_SavingsProtocol_$7525",
-                              "typeString": "enum SavingsProxy.SavingsProtocol"
-                            }
-                          }
-                        ],
-                        "expression": {
-                          "argumentTypes": [
-                            {
-                              "typeIdentifier": "t_enum$_SavingsProtocol_$7525",
-                              "typeString": "enum SavingsProxy.SavingsProtocol"
-                            }
-                          ],
-                          "id": 7565,
-                          "name": "getKeyValue",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 7669,
-                          "src": "482:11:45",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_function_internal_view$_t_enum$_SavingsProtocol_$7525_$returns$_t_bytes32_$",
-                            "typeString": "function (enum SavingsProxy.SavingsProtocol) view returns (bytes32)"
-                          }
-                        },
-                        "id": 7568,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": false,
-                        "kind": "functionCall",
-                        "lValueRequested": false,
-                        "names": [],
-                        "nodeType": "FunctionCall",
-                        "src": "482:36:45",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes32",
-                          "typeString": "bytes32"
-                        }
-                      },
-                      "isConstant": false,
-                      "isLValue": true,
-                      "isPure": false,
-                      "lValueRequested": true,
-                      "nodeType": "IndexAccess",
-                      "src": "472:47:45",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_address",
-                        "typeString": "address"
-                      }
-                    },
-                    "nodeType": "Assignment",
-                    "operator": "=",
-                    "rightHandSide": {
-                      "argumentTypes": null,
-                      "baseExpression": {
-                        "argumentTypes": null,
-                        "id": 7570,
-                        "name": "_protocols",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7532,
-                        "src": "522:10:45",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
-                          "typeString": "address[] memory"
-                        }
-                      },
-                      "id": 7572,
-                      "indexExpression": {
-                        "argumentTypes": null,
-                        "hexValue": "32",
-                        "id": 7571,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": true,
-                        "kind": "number",
-                        "lValueRequested": false,
-                        "nodeType": "Literal",
-                        "src": "533:1:45",
-                        "subdenomination": null,
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_rational_2_by_1",
-                          "typeString": "int_const 2"
-                        },
-                        "value": "2"
-                      },
-                      "isConstant": false,
-                      "isLValue": true,
-                      "isPure": false,
-                      "lValueRequested": false,
-                      "nodeType": "IndexAccess",
-                      "src": "522:13:45",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_address",
-                        "typeString": "address"
-                      }
-                    },
-                    "src": "472:63:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "id": 7574,
-                  "nodeType": "ExpressionStatement",
-                  "src": "472:63:45"
                 }
               ]
             },
@@ -1251,27 +659,15 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "baseType": {
-                      "id": 7530,
-                      "name": "address",
-                      "nodeType": "ElementaryTypeName",
-                      "src": "240:7:45",
-                      "stateMutability": "nonpayable",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_address",
-                        "typeString": "address"
-                      }
-                    },
                     "id": 7530,
-                    "length": null,
+                    "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "240:7:45",
+                    "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
-                    },
-                    "name": "address",
-                    "stateMutability": "nonpayable"
+                    }
                   },
                   "value": null,
                   "visibility": "internal"
@@ -1363,7 +759,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 10398,
+                          "referencedDeclaration": 10359,
                           "src": "696:3:45",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1653,7 +1049,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 10398,
+                          "referencedDeclaration": 10359,
                           "src": "867:3:45",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1943,7 +1339,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 10398,
+                          "referencedDeclaration": 10359,
                           "src": "1047:3:45",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -2145,7 +1541,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 10398,
+                          "referencedDeclaration": 10359,
                           "src": "1132:3:45",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -2485,7 +1881,7 @@
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 10385,
+                            "referencedDeclaration": 10346,
                             "src": "1269:3:45",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
@@ -2532,7 +1928,7 @@
                       "name": "keccak256",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10392,
+                      "referencedDeclaration": 10353,
                       "src": "1259:9:45",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
@@ -2670,280 +2066,13 @@
         "src": "0:23:45"
       },
       {
-        "baseContracts": [],
-        "contractDependencies": [],
-        "contractKind": "contract",
-        "documentation": null,
-        "fullyImplemented": true,
         "id": 7520,
-        "linearizedBaseContracts": [
-          7544
-        ],
-        "name": "SavingsProxy",
-        "nodeType": "PragmaDirective",
-        "nodes": [
-          {
-            "body": {
-              "id": 7526,
-              "nodeType": "Block",
-              "src": "109:8:45",
-              "statements": []
-            },
-            "documentation": null,
-            "id": 7527,
-            "implemented": true,
-            "kind": "function",
-            "modifiers": [],
-            "name": "deposit",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 7524,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 7521,
-                  "name": "_amount",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7527,
-                  "src": "72:12:45",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 7520,
-                    "name": "uint",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "72:4:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 7523,
-                  "name": "_protocol",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7527,
-                  "src": "86:14:45",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 7522,
-                    "name": "uint",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "86:4:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "71:30:45"
-            },
-            "returnParameters": {
-              "id": 7525,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "109:0:45"
-            },
-            "scope": 7544,
-            "src": "55:62:45",
-            "stateMutability": "nonpayable",
-            "superFunction": null,
-            "visibility": "public"
-          },
-          {
-            "body": {
-              "id": 7534,
-              "nodeType": "Block",
-              "src": "178:8:45",
-              "statements": []
-            },
-            "documentation": null,
-            "id": 7535,
-            "implemented": true,
-            "kind": "function",
-            "modifiers": [],
-            "name": "withdraw",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 7532,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 7529,
-                  "name": "_amount",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7535,
-                  "src": "141:12:45",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 7528,
-                    "name": "uint",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "141:4:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 7531,
-                  "name": "_protocol",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7535,
-                  "src": "155:14:45",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 7530,
-                    "name": "uint",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "155:4:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "140:30:45"
-            },
-            "returnParameters": {
-              "id": 7533,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "178:0:45"
-            },
-            "scope": 7544,
-            "src": "123:63:45",
-            "stateMutability": "nonpayable",
-            "superFunction": null,
-            "visibility": "public"
-          },
-          {
-            "body": {
-              "id": 7542,
-              "nodeType": "Block",
-              "src": "235:8:45",
-              "statements": []
-            },
-            "documentation": null,
-            "id": 7543,
-            "implemented": true,
-            "kind": "function",
-            "modifiers": [],
-            "name": "swap",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 7540,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 7537,
-                  "name": "_from",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7543,
-                  "src": "206:10:45",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 7536,
-                    "name": "uint",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "206:4:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 7539,
-                  "name": "_to",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7543,
-                  "src": "218:8:45",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 7538,
-                    "name": "uint",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "218:4:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "205:22:45"
-            },
-            "returnParameters": {
-              "id": 7541,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "235:0:45"
-            },
-            "scope": 7544,
-            "src": "192:51:45",
-            "stateMutability": "nonpayable",
-            "superFunction": null,
-            "visibility": "public"
-          }
-        ],
-        "scope": 7545,
-        "src": "24:33:45",
         "literals": [
           "experimental",
           "ABIEncoderV2"
-        ]
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "24:33:45"
       },
       {
         "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/ProtocolInterface.sol",
@@ -3051,108 +2180,11 @@
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "arguments": [
-                      {
-                        "argumentTypes": null,
-                        "commonType": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        },
-                        "id": 7539,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": false,
-                        "lValueRequested": false,
-                        "leftExpression": {
-                          "argumentTypes": null,
-                          "expression": {
-                            "argumentTypes": null,
-                            "id": 7536,
-                            "name": "_protocols",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 7532,
-                            "src": "294:10:45",
-                            "typeDescriptions": {
-                              "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
-                              "typeString": "address[] memory"
-                            }
-                          },
-                          "id": 7537,
-                          "isConstant": false,
-                          "isLValue": false,
-                          "isPure": false,
-                          "lValueRequested": false,
-                          "memberName": "length",
-                          "nodeType": "MemberAccess",
-                          "referencedDeclaration": null,
-                          "src": "294:17:45",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_uint256",
-                            "typeString": "uint256"
-                          }
-                        },
-                        "nodeType": "BinaryOperation",
-                        "operator": "==",
-                        "rightExpression": {
-                          "argumentTypes": null,
-                          "hexValue": "33",
-                          "id": 7538,
-                          "isConstant": false,
-                          "isLValue": false,
-                          "isPure": true,
-                          "kind": "number",
-                          "lValueRequested": false,
-                          "nodeType": "Literal",
-                          "src": "315:1:45",
-                          "subdenomination": null,
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_rational_3_by_1",
-                            "typeString": "int_const 3"
-                          },
-                          "value": "3"
-                        },
-                        "src": "294:22:45",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bool",
-                          "typeString": "bool"
-                        }
-                      }
-                    ],
-                    "expression": {
-                      "argumentTypes": [
-                        {
-                          "typeIdentifier": "t_bool",
-                          "typeString": "bool"
-                        }
-                      ],
-                      "id": 7535,
-                      "name": "require",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [
-                        10411,
-                        10412
-                      ],
-                      "referencedDeclaration": 10411,
-                      "src": "286:7:45",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
-                        "typeString": "function (bool) pure"
-                      }
-                    },
                     "id": 7545,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
-                    "kind": "functionCall",
                     "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "Assignment",
-                    "src": "333:68:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    },
                     "leftHandSide": {
                       "argumentTypes": null,
                       "baseExpression": {
@@ -3245,6 +2277,7 @@
                         "typeString": "address"
                       }
                     },
+                    "nodeType": "Assignment",
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
@@ -3258,6 +2291,11 @@
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
+                    },
+                    "src": "333:68:45",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
                     }
                   },
                   "id": 7546,
@@ -3368,51 +2406,16 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "baseExpression": {
-                        "argumentTypes": null,
-                        "id": 7548,
-                        "name": "_protocols",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7532,
-                        "src": "379:10:45",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
-                          "typeString": "address[] memory"
-                        }
-                      },
                       "id": 7553,
-                      "indexExpression": {
-                        "argumentTypes": null,
-                        "hexValue": "30",
-                        "id": 7549,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": true,
-                        "kind": "number",
-                        "lValueRequested": false,
-                        "nodeType": "Literal",
-                        "src": "390:1:45",
-                        "subdenomination": null,
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_rational_0_by_1",
-                          "typeString": "int_const 0"
-                        },
-                        "value": "0"
-                      },
-                      "isConstant": false,
-                      "isLValue": true,
-                      "isPure": false,
-                      "lValueRequested": false,
+                      "name": "_dydxProtocol",
                       "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7533,
                       "src": "458:13:45",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
-                      },
-                      "name": "_dydxProtocol",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7533
+                      }
                     },
                     "src": "411:60:45",
                     "typeDescriptions": {
@@ -3528,51 +2531,16 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "baseExpression": {
-                        "argumentTypes": null,
-                        "id": 7559,
-                        "name": "_protocols",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7532,
-                        "src": "449:10:45",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
-                          "typeString": "address[] memory"
-                        }
-                      },
                       "id": 7562,
-                      "indexExpression": {
-                        "argumentTypes": null,
-                        "hexValue": "31",
-                        "id": 7560,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": true,
-                        "kind": "number",
-                        "lValueRequested": false,
-                        "nodeType": "Literal",
-                        "src": "460:1:45",
-                        "subdenomination": null,
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_rational_1_by_1",
-                          "typeString": "int_const 1"
-                        },
-                        "value": "1"
-                      },
-                      "isConstant": false,
-                      "isLValue": true,
-                      "isPure": false,
-                      "lValueRequested": false,
+                      "name": "_fulcrumProtocol",
                       "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7535,
                       "src": "531:16:45",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
-                      },
-                      "name": "_fulcrumProtocol",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 7535
+                      }
                     },
                     "src": "481:66:45",
                     "typeDescriptions": {
@@ -3583,163 +2551,6 @@
                   "id": 7564,
                   "nodeType": "ExpressionStatement",
                   "src": "481:66:45"
-                },
-                {
-                  "expression": {
-                    "argumentTypes": null,
-                    "id": 7573,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "lValueRequested": false,
-                    "leftHandSide": {
-                      "argumentTypes": null,
-                      "baseExpression": {
-                        "argumentTypes": null,
-                        "id": 7564,
-                        "name": "protocols",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7529,
-                        "src": "472:9:45",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_address_$",
-                          "typeString": "mapping(bytes32 => address)"
-                        }
-                      },
-                      "id": 7569,
-                      "indexExpression": {
-                        "argumentTypes": null,
-                        "arguments": [
-                          {
-                            "argumentTypes": null,
-                            "expression": {
-                              "argumentTypes": null,
-                              "id": 7566,
-                              "name": "SavingsProtocol",
-                              "nodeType": "Identifier",
-                              "overloadedDeclarations": [],
-                              "referencedDeclaration": 7525,
-                              "src": "494:15:45",
-                              "typeDescriptions": {
-                                "typeIdentifier": "t_type$_t_enum$_SavingsProtocol_$7525_$",
-                                "typeString": "type(enum SavingsProxy.SavingsProtocol)"
-                              }
-                            },
-                            "id": 7567,
-                            "isConstant": false,
-                            "isLValue": false,
-                            "isPure": true,
-                            "lValueRequested": false,
-                            "memberName": "Fulcrum",
-                            "nodeType": "MemberAccess",
-                            "referencedDeclaration": null,
-                            "src": "494:23:45",
-                            "typeDescriptions": {
-                              "typeIdentifier": "t_enum$_SavingsProtocol_$7525",
-                              "typeString": "enum SavingsProxy.SavingsProtocol"
-                            }
-                          }
-                        ],
-                        "expression": {
-                          "argumentTypes": [
-                            {
-                              "typeIdentifier": "t_enum$_SavingsProtocol_$7525",
-                              "typeString": "enum SavingsProxy.SavingsProtocol"
-                            }
-                          ],
-                          "id": 7565,
-                          "name": "getKeyValue",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 7669,
-                          "src": "482:11:45",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_function_internal_view$_t_enum$_SavingsProtocol_$7525_$returns$_t_bytes32_$",
-                            "typeString": "function (enum SavingsProxy.SavingsProtocol) view returns (bytes32)"
-                          }
-                        },
-                        "id": 7568,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": false,
-                        "kind": "functionCall",
-                        "lValueRequested": false,
-                        "names": [],
-                        "nodeType": "FunctionCall",
-                        "src": "482:36:45",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes32",
-                          "typeString": "bytes32"
-                        }
-                      },
-                      "isConstant": false,
-                      "isLValue": true,
-                      "isPure": false,
-                      "lValueRequested": true,
-                      "nodeType": "IndexAccess",
-                      "src": "472:47:45",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_address",
-                        "typeString": "address"
-                      }
-                    },
-                    "nodeType": "Assignment",
-                    "operator": "=",
-                    "rightHandSide": {
-                      "argumentTypes": null,
-                      "baseExpression": {
-                        "argumentTypes": null,
-                        "id": 7570,
-                        "name": "_protocols",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 7532,
-                        "src": "522:10:45",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
-                          "typeString": "address[] memory"
-                        }
-                      },
-                      "id": 7572,
-                      "indexExpression": {
-                        "argumentTypes": null,
-                        "hexValue": "32",
-                        "id": 7571,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": true,
-                        "kind": "number",
-                        "lValueRequested": false,
-                        "nodeType": "Literal",
-                        "src": "533:1:45",
-                        "subdenomination": null,
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_rational_2_by_1",
-                          "typeString": "int_const 2"
-                        },
-                        "value": "2"
-                      },
-                      "isConstant": false,
-                      "isLValue": true,
-                      "isPure": false,
-                      "lValueRequested": false,
-                      "nodeType": "IndexAccess",
-                      "src": "522:13:45",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_address",
-                        "typeString": "address"
-                      }
-                    },
-                    "src": "472:63:45",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "id": 7574,
-                  "nodeType": "ExpressionStatement",
-                  "src": "472:63:45"
                 }
               ]
             },
@@ -3768,27 +2579,15 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "baseType": {
-                      "id": 7530,
-                      "name": "address",
-                      "nodeType": "ElementaryTypeName",
-                      "src": "240:7:45",
-                      "stateMutability": "nonpayable",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_address",
-                        "typeString": "address"
-                      }
-                    },
                     "id": 7530,
-                    "length": null,
+                    "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "240:7:45",
+                    "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
-                    },
-                    "name": "address",
-                    "stateMutability": "nonpayable"
+                    }
                   },
                   "value": null,
                   "visibility": "internal"
@@ -3880,7 +2679,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 10398,
+                          "referencedDeclaration": 10359,
                           "src": "696:3:45",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -4170,7 +2969,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 10398,
+                          "referencedDeclaration": 10359,
                           "src": "867:3:45",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -4460,7 +3259,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 10398,
+                          "referencedDeclaration": 10359,
                           "src": "1047:3:45",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -4662,7 +3461,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 10398,
+                          "referencedDeclaration": 10359,
                           "src": "1132:3:45",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -5002,7 +3801,7 @@
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 10385,
+                            "referencedDeclaration": 10346,
                             "src": "1269:3:45",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
@@ -5049,7 +3848,7 @@
                       "name": "keccak256",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 10392,
+                      "referencedDeclaration": 10353,
                       "src": "1259:9:45",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
@@ -5169,16 +3968,9 @@
     "name": "solc",
     "version": "0.5.7+commit.6da8b019.Emscripten.clang"
   },
-  "networks": {
-    "1001": {
-      "events": {},
-      "links": {},
-      "address": "0x4bf749ec68270027C5910220CEAB30Cc284c7BA2",
-      "transactionHash": "0x0afa6885f7fe170eb8ac650c5bed20515895ac45c6903f12ad5ef190c44554be"
-    }
-  },
+  "networks": {},
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-08-06T16:56:31.474Z",
+  "updatedAt": "2019-08-08T17:51:31.850Z",
   "devdoc": {
     "methods": {}
   },

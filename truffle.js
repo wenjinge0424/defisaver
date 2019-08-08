@@ -7,6 +7,13 @@ const mnemonic = process.env.ETHEREUM_ACCOUNT_MNEMONIC;
 
 module.exports = {
   networks: {
+    mainnet: {
+        provider: function() {
+            return new HDWalletProvider(mnemonic, "https://mainnet.decenter.com");
+        },
+        network_id: '1',
+        gasPrice: 5000000000, // 5 gwei
+    },
     kovan: {
         provider: function() {
             return new HDWalletProvider(mnemonic, "https://kovan.decenter.com", 0, 15);
