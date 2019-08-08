@@ -4,11 +4,10 @@ import "./interfaces/TubInterface.sol";
 import "./DS/DSGuard.sol";
 import "./DS/DSAuth.sol";
 import "./Monitor.sol";
+import "./ConstantAddresses.sol";
 
 /// @title MonitorProxy handles authorization and interaction with the Monitor contract
-contract MonitorProxy {
-    // Kovan
-    address public constant FACTORY_ADDRESS = 0xc72E74E474682680a414b506699bBcA44ab9a930;
+contract MonitorProxy is ConstantAddresses {
 
     function subscribe(bytes32 _cup, uint _minRatio, uint _maxRatio, uint _optimalRatioBoost, uint _optimalRatioRepay, uint _slippageLimit, address _monitor) public {
         DSGuard guard = DSGuardFactory(FACTORY_ADDRESS).newGuard();

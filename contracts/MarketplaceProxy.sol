@@ -3,11 +3,10 @@ pragma solidity ^0.5.0;
 import "./interfaces/TubInterface.sol";
 import "./DS/DSGuard.sol";
 import "./Marketplace.sol";
+import "./ConstantAddresses.sol";
 
 /// @title MarketplaceProxy handles authorization and interaction with the Marketplace contract
-contract MarketplaceProxy {
-    address public constant TUB_ADDRESS = 0xa71937147b55Deb8a530C7229C442Fd3F31b7db2;
-    address public constant FACTORY_ADDRESS = 0xc72E74E474682680a414b506699bBcA44ab9a930;
+contract MarketplaceProxy is ConstantAddresses {
 
     ///@dev Called by the Marketplace contract, will give CDP only if you're authorized or CDP owner
     ///@param _cup CDP Id
