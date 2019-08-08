@@ -217,10 +217,10 @@ contract SaverProxy is DSMath {
     /// @param _srcToken Address of the source token
     /// @param _destToken Address of the destination token
     /// @return (address, uint) The address of the best exchange and the exchange price
-    function getBestPrice(uint _amount, address _srcToken, address _destToken, uint _exchangeType) internal returns (address, uint) {
-        uint expectedRateKyber;
-        uint expectedRateUniswap;
-        uint expectedRateEth2Dai;
+    function getBestPrice(uint _amount, address _srcToken, address _destToken, uint _exchangeType) public returns (address, uint) {
+        uint expectedRateKyber = 0;
+        uint expectedRateUniswap = 0;
+        uint expectedRateEth2Dai = 0;
 
         (expectedRateKyber, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
         (expectedRateUniswap, ) = ExchangeInterface(UNISWAP_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
@@ -238,15 +238,15 @@ contract SaverProxy is DSMath {
             return (UNISWAP_WRAPPER, expectedRateUniswap);
         }
 
-        if (expectedRateEth2Dai > expectedRateKyber && expectedRateEth2Dai > expectedRateUniswap) {
+        if ((expectedRateEth2Dai >= expectedRateKyber) && (expectedRateEth2Dai >= expectedRateUniswap)) {
             return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
         }
 
-        if (expectedRateKyber > expectedRateUniswap && expectedRateKyber > expectedRateEth2Dai) {
+        if ((expectedRateKyber >= expectedRateUniswap) && (expectedRateKyber >= expectedRateEth2Dai)) {
             return (KYBER_WRAPPER, expectedRateKyber);
         }
 
-        if (expectedRateUniswap > expectedRateKyber && expectedRateUniswap > expectedRateEth2Dai) {
+        if ((expectedRateUniswap >= expectedRateKyber) && (expectedRateUniswap >= expectedRateEth2Dai)) {
             return (UNISWAP_WRAPPER, expectedRateUniswap);
         }
     }

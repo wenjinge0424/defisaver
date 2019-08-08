@@ -23,7 +23,8 @@ contract Monitor is DSMath {
         uint minRatio;
         uint maxRatio;
         uint slippageLimit;
-        uint optimalRatio;
+        uint optimalRatioBoost;
+        uint optimalRatioRepay;
         address owner;
     }
 
@@ -38,8 +39,8 @@ contract Monitor is DSMath {
     event Unsubscribed(address indexed owner, bytes32 cdpId);
     event Updated(address indexed owner, bytes32 cdpId);
 
-    event CdpRepay(bytes32 indexed cdpId, address caller);
-    event CdpBoost(bytes32 indexed cdpId, address caller);
+    event CdpRepay(bytes32 indexed cdpId, address caller, uint _amount, uint _ratioBefore, uint _ratioAfter);
+    event CdpBoost(bytes32 indexed cdpId, address caller, uint _amount, uint _ratioBefore, uint _ratioAfter);
 
     modifier onlyApproved() {
         require(approvedCallers[msg.sender]);
@@ -59,7 +60,7 @@ contract Monitor is DSMath {
     }
 
     /// @dev Users DSProxy should call this
-    function subscribe(bytes32 _cdpId, uint _minRatio, uint _maxRatio, uint _optimalRatio, uint _slippageLimit) public {
+    function subscribe(bytes32 _cdpId, uint _minRatio, uint _maxRatio, uint _optimalRatioBoost, uint _optimalRatioRepay, uint _slippageLimit) public {
         require(isOwner(msg.sender, _cdpId));
 
         bool isCreated = holders[_cdpId].owner == address(0) ? true : false;
@@ -67,7 +68,8 @@ contract Monitor is DSMath {
         holders[_cdpId] = CdpHolder({
             minRatio: _minRatio,
             maxRatio: _maxRatio,
-            optimalRatio: _optimalRatio,
+            optimalRatioBoost: _optimalRatioBoost,
+            optimalRatioRepay: _optimalRatioRepay,
             slippageLimit: _slippageLimit,
             owner: msg.sender
         });
@@ -98,13 +100,16 @@ contract Monitor is DSMath {
         // }
 
         CdpHolder memory holder = holders[_cdpId];
+        uint ratioBefore = getRatio(_cdpId);
 
         require(holder.owner != address(0));
-        require(getRatio(_cdpId) <= holders[_cdpId].minRatio);
+        require(ratioBefore <= holders[_cdpId].minRatio);
 
         DSProxyInterface(holder.owner).execute(saverProxy, abi.encodeWithSignature("repay(bytes32,uint256,uint256,uint256)", _cdpId, _amount, 0, 2));
 
-        emit CdpRepay(_cdpId, msg.sender);
+        uint ratioAfter = getRatio(_cdpId);
+
+        emit CdpRepay(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
     }
 
     /// @dev Should be callable by onlyApproved
@@ -114,14 +119,17 @@ contract Monitor is DSMath {
         // }
 
         CdpHolder memory holder = holders[_cdpId];
+        uint ratioBefore = getRatio(_cdpId);
 
         require(holder.owner != address(0));
 
-        require(getRatio(_cdpId) >= holders[_cdpId].maxRatio);
+        require(ratioBefore >= holders[_cdpId].maxRatio);
 
         DSProxyInterface(holder.owner).execute(saverProxy, abi.encodeWithSignature("boost(bytes32,uint256,uint256,uint256)", _cdpId, _amount, uint(-1), 2));
 
-        emit CdpBoost(_cdpId, msg.sender);
+        uint ratioAfter = getRatio(_cdpId);
+
+        emit CdpBoost(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
     }
 
     function getRatio(bytes32 _cdpId) public returns(uint) {

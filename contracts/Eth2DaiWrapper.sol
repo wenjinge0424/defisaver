@@ -26,7 +26,7 @@ contract Eth2DaiWrapper is ExchangeInterface, DSMath {
 
         return (daiBought, 0);
     }
-    
+
     function swapTokenToEther (address _tokenAddress, uint _amount, uint _maxAmount) external returns(uint) {
         require(ERC20(_tokenAddress).approve(OTC_ADDRESS, _amount));
 
@@ -40,7 +40,7 @@ contract Eth2DaiWrapper is ExchangeInterface, DSMath {
         return ethBought;
     }
 
-    function getExpectedRate(address _src, address _dest, uint _srcQty) public returns (uint, uint) {
+    function getExpectedRate(address _src, address _dest, uint _srcQty) public view returns (uint, uint) {
         if(_src == KYBER_ETH_ADDRESS) {
             return (wdiv(Eth2DaiInterface(OTC_ADDRESS).getBuyAmount(ERC20(_dest), ERC20(WETH_ADDRESS), _srcQty), _srcQty), 0);
         } else if (_dest == KYBER_ETH_ADDRESS) {

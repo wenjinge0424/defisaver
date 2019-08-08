@@ -28,7 +28,7 @@ contract UniswapWrapper is ExchangeInterface, DSMath {
 
         return (tokenAmount, 0);
     }
-    
+
     function swapTokenToEther (address _tokenAddress, uint _amount, uint _maxAmount) external returns(uint) {
         address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_tokenAddress);
 
@@ -40,7 +40,7 @@ contract UniswapWrapper is ExchangeInterface, DSMath {
         return ethAmount;
     }
 
-    function getExpectedRate(address _src, address _dest, uint _srcQty) public returns (uint, uint) {
+    function getExpectedRate(address _src, address _dest, uint _srcQty) public view returns (uint, uint) {
         if(_src == KYBER_ETH_ADDRESS) {
             address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_dest);
             return (wdiv(UniswapExchangeInterface(uniswapTokenAddress).getEthToTokenInputPrice(_srcQty), _srcQty), 0);
