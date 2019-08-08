@@ -68,7 +68,7 @@ contract SaverExchange is DSMath {
     /// @param _srcToken Address of the source token
     /// @param _destToken Address of the destination token
     /// @return (address, uint) The address of the best exchange and the exchange price
-    function getBestPrice(uint _amount, address _srcToken, address _destToken, uint _exchangeType) public returns (address, uint) {
+    function getBestPrice(uint _amount, address _srcToken, address _destToken, uint _exchangeType) public view returns (address, uint) {
         uint expectedRateKyber;
         uint expectedRateUniswap;
         uint expectedRateEth2Dai;
