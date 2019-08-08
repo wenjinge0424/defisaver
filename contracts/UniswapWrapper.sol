@@ -5,20 +5,16 @@ import "./interfaces/KyberNetworkProxyInterface.sol";
 import "./interfaces/ExchangeInterface.sol";
 import "./interfaces/UniswapExchangeInterface.sol";
 import "./DS/DSMath.sol";
+import "./ConstantAddresses.sol";
 
 contract UniswapFactoryInterface {
     function getExchange(address token) external view returns (address exchange);
 }
 
-contract UniswapWrapper is ExchangeInterface, DSMath {
-
-    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+contract UniswapWrapper is ExchangeInterface, DSMath, ConstantAddresses {
 
     // Mainnet, no kovan deployment :(
     // address public constant UNISWAP_FACTORY = 0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95;
-
-    // Rinkeby
-    address public constant UNISWAP_FACTORY = 0xf5D915570BC477f9B8D6C0E980aA81757A3AaC36;
 
     function swapEtherToToken (uint _ethAmount, address _tokenAddress, uint _maxAmount) external payable returns(uint, uint) {
         address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_tokenAddress);

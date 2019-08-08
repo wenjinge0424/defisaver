@@ -6,14 +6,10 @@ import "./interfaces/ExchangeInterface.sol";
 import "./interfaces/Eth2DaiInterface.sol";
 import "./interfaces/TokenInterface.sol";
 import "./DS/DSMath.sol";
+import "./ConstantAddresses.sol";
 
-contract Eth2DaiWrapper is ExchangeInterface, DSMath {
+contract Eth2DaiWrapper is ExchangeInterface, DSMath, ConstantAddresses {
 
-    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-
-    // Kovan
-    address public constant OTC_ADDRESS = 0x4A6bC4e803c62081ffEbCc8d227B5a87a58f1F8F;
-    address public constant WETH_ADDRESS = 0xd0A1E359811322d97991E03f863a0C30C2cF029C;
 
     function swapEtherToToken (uint _ethAmount, address _tokenAddress, uint _maxAmount) external payable returns(uint, uint) {
         require(ERC20(WETH_ADDRESS).approve(OTC_ADDRESS, _ethAmount));

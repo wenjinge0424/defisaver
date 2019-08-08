@@ -2,14 +2,9 @@ pragma solidity ^0.5.0;
 
 import "../interfaces/CTokenInterface.sol";
 import "../interfaces/KyberNetworkProxyInterface.sol";
+import "../ConstantAddresses.sol";
 
-contract CompoundMarginTrade {
-
-    address public constant CDAI_ADDRESS = 0xb6b09fBffBa6A5C4631e5F7B2e3Ee183aC259c0d;
-    address public constant DAI_ADDRESS = 0xC4375B7De8af5a38a93548eb8453a498222C4fF2;
-    address constant KYBER_INTERFACE = 0x692f391bCc85cefCe8C237C01e1f636BbD70EA4D;
-    address public constant WALLET_ID = 0x54b44C6B18fc0b4A1010B21d524c338D1f8065F6;
-
+contract CompoundMarginTrade is ConstantAddresses {
 
     struct Position {
         address _baseToken;
@@ -30,7 +25,7 @@ contract CompoundMarginTrade {
 
         require(cDaiContract.borrow(_amountToBorrow) == 0);
 
-        uint exchangedAmount = exchangeToken(ERC20(DAI_ADDRESS), ERC20(_baseToken), _amountToBorrow, uint(-1));
+        uint exchangedAmount = exchangeToken(ERC20(MAKER_DAI_ADDRESS), ERC20(_baseToken), _amountToBorrow, uint(-1));
 
         require(cBaseContract.mint(exchangedAmount) == 0);
 
