@@ -37,15 +37,19 @@ contract DydxSavingsProtocol is ProtocolInterface {
 
     ISoloMargin public soloMargin;
     ERC20 public dai;
+    address public savingsProxy;
 
     uint daiMarketId = 1;
 
-    constructor() public {
+    constructor(address _savingsProxy) public {
         soloMargin = ISoloMargin(SOLO_MARGIN_ADDRESS);
         dai = ERC20(MAKER_DAI_ADDRESS);
+        savingsProxy = _savingsProxy;
     }
 
     function deposit(address _user, uint _amount) public {
+        require(msg.sender == savingsProxy);
+
         Account.Info[] memory accounts = new Account.Info[](1);
         accounts[0] = getAccount(_user, 0);
 
@@ -72,6 +76,8 @@ contract DydxSavingsProtocol is ProtocolInterface {
     }
 
     function withdraw(address _user, uint _amount) public {
+        require(msg.sender == savingsProxy);
+
         Account.Info[] memory accounts = new Account.Info[](1);
         accounts[0] = getAccount(_user, 0);
 

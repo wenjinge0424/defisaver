@@ -9,7 +9,10 @@ contract SavingsProxy {
 
     mapping(bytes32 => address) public protocols;
 
-    constructor(address _compoundProtocol, address _dydxProtocol, address _fulcrumProtocol) public {
+    function addProtocols(address _compoundProtocol, address _dydxProtocol, address _fulcrumProtocol) public {
+        // allow setting only once
+        require(protocols[getKeyValue(SavingsProtocol.Compound)] == address(0));
+
         protocols[getKeyValue(SavingsProtocol.Compound)] = _compoundProtocol;
         protocols[getKeyValue(SavingsProtocol.Dydx)] = _dydxProtocol;
         protocols[getKeyValue(SavingsProtocol.Fulcrum)] = _fulcrumProtocol;

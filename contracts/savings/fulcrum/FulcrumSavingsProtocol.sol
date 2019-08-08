@@ -20,7 +20,15 @@ contract FulcrumSavingsProtocol is ProtocolInterface {
     address public constant MAKER_DAI_ADDRESS = 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359;
     address public constant IDAI_ADDRESS = 0x14094949152EDDBFcd073717200DA82fEd8dC960;
 
+    address public savingsProxy;
+
+    constructor(address _savingsProxy) public {
+        savingsProxy = _savingsProxy;
+    }
+
     function deposit(address _user, uint _amount) public {
+        require(msg.sender == savingsProxy);
+
         // get dai from user
         require(ERC20(MAKER_DAI_ADDRESS).transferFrom(_user, address(this), _amount));
 
@@ -32,6 +40,8 @@ contract FulcrumSavingsProtocol is ProtocolInterface {
     }
 
     function withdraw(address _user, uint _amount) public {
+        require(msg.sender == savingsProxy);
+
         // transfer all users tokens to our contract
         require(ERC20(IDAI_ADDRESS).transferFrom(_user, address(this), ITokenInterface(IDAI_ADDRESS).balanceOf(_user)));
 

@@ -21,12 +21,15 @@ contract CompoundSavingsProtocol is ProtocolInterface, Exponential {
 
 
     CTokenInterface public cDaiContract;
+    address public savingsProxy;
 
-    constructor() public {
+    constructor(address _savingsProxy) public {
         cDaiContract = CTokenInterface(CDAI_ADDRESS);
+        savingsProxy = _savingsProxy;
     }
 
     function deposit(address _user, uint _amount) public {
+        require(msg.sender == savingsProxy);
         // get dai from user
         require(ERC20(MAKER_DAI_ADDRESS).transferFrom(_user, address(this), _amount));
 
@@ -47,6 +50,7 @@ contract CompoundSavingsProtocol is ProtocolInterface, Exponential {
     }
 
     function withdraw(address _user, uint _amount) public {
+        require(msg.sender == savingsProxy);
         // transfer all users balance to this contract
         require(ERC20(CDAI_ADDRESS).transferFrom(_user, address(this), ERC20(CDAI_ADDRESS).balanceOf(_user)));
         // approve cDai to compound contract
