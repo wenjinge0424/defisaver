@@ -1,4 +1,4 @@
-pragma solidity 0.5.0;
+pragma solidity ^0.5.0;
 
 import "./interfaces/ERC20.sol";
 import "./interfaces/KyberNetworkProxyInterface.sol";
@@ -12,7 +12,7 @@ contract KyberWrapper is ExchangeInterface {
 
     address constant WALLET_ID = 0x54b44C6B18fc0b4A1010B21d524c338D1f8065F6;
 
-    function swapEtherToToken (uint _ethAmount, address _tokenAddress, uint _maxAmount) external payable returns(uint, uint) {
+    function swapEtherToToken(uint _ethAmount, address _tokenAddress, uint _maxAmount) external payable returns(uint, uint) {
         uint minRate;
         ERC20 ETH_TOKEN_ADDRESS = ERC20(ETHER_ADDRESS);
         ERC20 token = ERC20(_tokenAddress);
@@ -37,14 +37,14 @@ contract KyberWrapper is ExchangeInterface {
 
         return (destAmount, balance);
     }
-    
-    function swapTokenToEther (address _tokenAddress, uint _amount, uint _maxAmount) external returns(uint) {
+
+    function swapTokenToEther(address _tokenAddress, uint _amount, uint _maxAmount) external returns(uint) {
         uint minRate;
         ERC20 ETH_TOKEN_ADDRESS = ERC20(ETHER_ADDRESS);
         ERC20 token = ERC20(_tokenAddress);
-        
+
         KyberNetworkProxyInterface _kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
-        
+
         (, minRate) = _kyberNetworkProxy.getExpectedRate(token, ETH_TOKEN_ADDRESS, _amount);
 
         // Mitigate ERC20 Approve front-running attack, by initially setting, allowance to 0
@@ -66,7 +66,7 @@ contract KyberWrapper is ExchangeInterface {
         return destAmount;
     }
 
-    function getExpectedRate(address _src, address _dest, uint _srcQty) public returns (uint, uint) {
+    function getExpectedRate(address _src, address _dest, uint _srcQty) public view returns (uint, uint) {
         return KyberNetworkProxyInterface(KYBER_INTERFACE).getExpectedRate(ERC20(_src), ERC20(_dest), _srcQty);
     }
 

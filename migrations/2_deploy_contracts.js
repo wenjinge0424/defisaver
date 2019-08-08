@@ -29,8 +29,8 @@ module.exports = function(deployer, network) {
     //   return deployer.deploy(Marketplace, MarketplaceProxy.address, {gas: 6720000, overwrite: deployAgain});
     // });
 
-    deployer.deploy(SaverExchange, {gas: 6720000, overwrite: deployAgain});
-    deployer.deploy(Monitor, {gas: 6720000, overwrite: deployAgain});
+    // deployer.deploy(SaverExchange, {gas: 6720000, overwrite: deployAgain});
+    // deployer.deploy(Monitor, {gas: 6720000, overwrite: deployAgain});
 
     //  deployer.deploy(Monitor, {gas: 6720000, overwrite: deployAgain}).then(() => {
     //     return deployer.deploy(DecenterMonitorLending, '0x93cdB0a93Fc36f6a53ED21eCf6305Ab80D06becA', Monitor.address, {gas: 6720000, overwrite: deployAgain});

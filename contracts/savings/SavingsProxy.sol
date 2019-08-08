@@ -1,15 +1,37 @@
 pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
+
+import "./ProtocolInterface.sol";
 
 contract SavingsProxy {
-    function deposit(uint _amount, uint _protocol) public {
 
+    enum SavingsProtocol { Compound, Dydx, Fulcrum }
+
+    mapping(bytes32 => address) public protocols;
+
+    function addProtocols(address _compoundProtocol, address _dydxProtocol, address _fulcrumProtocol) public {
+        // allow setting only once
+        require(protocols[getKeyValue(SavingsProtocol.Compound)] == address(0));
+
+        protocols[getKeyValue(SavingsProtocol.Compound)] = _compoundProtocol;
+        protocols[getKeyValue(SavingsProtocol.Dydx)] = _dydxProtocol;
+        protocols[getKeyValue(SavingsProtocol.Fulcrum)] = _fulcrumProtocol;
     }
 
-    function withdraw(uint _amount, uint _protocol) public {
-
+    function deposit(SavingsProtocol _protocol, uint _amount) public {
+        ProtocolInterface(protocols[getKeyValue(_protocol)]).deposit(msg.sender, _amount);
     }
 
-    function swap(uint _from, uint _to) public {
-        
+    function withdraw(SavingsProtocol _protocol, uint _amount) public {
+        ProtocolInterface(protocols[getKeyValue(_protocol)]).withdraw(msg.sender, _amount);
+    }
+
+    function swap(SavingsProtocol _from, SavingsProtocol _to, uint _amount) public {
+        ProtocolInterface(protocols[getKeyValue(_from)]).withdraw(msg.sender, _amount);
+        ProtocolInterface(protocols[getKeyValue(_to)]).deposit(msg.sender, _amount);
+    }
+
+    function getKeyValue(SavingsProtocol _protocol) public view returns(bytes32) {
+        return keccak256(abi.encodePacked(_protocol));
     }
 }

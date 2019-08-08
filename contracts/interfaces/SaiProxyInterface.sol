@@ -1,4 +1,4 @@
-pragma solidity 0.5.0;
+pragma solidity ^0.5.0;
 
 contract SaiProxyInterface {
     function open(address tub_) public returns (bytes32);
