@@ -7,7 +7,7 @@ import "../interfaces/KyberNetworkProxyInterface.sol";
 import "../ActionLogger.sol";
 import "./Exponential.sol";
 import "./StupidExchange.sol";
-import "../ConstantAddresses.sol";
+import "../constants/ConstantAddresses.sol";
 
 /// @title CompoundProxy implements CDP and Compound direct interactions
 contract CompoundProxy is DSMath, Exponential, ConstantAddresses {

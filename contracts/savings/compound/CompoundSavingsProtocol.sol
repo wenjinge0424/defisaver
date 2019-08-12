@@ -6,7 +6,7 @@ import "../../interfaces/CTokenInterface.sol";
 import "../../compound/Exponential.sol";
 import "../../compound/StupidExchange.sol";
 import "../../interfaces/ERC20.sol";
-import "../../ConstantAddresses.sol";
+import "../../constants/ConstantAddresses.sol";
 
 
 contract CompoundSavingsProtocol is ProtocolInterface, Exponential, ConstantAddresses {

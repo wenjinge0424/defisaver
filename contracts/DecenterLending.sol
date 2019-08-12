@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 import "./interfaces/ERC20.sol";
 import "./ReentrancyGuard.sol";
 import "./DS/DSMath.sol";
-import "./ConstantAddresses.sol";
+import "./constants/ConstantAddresses.sol";
 
 contract CTokenInterface is ERC20 {
     function mint(uint mintAmount) external returns (uint);

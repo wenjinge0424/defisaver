@@ -6,7 +6,7 @@ import "./interfaces/ExchangeInterface.sol";
 import "./interfaces/Eth2DaiInterface.sol";
 import "./interfaces/TokenInterface.sol";
 import "./DS/DSMath.sol";
-import "./ConstantAddresses.sol";
+import "./constants/ConstantAddresses.sol";
 
 contract Eth2DaiWrapper is ExchangeInterface, DSMath, ConstantAddresses {
 

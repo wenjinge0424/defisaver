@@ -4,7 +4,7 @@ import "./interfaces/TubInterface.sol";
 import "./interfaces/ExchangeInterface.sol";
 import "./DS/DSMath.sol";
 import "./SaverLogger.sol";
-import "./ConstantAddresses.sol";
+import "./constants/ConstantAddresses.sol";
 
 /// @title SaverProxy implements advanced dashboard features repay/boost
 contract SaverProxy is DSMath, ConstantAddresses {

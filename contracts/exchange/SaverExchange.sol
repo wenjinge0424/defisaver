@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 
 import "../interfaces/ExchangeInterface.sol";
 import "../DS/DSMath.sol";
-import "../ConstantAddresses.sol";
+import "../constants/ConstantAddresses.sol";
 
 contract SaverExchange is DSMath, ConstantAddresses {
 

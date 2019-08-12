@@ -5,7 +5,7 @@ import "./interfaces/ProxyRegistryInterface.sol";
 import "./interfaces/GasTokenInterface.sol";
 import "./interfaces/ERC20.sol";
 import "./DS/DSMath.sol";
-import "./ConstantAddresses.sol";
+import "./constants/ConstantAddresses.sol";
 
 contract Monitor is DSMath, ConstantAddresses {
     // KOVAN

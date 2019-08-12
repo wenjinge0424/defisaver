@@ -4,7 +4,7 @@ import "../interfaces/CTokenInterface.sol";
 import "../interfaces/KyberNetworkProxyInterface.sol";
 import "./Exponential.sol";
 import "../DS/DSMath.sol";
-import "../ConstantAddresses.sol";
+import "../constants/ConstantAddresses.sol";
 
 contract CompoundAdvanced is Exponential, DSMath, ConstantAddresses {
 

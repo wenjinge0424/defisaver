@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 
 import "../interfaces/CTokenInterface.sol";
 import "../interfaces/KyberNetworkProxyInterface.sol";
-import "../ConstantAddresses.sol";
+import "../constants/ConstantAddresses.sol";
 
 contract CompoundMarginTrade is ConstantAddresses {
 

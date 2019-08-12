@@ -4,7 +4,7 @@ import "./interfaces/TubInterface.sol";
 import "./DS/DSGuard.sol";
 import "./DS/DSAuth.sol";
 import "./Monitor.sol";
-import "./ConstantAddresses.sol";
+import "./constants/ConstantAddresses.sol";
 
 /// @title MonitorProxy handles authorization and interaction with the Monitor contract
 contract MonitorProxy is ConstantAddresses {

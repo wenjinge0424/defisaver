@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 
 import "./interfaces/CTokenInterface.sol";
 import "./compound/StupidExchange.sol";
-import "./ConstantAddresses.sol";
+import "./constants/ConstantAddresses.sol";
 
 contract DecenterMonitorLending is ConstantAddresses {
 

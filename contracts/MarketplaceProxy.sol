@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 import "./interfaces/TubInterface.sol";
 import "./DS/DSGuard.sol";
 import "./Marketplace.sol";
-import "./ConstantAddresses.sol";
+import "./constants/ConstantAddresses.sol";
 
 /// @title MarketplaceProxy handles authorization and interaction with the Marketplace contract
 contract MarketplaceProxy is ConstantAddresses {

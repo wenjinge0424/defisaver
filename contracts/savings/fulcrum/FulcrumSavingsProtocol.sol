@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "../ProtocolInterface.sol";
 import "../../interfaces/ERC20.sol";
-import "../../ConstantAddresses.sol";
+import "../../constants/ConstantAddresses.sol";
 
 contract ITokenInterface {
     function mint(address receiver, uint256 depositAmount) external returns(uint256 mintAmount);

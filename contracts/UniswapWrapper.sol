@@ -5,7 +5,7 @@ import "./interfaces/KyberNetworkProxyInterface.sol";
 import "./interfaces/ExchangeInterface.sol";
 import "./interfaces/UniswapExchangeInterface.sol";
 import "./DS/DSMath.sol";
-import "./ConstantAddresses.sol";
+import "./constants/ConstantAddresses.sol";
 
 contract UniswapFactoryInterface {
     function getExchange(address token) external view returns (address exchange);

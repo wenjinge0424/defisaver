@@ -6,7 +6,7 @@ import "./lib/Actions.sol";
 import "./lib/Account.sol";
 import "./lib/Types.sol";
 import "../../interfaces/ERC20.sol";
-import "../../ConstantAddresses.sol";
+import "../../constants/ConstantAddresses.sol";
 
 contract ISoloMargin {
     function operate(
