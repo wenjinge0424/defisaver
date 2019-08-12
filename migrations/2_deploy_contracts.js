@@ -9,7 +9,6 @@ const MarketplaceProxy = artifacts.require("./MarketplaceProxy.sol");
 const SaverLogger = artifacts.require("./SaverLogger.sol");
 const CompoundProxy = artifacts.require("./CompoundProxy.sol");
 const DecenterMonitorLending = artifacts.require("./DecenterMonitorLending.sol");
-const SaverExchange = artifacts.require("./SaverExchange.sol");
 
 require('dotenv').config();
 
