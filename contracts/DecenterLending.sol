@@ -24,7 +24,7 @@ contract SaverProxy {
 contract DecenterLending is ReentrancyGuard, DSMath, ConstantAddresses {
 
     //Kovan
-    CTokenInterface public cDai = CTokenInterface(CTOKEN_INTERFACE);
+    CTokenInterface public cDai = CTokenInterface(CDAI_ADDRESS);
     ERC20 public Dai = ERC20(COMPOUND_DAI_ADDRESS);
 
     modifier onlyOwner() {

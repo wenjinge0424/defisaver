@@ -2,29 +2,9 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
 import "../ProtocolInterface.sol";
-import "./lib/Actions.sol";
-import "./lib/Account.sol";
-import "./lib/Types.sol";
+import "./ISoloMargin.sol";
 import "../../interfaces/ERC20.sol";
 import "../../constants/ConstantAddresses.sol";
-
-contract ISoloMargin {
-    function operate(
-        Account.Info[] memory accounts,
-        Actions.ActionArgs[] memory actions
-    ) public;
-
-    function getAccountBalances(
-        Account.Info memory account
-    )
-        public
-        view
-        returns (
-            address[] memory,
-            Types.Par[] memory,
-            Types.Wei[] memory
-        );
-}
 
 contract DydxSavingsProtocol is ProtocolInterface, ConstantAddresses {
 

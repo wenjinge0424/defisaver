@@ -7,7 +7,7 @@ import "./constants/ConstantAddresses.sol";
 contract DecenterMonitorLending is ConstantAddresses {
 
     //Kovan
-    CTokenInterface public cDai = CTokenInterface(CTOKEN_INTERFACE);
+    CTokenInterface public cDai = CTokenInterface(CDAI_ADDRESS);
     ERC20 public dai = ERC20(COMPOUND_DAI_ADDRESS);
 
     address owner;
