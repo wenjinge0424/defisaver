@@ -5,8 +5,9 @@ import "../ProtocolInterface.sol";
 import "./ISoloMargin.sol";
 import "../../interfaces/ERC20.sol";
 import "../../constants/ConstantAddresses.sol";
+import "../../DS/DSAuth.sol";
 
-contract DydxSavingsProtocol is ProtocolInterface, ConstantAddresses {
+contract DydxSavingsProtocol is ProtocolInterface, ConstantAddresses, DSAuth {
 
 
     ISoloMargin public soloMargin;
@@ -15,9 +16,12 @@ contract DydxSavingsProtocol is ProtocolInterface, ConstantAddresses {
 
     uint daiMarketId = 1;
 
-    constructor(address _savingsProxy) public {
+    constructor() public {
         soloMargin = ISoloMargin(SOLO_MARGIN_ADDRESS);
         dai = ERC20(MAKER_DAI_ADDRESS);
+    }
+
+    function addSavingsProxy(address _savingsProxy) public auth {
         savingsProxy = _savingsProxy;
     }
 

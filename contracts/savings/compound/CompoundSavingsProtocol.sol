@@ -7,15 +7,20 @@ import "../../compound/Exponential.sol";
 import "../../compound/StupidExchange.sol";
 import "../../interfaces/ERC20.sol";
 import "../../constants/ConstantAddresses.sol";
+import "../../DS/DSAuth.sol";
 
 
-contract CompoundSavingsProtocol is ProtocolInterface, Exponential, ConstantAddresses {
+contract CompoundSavingsProtocol is ProtocolInterface, Exponential, ConstantAddresses, DSAuth {
 
     CTokenInterface public cDaiContract;
     address public savingsProxy;
 
-    constructor(address _savingsProxy) public {
-        cDaiContract = CTokenInterface(CDAI_ADDRESS);
+    constructor() public {
+        cDaiContract = CTokenInterface(CDAI_ADDRESS);\
+    }
+
+    function addSavingsProxy(address _savingsProxy) public auth {
+
         savingsProxy = _savingsProxy;
     }
 

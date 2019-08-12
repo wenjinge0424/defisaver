@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 import "../ProtocolInterface.sol";
 import "../../interfaces/ERC20.sol";
 import "../../constants/ConstantAddresses.sol";
+import "../../DS/DSAuth.sol";
 
 contract ITokenInterface {
     function mint(address receiver, uint256 depositAmount) external returns(uint256 mintAmount);
@@ -11,11 +12,11 @@ contract ITokenInterface {
     function balanceOf(address _owner) external view returns (uint balance);
 }
 
-contract FulcrumSavingsProtocol is ProtocolInterface, ConstantAddresses {
+contract FulcrumSavingsProtocol is ProtocolInterface, ConstantAddresses, DSAuth {
 
     address public savingsProxy;
 
-    constructor(address _savingsProxy) public {
+    function addSavingsProxy(address _savingsProxy) public auth {
         savingsProxy = _savingsProxy;
     }
 
