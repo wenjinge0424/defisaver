@@ -18,7 +18,7 @@ contract SaverExchange is DSMath, ConstantAddresses {
         uint daiEthPrice;
         (exchangeWrapper, daiEthPrice) = getBestPrice(_amount, MAKER_DAI_ADDRESS, KYBER_ETH_ADDRESS, _exchangeType);
 
-        require(wdiv(1000000000000000000, daiEthPrice) < _minPrice, "Slippage hit");
+        require(daiEthPrice > _minPrice, "Slippage hit");
 
         ERC20(MAKER_DAI_ADDRESS).transfer(exchangeWrapper, _amount);
         ExchangeInterface(exchangeWrapper).swapTokenToEther(MAKER_DAI_ADDRESS, _amount, uint(-1));
