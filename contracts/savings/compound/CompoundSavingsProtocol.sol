@@ -16,7 +16,7 @@ contract CompoundSavingsProtocol is ProtocolInterface, Exponential, ConstantAddr
     address public savingsProxy;
 
     constructor() public {
-        cDaiContract = CTokenInterface(CDAI_ADDRESS);\
+        cDaiContract = CTokenInterface(CDAI_ADDRESS);
     }
 
     function addSavingsProxy(address _savingsProxy) public auth {
