@@ -8,9 +8,9 @@ import "./dydx/ISoloMargin.sol";
 
 contract SavingsProxy is ConstantAddresses {
 
-    address constant public SAVINGS_COMPOUND_ADDRESS = 0x5bdF0b2FaF59639f41946EE2DeBa90f0e02EB867;
-    address constant public SAVINGS_DYDX_ADDRESS = 0x13903074023f8a269671e12401Cce148eA18784D;
-    address constant public SAVINGS_FULCRUM_ADDRESS = 0x560d427777a206E3152B9b2a998aC52a8660269A;
+    address constant public SAVINGS_COMPOUND_ADDRESS = 0x5CeDe2418E64de77efEF3aA85a74fD18CdB18B2a;
+    address constant public SAVINGS_DYDX_ADDRESS = 0x409FB5b8c2B2EfF5d86449f52AbA8a2AF0ee88f2;
+    address constant public SAVINGS_FULCRUM_ADDRESS = 0xB5Be7966144dcd1458c1ECf6b57fdD1adc460f1D;
 
     enum SavingsProtocol { Compound, Dydx, Fulcrum }
 
@@ -41,7 +41,7 @@ contract SavingsProxy is ConstantAddresses {
         endAction(_to);
     }
 
-    function getAddress(SavingsProtocol _protocol) public view returns(address) {
+    function getAddress(SavingsProtocol _protocol) public pure returns(address) {
         if (_protocol == SavingsProtocol.Compound) {
             return SAVINGS_COMPOUND_ADDRESS;
         }

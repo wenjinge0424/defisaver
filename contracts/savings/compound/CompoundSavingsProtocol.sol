@@ -25,14 +25,14 @@ contract CompoundSavingsProtocol is ProtocolInterface, Exponential, ConstantAddr
     }
 
     function deposit(address _user, uint _amount) public {
-        require(msg.sender == savingsProxy);
+        require(msg.sender == _user);
         // get dai from user
         require(ERC20(MAKER_DAI_ADDRESS).transferFrom(_user, address(this), _amount));
 
-        // // REMOVE: USED ONLY ON KOVAN TO HANDLE DAI DIFFERENT TOKENS
-        // StupidExchange(STUPID_EXCHANGE).getCompoundDaiToken(_amount);
-        // // approve dai to compound
-        // ERC20(COMPOUND_DAI_ADDRESS).approve(CDAI_ADDRESS, uint(-1));
+        // REMOVE: USED ONLY ON KOVAN TO HANDLE DAI DIFFERENT TOKENS
+        StupidExchange(STUPID_EXCHANGE).getCompoundDaiToken(_amount);
+        // approve dai to compound
+        ERC20(COMPOUND_DAI_ADDRESS).approve(CDAI_ADDRESS, uint(-1));
 
         // mainnet only
         ERC20(MAKER_DAI_ADDRESS).approve(CDAI_ADDRESS, uint(-1));
@@ -46,7 +46,7 @@ contract CompoundSavingsProtocol is ProtocolInterface, Exponential, ConstantAddr
     }
 
     function withdraw(address _user, uint _amount) public {
-        require(msg.sender == savingsProxy);
+        require(msg.sender == _user);
         // transfer all users balance to this contract
         require(ERC20(CDAI_ADDRESS).transferFrom(_user, address(this), ERC20(CDAI_ADDRESS).balanceOf(_user)));
         // approve cDai to compound contract
@@ -55,7 +55,7 @@ contract CompoundSavingsProtocol is ProtocolInterface, Exponential, ConstantAddr
         require(cDaiContract.redeemUnderlying(_amount) == 0, "Reedem Failed");
 
         // REMOVE: USED ONLY ON KOVAN TO HANDLE DAI DIFFERENT TOKENS
-        // StupidExchange(STUPID_EXCHANGE).getMakerDaiToken(_amount);
+        StupidExchange(STUPID_EXCHANGE).getMakerDaiToken(_amount);
 
         // return to user balance we didn't spend
         uint cDaiBalance = ERC20(CDAI_ADDRESS).balanceOf(address(this));

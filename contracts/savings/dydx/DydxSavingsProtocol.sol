@@ -26,7 +26,7 @@ contract DydxSavingsProtocol is ProtocolInterface, ConstantAddresses, DSAuth {
     }
 
     function deposit(address _user, uint _amount) public {
-        require(msg.sender == savingsProxy);
+        require(msg.sender == _user);
 
         Account.Info[] memory accounts = new Account.Info[](1);
         accounts[0] = getAccount(_user, 0);
@@ -54,7 +54,7 @@ contract DydxSavingsProtocol is ProtocolInterface, ConstantAddresses, DSAuth {
     }
 
     function withdraw(address _user, uint _amount) public {
-        require(msg.sender == savingsProxy);
+        require(msg.sender == _user);
 
         Account.Info[] memory accounts = new Account.Info[](1);
         accounts[0] = getAccount(_user, 0);

@@ -21,7 +21,7 @@ contract FulcrumSavingsProtocol is ProtocolInterface, ConstantAddresses, DSAuth 
     }
 
     function deposit(address _user, uint _amount) public {
-        require(msg.sender == savingsProxy);
+        require(msg.sender == _user);
 
         // get dai from user
         require(ERC20(MAKER_DAI_ADDRESS).transferFrom(_user, address(this), _amount));
@@ -34,7 +34,7 @@ contract FulcrumSavingsProtocol is ProtocolInterface, ConstantAddresses, DSAuth 
     }
 
     function withdraw(address _user, uint _amount) public {
-        require(msg.sender == savingsProxy);
+        require(msg.sender == _user);
 
         // transfer all users tokens to our contract
         require(ERC20(IDAI_ADDRESS).transferFrom(_user, address(this), ITokenInterface(IDAI_ADDRESS).balanceOf(_user)));

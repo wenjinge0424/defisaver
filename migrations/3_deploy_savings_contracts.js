@@ -9,14 +9,16 @@ module.exports = function(deployer, network, accounts) {
     let deployAgain = (process.env.DEPLOY_AGAIN === 'true') ? true : false;
 
     deployer.then(async () => {
-        await deployer.deploy(DydxSavingsProtocol, savingsProxy.address, {gas: 6000000, overwrite: deployAgain})
-        let dydxSavingsProtocol = await DydxSavingsProtocol.deployed()
 
-        await deployer.deploy(CompoundSavingsProtocol, savingsProxy.address, {gas: 6000000, overwrite: deployAgain})
-        let compoundSavingsProtocol = await CompoundSavingsProtocol.deployed()
+        // --------- first deploy this part ---------------------------------
+        // await deployer.deploy(DydxSavingsProtocol, {gas: 6000000, overwrite: deployAgain})
+        // await deployer.deploy(CompoundSavingsProtocol, {gas: 6000000, overwrite: deployAgain})
+        // await deployer.deploy(FulcrumSavingsProtocol, {gas: 6000000, overwrite: deployAgain})
 
-        await deployer.deploy(FulcrumSavingsProtocol, savingsProxy.address, {gas: 6000000, overwrite: deployAgain})
-        let fulcrumSavingsProtocol = await FulcrumSavingsProtocol.deployed()
+        // --------- change addresses in SavingsProxy contract and then deploy this part --------------
+        // let dydxSavingsProtocol = await DydxSavingsProtocol.deployed()
+        // let compoundSavingsProtocol = await CompoundSavingsProtocol.deployed()
+        // let fulcrumSavingsProtocol = await FulcrumSavingsProtocol.deployed()
 
         // await deployer.deploy(SavingsProxy, {gas: 6000000, overwrite: deployAgain})
         // let savingsProxy = await SavingsProxy.deployed()
