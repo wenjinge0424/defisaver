@@ -95,9 +95,10 @@ contract Monitor is DSMath {
 
     /// @dev Should be callable by onlyApproved
     function repayFor(bytes32 _cdpId, uint _amount) public onlyApproved {
-        // if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
-        //     gasToken.free(BOOST_GAS_TOKEN);
-        // }
+        // require(tx.gasPrice <= 40000000000);
+        if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
+            gasToken.free(BOOST_GAS_TOKEN);
+        }
 
         CdpHolder memory holder = holders[_cdpId];
         uint ratioBefore = getRatio(_cdpId);
@@ -114,9 +115,9 @@ contract Monitor is DSMath {
 
     /// @dev Should be callable by onlyApproved
     function boostFor(bytes32 _cdpId, uint _amount) public onlyApproved {
-        // if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
-        //     gasToken.free(REPAY_GAS_TOKEN);
-        // }
+        if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
+            gasToken.free(REPAY_GAS_TOKEN);
+        }
 
         CdpHolder memory holder = holders[_cdpId];
         uint ratioBefore = getRatio(_cdpId);

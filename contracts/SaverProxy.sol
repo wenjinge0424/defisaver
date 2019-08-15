@@ -13,18 +13,19 @@ contract SaverProxy is DSMath {
     address public constant MKR_ADDRESS = 0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD;
     address public constant VOX_ADDRESS = 0xBb4339c0aB5B1d9f14Bd6e3426444A1e9d86A1d9;
     address public constant PETH_ADDRESS = 0xf4d791139cE033Ad35DB2B2201435fAd668B1b64;
+    address public constant KYBER_WRAPPER = 0x82CD6436c58A65E2D4263259EcA5843d3d7e0e65;
     address public constant TUB_ADDRESS = 0xa71937147b55Deb8a530C7229C442Fd3F31b7db2;
     address public constant ETHER_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant LOGGER_ADDRESS = 0x32d0e18f988F952Eb3524aCE762042381a2c39E5;
-    address public constant WALLET_ID = 0x54b44C6B18fc0b4A1010B21d524c338D1f8065F6;
-
-    uint public constant SERVICE_FEE = 400; // 0.25% Fee
 
     address public constant KYBER_WRAPPER = 0x5595930d576Aedf13945C83cE5aaD827529A1310;
     address public constant UNISWAP_WRAPPER = 0x5595930d576Aedf13945C83cE5aaD827529A1310;
     address public constant ETH2DAI_WRAPPER = 0x823cde416973a19f98Bb9C96d97F4FE6C9A7238B;
-
-    /// @notice Withdraws Eth collateral, swaps Eth -> Dai with Kyber, and pays back the debt in Dai
+    address public constant WALLET_ID = 0x54b44C6B18fc0b4A1010B21d524c338D1f8065F6;
+    
+    
+    uint public constant SERVICE_FEE = 400; // 0.25% Fee
+    
+      /// @notice Withdraws Eth collateral, swaps Eth -> Dai with Kyber, and pays back the debt in Dai
     /// @dev If _buyMkr is false user needs to have MKR tokens and approve his DSProxy
     /// @param _cup Id of the CDP
     /// @param _amount Amount of Eth to sell
@@ -35,7 +36,7 @@ contract SaverProxy is DSMath {
 
         (exchangeWrapper, ethDaiPrice) = getBestPrice(_amount, ETHER_ADDRESS, DAI_ADDRESS, _exchangeType);
 
-        require(ethDaiPrice > _minPrice, "Slppage hit");
+        require(ethDaiPrice > _minPrice, "Slippage hit");
 
         TubInterface tub = TubInterface(TUB_ADDRESS);
 
@@ -81,7 +82,7 @@ contract SaverProxy is DSMath {
             ERC20(DAI_ADDRESS).transfer(msg.sender, sub(daiAmount, cdpWholeDebt));
         } else {
             tub.wipe(_cup, daiAmount);
-            // require(getRatio(tub, _cup) > startingRatio, "ratio must be better off at the end");
+            require(getRatio(tub, _cup) > startingRatio, "ratio must be better off at the end");
         }
 
         SaverLogger(LOGGER_ADDRESS).LogRepay(uint(_cup), msg.sender, _amount, daiAmount);
@@ -121,7 +122,7 @@ contract SaverProxy is DSMath {
         
         uint ethAmount = swapDaiAndLockEth(tub, _cup, _amount, exchangeWrapper);
 
-        // require(tub.ink(_cup) > startingCollateral, "collateral must be bigger than starting point");
+        require(tub.ink(_cup) > startingCollateral, "collateral must be bigger than starting point");
         
         SaverLogger(LOGGER_ADDRESS).LogBoost(uint(_cup), msg.sender, _amount, ethAmount);
     }
@@ -197,7 +198,7 @@ contract SaverProxy is DSMath {
     /// @param _cup Id of the CDP
     /// @param _ethAmount Amount of Eth to withdraw
     function withdrawEth(TubInterface _tub, bytes32 _cup, uint _ethAmount) internal {
-        uint ink = rdiv(_ethAmount, _tub.per());
+        uint ink = sub(rdiv(_ethAmount, _tub.per()), 1);
         _tub.free(_cup, ink);
         
         _tub.exit(ink);
@@ -224,7 +225,7 @@ contract SaverProxy is DSMath {
 
         (expectedRateKyber, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
         (expectedRateUniswap, ) = ExchangeInterface(UNISWAP_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
-        // (expectedRateEth2Dai, ) = ExchangeInterface(ETH2DAI_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
+        (expectedRateEth2Dai, ) = ExchangeInterface(ETH2DAI_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
 
         if (_exchangeType == 1) {
             return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
@@ -238,15 +239,15 @@ contract SaverProxy is DSMath {
             return (UNISWAP_WRAPPER, expectedRateUniswap);
         }
 
-        if (expectedRateEth2Dai > expectedRateKyber && expectedRateEth2Dai > expectedRateUniswap) {
+        if (expectedRateEth2Dai >= expectedRateKyber && expectedRateEth2Dai >= expectedRateUniswap) {
             return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
         }
 
-        if (expectedRateKyber > expectedRateUniswap && expectedRateKyber > expectedRateEth2Dai) {
+        if (expectedRateKyber >= expectedRateUniswap && expectedRateKyber >= expectedRateEth2Dai) {
             return (KYBER_WRAPPER, expectedRateKyber);
         }
 
-        if (expectedRateUniswap > expectedRateKyber && expectedRateUniswap > expectedRateEth2Dai) {
+        if (expectedRateUniswap >= expectedRateKyber && expectedRateUniswap >= expectedRateEth2Dai) {
             return (UNISWAP_WRAPPER, expectedRateUniswap);
         }
     }
