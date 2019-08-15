@@ -1,4 +1,4 @@
-pragma solidity 0.5.0;
+pragma solidity ^0.5.0;
 
 contract SaverLogger {
     event Repay(uint indexed cdpId, address indexed owner, uint collateralAmount, uint daiAmount);

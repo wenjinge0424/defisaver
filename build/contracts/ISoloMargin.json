@@ -1,0 +1,1160 @@
+{
+  "contractName": "ISoloMargin",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "number",
+              "type": "uint256"
+            }
+          ],
+          "name": "accounts",
+          "type": "tuple[]"
+        },
+        {
+          "components": [
+            {
+              "name": "actionType",
+              "type": "uint8"
+            },
+            {
+              "name": "accountId",
+              "type": "uint256"
+            },
+            {
+              "components": [
+                {
+                  "name": "sign",
+                  "type": "bool"
+                },
+                {
+                  "name": "denomination",
+                  "type": "uint8"
+                },
+                {
+                  "name": "ref",
+                  "type": "uint8"
+                },
+                {
+                  "name": "value",
+                  "type": "uint256"
+                }
+              ],
+              "name": "amount",
+              "type": "tuple"
+            },
+            {
+              "name": "primaryMarketId",
+              "type": "uint256"
+            },
+            {
+              "name": "secondaryMarketId",
+              "type": "uint256"
+            },
+            {
+              "name": "otherAddress",
+              "type": "address"
+            },
+            {
+              "name": "otherAccountId",
+              "type": "uint256"
+            },
+            {
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "name": "actions",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "operate",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "components": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "number",
+              "type": "uint256"
+            }
+          ],
+          "name": "account",
+          "type": "tuple"
+        }
+      ],
+      "name": "getAccountBalances",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address[]"
+        },
+        {
+          "components": [
+            {
+              "name": "sign",
+              "type": "bool"
+            },
+            {
+              "name": "value",
+              "type": "uint128"
+            }
+          ],
+          "name": "",
+          "type": "tuple[]"
+        },
+        {
+          "components": [
+            {
+              "name": "sign",
+              "type": "bool"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "name": "trusted",
+              "type": "bool"
+            }
+          ],
+          "name": "args",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "setOperators",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.7+commit.6da8b019\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[{\"components\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"number\",\"type\":\"uint256\"}],\"name\":\"account\",\"type\":\"tuple\"}],\"name\":\"getAccountBalances\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"},{\"components\":[{\"name\":\"sign\",\"type\":\"bool\"},{\"name\":\"value\",\"type\":\"uint128\"}],\"name\":\"\",\"type\":\"tuple[]\"},{\"components\":[{\"name\":\"sign\",\"type\":\"bool\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"\",\"type\":\"tuple[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"components\":[{\"name\":\"operator\",\"type\":\"address\"},{\"name\":\"trusted\",\"type\":\"bool\"}],\"name\":\"args\",\"type\":\"tuple[]\"}],\"name\":\"setOperators\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"components\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"number\",\"type\":\"uint256\"}],\"name\":\"accounts\",\"type\":\"tuple[]\"},{\"components\":[{\"name\":\"actionType\",\"type\":\"uint8\"},{\"name\":\"accountId\",\"type\":\"uint256\"},{\"components\":[{\"name\":\"sign\",\"type\":\"bool\"},{\"name\":\"denomination\",\"type\":\"uint8\"},{\"name\":\"ref\",\"type\":\"uint8\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"amount\",\"type\":\"tuple\"},{\"name\":\"primaryMarketId\",\"type\":\"uint256\"},{\"name\":\"secondaryMarketId\",\"type\":\"uint256\"},{\"name\":\"otherAddress\",\"type\":\"address\"},{\"name\":\"otherAccountId\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"actions\",\"type\":\"tuple[]\"}],\"name\":\"operate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/ISoloMargin.sol\":\"ISoloMargin\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/ISoloMargin.sol\":{\"keccak256\":\"0xdab6465fa7194bceb63b86d4f9629069e1cd3e0c3aa166ea8302cea6d473288f\",\"urls\":[\"bzzr://c7c6ed0902cac7f95e1574301d65dd87ef68e84582e94c615e296ad43f79cc0a\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Account.sol\":{\"keccak256\":\"0x4c27c617b01972ddb8ca160454284ed09f3ec6f7abd667c31ca9f38805738d33\",\"urls\":[\"bzzr://ad0dd4229cea4f8c5b877a653766cf413d733e442cfc448ffd715e786d7b5216\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Actions.sol\":{\"keccak256\":\"0xa3def9f1d58c1a353cd5412df8027674226000fd0b1cf52f3e11d6b4428fe2dc\",\"urls\":[\"bzzr://955e36c7bd9e222b58764b755169056c4225fc0561fdd88bb71ce7f1e2782a41\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Math.sol\":{\"keccak256\":\"0x05162cffa6d5479b6555e03af67b75e63d85272a3c3d3d2630a127ffa811ba41\",\"urls\":[\"bzzr://0e784dccf35201ef16030ec531028252d590936d75f0200f368a7e5981046af4\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Require.sol\":{\"keccak256\":\"0x6ecb512d52bb5cb36ba26b98877240e0b23eb3310df5dc61f82c655dc974d04b\",\"urls\":[\"bzzr://826485117e00106f438a7e64ecc32b2c3705e02d9bd6035dbdc5f9faaa19482c\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Types.sol\":{\"keccak256\":\"0x35c04c154e9ef818a3e1b59eb748565645864d5f8f2bc696c1f425a8ade9ab00\",\"urls\":[\"bzzr://8b2db9cb583f79fc2b74a70b270667f6a3bc54c3afef6a2d56e0d2ec5b8ca725\"]},\"openzeppelin-solidity/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x965012d27b4262d7a41f5028cbb30c51ebd9ecd4be8fb30380aaa7a3c64fbc8b\",\"urls\":[\"bzzr://41ca38f6b0fa4b77b0feec43e422cfbec48b7eb38a41edf0b85c77e8d9a296b1\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.5.0;\npragma experimental ABIEncoderV2;\n\nimport \"./lib/Actions.sol\";\nimport \"./lib/Account.sol\";\nimport \"./lib/Types.sol\";\n\ncontract ISoloMargin {\n    struct OperatorArg {\n        address operator;\n        bool trusted;\n    }\n\n    function operate(\n        Account.Info[] memory accounts,\n        Actions.ActionArgs[] memory actions\n    ) public;\n\n    function getAccountBalances(\n        Account.Info memory account\n    ) public view returns (\n        address[] memory,\n        Types.Par[] memory,\n        Types.Wei[] memory\n    );\n\n    function setOperators(\n        OperatorArg[] memory args\n    ) public;\n}\n",
+  "sourcePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/ISoloMargin.sol",
+  "ast": {
+    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/ISoloMargin.sol",
+    "exportedSymbols": {
+      "ISoloMargin": [
+        8879
+      ]
+    },
+    "id": 8880,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8840,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:52"
+      },
+      {
+        "id": 8841,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "24:33:52"
+      },
+      {
+        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Actions.sol",
+        "file": "./lib/Actions.sol",
+        "id": 8842,
+        "nodeType": "ImportDirective",
+        "scope": 8880,
+        "sourceUnit": 9465,
+        "src": "59:27:52",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Account.sol",
+        "file": "./lib/Account.sol",
+        "id": 8843,
+        "nodeType": "ImportDirective",
+        "scope": 8880,
+        "sourceUnit": 8924,
+        "src": "87:27:52",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Types.sol",
+        "file": "./lib/Types.sol",
+        "id": 8844,
+        "nodeType": "ImportDirective",
+        "scope": 8880,
+        "sourceUnit": 10815,
+        "src": "115:25:52",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 8879,
+        "linearizedBaseContracts": [
+          8879
+        ],
+        "name": "ISoloMargin",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "ISoloMargin.OperatorArg",
+            "id": 8849,
+            "members": [
+              {
+                "constant": false,
+                "id": 8846,
+                "name": "operator",
+                "nodeType": "VariableDeclaration",
+                "scope": 8849,
+                "src": "198:16:52",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                },
+                "typeName": {
+                  "id": 8845,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "198:7:52",
+                  "stateMutability": "nonpayable",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 8848,
+                "name": "trusted",
+                "nodeType": "VariableDeclaration",
+                "scope": 8849,
+                "src": "224:12:52",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                },
+                "typeName": {
+                  "id": 8847,
+                  "name": "bool",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "224:4:52",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "OperatorArg",
+            "nodeType": "StructDefinition",
+            "scope": 8879,
+            "src": "169:74:52",
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 8858,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "operate",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8856,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8852,
+                  "name": "accounts",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8858,
+                  "src": "275:30:52",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_Info_$8893_memory_$dyn_memory_ptr",
+                    "typeString": "struct Account.Info[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "contractScope": null,
+                      "id": 8850,
+                      "name": "Account.Info",
+                      "nodeType": "UserDefinedTypeName",
+                      "referencedDeclaration": 8893,
+                      "src": "275:12:52",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Info_$8893_storage_ptr",
+                        "typeString": "struct Account.Info"
+                      }
+                    },
+                    "id": 8851,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "275:14:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_Info_$8893_storage_$dyn_storage_ptr",
+                      "typeString": "struct Account.Info[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8855,
+                  "name": "actions",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8858,
+                  "src": "315:35:52",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_ActionArgs_$8968_memory_$dyn_memory_ptr",
+                    "typeString": "struct Actions.ActionArgs[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "contractScope": null,
+                      "id": 8853,
+                      "name": "Actions.ActionArgs",
+                      "nodeType": "UserDefinedTypeName",
+                      "referencedDeclaration": 8968,
+                      "src": "315:18:52",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_ActionArgs_$8968_storage_ptr",
+                        "typeString": "struct Actions.ActionArgs"
+                      }
+                    },
+                    "id": 8854,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "315:20:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_ActionArgs_$8968_storage_$dyn_storage_ptr",
+                      "typeString": "struct Actions.ActionArgs[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "265:91:52"
+            },
+            "returnParameters": {
+              "id": 8857,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "363:0:52"
+            },
+            "scope": 8879,
+            "src": "249:115:52",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 8872,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getAccountBalances",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8861,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8860,
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8872,
+                  "src": "407:27:52",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Info_$8893_memory_ptr",
+                    "typeString": "struct Account.Info"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 8859,
+                    "name": "Account.Info",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 8893,
+                    "src": "407:12:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Info_$8893_storage_ptr",
+                      "typeString": "struct Account.Info"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "397:43:52"
+            },
+            "returnParameters": {
+              "id": 8871,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8864,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8872,
+                  "src": "471:16:52",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 8862,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "471:7:52",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 8863,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "471:9:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8867,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8872,
+                  "src": "497:18:52",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_Par_$10380_memory_$dyn_memory_ptr",
+                    "typeString": "struct Types.Par[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "contractScope": null,
+                      "id": 8865,
+                      "name": "Types.Par",
+                      "nodeType": "UserDefinedTypeName",
+                      "referencedDeclaration": 10380,
+                      "src": "497:9:52",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Par_$10380_storage_ptr",
+                        "typeString": "struct Types.Par"
+                      }
+                    },
+                    "id": 8866,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "497:11:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_Par_$10380_storage_$dyn_storage_ptr",
+                      "typeString": "struct Types.Par[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8870,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8872,
+                  "src": "525:18:52",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_Wei_$10602_memory_$dyn_memory_ptr",
+                    "typeString": "struct Types.Wei[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "contractScope": null,
+                      "id": 8868,
+                      "name": "Types.Wei",
+                      "nodeType": "UserDefinedTypeName",
+                      "referencedDeclaration": 10602,
+                      "src": "525:9:52",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Wei_$10602_storage_ptr",
+                        "typeString": "struct Types.Wei"
+                      }
+                    },
+                    "id": 8869,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "525:11:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_Wei_$10602_storage_$dyn_storage_ptr",
+                      "typeString": "struct Types.Wei[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "461:88:52"
+            },
+            "scope": 8879,
+            "src": "370:180:52",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 8878,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setOperators",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8876,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8875,
+                  "name": "args",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8878,
+                  "src": "587:25:52",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_OperatorArg_$8849_memory_$dyn_memory_ptr",
+                    "typeString": "struct ISoloMargin.OperatorArg[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "contractScope": null,
+                      "id": 8873,
+                      "name": "OperatorArg",
+                      "nodeType": "UserDefinedTypeName",
+                      "referencedDeclaration": 8849,
+                      "src": "587:11:52",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_OperatorArg_$8849_storage_ptr",
+                        "typeString": "struct ISoloMargin.OperatorArg"
+                      }
+                    },
+                    "id": 8874,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "587:13:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_OperatorArg_$8849_storage_$dyn_storage_ptr",
+                      "typeString": "struct ISoloMargin.OperatorArg[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "577:41:52"
+            },
+            "returnParameters": {
+              "id": 8877,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "625:0:52"
+            },
+            "scope": 8879,
+            "src": "556:70:52",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 8880,
+        "src": "142:486:52"
+      }
+    ],
+    "src": "0:629:52"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/ISoloMargin.sol",
+    "exportedSymbols": {
+      "ISoloMargin": [
+        8879
+      ]
+    },
+    "id": 8880,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8840,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:52"
+      },
+      {
+        "id": 8841,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "24:33:52"
+      },
+      {
+        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Actions.sol",
+        "file": "./lib/Actions.sol",
+        "id": 8842,
+        "nodeType": "ImportDirective",
+        "scope": 8880,
+        "sourceUnit": 9465,
+        "src": "59:27:52",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Account.sol",
+        "file": "./lib/Account.sol",
+        "id": 8843,
+        "nodeType": "ImportDirective",
+        "scope": 8880,
+        "sourceUnit": 8924,
+        "src": "87:27:52",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Types.sol",
+        "file": "./lib/Types.sol",
+        "id": 8844,
+        "nodeType": "ImportDirective",
+        "scope": 8880,
+        "sourceUnit": 10815,
+        "src": "115:25:52",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 8879,
+        "linearizedBaseContracts": [
+          8879
+        ],
+        "name": "ISoloMargin",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "ISoloMargin.OperatorArg",
+            "id": 8849,
+            "members": [
+              {
+                "constant": false,
+                "id": 8846,
+                "name": "operator",
+                "nodeType": "VariableDeclaration",
+                "scope": 8849,
+                "src": "198:16:52",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                },
+                "typeName": {
+                  "id": 8845,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "198:7:52",
+                  "stateMutability": "nonpayable",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 8848,
+                "name": "trusted",
+                "nodeType": "VariableDeclaration",
+                "scope": 8849,
+                "src": "224:12:52",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                },
+                "typeName": {
+                  "id": 8847,
+                  "name": "bool",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "224:4:52",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "OperatorArg",
+            "nodeType": "StructDefinition",
+            "scope": 8879,
+            "src": "169:74:52",
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 8858,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "operate",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8856,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8852,
+                  "name": "accounts",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8858,
+                  "src": "275:30:52",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_Info_$8893_memory_$dyn_memory_ptr",
+                    "typeString": "struct Account.Info[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "contractScope": null,
+                      "id": 8850,
+                      "name": "Account.Info",
+                      "nodeType": "UserDefinedTypeName",
+                      "referencedDeclaration": 8893,
+                      "src": "275:12:52",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Info_$8893_storage_ptr",
+                        "typeString": "struct Account.Info"
+                      }
+                    },
+                    "id": 8851,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "275:14:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_Info_$8893_storage_$dyn_storage_ptr",
+                      "typeString": "struct Account.Info[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8855,
+                  "name": "actions",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8858,
+                  "src": "315:35:52",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_ActionArgs_$8968_memory_$dyn_memory_ptr",
+                    "typeString": "struct Actions.ActionArgs[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "contractScope": null,
+                      "id": 8853,
+                      "name": "Actions.ActionArgs",
+                      "nodeType": "UserDefinedTypeName",
+                      "referencedDeclaration": 8968,
+                      "src": "315:18:52",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_ActionArgs_$8968_storage_ptr",
+                        "typeString": "struct Actions.ActionArgs"
+                      }
+                    },
+                    "id": 8854,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "315:20:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_ActionArgs_$8968_storage_$dyn_storage_ptr",
+                      "typeString": "struct Actions.ActionArgs[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "265:91:52"
+            },
+            "returnParameters": {
+              "id": 8857,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "363:0:52"
+            },
+            "scope": 8879,
+            "src": "249:115:52",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 8872,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getAccountBalances",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8861,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8860,
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8872,
+                  "src": "407:27:52",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Info_$8893_memory_ptr",
+                    "typeString": "struct Account.Info"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 8859,
+                    "name": "Account.Info",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 8893,
+                    "src": "407:12:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Info_$8893_storage_ptr",
+                      "typeString": "struct Account.Info"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "397:43:52"
+            },
+            "returnParameters": {
+              "id": 8871,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8864,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8872,
+                  "src": "471:16:52",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 8862,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "471:7:52",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 8863,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "471:9:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8867,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8872,
+                  "src": "497:18:52",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_Par_$10380_memory_$dyn_memory_ptr",
+                    "typeString": "struct Types.Par[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "contractScope": null,
+                      "id": 8865,
+                      "name": "Types.Par",
+                      "nodeType": "UserDefinedTypeName",
+                      "referencedDeclaration": 10380,
+                      "src": "497:9:52",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Par_$10380_storage_ptr",
+                        "typeString": "struct Types.Par"
+                      }
+                    },
+                    "id": 8866,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "497:11:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_Par_$10380_storage_$dyn_storage_ptr",
+                      "typeString": "struct Types.Par[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8870,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8872,
+                  "src": "525:18:52",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_Wei_$10602_memory_$dyn_memory_ptr",
+                    "typeString": "struct Types.Wei[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "contractScope": null,
+                      "id": 8868,
+                      "name": "Types.Wei",
+                      "nodeType": "UserDefinedTypeName",
+                      "referencedDeclaration": 10602,
+                      "src": "525:9:52",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Wei_$10602_storage_ptr",
+                        "typeString": "struct Types.Wei"
+                      }
+                    },
+                    "id": 8869,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "525:11:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_Wei_$10602_storage_$dyn_storage_ptr",
+                      "typeString": "struct Types.Wei[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "461:88:52"
+            },
+            "scope": 8879,
+            "src": "370:180:52",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 8878,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setOperators",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8876,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8875,
+                  "name": "args",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8878,
+                  "src": "587:25:52",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_OperatorArg_$8849_memory_$dyn_memory_ptr",
+                    "typeString": "struct ISoloMargin.OperatorArg[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "contractScope": null,
+                      "id": 8873,
+                      "name": "OperatorArg",
+                      "nodeType": "UserDefinedTypeName",
+                      "referencedDeclaration": 8849,
+                      "src": "587:11:52",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_OperatorArg_$8849_storage_ptr",
+                        "typeString": "struct ISoloMargin.OperatorArg"
+                      }
+                    },
+                    "id": 8874,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "587:13:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_OperatorArg_$8849_storage_$dyn_storage_ptr",
+                      "typeString": "struct ISoloMargin.OperatorArg[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "577:41:52"
+            },
+            "returnParameters": {
+              "id": 8877,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "625:0:52"
+            },
+            "scope": 8879,
+            "src": "556:70:52",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 8880,
+        "src": "142:486:52"
+      }
+    ],
+    "src": "0:629:52"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-08-13T11:10:47.010Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}

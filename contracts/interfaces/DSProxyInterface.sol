@@ -1,4 +1,4 @@
-pragma solidity 0.5.0;
+pragma solidity ^0.5.0;
 
 contract DSProxyInterface {
     function execute(bytes memory _code, bytes memory _data) public payable returns (address, bytes32);

@@ -5,20 +5,16 @@ import "./interfaces/KyberNetworkProxyInterface.sol";
 import "./interfaces/ExchangeInterface.sol";
 import "./interfaces/UniswapExchangeInterface.sol";
 import "./DS/DSMath.sol";
+import "./constants/ConstantAddresses.sol";
 
 contract UniswapFactoryInterface {
     function getExchange(address token) external view returns (address exchange);
 }
 
-contract UniswapWrapper is ExchangeInterface, DSMath {
-
-    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+contract UniswapWrapper is ExchangeInterface, DSMath, ConstantAddresses {
 
     // Mainnet, no kovan deployment :(
     // address public constant UNISWAP_FACTORY = 0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95;
-
-    // Rinkeby
-    address public constant UNISWAP_FACTORY = 0xf5D915570BC477f9B8D6C0E980aA81757A3AaC36;
 
     function swapEtherToToken (uint _ethAmount, address _tokenAddress, uint _maxAmount) external payable returns(uint, uint) {
         address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_tokenAddress);
@@ -28,7 +24,7 @@ contract UniswapWrapper is ExchangeInterface, DSMath {
 
         return (tokenAmount, 0);
     }
-    
+
     function swapTokenToEther (address _tokenAddress, uint _amount, uint _maxAmount) external returns(uint) {
         address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_tokenAddress);
 
@@ -40,7 +36,7 @@ contract UniswapWrapper is ExchangeInterface, DSMath {
         return ethAmount;
     }
 
-    function getExpectedRate(address _src, address _dest, uint _srcQty) public returns (uint, uint) {
+    function getExpectedRate(address _src, address _dest, uint _srcQty) public view returns (uint, uint) {
         if(_src == KYBER_ETH_ADDRESS) {
             address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_dest);
             return (wdiv(UniswapExchangeInterface(uniswapTokenAddress).getEthToTokenInputPrice(_srcQty), _srcQty), 0);

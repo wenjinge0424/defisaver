@@ -4,19 +4,16 @@ import "../interfaces/CTokenInterface.sol";
 import "../interfaces/KyberNetworkProxyInterface.sol";
 import "./Exponential.sol";
 import "../DS/DSMath.sol";
+import "../constants/ConstantAddresses.sol";
 
-contract CompoundAdvanced is Exponential, DSMath {
-
-    address public constant WALLET_ID = 0x54b44C6B18fc0b4A1010B21d524c338D1f8065F6;
-    address constant KYBER_INTERFACE = 0x692f391bCc85cefCe8C237C01e1f636BbD70EA4D;
-
+contract CompoundAdvanced is Exponential, DSMath, ConstantAddresses {
 
     /// @notice Takes out an asset which a user supplies, converts and pays the debt
     function repay(address _suppliedAsset, address _borrowedAsset, address _underlyingSupply, address _underlyingBorrow, uint _amount) public {
         CTokenInterface cSuppliedContract = CTokenInterface(_suppliedAsset);
         CTokenInterface cBorrowedContract = CTokenInterface(_borrowedAsset);
 
-        uint cAmount = getCTokenAmount(_amount, _suppliedAsset);   
+        uint cAmount = getCTokenAmount(_amount, _suppliedAsset);
 
         cSuppliedContract.approve(_suppliedAsset, cAmount);
         cSuppliedContract.transferFrom(msg.sender, address(this), cAmount);

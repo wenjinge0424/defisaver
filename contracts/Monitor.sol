@@ -5,13 +5,14 @@ import "./interfaces/ProxyRegistryInterface.sol";
 import "./interfaces/GasTokenInterface.sol";
 import "./interfaces/ERC20.sol";
 import "./DS/DSMath.sol";
+import "./constants/ConstantAddresses.sol";
 
-contract Monitor is DSMath {
+contract Monitor is DSMath, ConstantAddresses {
     // KOVAN
-    PipInterface pip = PipInterface(0xA944bd4b25C9F186A846fd5668941AA3d3B8425F);
-    TubInterface tub = TubInterface(0xa71937147b55Deb8a530C7229C442Fd3F31b7db2);
-    ProxyRegistryInterface registry = ProxyRegistryInterface(0x64A436ae831C1672AE81F674CAb8B6775df3475C);
-    GasTokenInterface gasToken = GasTokenInterface(0x0000000000170CcC93903185bE5A2094C870Df62);
+    PipInterface pip = PipInterface(PIP_INTERFACE_ADDRESS);
+    TubInterface tub = TubInterface(TUB_ADDRESS);
+    ProxyRegistryInterface registry = ProxyRegistryInterface(PROXY_REGISTRY_INTERFACE_ADDRESS);
+    GasTokenInterface gasToken = GasTokenInterface(GAS_TOKEN_INTERFACE_ADDRESS);
 
     uint constant public REPAY_GAS_TOKEN = 30;
     uint constant public BOOST_GAS_TOKEN = 19;
@@ -139,7 +140,7 @@ contract Monitor is DSMath {
 
     function isOwner(address _owner, bytes32 _cdpId) internal returns(bool) {
         require(tub.lad(_cdpId) == _owner);
-        
+
         return true;
     }
 

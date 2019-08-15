@@ -4,28 +4,14 @@ import "./interfaces/TubInterface.sol";
 import "./interfaces/ExchangeInterface.sol";
 import "./DS/DSMath.sol";
 import "./SaverLogger.sol";
+import "./constants/ConstantAddresses.sol";
 
 /// @title SaverProxy implements advanced dashboard features repay/boost
-contract SaverProxy is DSMath {
-    //KOVAN
-    address public constant WETH_ADDRESS = 0xd0A1E359811322d97991E03f863a0C30C2cF029C;
-    address public constant DAI_ADDRESS = 0xC4375B7De8af5a38a93548eb8453a498222C4fF2;
-    address public constant MKR_ADDRESS = 0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD;
-    address public constant VOX_ADDRESS = 0xBb4339c0aB5B1d9f14Bd6e3426444A1e9d86A1d9;
-    address public constant PETH_ADDRESS = 0xf4d791139cE033Ad35DB2B2201435fAd668B1b64;
-    address public constant KYBER_WRAPPER = 0x82CD6436c58A65E2D4263259EcA5843d3d7e0e65;
-    address public constant TUB_ADDRESS = 0xa71937147b55Deb8a530C7229C442Fd3F31b7db2;
-    address public constant ETHER_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+contract SaverProxy is DSMath, ConstantAddresses {
 
-    address public constant KYBER_WRAPPER = 0x5595930d576Aedf13945C83cE5aaD827529A1310;
-    address public constant UNISWAP_WRAPPER = 0x5595930d576Aedf13945C83cE5aaD827529A1310;
-    address public constant ETH2DAI_WRAPPER = 0x823cde416973a19f98Bb9C96d97F4FE6C9A7238B;
-    address public constant WALLET_ID = 0x54b44C6B18fc0b4A1010B21d524c338D1f8065F6;
-    
-    
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
-    
-      /// @notice Withdraws Eth collateral, swaps Eth -> Dai with Kyber, and pays back the debt in Dai
+
+    /// @notice Withdraws Eth collateral, swaps Eth -> Dai with Kyber, and pays back the debt in Dai
     /// @dev If _buyMkr is false user needs to have MKR tokens and approve his DSProxy
     /// @param _cup Id of the CDP
     /// @param _amount Amount of Eth to sell
@@ -34,13 +20,13 @@ contract SaverProxy is DSMath {
         address exchangeWrapper;
         uint ethDaiPrice;
 
-        (exchangeWrapper, ethDaiPrice) = getBestPrice(_amount, ETHER_ADDRESS, DAI_ADDRESS, _exchangeType);
+        (exchangeWrapper, ethDaiPrice) = getBestPrice(_amount, KYBER_ETH_ADDRESS, MAKER_DAI_ADDRESS, _exchangeType);
 
         require(ethDaiPrice > _minPrice, "Slippage hit");
 
         TubInterface tub = TubInterface(TUB_ADDRESS);
 
-        approveTub(DAI_ADDRESS);
+        approveTub(MAKER_DAI_ADDRESS);
         approveTub(MKR_ADDRESS);
         approveTub(PETH_ADDRESS);
         approveTub(WETH_ADDRESS);
@@ -72,14 +58,14 @@ contract SaverProxy is DSMath {
         _amount = sub(_amount, sub(ethFee, change));
 
         (daiAmount, ) = ExchangeInterface(exchangeWrapper).swapEtherToToken.
-                            value(_amount)(_amount, DAI_ADDRESS, uint(-1));
+                            value(_amount)(_amount, MAKER_DAI_ADDRESS, uint(-1));
 
          // Take a fee from the user in dai
          daiAmount = sub(daiAmount, takeFee(daiAmount));
-        
+
         if (daiAmount > cdpWholeDebt) {
             tub.wipe(_cup, cdpWholeDebt);
-            ERC20(DAI_ADDRESS).transfer(msg.sender, sub(daiAmount, cdpWholeDebt));
+            ERC20(MAKER_DAI_ADDRESS).transfer(msg.sender, sub(daiAmount, cdpWholeDebt));
         } else {
             tub.wipe(_cup, daiAmount);
             require(getRatio(tub, _cup) > startingRatio, "ratio must be better off at the end");
@@ -97,7 +83,7 @@ contract SaverProxy is DSMath {
         address exchangeWrapper;
         uint daiEthPrice;
 
-        (exchangeWrapper, daiEthPrice) = getBestPrice(_amount, DAI_ADDRESS, ETHER_ADDRESS, _exchangeType);
+        (exchangeWrapper, daiEthPrice) = getBestPrice(_amount, MAKER_DAI_ADDRESS, KYBER_ETH_ADDRESS, _exchangeType);
 
         require(wdiv(1000000000000000000, daiEthPrice) < _minPrice, "Slippage hit");
 
@@ -105,8 +91,8 @@ contract SaverProxy is DSMath {
 
         approveTub(WETH_ADDRESS);
         approveTub(PETH_ADDRESS);
-        approveTub(DAI_ADDRESS);
-        
+        approveTub(MAKER_DAI_ADDRESS);
+
         uint maxAmount = maxFreeDai(tub, _cup);
 
         if (_amount > maxAmount) {
@@ -114,16 +100,21 @@ contract SaverProxy is DSMath {
         }
 
         uint startingCollateral = tub.ink(_cup);
-        
+
         tub.draw(_cup, _amount);
 
         // Take a fee from the user in dai
         _amount = sub(_amount, takeFee(_amount));
-        
+
         uint ethAmount = swapDaiAndLockEth(tub, _cup, _amount, exchangeWrapper);
 
+<<<<<<< HEAD
         require(tub.ink(_cup) > startingCollateral, "collateral must be bigger than starting point");
-        
+
+=======
+        // require(tub.ink(_cup) > startingCollateral, "collateral must be bigger than starting point");
+
+>>>>>>> ae110292843b09555cd496076dc9c824dfedb229
         SaverLogger(LOGGER_ADDRESS).LogBoost(uint(_cup), msg.sender, _amount, ethAmount);
     }
 
@@ -134,7 +125,7 @@ contract SaverProxy is DSMath {
         return sub(_tub.ink(_cup), wdiv(wmul(wmul(_tub.tab(_cup), rmul(_tub.mat(), WAD)),
                 VoxInterface(VOX_ADDRESS).par()), _tub.tag())) - 1;
     }
-    
+
     /// @notice Max. amount of Dai available to generate
     /// @param _tub Tub interface
     /// @param _cup Id of the CDP
@@ -156,25 +147,25 @@ contract SaverProxy is DSMath {
 
         return wdiv(feeInDai, uint(mkrPrice));
     }
-    
+
     /// @notice Helper function which swaps Dai for Eth and adds the collateral to the CDP
     /// @param _tub Tub interface
     /// @param _cup Id of the CDP
     /// @param _daiAmount Amount of Dai to swap for Eth
     function swapDaiAndLockEth(TubInterface _tub, bytes32 _cup, uint _daiAmount, address _exchangeWrapper) internal returns(uint) {
 
-        ERC20(DAI_ADDRESS).transfer(_exchangeWrapper, _daiAmount);
+        ERC20(MAKER_DAI_ADDRESS).transfer(_exchangeWrapper, _daiAmount);
 
-        uint ethAmount = ExchangeInterface(_exchangeWrapper).swapTokenToEther(DAI_ADDRESS, _daiAmount, uint(-1));
-        
+        uint ethAmount = ExchangeInterface(_exchangeWrapper).swapTokenToEther(MAKER_DAI_ADDRESS, _daiAmount, uint(-1));
+
         _tub.gem().deposit.value(ethAmount)();
 
         uint ink = sub(rdiv(ethAmount, _tub.per()), 1);
-        
+
         _tub.join(ink);
 
         _tub.lock(_cup, ink);
-        
+
         return ethAmount;
     }
 
@@ -200,7 +191,7 @@ contract SaverProxy is DSMath {
     function withdrawEth(TubInterface _tub, bytes32 _cup, uint _ethAmount) internal {
         uint ink = sub(rdiv(_ethAmount, _tub.per()), 1);
         _tub.free(_cup, ink);
-        
+
         _tub.exit(ink);
         _tub.gem().withdraw(_ethAmount);
     }
@@ -210,7 +201,7 @@ contract SaverProxy is DSMath {
     /// @return feeAmount Amount in Dai owner earned on the fee
     function takeFee(uint _amount) internal returns (uint feeAmount) {
         feeAmount = _amount / SERVICE_FEE;
-        ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
+        ERC20(MAKER_DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
     }
 
     /// @notice Returns the best estimated price from 2 exchanges
@@ -218,10 +209,10 @@ contract SaverProxy is DSMath {
     /// @param _srcToken Address of the source token
     /// @param _destToken Address of the destination token
     /// @return (address, uint) The address of the best exchange and the exchange price
-    function getBestPrice(uint _amount, address _srcToken, address _destToken, uint _exchangeType) internal returns (address, uint) {
-        uint expectedRateKyber;
-        uint expectedRateUniswap;
-        uint expectedRateEth2Dai;
+    function getBestPrice(uint _amount, address _srcToken, address _destToken, uint _exchangeType) public returns (address, uint) {
+        uint expectedRateKyber = 0;
+        uint expectedRateUniswap = 0;
+        uint expectedRateEth2Dai = 0;
 
         (expectedRateKyber, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
         (expectedRateUniswap, ) = ExchangeInterface(UNISWAP_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
@@ -239,6 +230,7 @@ contract SaverProxy is DSMath {
             return (UNISWAP_WRAPPER, expectedRateUniswap);
         }
 
+<<<<<<< HEAD
         if (expectedRateEth2Dai >= expectedRateKyber && expectedRateEth2Dai >= expectedRateUniswap) {
             return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
         }
@@ -248,6 +240,17 @@ contract SaverProxy is DSMath {
         }
 
         if (expectedRateUniswap >= expectedRateKyber && expectedRateUniswap >= expectedRateEth2Dai) {
+=======
+        if ((expectedRateEth2Dai >= expectedRateKyber) && (expectedRateEth2Dai >= expectedRateUniswap)) {
+            return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
+        }
+
+        if ((expectedRateKyber >= expectedRateUniswap) && (expectedRateKyber >= expectedRateEth2Dai)) {
+            return (KYBER_WRAPPER, expectedRateKyber);
+        }
+
+        if ((expectedRateUniswap >= expectedRateKyber) && (expectedRateUniswap >= expectedRateEth2Dai)) {
+>>>>>>> ae110292843b09555cd496076dc9c824dfedb229
             return (UNISWAP_WRAPPER, expectedRateUniswap);
         }
     }
@@ -255,19 +258,19 @@ contract SaverProxy is DSMath {
     /// @notice Returns expected rate for Eth -> Dai conversion
     /// @param _amount Amount of Ether
     function estimatedDaiPrice(uint _amount) internal returns (uint expectedRate) {
-        (expectedRate, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(ETHER_ADDRESS, DAI_ADDRESS, _amount);
+        (expectedRate, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(KYBER_ETH_ADDRESS, MAKER_DAI_ADDRESS, _amount);
     }
 
     /// @notice Returns expected rate for Dai -> Eth conversion
     /// @param _amount Amount of Dai
     function estimatedEthPrice(uint _amount) internal returns (uint expectedRate) {
-        (expectedRate, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(DAI_ADDRESS, ETHER_ADDRESS, _amount);
+        (expectedRate, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(MAKER_DAI_ADDRESS, KYBER_ETH_ADDRESS, _amount);
     }
 
     /// @notice Returns expected rate for Eth -> Mkr conversion
     /// @param _amount Amount of Ether
     function estimatedMkrPrice(uint _amount) internal returns (uint expectedRate) {
-        (expectedRate, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(ETHER_ADDRESS, MKR_ADDRESS, _amount);
+        (expectedRate, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(KYBER_ETH_ADDRESS, MKR_ADDRESS, _amount);
     }
 
     /// @notice Returns current Dai debt of the CDP

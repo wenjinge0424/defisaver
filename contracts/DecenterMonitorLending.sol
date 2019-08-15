@@ -2,12 +2,13 @@ pragma solidity ^0.5.0;
 
 import "./interfaces/CTokenInterface.sol";
 import "./compound/StupidExchange.sol";
+import "./constants/ConstantAddresses.sol";
 
-contract DecenterMonitorLending {
+contract DecenterMonitorLending is ConstantAddresses {
 
     //Kovan
-    CTokenInterface public cDai = CTokenInterface(0xb6b09fBffBa6A5C4631e5F7B2e3Ee183aC259c0d);
-    ERC20 public dai = ERC20(0x25a01a05C188DaCBCf1D61Af55D4a5B4021F7eeD);
+    CTokenInterface public cDai = CTokenInterface(CDAI_ADDRESS);
+    ERC20 public dai = ERC20(COMPOUND_DAI_ADDRESS);
 
     address owner;
     address monitor;

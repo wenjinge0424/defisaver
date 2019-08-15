@@ -1,12 +1,13 @@
-pragma solidity 0.5.0;
+pragma solidity ^0.5.0;
 
 import "./DS/DSMath.sol";
 import "./DS/DSAuth.sol";
 import "./interfaces/TubInterface.sol";
 import "./interfaces/ProxyRegistryInterface.sol";
+import "./constants/ConstantAddresses.sol";
 
 /// @title Marketplace keeps track of all the CDPs and implements the buy logic through MarketplaceProxy
-contract Marketplace is DSAuth, DSMath {
+contract Marketplace is DSAuth, DSMath, ConstantAddresses {
 
     struct SaleItem {
         address payable owner;
@@ -14,7 +15,7 @@ contract Marketplace is DSAuth, DSMath {
         uint discount;
         bool active;
     }
- 
+
     mapping (bytes32 => SaleItem) public items;
     mapping (bytes32 => uint) public itemPos;
     bytes32[] public itemsArr;
@@ -25,8 +26,8 @@ contract Marketplace is DSAuth, DSMath {
     uint public fee = 100; //1% fee
 
     // KOVAN
-    ProxyRegistryInterface public registry = ProxyRegistryInterface(0x64A436ae831C1672AE81F674CAb8B6775df3475C);
-    TubInterface public tub = TubInterface(0xa71937147b55Deb8a530C7229C442Fd3F31b7db2);
+    ProxyRegistryInterface public registry = ProxyRegistryInterface(PROXY_REGISTRY_INTERFACE_ADDRESS);
+    TubInterface public tub = TubInterface(TUB_ADDRESS);
 
     event OnSale(bytes32 indexed cup, address indexed proxy, address owner, uint discount);
 
@@ -81,7 +82,7 @@ contract Marketplace is DSAuth, DSMath {
         item.active = false;
 
         // give the cup to the buyer, him becoming the lad that owns the cup
-        DSProxyInterface(item.proxy).execute(marketplaceProxy, 
+        DSProxyInterface(item.proxy).execute(marketplaceProxy,
             abi.encodeWithSignature("give(bytes32,address)", _cup, _newOwner));
 
         item.owner.transfer(sub(cdpPrice, feeAmount)); // transfer money to the seller
@@ -99,7 +100,7 @@ contract Marketplace is DSAuth, DSMath {
     function cancel(bytes32 _cup) public {
         require(isOwner(msg.sender, _cup), "msg.sender must proxy which owns the cup");
         require(isOnSale(_cup), "only cancel cdps that are on sale");
-        
+
         removeItem(_cup);
     }
 
@@ -165,7 +166,7 @@ contract Marketplace is DSAuth, DSMath {
         itemsArr.length--;
     }
 
-    function isOwner(address _owner, bytes32 _cup) internal view returns(bool) {         
+    function isOwner(address _owner, bytes32 _cup) internal view returns(bool) {
         require(tub.lad(_cup) == _owner);
 
         return true;

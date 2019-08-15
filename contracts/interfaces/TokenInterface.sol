@@ -1,4 +1,4 @@
-pragma solidity 0.5.0;
+pragma solidity ^0.5.0;
 
 contract TokenInterface {
     function allowance(address, address) public returns (uint);

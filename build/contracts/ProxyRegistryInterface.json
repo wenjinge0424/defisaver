@@ -1,0 +1,501 @@
+{
+  "contractName": "ProxyRegistryInterface",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "proxies",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.7+commit.6da8b019\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"proxies\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"build\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/interfaces/ProxyRegistryInterface.sol\":\"ProxyRegistryInterface\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/interfaces/DSProxyInterface.sol\":{\"keccak256\":\"0x00851984e84bee551ec3601119bb3f1fc3e86a383b61c253a4b7c2ef0b1d17fa\",\"urls\":[\"bzzr://f169f16e7df675bfecefca6edb4779e785290585067f9d610706406884352e24\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/interfaces/ProxyRegistryInterface.sol\":{\"keccak256\":\"0xc0530b37da2b3e38c5c4a87d3a685d7ab13e742cf835bbdf9790ea585b6aac0d\",\"urls\":[\"bzzr://81809d7ef38ff8558d26e5cd38e07e6a6ed109c7bb00f315738a98c6451e3180\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.5.0;\n\nimport \"./DSProxyInterface.sol\";\n\ncontract ProxyRegistryInterface {\n    function proxies(address _owner) public view returns(DSProxyInterface);\n    function build(address) public returns (address);\n}\n",
+  "sourcePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/interfaces/ProxyRegistryInterface.sol",
+  "ast": {
+    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/interfaces/ProxyRegistryInterface.sol",
+    "exportedSymbols": {
+      "ProxyRegistryInterface": [
+        7518
+      ]
+    },
+    "id": 7519,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 7502,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:43"
+      },
+      {
+        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/interfaces/DSProxyInterface.sol",
+        "file": "./DSProxyInterface.sol",
+        "id": 7503,
+        "nodeType": "ImportDirective",
+        "scope": 7519,
+        "sourceUnit": 7125,
+        "src": "25:32:43",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 7518,
+        "linearizedBaseContracts": [
+          7518
+        ],
+        "name": "ProxyRegistryInterface",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 7510,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "proxies",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 7506,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7505,
+                  "name": "_owner",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7510,
+                  "src": "114:14:43",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7504,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "114:7:43",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "113:16:43"
+            },
+            "returnParameters": {
+              "id": 7509,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7508,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7510,
+                  "src": "150:16:43",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_DSProxyInterface_$7124",
+                    "typeString": "contract DSProxyInterface"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 7507,
+                    "name": "DSProxyInterface",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 7124,
+                    "src": "150:16:43",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_DSProxyInterface_$7124",
+                      "typeString": "contract DSProxyInterface"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "149:18:43"
+            },
+            "scope": 7518,
+            "src": "97:71:43",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 7517,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "build",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 7513,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7512,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7517,
+                  "src": "188:7:43",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7511,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "188:7:43",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "187:9:43"
+            },
+            "returnParameters": {
+              "id": 7516,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7515,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7517,
+                  "src": "213:7:43",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7514,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "213:7:43",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "212:9:43"
+            },
+            "scope": 7518,
+            "src": "173:49:43",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 7519,
+        "src": "59:165:43"
+      }
+    ],
+    "src": "0:225:43"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/interfaces/ProxyRegistryInterface.sol",
+    "exportedSymbols": {
+      "ProxyRegistryInterface": [
+        7518
+      ]
+    },
+    "id": 7519,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 7502,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:43"
+      },
+      {
+        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/interfaces/DSProxyInterface.sol",
+        "file": "./DSProxyInterface.sol",
+        "id": 7503,
+        "nodeType": "ImportDirective",
+        "scope": 7519,
+        "sourceUnit": 7125,
+        "src": "25:32:43",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 7518,
+        "linearizedBaseContracts": [
+          7518
+        ],
+        "name": "ProxyRegistryInterface",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 7510,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "proxies",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 7506,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7505,
+                  "name": "_owner",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7510,
+                  "src": "114:14:43",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7504,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "114:7:43",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "113:16:43"
+            },
+            "returnParameters": {
+              "id": 7509,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7508,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7510,
+                  "src": "150:16:43",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_DSProxyInterface_$7124",
+                    "typeString": "contract DSProxyInterface"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 7507,
+                    "name": "DSProxyInterface",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 7124,
+                    "src": "150:16:43",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_DSProxyInterface_$7124",
+                      "typeString": "contract DSProxyInterface"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "149:18:43"
+            },
+            "scope": 7518,
+            "src": "97:71:43",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 7517,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "build",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 7513,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7512,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7517,
+                  "src": "188:7:43",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7511,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "188:7:43",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "187:9:43"
+            },
+            "returnParameters": {
+              "id": 7516,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7515,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7517,
+                  "src": "213:7:43",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7514,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "213:7:43",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "212:9:43"
+            },
+            "scope": 7518,
+            "src": "173:49:43",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 7519,
+        "src": "59:165:43"
+      }
+    ],
+    "src": "0:225:43"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-08-13T11:10:46.986Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}

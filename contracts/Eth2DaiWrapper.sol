@@ -6,14 +6,10 @@ import "./interfaces/ExchangeInterface.sol";
 import "./interfaces/Eth2DaiInterface.sol";
 import "./interfaces/TokenInterface.sol";
 import "./DS/DSMath.sol";
+import "./constants/ConstantAddresses.sol";
 
-contract Eth2DaiWrapper is ExchangeInterface, DSMath {
+contract Eth2DaiWrapper is ExchangeInterface, DSMath, ConstantAddresses {
 
-    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-
-    // Kovan
-    address public constant OTC_ADDRESS = 0x4A6bC4e803c62081ffEbCc8d227B5a87a58f1F8F;
-    address public constant WETH_ADDRESS = 0xd0A1E359811322d97991E03f863a0C30C2cF029C;
 
     function swapEtherToToken (uint _ethAmount, address _tokenAddress, uint _maxAmount) external payable returns(uint, uint) {
         require(ERC20(WETH_ADDRESS).approve(OTC_ADDRESS, _ethAmount));
@@ -26,7 +22,7 @@ contract Eth2DaiWrapper is ExchangeInterface, DSMath {
 
         return (daiBought, 0);
     }
-    
+
     function swapTokenToEther (address _tokenAddress, uint _amount, uint _maxAmount) external returns(uint) {
         require(ERC20(_tokenAddress).approve(OTC_ADDRESS, _amount));
 
@@ -40,7 +36,7 @@ contract Eth2DaiWrapper is ExchangeInterface, DSMath {
         return ethBought;
     }
 
-    function getExpectedRate(address _src, address _dest, uint _srcQty) public returns (uint, uint) {
+    function getExpectedRate(address _src, address _dest, uint _srcQty) public view returns (uint, uint) {
         if(_src == KYBER_ETH_ADDRESS) {
             return (wdiv(Eth2DaiInterface(OTC_ADDRESS).getBuyAmount(ERC20(_dest), ERC20(WETH_ADDRESS), _srcQty), _srcQty), 0);
         } else if (_dest == KYBER_ETH_ADDRESS) {
