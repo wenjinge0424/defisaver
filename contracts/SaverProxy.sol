@@ -108,13 +108,8 @@ contract SaverProxy is DSMath, ConstantAddresses {
 
         uint ethAmount = swapDaiAndLockEth(tub, _cup, _amount, exchangeWrapper);
 
-<<<<<<< HEAD
         require(tub.ink(_cup) > startingCollateral, "collateral must be bigger than starting point");
 
-=======
-        // require(tub.ink(_cup) > startingCollateral, "collateral must be bigger than starting point");
-
->>>>>>> ae110292843b09555cd496076dc9c824dfedb229
         SaverLogger(LOGGER_ADDRESS).LogBoost(uint(_cup), msg.sender, _amount, ethAmount);
     }
 
@@ -209,7 +204,7 @@ contract SaverProxy is DSMath, ConstantAddresses {
     /// @param _srcToken Address of the source token
     /// @param _destToken Address of the destination token
     /// @return (address, uint) The address of the best exchange and the exchange price
-    function getBestPrice(uint _amount, address _srcToken, address _destToken, uint _exchangeType) public returns (address, uint) {
+    function getBestPrice(uint _amount, address _srcToken, address _destToken, uint _exchangeType) public view returns (address, uint) {
         uint expectedRateKyber = 0;
         uint expectedRateUniswap = 0;
         uint expectedRateEth2Dai = 0;
@@ -230,17 +225,6 @@ contract SaverProxy is DSMath, ConstantAddresses {
             return (UNISWAP_WRAPPER, expectedRateUniswap);
         }
 
-<<<<<<< HEAD
-        if (expectedRateEth2Dai >= expectedRateKyber && expectedRateEth2Dai >= expectedRateUniswap) {
-            return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
-        }
-
-        if (expectedRateKyber >= expectedRateUniswap && expectedRateKyber >= expectedRateEth2Dai) {
-            return (KYBER_WRAPPER, expectedRateKyber);
-        }
-
-        if (expectedRateUniswap >= expectedRateKyber && expectedRateUniswap >= expectedRateEth2Dai) {
-=======
         if ((expectedRateEth2Dai >= expectedRateKyber) && (expectedRateEth2Dai >= expectedRateUniswap)) {
             return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
         }
@@ -250,26 +234,25 @@ contract SaverProxy is DSMath, ConstantAddresses {
         }
 
         if ((expectedRateUniswap >= expectedRateKyber) && (expectedRateUniswap >= expectedRateEth2Dai)) {
->>>>>>> ae110292843b09555cd496076dc9c824dfedb229
             return (UNISWAP_WRAPPER, expectedRateUniswap);
         }
     }
 
     /// @notice Returns expected rate for Eth -> Dai conversion
     /// @param _amount Amount of Ether
-    function estimatedDaiPrice(uint _amount) internal returns (uint expectedRate) {
+    function estimatedDaiPrice(uint _amount) internal view returns (uint expectedRate) {
         (expectedRate, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(KYBER_ETH_ADDRESS, MAKER_DAI_ADDRESS, _amount);
     }
 
     /// @notice Returns expected rate for Dai -> Eth conversion
     /// @param _amount Amount of Dai
-    function estimatedEthPrice(uint _amount) internal returns (uint expectedRate) {
+    function estimatedEthPrice(uint _amount) internal view returns (uint expectedRate) {
         (expectedRate, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(MAKER_DAI_ADDRESS, KYBER_ETH_ADDRESS, _amount);
     }
 
     /// @notice Returns expected rate for Eth -> Mkr conversion
     /// @param _amount Amount of Ether
-    function estimatedMkrPrice(uint _amount) internal returns (uint expectedRate) {
+    function estimatedMkrPrice(uint _amount) internal view returns (uint expectedRate) {
         (expectedRate, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(KYBER_ETH_ADDRESS, MKR_ADDRESS, _amount);
     }
 

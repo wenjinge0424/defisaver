@@ -163,25 +163,24 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.7+commit.6da8b019\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[{\"components\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"number\",\"type\":\"uint256\"}],\"name\":\"account\",\"type\":\"tuple\"}],\"name\":\"getAccountBalances\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"},{\"components\":[{\"name\":\"sign\",\"type\":\"bool\"},{\"name\":\"value\",\"type\":\"uint128\"}],\"name\":\"\",\"type\":\"tuple[]\"},{\"components\":[{\"name\":\"sign\",\"type\":\"bool\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"\",\"type\":\"tuple[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"components\":[{\"name\":\"operator\",\"type\":\"address\"},{\"name\":\"trusted\",\"type\":\"bool\"}],\"name\":\"args\",\"type\":\"tuple[]\"}],\"name\":\"setOperators\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"components\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"number\",\"type\":\"uint256\"}],\"name\":\"accounts\",\"type\":\"tuple[]\"},{\"components\":[{\"name\":\"actionType\",\"type\":\"uint8\"},{\"name\":\"accountId\",\"type\":\"uint256\"},{\"components\":[{\"name\":\"sign\",\"type\":\"bool\"},{\"name\":\"denomination\",\"type\":\"uint8\"},{\"name\":\"ref\",\"type\":\"uint8\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"amount\",\"type\":\"tuple\"},{\"name\":\"primaryMarketId\",\"type\":\"uint256\"},{\"name\":\"secondaryMarketId\",\"type\":\"uint256\"},{\"name\":\"otherAddress\",\"type\":\"address\"},{\"name\":\"otherAccountId\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"actions\",\"type\":\"tuple[]\"}],\"name\":\"operate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/ISoloMargin.sol\":\"ISoloMargin\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/ISoloMargin.sol\":{\"keccak256\":\"0xdab6465fa7194bceb63b86d4f9629069e1cd3e0c3aa166ea8302cea6d473288f\",\"urls\":[\"bzzr://c7c6ed0902cac7f95e1574301d65dd87ef68e84582e94c615e296ad43f79cc0a\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Account.sol\":{\"keccak256\":\"0x4c27c617b01972ddb8ca160454284ed09f3ec6f7abd667c31ca9f38805738d33\",\"urls\":[\"bzzr://ad0dd4229cea4f8c5b877a653766cf413d733e442cfc448ffd715e786d7b5216\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Actions.sol\":{\"keccak256\":\"0xa3def9f1d58c1a353cd5412df8027674226000fd0b1cf52f3e11d6b4428fe2dc\",\"urls\":[\"bzzr://955e36c7bd9e222b58764b755169056c4225fc0561fdd88bb71ce7f1e2782a41\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Math.sol\":{\"keccak256\":\"0x05162cffa6d5479b6555e03af67b75e63d85272a3c3d3d2630a127ffa811ba41\",\"urls\":[\"bzzr://0e784dccf35201ef16030ec531028252d590936d75f0200f368a7e5981046af4\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Require.sol\":{\"keccak256\":\"0x6ecb512d52bb5cb36ba26b98877240e0b23eb3310df5dc61f82c655dc974d04b\",\"urls\":[\"bzzr://826485117e00106f438a7e64ecc32b2c3705e02d9bd6035dbdc5f9faaa19482c\"]},\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Types.sol\":{\"keccak256\":\"0x35c04c154e9ef818a3e1b59eb748565645864d5f8f2bc696c1f425a8ade9ab00\",\"urls\":[\"bzzr://8b2db9cb583f79fc2b74a70b270667f6a3bc54c3afef6a2d56e0d2ec5b8ca725\"]},\"openzeppelin-solidity/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x965012d27b4262d7a41f5028cbb30c51ebd9ecd4be8fb30380aaa7a3c64fbc8b\",\"urls\":[\"bzzr://41ca38f6b0fa4b77b0feec43e422cfbec48b7eb38a41edf0b85c77e8d9a296b1\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.5.0;\npragma experimental ABIEncoderV2;\n\nimport \"./lib/Actions.sol\";\nimport \"./lib/Account.sol\";\nimport \"./lib/Types.sol\";\n\ncontract ISoloMargin {\n    struct OperatorArg {\n        address operator;\n        bool trusted;\n    }\n\n    function operate(\n        Account.Info[] memory accounts,\n        Actions.ActionArgs[] memory actions\n    ) public;\n\n    function getAccountBalances(\n        Account.Info memory account\n    ) public view returns (\n        address[] memory,\n        Types.Par[] memory,\n        Types.Wei[] memory\n    );\n\n    function setOperators(\n        OperatorArg[] memory args\n    ) public;\n}\n",
-  "sourcePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/ISoloMargin.sol",
+  "sourcePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/savings/dydx/ISoloMargin.sol",
   "ast": {
-    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/ISoloMargin.sol",
+    "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/savings/dydx/ISoloMargin.sol",
     "exportedSymbols": {
       "ISoloMargin": [
-        8879
+        8972
       ]
     },
-    "id": 8880,
+    "id": 8973,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 8840,
+        "id": 8933,
         "literals": [
           "solidity",
           "^",
@@ -192,7 +191,7 @@
         "src": "0:23:52"
       },
       {
-        "id": 8841,
+        "id": 8934,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -201,34 +200,34 @@
         "src": "24:33:52"
       },
       {
-        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Actions.sol",
+        "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/savings/dydx/lib/Actions.sol",
         "file": "./lib/Actions.sol",
-        "id": 8842,
+        "id": 8935,
         "nodeType": "ImportDirective",
-        "scope": 8880,
-        "sourceUnit": 9465,
+        "scope": 8973,
+        "sourceUnit": 9558,
         "src": "59:27:52",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Account.sol",
+        "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/savings/dydx/lib/Account.sol",
         "file": "./lib/Account.sol",
-        "id": 8843,
+        "id": 8936,
         "nodeType": "ImportDirective",
-        "scope": 8880,
-        "sourceUnit": 8924,
+        "scope": 8973,
+        "sourceUnit": 9017,
         "src": "87:27:52",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Types.sol",
+        "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/savings/dydx/lib/Types.sol",
         "file": "./lib/Types.sol",
-        "id": 8844,
+        "id": 8937,
         "nodeType": "ImportDirective",
-        "scope": 8880,
-        "sourceUnit": 10815,
+        "scope": 8973,
+        "sourceUnit": 10908,
         "src": "115:25:52",
         "symbolAliases": [],
         "unitAlias": ""
@@ -239,23 +238,23 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 8879,
+        "id": 8972,
         "linearizedBaseContracts": [
-          8879
+          8972
         ],
         "name": "ISoloMargin",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "ISoloMargin.OperatorArg",
-            "id": 8849,
+            "id": 8942,
             "members": [
               {
                 "constant": false,
-                "id": 8846,
+                "id": 8939,
                 "name": "operator",
                 "nodeType": "VariableDeclaration",
-                "scope": 8849,
+                "scope": 8942,
                 "src": "198:16:52",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -264,7 +263,7 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 8845,
+                  "id": 8938,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "198:7:52",
@@ -279,10 +278,10 @@
               },
               {
                 "constant": false,
-                "id": 8848,
+                "id": 8941,
                 "name": "trusted",
                 "nodeType": "VariableDeclaration",
-                "scope": 8849,
+                "scope": 8942,
                 "src": "224:12:52",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -291,7 +290,7 @@
                   "typeString": "bool"
                 },
                 "typeName": {
-                  "id": 8847,
+                  "id": 8940,
                   "name": "bool",
                   "nodeType": "ElementaryTypeName",
                   "src": "224:4:52",
@@ -306,55 +305,55 @@
             ],
             "name": "OperatorArg",
             "nodeType": "StructDefinition",
-            "scope": 8879,
+            "scope": 8972,
             "src": "169:74:52",
             "visibility": "public"
           },
           {
             "body": null,
             "documentation": null,
-            "id": 8858,
+            "id": 8951,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "operate",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8856,
+              "id": 8949,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8852,
+                  "id": 8945,
                   "name": "accounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8858,
+                  "scope": 8951,
                   "src": "275:30:52",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Info_$8893_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Info_$8986_memory_$dyn_memory_ptr",
                     "typeString": "struct Account.Info[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 8850,
+                      "id": 8943,
                       "name": "Account.Info",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 8893,
+                      "referencedDeclaration": 8986,
                       "src": "275:12:52",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Info_$8893_storage_ptr",
+                        "typeIdentifier": "t_struct$_Info_$8986_storage_ptr",
                         "typeString": "struct Account.Info"
                       }
                     },
-                    "id": 8851,
+                    "id": 8944,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "275:14:52",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Info_$8893_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Info_$8986_storage_$dyn_storage_ptr",
                       "typeString": "struct Account.Info[]"
                     }
                   },
@@ -363,36 +362,36 @@
                 },
                 {
                   "constant": false,
-                  "id": 8855,
+                  "id": 8948,
                   "name": "actions",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8858,
+                  "scope": 8951,
                   "src": "315:35:52",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_ActionArgs_$8968_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_ActionArgs_$9061_memory_$dyn_memory_ptr",
                     "typeString": "struct Actions.ActionArgs[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 8853,
+                      "id": 8946,
                       "name": "Actions.ActionArgs",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 8968,
+                      "referencedDeclaration": 9061,
                       "src": "315:18:52",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_ActionArgs_$8968_storage_ptr",
+                        "typeIdentifier": "t_struct$_ActionArgs_$9061_storage_ptr",
                         "typeString": "struct Actions.ActionArgs"
                       }
                     },
-                    "id": 8854,
+                    "id": 8947,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "315:20:52",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_ActionArgs_$8968_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_ActionArgs_$9061_storage_$dyn_storage_ptr",
                       "typeString": "struct Actions.ActionArgs[]"
                     }
                   },
@@ -403,12 +402,12 @@
               "src": "265:91:52"
             },
             "returnParameters": {
-              "id": 8857,
+              "id": 8950,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "363:0:52"
             },
-            "scope": 8879,
+            "scope": 8972,
             "src": "249:115:52",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -417,38 +416,38 @@
           {
             "body": null,
             "documentation": null,
-            "id": 8872,
+            "id": 8965,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getAccountBalances",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8861,
+              "id": 8954,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8860,
+                  "id": 8953,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8872,
+                  "scope": 8965,
                   "src": "407:27:52",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Info_$8893_memory_ptr",
+                    "typeIdentifier": "t_struct$_Info_$8986_memory_ptr",
                     "typeString": "struct Account.Info"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 8859,
+                    "id": 8952,
                     "name": "Account.Info",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 8893,
+                    "referencedDeclaration": 8986,
                     "src": "407:12:52",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Info_$8893_storage_ptr",
+                      "typeIdentifier": "t_struct$_Info_$8986_storage_ptr",
                       "typeString": "struct Account.Info"
                     }
                   },
@@ -459,15 +458,15 @@
               "src": "397:43:52"
             },
             "returnParameters": {
-              "id": 8871,
+              "id": 8964,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8864,
+                  "id": 8957,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8872,
+                  "scope": 8965,
                   "src": "471:16:52",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -477,7 +476,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 8862,
+                      "id": 8955,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "471:7:52",
@@ -487,7 +486,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 8863,
+                    "id": 8956,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "471:9:52",
@@ -501,36 +500,36 @@
                 },
                 {
                   "constant": false,
-                  "id": 8867,
+                  "id": 8960,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8872,
+                  "scope": 8965,
                   "src": "497:18:52",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Par_$10380_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Par_$10473_memory_$dyn_memory_ptr",
                     "typeString": "struct Types.Par[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 8865,
+                      "id": 8958,
                       "name": "Types.Par",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 10380,
+                      "referencedDeclaration": 10473,
                       "src": "497:9:52",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Par_$10380_storage_ptr",
+                        "typeIdentifier": "t_struct$_Par_$10473_storage_ptr",
                         "typeString": "struct Types.Par"
                       }
                     },
-                    "id": 8866,
+                    "id": 8959,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "497:11:52",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Par_$10380_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Par_$10473_storage_$dyn_storage_ptr",
                       "typeString": "struct Types.Par[]"
                     }
                   },
@@ -539,36 +538,36 @@
                 },
                 {
                   "constant": false,
-                  "id": 8870,
+                  "id": 8963,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8872,
+                  "scope": 8965,
                   "src": "525:18:52",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Wei_$10602_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Wei_$10695_memory_$dyn_memory_ptr",
                     "typeString": "struct Types.Wei[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 8868,
+                      "id": 8961,
                       "name": "Types.Wei",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 10602,
+                      "referencedDeclaration": 10695,
                       "src": "525:9:52",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Wei_$10602_storage_ptr",
+                        "typeIdentifier": "t_struct$_Wei_$10695_storage_ptr",
                         "typeString": "struct Types.Wei"
                       }
                     },
-                    "id": 8869,
+                    "id": 8962,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "525:11:52",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Wei_$10602_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Wei_$10695_storage_$dyn_storage_ptr",
                       "typeString": "struct Types.Wei[]"
                     }
                   },
@@ -578,7 +577,7 @@
               ],
               "src": "461:88:52"
             },
-            "scope": 8879,
+            "scope": 8972,
             "src": "370:180:52",
             "stateMutability": "view",
             "superFunction": null,
@@ -587,48 +586,48 @@
           {
             "body": null,
             "documentation": null,
-            "id": 8878,
+            "id": 8971,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "setOperators",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8876,
+              "id": 8969,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8875,
+                  "id": 8968,
                   "name": "args",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8878,
+                  "scope": 8971,
                   "src": "587:25:52",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_OperatorArg_$8849_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_OperatorArg_$8942_memory_$dyn_memory_ptr",
                     "typeString": "struct ISoloMargin.OperatorArg[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 8873,
+                      "id": 8966,
                       "name": "OperatorArg",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 8849,
+                      "referencedDeclaration": 8942,
                       "src": "587:11:52",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_OperatorArg_$8849_storage_ptr",
+                        "typeIdentifier": "t_struct$_OperatorArg_$8942_storage_ptr",
                         "typeString": "struct ISoloMargin.OperatorArg"
                       }
                     },
-                    "id": 8874,
+                    "id": 8967,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "587:13:52",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_OperatorArg_$8849_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_OperatorArg_$8942_storage_$dyn_storage_ptr",
                       "typeString": "struct ISoloMargin.OperatorArg[]"
                     }
                   },
@@ -639,36 +638,36 @@
               "src": "577:41:52"
             },
             "returnParameters": {
-              "id": 8877,
+              "id": 8970,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "625:0:52"
             },
-            "scope": 8879,
+            "scope": 8972,
             "src": "556:70:52",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 8880,
+        "scope": 8973,
         "src": "142:486:52"
       }
     ],
     "src": "0:629:52"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/ISoloMargin.sol",
+    "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/savings/dydx/ISoloMargin.sol",
     "exportedSymbols": {
       "ISoloMargin": [
-        8879
+        8972
       ]
     },
-    "id": 8880,
+    "id": 8973,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 8840,
+        "id": 8933,
         "literals": [
           "solidity",
           "^",
@@ -679,7 +678,7 @@
         "src": "0:23:52"
       },
       {
-        "id": 8841,
+        "id": 8934,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -688,34 +687,34 @@
         "src": "24:33:52"
       },
       {
-        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Actions.sol",
+        "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/savings/dydx/lib/Actions.sol",
         "file": "./lib/Actions.sol",
-        "id": 8842,
+        "id": 8935,
         "nodeType": "ImportDirective",
-        "scope": 8880,
-        "sourceUnit": 9465,
+        "scope": 8973,
+        "sourceUnit": 9558,
         "src": "59:27:52",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Account.sol",
+        "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/savings/dydx/lib/Account.sol",
         "file": "./lib/Account.sol",
-        "id": 8843,
+        "id": 8936,
         "nodeType": "ImportDirective",
-        "scope": 8880,
-        "sourceUnit": 8924,
+        "scope": 8973,
+        "sourceUnit": 9017,
         "src": "87:27:52",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/savings/dydx/lib/Types.sol",
+        "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/savings/dydx/lib/Types.sol",
         "file": "./lib/Types.sol",
-        "id": 8844,
+        "id": 8937,
         "nodeType": "ImportDirective",
-        "scope": 8880,
-        "sourceUnit": 10815,
+        "scope": 8973,
+        "sourceUnit": 10908,
         "src": "115:25:52",
         "symbolAliases": [],
         "unitAlias": ""
@@ -726,23 +725,23 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 8879,
+        "id": 8972,
         "linearizedBaseContracts": [
-          8879
+          8972
         ],
         "name": "ISoloMargin",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "ISoloMargin.OperatorArg",
-            "id": 8849,
+            "id": 8942,
             "members": [
               {
                 "constant": false,
-                "id": 8846,
+                "id": 8939,
                 "name": "operator",
                 "nodeType": "VariableDeclaration",
-                "scope": 8849,
+                "scope": 8942,
                 "src": "198:16:52",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -751,7 +750,7 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 8845,
+                  "id": 8938,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "198:7:52",
@@ -766,10 +765,10 @@
               },
               {
                 "constant": false,
-                "id": 8848,
+                "id": 8941,
                 "name": "trusted",
                 "nodeType": "VariableDeclaration",
-                "scope": 8849,
+                "scope": 8942,
                 "src": "224:12:52",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -778,7 +777,7 @@
                   "typeString": "bool"
                 },
                 "typeName": {
-                  "id": 8847,
+                  "id": 8940,
                   "name": "bool",
                   "nodeType": "ElementaryTypeName",
                   "src": "224:4:52",
@@ -793,55 +792,55 @@
             ],
             "name": "OperatorArg",
             "nodeType": "StructDefinition",
-            "scope": 8879,
+            "scope": 8972,
             "src": "169:74:52",
             "visibility": "public"
           },
           {
             "body": null,
             "documentation": null,
-            "id": 8858,
+            "id": 8951,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "operate",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8856,
+              "id": 8949,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8852,
+                  "id": 8945,
                   "name": "accounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8858,
+                  "scope": 8951,
                   "src": "275:30:52",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Info_$8893_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Info_$8986_memory_$dyn_memory_ptr",
                     "typeString": "struct Account.Info[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 8850,
+                      "id": 8943,
                       "name": "Account.Info",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 8893,
+                      "referencedDeclaration": 8986,
                       "src": "275:12:52",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Info_$8893_storage_ptr",
+                        "typeIdentifier": "t_struct$_Info_$8986_storage_ptr",
                         "typeString": "struct Account.Info"
                       }
                     },
-                    "id": 8851,
+                    "id": 8944,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "275:14:52",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Info_$8893_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Info_$8986_storage_$dyn_storage_ptr",
                       "typeString": "struct Account.Info[]"
                     }
                   },
@@ -850,36 +849,36 @@
                 },
                 {
                   "constant": false,
-                  "id": 8855,
+                  "id": 8948,
                   "name": "actions",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8858,
+                  "scope": 8951,
                   "src": "315:35:52",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_ActionArgs_$8968_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_ActionArgs_$9061_memory_$dyn_memory_ptr",
                     "typeString": "struct Actions.ActionArgs[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 8853,
+                      "id": 8946,
                       "name": "Actions.ActionArgs",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 8968,
+                      "referencedDeclaration": 9061,
                       "src": "315:18:52",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_ActionArgs_$8968_storage_ptr",
+                        "typeIdentifier": "t_struct$_ActionArgs_$9061_storage_ptr",
                         "typeString": "struct Actions.ActionArgs"
                       }
                     },
-                    "id": 8854,
+                    "id": 8947,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "315:20:52",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_ActionArgs_$8968_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_ActionArgs_$9061_storage_$dyn_storage_ptr",
                       "typeString": "struct Actions.ActionArgs[]"
                     }
                   },
@@ -890,12 +889,12 @@
               "src": "265:91:52"
             },
             "returnParameters": {
-              "id": 8857,
+              "id": 8950,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "363:0:52"
             },
-            "scope": 8879,
+            "scope": 8972,
             "src": "249:115:52",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -904,38 +903,38 @@
           {
             "body": null,
             "documentation": null,
-            "id": 8872,
+            "id": 8965,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getAccountBalances",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8861,
+              "id": 8954,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8860,
+                  "id": 8953,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8872,
+                  "scope": 8965,
                   "src": "407:27:52",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Info_$8893_memory_ptr",
+                    "typeIdentifier": "t_struct$_Info_$8986_memory_ptr",
                     "typeString": "struct Account.Info"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 8859,
+                    "id": 8952,
                     "name": "Account.Info",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 8893,
+                    "referencedDeclaration": 8986,
                     "src": "407:12:52",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Info_$8893_storage_ptr",
+                      "typeIdentifier": "t_struct$_Info_$8986_storage_ptr",
                       "typeString": "struct Account.Info"
                     }
                   },
@@ -946,15 +945,15 @@
               "src": "397:43:52"
             },
             "returnParameters": {
-              "id": 8871,
+              "id": 8964,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8864,
+                  "id": 8957,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8872,
+                  "scope": 8965,
                   "src": "471:16:52",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -964,7 +963,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 8862,
+                      "id": 8955,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "471:7:52",
@@ -974,7 +973,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 8863,
+                    "id": 8956,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "471:9:52",
@@ -988,36 +987,36 @@
                 },
                 {
                   "constant": false,
-                  "id": 8867,
+                  "id": 8960,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8872,
+                  "scope": 8965,
                   "src": "497:18:52",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Par_$10380_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Par_$10473_memory_$dyn_memory_ptr",
                     "typeString": "struct Types.Par[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 8865,
+                      "id": 8958,
                       "name": "Types.Par",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 10380,
+                      "referencedDeclaration": 10473,
                       "src": "497:9:52",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Par_$10380_storage_ptr",
+                        "typeIdentifier": "t_struct$_Par_$10473_storage_ptr",
                         "typeString": "struct Types.Par"
                       }
                     },
-                    "id": 8866,
+                    "id": 8959,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "497:11:52",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Par_$10380_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Par_$10473_storage_$dyn_storage_ptr",
                       "typeString": "struct Types.Par[]"
                     }
                   },
@@ -1026,36 +1025,36 @@
                 },
                 {
                   "constant": false,
-                  "id": 8870,
+                  "id": 8963,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8872,
+                  "scope": 8965,
                   "src": "525:18:52",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Wei_$10602_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Wei_$10695_memory_$dyn_memory_ptr",
                     "typeString": "struct Types.Wei[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 8868,
+                      "id": 8961,
                       "name": "Types.Wei",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 10602,
+                      "referencedDeclaration": 10695,
                       "src": "525:9:52",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Wei_$10602_storage_ptr",
+                        "typeIdentifier": "t_struct$_Wei_$10695_storage_ptr",
                         "typeString": "struct Types.Wei"
                       }
                     },
-                    "id": 8869,
+                    "id": 8962,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "525:11:52",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Wei_$10602_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Wei_$10695_storage_$dyn_storage_ptr",
                       "typeString": "struct Types.Wei[]"
                     }
                   },
@@ -1065,7 +1064,7 @@
               ],
               "src": "461:88:52"
             },
-            "scope": 8879,
+            "scope": 8972,
             "src": "370:180:52",
             "stateMutability": "view",
             "superFunction": null,
@@ -1074,48 +1073,48 @@
           {
             "body": null,
             "documentation": null,
-            "id": 8878,
+            "id": 8971,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "setOperators",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8876,
+              "id": 8969,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8875,
+                  "id": 8968,
                   "name": "args",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8878,
+                  "scope": 8971,
                   "src": "587:25:52",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_OperatorArg_$8849_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_OperatorArg_$8942_memory_$dyn_memory_ptr",
                     "typeString": "struct ISoloMargin.OperatorArg[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 8873,
+                      "id": 8966,
                       "name": "OperatorArg",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 8849,
+                      "referencedDeclaration": 8942,
                       "src": "587:11:52",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_OperatorArg_$8849_storage_ptr",
+                        "typeIdentifier": "t_struct$_OperatorArg_$8942_storage_ptr",
                         "typeString": "struct ISoloMargin.OperatorArg"
                       }
                     },
-                    "id": 8874,
+                    "id": 8967,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "587:13:52",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_OperatorArg_$8849_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_OperatorArg_$8942_storage_$dyn_storage_ptr",
                       "typeString": "struct ISoloMargin.OperatorArg[]"
                     }
                   },
@@ -1126,19 +1125,19 @@
               "src": "577:41:52"
             },
             "returnParameters": {
-              "id": 8877,
+              "id": 8970,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "625:0:52"
             },
-            "scope": 8879,
+            "scope": 8972,
             "src": "556:70:52",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 8880,
+        "scope": 8973,
         "src": "142:486:52"
       }
     ],
@@ -1149,8 +1148,8 @@
     "version": "0.5.7+commit.6da8b019.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.9",
-  "updatedAt": "2019-08-13T11:10:47.010Z",
+  "schemaVersion": "3.0.0",
+  "updatedAt": "2019-08-17T15:16:25.224Z",
   "devdoc": {
     "methods": {}
   },

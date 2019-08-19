@@ -8,6 +8,7 @@ import "./DS/DSMath.sol";
 import "./constants/ConstantAddresses.sol";
 
 contract Monitor is DSMath, ConstantAddresses {
+
     // KOVAN
     PipInterface pip = PipInterface(PIP_INTERFACE_ADDRESS);
     TubInterface tub = TubInterface(TUB_ADDRESS);
@@ -17,21 +18,24 @@ contract Monitor is DSMath, ConstantAddresses {
     uint constant public REPAY_GAS_TOKEN = 30;
     uint constant public BOOST_GAS_TOKEN = 19;
 
+    uint constant public MAX_GAS_PRICE = 40000000000; // 40 gwei
+
+    uint constant public REPAY_GAS_COST = 1500000;
+    uint constant public BOOST_GAS_COST = 750000;
+
     address public saverProxy;
     address public owner;
+    uint public changeIndex;
 
     struct CdpHolder {
         uint minRatio;
         uint maxRatio;
-        uint slippageLimit;
         uint optimalRatioBoost;
         uint optimalRatioRepay;
         address owner;
     }
 
     mapping(bytes32 => CdpHolder) public holders;
-
-    uint public changeIndex;
 
     /// @dev This will be Bot addresses which will trigger the calls
     mapping(address => bool) public approvedCallers;
@@ -53,15 +57,21 @@ contract Monitor is DSMath, ConstantAddresses {
         _;
     }
 
-    constructor() public {
+    constructor(address _saverProxy) public {
         approvedCallers[msg.sender] = true;
         owner = msg.sender;
-        saverProxy = 0x043125335E8feD7421F4aF91F7123b605b30F593;
+
+        saverProxy = _saverProxy;
         changeIndex = 0;
     }
 
-    /// @dev Users DSProxy should call this
-    function subscribe(bytes32 _cdpId, uint _minRatio, uint _maxRatio, uint _optimalRatioBoost, uint _optimalRatioRepay, uint _slippageLimit) public {
+    /// @notice Owners of Cdps subscribe through DSProxy for automatic saving
+    /// @param _cdpId Id of the cdp
+    /// @param _minRatio Minimum ratio that the Cdp can be
+    /// @param _maxRatio Maximum ratio that the Cdp can be
+    /// @param _optimalRatioBoost Optimal ratio for the user after boost is performed
+    /// @param _optimalRatioRepay Optimal ratio for the user after repay is performed
+    function subscribe(bytes32 _cdpId, uint _minRatio, uint _maxRatio, uint _optimalRatioBoost, uint _optimalRatioRepay) public {
         require(isOwner(msg.sender, _cdpId));
 
         bool isCreated = holders[_cdpId].owner == address(0) ? true : false;
@@ -71,7 +81,6 @@ contract Monitor is DSMath, ConstantAddresses {
             maxRatio: _maxRatio,
             optimalRatioBoost: _optimalRatioBoost,
             optimalRatioRepay: _optimalRatioRepay,
-            slippageLimit: _slippageLimit,
             owner: msg.sender
         });
 
@@ -84,6 +93,8 @@ contract Monitor is DSMath, ConstantAddresses {
         }
     }
 
+    /// @notice Users can unsubscribe from monitoring
+    /// @param _cdpId Id of the cdp
     function unsubscribe(bytes32 _cdpId) public {
         require(isOwner(msg.sender, _cdpId));
 
@@ -94,9 +105,11 @@ contract Monitor is DSMath, ConstantAddresses {
         emit Unsubscribed(msg.sender, _cdpId);
     }
 
-    /// @dev Should be callable by onlyApproved
+    /// @notice Bots call this method to repay for user when conditions are met
+    /// @dev If the contract ownes gas token it will try and use it for gas price reduction
+    /// @param _cdpId Id of the cdp
+    /// @param _amount Amount of Eth to convert to Dai
     function repayFor(bytes32 _cdpId, uint _amount) public onlyApproved {
-        // require(tx.gasPrice <= 40000000000);
         if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
             gasToken.free(BOOST_GAS_TOKEN);
         }
@@ -107,14 +120,19 @@ contract Monitor is DSMath, ConstantAddresses {
         require(holder.owner != address(0));
         require(ratioBefore <= holders[_cdpId].minRatio);
 
-        DSProxyInterface(holder.owner).execute(saverProxy, abi.encodeWithSignature("repay(bytes32,uint256,uint256,uint256)", _cdpId, _amount, 0, 2));
+        uint gasCost = calcGasCost(REPAY_GAS_COST);
+
+        DSProxyInterface(holder.owner).execute(saverProxy, abi.encodeWithSignature("repay(bytes32,uint256,uint256)", _cdpId, _amount, gasCost));
 
         uint ratioAfter = getRatio(_cdpId);
 
         emit CdpRepay(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
     }
 
-    /// @dev Should be callable by onlyApproved
+    /// @notice Bots call this method to boost for user when conditions are met
+    /// @dev If the contract ownes gas token it will try and use it for gas price reduction
+    /// @param _cdpId Id of the cdp
+    /// @param _amount Amount of Dai to convert to Eth
     function boostFor(bytes32 _cdpId, uint _amount) public onlyApproved {
         if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
             gasToken.free(REPAY_GAS_TOKEN);
@@ -127,28 +145,51 @@ contract Monitor is DSMath, ConstantAddresses {
 
         require(ratioBefore >= holders[_cdpId].maxRatio);
 
-        DSProxyInterface(holder.owner).execute(saverProxy, abi.encodeWithSignature("boost(bytes32,uint256,uint256,uint256)", _cdpId, _amount, uint(-1), 2));
+        uint gasCost = calcGasCost(BOOST_GAS_COST);
+
+        DSProxyInterface(holder.owner).execute(saverProxy, abi.encodeWithSignature("boost(bytes32,uint256,uint256)", _cdpId, _amount, gasCost));
 
         uint ratioAfter = getRatio(_cdpId);
 
         emit CdpBoost(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
     }
 
+
+    /// @notice Calculates the ratio of a given cdp
+    /// @param _cdpId The id od the cdp
     function getRatio(bytes32 _cdpId) public returns(uint) {
         return (rdiv(rmul(rmul(tub.ink(_cdpId), tub.tag()), WAD), tub.tab(_cdpId)));
     }
 
-    function isOwner(address _owner, bytes32 _cdpId) internal returns(bool) {
+    /// @notice Check if the owner is the cup owner
+    /// @param _owner Address which is the owner of the cup
+    /// @param _cdpId Id of the cdp
+    function isOwner(address _owner, bytes32 _cdpId) internal view returns(bool) {
         require(tub.lad(_cdpId) == _owner);
 
         return true;
     }
 
-    // Owner only operations
+    /// @notice Calculates gas cost (in Eth) of tx
+    /// @dev Gas price is limited to MAX_GAS_PRICE to prevent attack of draining user CDP
+    /// @param _gasAmount Amount of gas used for the tx
+    function calcGasCost(uint _gasAmount) internal view returns (uint) {
+        uint gasPrice = tx.gasprice <= MAX_GAS_PRICE ? tx.gasprice : MAX_GAS_PRICE;
+
+        return mul(gasPrice, _gasAmount);
+    }
+
+
+    /******************* OWNER ONLY OPERATIONS ********************************/
+
+    /// @notice Adds a new bot address which can call repay/boost
+    /// @param _caller Bot address
     function addCaller(address _caller) public onlyOwner {
         approvedCallers[_caller] = true;
     }
 
+    /// @notice Removed a bot address so it can't call repay/boost
+    /// @param _caller Bot address
     function removeCaller(address _caller) public onlyOwner {
         approvedCallers[_caller] = false;
     }

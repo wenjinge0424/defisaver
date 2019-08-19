@@ -117,15 +117,14 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.7+commit.6da8b019\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"src\",\"type\":\"address\"},{\"name\":\"dst\",\"type\":\"address\"},{\"name\":\"sig\",\"type\":\"bytes32\"}],\"name\":\"forbid\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"src\",\"type\":\"bytes32\"},{\"name\":\"dst\",\"type\":\"bytes32\"},{\"name\":\"sig\",\"type\":\"bytes32\"}],\"name\":\"forbid\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"src_\",\"type\":\"address\"},{\"name\":\"dst_\",\"type\":\"address\"},{\"name\":\"sig\",\"type\":\"bytes4\"}],\"name\":\"canCall\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"src\",\"type\":\"address\"},{\"name\":\"dst\",\"type\":\"address\"},{\"name\":\"sig\",\"type\":\"bytes32\"}],\"name\":\"permit\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"src\",\"type\":\"bytes32\"},{\"name\":\"dst\",\"type\":\"bytes32\"},{\"name\":\"sig\",\"type\":\"bytes32\"}],\"name\":\"permit\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/DS/DSGuard.sol\":\"DSGuard\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/DS/DSGuard.sol\":{\"keccak256\":\"0x65a254dfcb917b3afb56de7baff960bc316a843b4bbae4a31527173c58eaa443\",\"urls\":[\"bzzr://14e2c07d23255e6f4f07a0657a4d7ee8fcfb3b41c9d926f0046089c246ecf626\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.5.0;\n\n\ncontract DSGuard {\n    function canCall(address src_, address dst_, bytes4 sig) public view returns (bool);\n\n    function permit(bytes32 src, bytes32 dst, bytes32 sig) public;\n    function forbid(bytes32 src, bytes32 dst, bytes32 sig) public;\n\n    function permit(address src, address dst, bytes32 sig) public;\n    function forbid(address src, address dst, bytes32 sig) public;\n\n}\n\n\ncontract DSGuardFactory {\n    function newGuard() public returns (DSGuard guard);\n}\n",
-  "sourcePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/DS/DSGuard.sol",
+  "sourcePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/DS/DSGuard.sol",
   "ast": {
-    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/DS/DSGuard.sol",
+    "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/DS/DSGuard.sol",
     "exportedSymbols": {
       "DSGuard": [
         220
@@ -805,7 +804,7 @@
     "src": "0:493:3"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/DS/DSGuard.sol",
+    "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/DS/DSGuard.sol",
     "exportedSymbols": {
       "DSGuard": [
         220
@@ -1489,8 +1488,8 @@
     "version": "0.5.7+commit.6da8b019.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.9",
-  "updatedAt": "2019-08-13T11:10:46.889Z",
+  "schemaVersion": "3.0.0",
+  "updatedAt": "2019-08-17T15:16:25.130Z",
   "devdoc": {
     "methods": {}
   },

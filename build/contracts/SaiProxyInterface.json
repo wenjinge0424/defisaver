@@ -160,16 +160,17 @@
           "type": "address"
         },
         {
-          "name": "cup",
-          "type": "bytes32"
-        },
-        {
           "name": "wad",
           "type": "uint256"
         }
       ],
       "name": "lockAndDraw",
-      "outputs": [],
+      "outputs": [
+        {
+          "name": "cup",
+          "type": "bytes32"
+        }
+      ],
       "payable": true,
       "stateMutability": "payable",
       "type": "function"
@@ -182,17 +183,16 @@
           "type": "address"
         },
         {
+          "name": "cup",
+          "type": "bytes32"
+        },
+        {
           "name": "wad",
           "type": "uint256"
         }
       ],
       "name": "lockAndDraw",
-      "outputs": [
-        {
-          "name": "cup",
-          "type": "bytes32"
-        }
-      ],
+      "outputs": [],
       "payable": true,
       "stateMutability": "payable",
       "type": "function"
@@ -325,25 +325,24 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.7+commit.6da8b019\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"tub_\",\"type\":\"address\"},{\"name\":\"cup\",\"type\":\"bytes32\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"draw\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tub_\",\"type\":\"address\"},{\"name\":\"cup\",\"type\":\"bytes32\"},{\"name\":\"jam\",\"type\":\"uint256\"},{\"name\":\"wad\",\"type\":\"uint256\"},{\"name\":\"otc_\",\"type\":\"address\"}],\"name\":\"wipeAndFree\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tub_\",\"type\":\"address\"},{\"name\":\"cup\",\"type\":\"bytes32\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"lockAndDraw\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tub_\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"lockAndDraw\",\"outputs\":[{\"name\":\"cup\",\"type\":\"bytes32\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tub_\",\"type\":\"address\"},{\"name\":\"cup\",\"type\":\"bytes32\"},{\"name\":\"otc_\",\"type\":\"address\"}],\"name\":\"shut\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tub_\",\"type\":\"address\"},{\"name\":\"cup\",\"type\":\"bytes32\"},{\"name\":\"wad\",\"type\":\"uint256\"},{\"name\":\"otc_\",\"type\":\"address\"}],\"name\":\"wipe\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tub_\",\"type\":\"address\"},{\"name\":\"cup\",\"type\":\"bytes32\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"wipe\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tub_\",\"type\":\"address\"}],\"name\":\"open\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tub_\",\"type\":\"address\"},{\"name\":\"cup\",\"type\":\"bytes32\"}],\"name\":\"shut\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tub_\",\"type\":\"address\"},{\"name\":\"cup\",\"type\":\"bytes32\"}],\"name\":\"lock\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"registry_\",\"type\":\"address\"},{\"name\":\"tub_\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"createOpenLockAndDraw\",\"outputs\":[{\"name\":\"proxy\",\"type\":\"address\"},{\"name\":\"cup\",\"type\":\"bytes32\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tub_\",\"type\":\"address\"},{\"name\":\"cup\",\"type\":\"bytes32\"},{\"name\":\"lad\",\"type\":\"address\"}],\"name\":\"give\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tub_\",\"type\":\"address\"},{\"name\":\"cup\",\"type\":\"bytes32\"},{\"name\":\"jam\",\"type\":\"uint256\"}],\"name\":\"free\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tub_\",\"type\":\"address\"},{\"name\":\"cup\",\"type\":\"bytes32\"},{\"name\":\"jam\",\"type\":\"uint256\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"wipeAndFree\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/interfaces/SaiProxyInterface.sol\":\"SaiProxyInterface\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/interfaces/SaiProxyInterface.sol\":{\"keccak256\":\"0x7b6dc291adc1ef2304f5308c0b8cbf8660d8186b19685ba3824ceb5372500cb3\",\"urls\":[\"bzzr://9587e86aa6be6e493d649192fef090d803e594bf3b6c6b47a08f02ab27a04cd0\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.5.0;\n\ncontract SaiProxyInterface {\n    function open(address tub_) public returns (bytes32);\n    function give(address tub_, bytes32 cup, address lad) public;\n    function lock(address tub_, bytes32 cup) public payable;\n    function draw(address tub_, bytes32 cup, uint wad) public;\n    function wipe(address tub_, bytes32 cup, uint wad, address otc_) public;\n    function wipe(address tub_, bytes32 cup, uint wad) public;\n    function free(address tub_, bytes32 cup, uint jam) public;\n    function lockAndDraw(address tub_, bytes32 cup, uint wad) public payable;\n    function lockAndDraw(address tub_, uint wad) public payable returns (bytes32 cup);\n    function wipeAndFree(address tub_, bytes32 cup, uint jam, uint wad) public payable;\n    function wipeAndFree(address tub_, bytes32 cup, uint jam, uint wad, address otc_) public payable;\n    function shut(address tub_, bytes32 cup) public;\n    function shut(address tub_, bytes32 cup, address otc_) public;\n\n    function createOpenLockAndDraw(address registry_, address tub_, uint wad) public payable returns (address proxy, bytes32 cup);\n}\n",
-  "sourcePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/interfaces/SaiProxyInterface.sol",
+  "sourcePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/interfaces/SaiProxyInterface.sol",
   "ast": {
-    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/interfaces/SaiProxyInterface.sol",
+    "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/interfaces/SaiProxyInterface.sol",
     "exportedSymbols": {
       "SaiProxyInterface": [
-        7653
+        7746
       ]
     },
-    "id": 7654,
+    "id": 7747,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7520,
+        "id": 7613,
         "literals": [
           "solidity",
           "^",
@@ -359,9 +358,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 7653,
+        "id": 7746,
         "linearizedBaseContracts": [
-          7653
+          7746
         ],
         "name": "SaiProxyInterface",
         "nodeType": "ContractDefinition",
@@ -369,22 +368,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7527,
+            "id": 7620,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "open",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7523,
+              "id": 7616,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7522,
+                  "id": 7615,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7527,
+                  "scope": 7620,
                   "src": "72:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -393,7 +392,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7521,
+                    "id": 7614,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "72:7:44",
@@ -410,15 +409,15 @@
               "src": "71:14:44"
             },
             "returnParameters": {
-              "id": 7526,
+              "id": 7619,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7525,
+                  "id": 7618,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7527,
+                  "scope": 7620,
                   "src": "102:7:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -427,7 +426,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7524,
+                    "id": 7617,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "102:7:44",
@@ -442,7 +441,7 @@
               ],
               "src": "101:9:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "58:53:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -451,22 +450,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7536,
+            "id": 7629,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "give",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7534,
+              "id": 7627,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7529,
+                  "id": 7622,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7536,
+                  "scope": 7629,
                   "src": "130:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -475,7 +474,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7528,
+                    "id": 7621,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "130:7:44",
@@ -490,10 +489,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7531,
+                  "id": 7624,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7536,
+                  "scope": 7629,
                   "src": "144:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -502,7 +501,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7530,
+                    "id": 7623,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "144:7:44",
@@ -516,10 +515,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7533,
+                  "id": 7626,
                   "name": "lad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7536,
+                  "scope": 7629,
                   "src": "157:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -528,7 +527,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7532,
+                    "id": 7625,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "157:7:44",
@@ -545,12 +544,12 @@
               "src": "129:40:44"
             },
             "returnParameters": {
-              "id": 7535,
+              "id": 7628,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "176:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "116:61:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -559,22 +558,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7543,
+            "id": 7636,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "lock",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7541,
+              "id": 7634,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7538,
+                  "id": 7631,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7543,
+                  "scope": 7636,
                   "src": "196:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -583,7 +582,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7537,
+                    "id": 7630,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "196:7:44",
@@ -598,10 +597,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7540,
+                  "id": 7633,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7543,
+                  "scope": 7636,
                   "src": "210:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -610,7 +609,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7539,
+                    "id": 7632,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "210:7:44",
@@ -626,12 +625,12 @@
               "src": "195:27:44"
             },
             "returnParameters": {
-              "id": 7542,
+              "id": 7635,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "237:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "182:56:44",
             "stateMutability": "payable",
             "superFunction": null,
@@ -640,22 +639,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7552,
+            "id": 7645,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "draw",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7550,
+              "id": 7643,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7545,
+                  "id": 7638,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7552,
+                  "scope": 7645,
                   "src": "257:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -664,7 +663,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7544,
+                    "id": 7637,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "257:7:44",
@@ -679,10 +678,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7547,
+                  "id": 7640,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7552,
+                  "scope": 7645,
                   "src": "271:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -691,7 +690,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7546,
+                    "id": 7639,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "271:7:44",
@@ -705,10 +704,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7549,
+                  "id": 7642,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7552,
+                  "scope": 7645,
                   "src": "284:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -717,7 +716,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7548,
+                    "id": 7641,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "284:4:44",
@@ -733,12 +732,12 @@
               "src": "256:37:44"
             },
             "returnParameters": {
-              "id": 7551,
+              "id": 7644,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "300:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "243:58:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -747,22 +746,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7563,
+            "id": 7656,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "wipe",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7561,
+              "id": 7654,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7554,
+                  "id": 7647,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7563,
+                  "scope": 7656,
                   "src": "320:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -771,7 +770,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7553,
+                    "id": 7646,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "320:7:44",
@@ -786,10 +785,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7556,
+                  "id": 7649,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7563,
+                  "scope": 7656,
                   "src": "334:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -798,7 +797,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7555,
+                    "id": 7648,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "334:7:44",
@@ -812,10 +811,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7558,
+                  "id": 7651,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7563,
+                  "scope": 7656,
                   "src": "347:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -824,7 +823,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7557,
+                    "id": 7650,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "347:4:44",
@@ -838,10 +837,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7560,
+                  "id": 7653,
                   "name": "otc_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7563,
+                  "scope": 7656,
                   "src": "357:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -850,7 +849,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7559,
+                    "id": 7652,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "357:7:44",
@@ -867,12 +866,12 @@
               "src": "319:51:44"
             },
             "returnParameters": {
-              "id": 7562,
+              "id": 7655,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "377:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "306:72:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -881,22 +880,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7572,
+            "id": 7665,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "wipe",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7570,
+              "id": 7663,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7565,
+                  "id": 7658,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7572,
+                  "scope": 7665,
                   "src": "397:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -905,7 +904,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7564,
+                    "id": 7657,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "397:7:44",
@@ -920,10 +919,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7567,
+                  "id": 7660,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7572,
+                  "scope": 7665,
                   "src": "411:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -932,7 +931,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7566,
+                    "id": 7659,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "411:7:44",
@@ -946,10 +945,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7569,
+                  "id": 7662,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7572,
+                  "scope": 7665,
                   "src": "424:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -958,7 +957,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7568,
+                    "id": 7661,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "424:4:44",
@@ -974,12 +973,12 @@
               "src": "396:37:44"
             },
             "returnParameters": {
-              "id": 7571,
+              "id": 7664,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "440:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "383:58:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -988,22 +987,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7581,
+            "id": 7674,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "free",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7579,
+              "id": 7672,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7574,
+                  "id": 7667,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7581,
+                  "scope": 7674,
                   "src": "460:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1012,7 +1011,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7573,
+                    "id": 7666,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "460:7:44",
@@ -1027,10 +1026,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7576,
+                  "id": 7669,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7581,
+                  "scope": 7674,
                   "src": "474:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1039,7 +1038,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7575,
+                    "id": 7668,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "474:7:44",
@@ -1053,10 +1052,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7578,
+                  "id": 7671,
                   "name": "jam",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7581,
+                  "scope": 7674,
                   "src": "487:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1065,7 +1064,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7577,
+                    "id": 7670,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "487:4:44",
@@ -1081,12 +1080,12 @@
               "src": "459:37:44"
             },
             "returnParameters": {
-              "id": 7580,
+              "id": 7673,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "503:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "446:58:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1095,22 +1094,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7590,
+            "id": 7683,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "lockAndDraw",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7588,
+              "id": 7681,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7583,
+                  "id": 7676,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7590,
+                  "scope": 7683,
                   "src": "530:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1119,7 +1118,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7582,
+                    "id": 7675,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "530:7:44",
@@ -1134,10 +1133,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7585,
+                  "id": 7678,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7590,
+                  "scope": 7683,
                   "src": "544:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1146,7 +1145,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7584,
+                    "id": 7677,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "544:7:44",
@@ -1160,10 +1159,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7587,
+                  "id": 7680,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7590,
+                  "scope": 7683,
                   "src": "557:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1172,7 +1171,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7586,
+                    "id": 7679,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "557:4:44",
@@ -1188,12 +1187,12 @@
               "src": "529:37:44"
             },
             "returnParameters": {
-              "id": 7589,
+              "id": 7682,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "581:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "509:73:44",
             "stateMutability": "payable",
             "superFunction": null,
@@ -1202,22 +1201,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7599,
+            "id": 7692,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "lockAndDraw",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7595,
+              "id": 7688,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7592,
+                  "id": 7685,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7599,
+                  "scope": 7692,
                   "src": "608:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1226,7 +1225,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7591,
+                    "id": 7684,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "608:7:44",
@@ -1241,10 +1240,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7594,
+                  "id": 7687,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7599,
+                  "scope": 7692,
                   "src": "622:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1253,7 +1252,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7593,
+                    "id": 7686,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "622:4:44",
@@ -1269,15 +1268,15 @@
               "src": "607:24:44"
             },
             "returnParameters": {
-              "id": 7598,
+              "id": 7691,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7597,
+                  "id": 7690,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7599,
+                  "scope": 7692,
                   "src": "656:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1286,7 +1285,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7596,
+                    "id": 7689,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "656:7:44",
@@ -1301,7 +1300,7 @@
               ],
               "src": "655:13:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "587:82:44",
             "stateMutability": "payable",
             "superFunction": null,
@@ -1310,22 +1309,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7610,
+            "id": 7703,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "wipeAndFree",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7608,
+              "id": 7701,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7601,
+                  "id": 7694,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7610,
+                  "scope": 7703,
                   "src": "695:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1334,7 +1333,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7600,
+                    "id": 7693,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "695:7:44",
@@ -1349,10 +1348,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7603,
+                  "id": 7696,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7610,
+                  "scope": 7703,
                   "src": "709:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1361,7 +1360,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7602,
+                    "id": 7695,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "709:7:44",
@@ -1375,10 +1374,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7605,
+                  "id": 7698,
                   "name": "jam",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7610,
+                  "scope": 7703,
                   "src": "722:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1387,7 +1386,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7604,
+                    "id": 7697,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "722:4:44",
@@ -1401,10 +1400,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7607,
+                  "id": 7700,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7610,
+                  "scope": 7703,
                   "src": "732:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1413,7 +1412,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7606,
+                    "id": 7699,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "732:4:44",
@@ -1429,12 +1428,12 @@
               "src": "694:47:44"
             },
             "returnParameters": {
-              "id": 7609,
+              "id": 7702,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "756:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "674:83:44",
             "stateMutability": "payable",
             "superFunction": null,
@@ -1443,22 +1442,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7623,
+            "id": 7716,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "wipeAndFree",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7621,
+              "id": 7714,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7612,
+                  "id": 7705,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7623,
+                  "scope": 7716,
                   "src": "783:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1467,7 +1466,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7611,
+                    "id": 7704,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "783:7:44",
@@ -1482,10 +1481,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7614,
+                  "id": 7707,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7623,
+                  "scope": 7716,
                   "src": "797:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1494,7 +1493,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7613,
+                    "id": 7706,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "797:7:44",
@@ -1508,10 +1507,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7616,
+                  "id": 7709,
                   "name": "jam",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7623,
+                  "scope": 7716,
                   "src": "810:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1520,7 +1519,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7615,
+                    "id": 7708,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "810:4:44",
@@ -1534,10 +1533,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7618,
+                  "id": 7711,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7623,
+                  "scope": 7716,
                   "src": "820:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1546,7 +1545,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7617,
+                    "id": 7710,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "820:4:44",
@@ -1560,10 +1559,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7620,
+                  "id": 7713,
                   "name": "otc_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7623,
+                  "scope": 7716,
                   "src": "830:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1572,7 +1571,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7619,
+                    "id": 7712,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "830:7:44",
@@ -1589,12 +1588,12 @@
               "src": "782:61:44"
             },
             "returnParameters": {
-              "id": 7622,
+              "id": 7715,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "858:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "762:97:44",
             "stateMutability": "payable",
             "superFunction": null,
@@ -1603,22 +1602,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7630,
+            "id": 7723,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "shut",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7628,
+              "id": 7721,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7625,
+                  "id": 7718,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7630,
+                  "scope": 7723,
                   "src": "878:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1627,7 +1626,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7624,
+                    "id": 7717,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "878:7:44",
@@ -1642,10 +1641,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7627,
+                  "id": 7720,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7630,
+                  "scope": 7723,
                   "src": "892:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1654,7 +1653,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7626,
+                    "id": 7719,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "892:7:44",
@@ -1670,12 +1669,12 @@
               "src": "877:27:44"
             },
             "returnParameters": {
-              "id": 7629,
+              "id": 7722,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "911:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "864:48:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1684,22 +1683,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7639,
+            "id": 7732,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "shut",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7637,
+              "id": 7730,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7632,
+                  "id": 7725,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7639,
+                  "scope": 7732,
                   "src": "931:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1708,7 +1707,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7631,
+                    "id": 7724,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "931:7:44",
@@ -1723,10 +1722,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7634,
+                  "id": 7727,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7639,
+                  "scope": 7732,
                   "src": "945:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1735,7 +1734,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7633,
+                    "id": 7726,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "945:7:44",
@@ -1749,10 +1748,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7636,
+                  "id": 7729,
                   "name": "otc_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7639,
+                  "scope": 7732,
                   "src": "958:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1761,7 +1760,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7635,
+                    "id": 7728,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "958:7:44",
@@ -1778,12 +1777,12 @@
               "src": "930:41:44"
             },
             "returnParameters": {
-              "id": 7638,
+              "id": 7731,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "978:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "917:62:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1792,22 +1791,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7652,
+            "id": 7745,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "createOpenLockAndDraw",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7646,
+              "id": 7739,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7641,
+                  "id": 7734,
                   "name": "registry_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7652,
+                  "scope": 7745,
                   "src": "1016:17:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1816,7 +1815,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7640,
+                    "id": 7733,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1016:7:44",
@@ -1831,10 +1830,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7643,
+                  "id": 7736,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7652,
+                  "scope": 7745,
                   "src": "1035:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1843,7 +1842,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7642,
+                    "id": 7735,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1035:7:44",
@@ -1858,10 +1857,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7645,
+                  "id": 7738,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7652,
+                  "scope": 7745,
                   "src": "1049:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1870,7 +1869,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7644,
+                    "id": 7737,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "1049:4:44",
@@ -1886,15 +1885,15 @@
               "src": "1015:43:44"
             },
             "returnParameters": {
-              "id": 7651,
+              "id": 7744,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7648,
+                  "id": 7741,
                   "name": "proxy",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7652,
+                  "scope": 7745,
                   "src": "1083:13:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1903,7 +1902,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7647,
+                    "id": 7740,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1083:7:44",
@@ -1918,10 +1917,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7650,
+                  "id": 7743,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7652,
+                  "scope": 7745,
                   "src": "1098:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1930,7 +1929,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7649,
+                    "id": 7742,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1098:7:44",
@@ -1945,31 +1944,31 @@
               ],
               "src": "1082:28:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "985:126:44",
             "stateMutability": "payable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 7654,
+        "scope": 7747,
         "src": "25:1088:44"
       }
     ],
     "src": "0:1114:44"
   },
   "legacyAST": {
-    "absolutePath": "/Users/nikolaklipa/Decenter/defisaver/cdpsaver-contracts/contracts/interfaces/SaiProxyInterface.sol",
+    "absolutePath": "/Users/nenadpalinkasevic/Desktop/blockchain/cdpsaver-contracts/contracts/interfaces/SaiProxyInterface.sol",
     "exportedSymbols": {
       "SaiProxyInterface": [
-        7653
+        7746
       ]
     },
-    "id": 7654,
+    "id": 7747,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7520,
+        "id": 7613,
         "literals": [
           "solidity",
           "^",
@@ -1985,9 +1984,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 7653,
+        "id": 7746,
         "linearizedBaseContracts": [
-          7653
+          7746
         ],
         "name": "SaiProxyInterface",
         "nodeType": "ContractDefinition",
@@ -1995,22 +1994,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7527,
+            "id": 7620,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "open",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7523,
+              "id": 7616,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7522,
+                  "id": 7615,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7527,
+                  "scope": 7620,
                   "src": "72:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2019,7 +2018,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7521,
+                    "id": 7614,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "72:7:44",
@@ -2036,15 +2035,15 @@
               "src": "71:14:44"
             },
             "returnParameters": {
-              "id": 7526,
+              "id": 7619,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7525,
+                  "id": 7618,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7527,
+                  "scope": 7620,
                   "src": "102:7:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2053,7 +2052,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7524,
+                    "id": 7617,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "102:7:44",
@@ -2068,7 +2067,7 @@
               ],
               "src": "101:9:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "58:53:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -2077,22 +2076,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7536,
+            "id": 7629,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "give",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7534,
+              "id": 7627,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7529,
+                  "id": 7622,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7536,
+                  "scope": 7629,
                   "src": "130:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2101,7 +2100,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7528,
+                    "id": 7621,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "130:7:44",
@@ -2116,10 +2115,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7531,
+                  "id": 7624,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7536,
+                  "scope": 7629,
                   "src": "144:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2128,7 +2127,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7530,
+                    "id": 7623,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "144:7:44",
@@ -2142,10 +2141,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7533,
+                  "id": 7626,
                   "name": "lad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7536,
+                  "scope": 7629,
                   "src": "157:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2154,7 +2153,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7532,
+                    "id": 7625,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "157:7:44",
@@ -2171,12 +2170,12 @@
               "src": "129:40:44"
             },
             "returnParameters": {
-              "id": 7535,
+              "id": 7628,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "176:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "116:61:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -2185,22 +2184,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7543,
+            "id": 7636,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "lock",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7541,
+              "id": 7634,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7538,
+                  "id": 7631,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7543,
+                  "scope": 7636,
                   "src": "196:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2209,7 +2208,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7537,
+                    "id": 7630,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "196:7:44",
@@ -2224,10 +2223,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7540,
+                  "id": 7633,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7543,
+                  "scope": 7636,
                   "src": "210:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2236,7 +2235,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7539,
+                    "id": 7632,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "210:7:44",
@@ -2252,12 +2251,12 @@
               "src": "195:27:44"
             },
             "returnParameters": {
-              "id": 7542,
+              "id": 7635,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "237:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "182:56:44",
             "stateMutability": "payable",
             "superFunction": null,
@@ -2266,22 +2265,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7552,
+            "id": 7645,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "draw",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7550,
+              "id": 7643,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7545,
+                  "id": 7638,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7552,
+                  "scope": 7645,
                   "src": "257:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2290,7 +2289,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7544,
+                    "id": 7637,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "257:7:44",
@@ -2305,10 +2304,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7547,
+                  "id": 7640,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7552,
+                  "scope": 7645,
                   "src": "271:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2317,7 +2316,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7546,
+                    "id": 7639,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "271:7:44",
@@ -2331,10 +2330,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7549,
+                  "id": 7642,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7552,
+                  "scope": 7645,
                   "src": "284:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2343,7 +2342,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7548,
+                    "id": 7641,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "284:4:44",
@@ -2359,12 +2358,12 @@
               "src": "256:37:44"
             },
             "returnParameters": {
-              "id": 7551,
+              "id": 7644,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "300:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "243:58:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -2373,22 +2372,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7563,
+            "id": 7656,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "wipe",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7561,
+              "id": 7654,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7554,
+                  "id": 7647,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7563,
+                  "scope": 7656,
                   "src": "320:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2397,7 +2396,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7553,
+                    "id": 7646,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "320:7:44",
@@ -2412,10 +2411,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7556,
+                  "id": 7649,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7563,
+                  "scope": 7656,
                   "src": "334:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2424,7 +2423,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7555,
+                    "id": 7648,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "334:7:44",
@@ -2438,10 +2437,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7558,
+                  "id": 7651,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7563,
+                  "scope": 7656,
                   "src": "347:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2450,7 +2449,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7557,
+                    "id": 7650,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "347:4:44",
@@ -2464,10 +2463,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7560,
+                  "id": 7653,
                   "name": "otc_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7563,
+                  "scope": 7656,
                   "src": "357:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2476,7 +2475,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7559,
+                    "id": 7652,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "357:7:44",
@@ -2493,12 +2492,12 @@
               "src": "319:51:44"
             },
             "returnParameters": {
-              "id": 7562,
+              "id": 7655,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "377:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "306:72:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -2507,22 +2506,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7572,
+            "id": 7665,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "wipe",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7570,
+              "id": 7663,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7565,
+                  "id": 7658,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7572,
+                  "scope": 7665,
                   "src": "397:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2531,7 +2530,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7564,
+                    "id": 7657,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "397:7:44",
@@ -2546,10 +2545,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7567,
+                  "id": 7660,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7572,
+                  "scope": 7665,
                   "src": "411:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2558,7 +2557,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7566,
+                    "id": 7659,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "411:7:44",
@@ -2572,10 +2571,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7569,
+                  "id": 7662,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7572,
+                  "scope": 7665,
                   "src": "424:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2584,7 +2583,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7568,
+                    "id": 7661,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "424:4:44",
@@ -2600,12 +2599,12 @@
               "src": "396:37:44"
             },
             "returnParameters": {
-              "id": 7571,
+              "id": 7664,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "440:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "383:58:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -2614,22 +2613,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7581,
+            "id": 7674,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "free",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7579,
+              "id": 7672,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7574,
+                  "id": 7667,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7581,
+                  "scope": 7674,
                   "src": "460:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2638,7 +2637,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7573,
+                    "id": 7666,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "460:7:44",
@@ -2653,10 +2652,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7576,
+                  "id": 7669,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7581,
+                  "scope": 7674,
                   "src": "474:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2665,7 +2664,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7575,
+                    "id": 7668,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "474:7:44",
@@ -2679,10 +2678,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7578,
+                  "id": 7671,
                   "name": "jam",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7581,
+                  "scope": 7674,
                   "src": "487:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2691,7 +2690,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7577,
+                    "id": 7670,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "487:4:44",
@@ -2707,12 +2706,12 @@
               "src": "459:37:44"
             },
             "returnParameters": {
-              "id": 7580,
+              "id": 7673,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "503:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "446:58:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -2721,22 +2720,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7590,
+            "id": 7683,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "lockAndDraw",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7588,
+              "id": 7681,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7583,
+                  "id": 7676,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7590,
+                  "scope": 7683,
                   "src": "530:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2745,7 +2744,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7582,
+                    "id": 7675,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "530:7:44",
@@ -2760,10 +2759,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7585,
+                  "id": 7678,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7590,
+                  "scope": 7683,
                   "src": "544:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2772,7 +2771,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7584,
+                    "id": 7677,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "544:7:44",
@@ -2786,10 +2785,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7587,
+                  "id": 7680,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7590,
+                  "scope": 7683,
                   "src": "557:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2798,7 +2797,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7586,
+                    "id": 7679,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "557:4:44",
@@ -2814,12 +2813,12 @@
               "src": "529:37:44"
             },
             "returnParameters": {
-              "id": 7589,
+              "id": 7682,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "581:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "509:73:44",
             "stateMutability": "payable",
             "superFunction": null,
@@ -2828,22 +2827,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7599,
+            "id": 7692,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "lockAndDraw",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7595,
+              "id": 7688,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7592,
+                  "id": 7685,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7599,
+                  "scope": 7692,
                   "src": "608:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2852,7 +2851,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7591,
+                    "id": 7684,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "608:7:44",
@@ -2867,10 +2866,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7594,
+                  "id": 7687,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7599,
+                  "scope": 7692,
                   "src": "622:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2879,7 +2878,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7593,
+                    "id": 7686,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "622:4:44",
@@ -2895,15 +2894,15 @@
               "src": "607:24:44"
             },
             "returnParameters": {
-              "id": 7598,
+              "id": 7691,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7597,
+                  "id": 7690,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7599,
+                  "scope": 7692,
                   "src": "656:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2912,7 +2911,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7596,
+                    "id": 7689,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "656:7:44",
@@ -2927,7 +2926,7 @@
               ],
               "src": "655:13:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "587:82:44",
             "stateMutability": "payable",
             "superFunction": null,
@@ -2936,22 +2935,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7610,
+            "id": 7703,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "wipeAndFree",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7608,
+              "id": 7701,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7601,
+                  "id": 7694,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7610,
+                  "scope": 7703,
                   "src": "695:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2960,7 +2959,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7600,
+                    "id": 7693,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "695:7:44",
@@ -2975,10 +2974,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7603,
+                  "id": 7696,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7610,
+                  "scope": 7703,
                   "src": "709:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2987,7 +2986,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7602,
+                    "id": 7695,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "709:7:44",
@@ -3001,10 +3000,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7605,
+                  "id": 7698,
                   "name": "jam",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7610,
+                  "scope": 7703,
                   "src": "722:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3013,7 +3012,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7604,
+                    "id": 7697,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "722:4:44",
@@ -3027,10 +3026,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7607,
+                  "id": 7700,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7610,
+                  "scope": 7703,
                   "src": "732:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3039,7 +3038,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7606,
+                    "id": 7699,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "732:4:44",
@@ -3055,12 +3054,12 @@
               "src": "694:47:44"
             },
             "returnParameters": {
-              "id": 7609,
+              "id": 7702,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "756:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "674:83:44",
             "stateMutability": "payable",
             "superFunction": null,
@@ -3069,22 +3068,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7623,
+            "id": 7716,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "wipeAndFree",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7621,
+              "id": 7714,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7612,
+                  "id": 7705,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7623,
+                  "scope": 7716,
                   "src": "783:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3093,7 +3092,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7611,
+                    "id": 7704,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "783:7:44",
@@ -3108,10 +3107,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7614,
+                  "id": 7707,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7623,
+                  "scope": 7716,
                   "src": "797:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3120,7 +3119,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7613,
+                    "id": 7706,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "797:7:44",
@@ -3134,10 +3133,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7616,
+                  "id": 7709,
                   "name": "jam",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7623,
+                  "scope": 7716,
                   "src": "810:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3146,7 +3145,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7615,
+                    "id": 7708,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "810:4:44",
@@ -3160,10 +3159,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7618,
+                  "id": 7711,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7623,
+                  "scope": 7716,
                   "src": "820:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3172,7 +3171,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7617,
+                    "id": 7710,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "820:4:44",
@@ -3186,10 +3185,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7620,
+                  "id": 7713,
                   "name": "otc_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7623,
+                  "scope": 7716,
                   "src": "830:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3198,7 +3197,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7619,
+                    "id": 7712,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "830:7:44",
@@ -3215,12 +3214,12 @@
               "src": "782:61:44"
             },
             "returnParameters": {
-              "id": 7622,
+              "id": 7715,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "858:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "762:97:44",
             "stateMutability": "payable",
             "superFunction": null,
@@ -3229,22 +3228,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7630,
+            "id": 7723,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "shut",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7628,
+              "id": 7721,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7625,
+                  "id": 7718,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7630,
+                  "scope": 7723,
                   "src": "878:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3253,7 +3252,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7624,
+                    "id": 7717,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "878:7:44",
@@ -3268,10 +3267,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7627,
+                  "id": 7720,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7630,
+                  "scope": 7723,
                   "src": "892:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3280,7 +3279,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7626,
+                    "id": 7719,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "892:7:44",
@@ -3296,12 +3295,12 @@
               "src": "877:27:44"
             },
             "returnParameters": {
-              "id": 7629,
+              "id": 7722,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "911:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "864:48:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -3310,22 +3309,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7639,
+            "id": 7732,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "shut",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7637,
+              "id": 7730,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7632,
+                  "id": 7725,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7639,
+                  "scope": 7732,
                   "src": "931:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3334,7 +3333,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7631,
+                    "id": 7724,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "931:7:44",
@@ -3349,10 +3348,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7634,
+                  "id": 7727,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7639,
+                  "scope": 7732,
                   "src": "945:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3361,7 +3360,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7633,
+                    "id": 7726,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "945:7:44",
@@ -3375,10 +3374,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7636,
+                  "id": 7729,
                   "name": "otc_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7639,
+                  "scope": 7732,
                   "src": "958:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3387,7 +3386,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7635,
+                    "id": 7728,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "958:7:44",
@@ -3404,12 +3403,12 @@
               "src": "930:41:44"
             },
             "returnParameters": {
-              "id": 7638,
+              "id": 7731,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "978:0:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "917:62:44",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -3418,22 +3417,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 7652,
+            "id": 7745,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "createOpenLockAndDraw",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7646,
+              "id": 7739,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7641,
+                  "id": 7734,
                   "name": "registry_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7652,
+                  "scope": 7745,
                   "src": "1016:17:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3442,7 +3441,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7640,
+                    "id": 7733,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1016:7:44",
@@ -3457,10 +3456,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7643,
+                  "id": 7736,
                   "name": "tub_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7652,
+                  "scope": 7745,
                   "src": "1035:12:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3469,7 +3468,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7642,
+                    "id": 7735,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1035:7:44",
@@ -3484,10 +3483,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7645,
+                  "id": 7738,
                   "name": "wad",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7652,
+                  "scope": 7745,
                   "src": "1049:8:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3496,7 +3495,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7644,
+                    "id": 7737,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "1049:4:44",
@@ -3512,15 +3511,15 @@
               "src": "1015:43:44"
             },
             "returnParameters": {
-              "id": 7651,
+              "id": 7744,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7648,
+                  "id": 7741,
                   "name": "proxy",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7652,
+                  "scope": 7745,
                   "src": "1083:13:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3529,7 +3528,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7647,
+                    "id": 7740,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1083:7:44",
@@ -3544,10 +3543,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7650,
+                  "id": 7743,
                   "name": "cup",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7652,
+                  "scope": 7745,
                   "src": "1098:11:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3556,7 +3555,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7649,
+                    "id": 7742,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1098:7:44",
@@ -3571,14 +3570,14 @@
               ],
               "src": "1082:28:44"
             },
-            "scope": 7653,
+            "scope": 7746,
             "src": "985:126:44",
             "stateMutability": "payable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 7654,
+        "scope": 7747,
         "src": "25:1088:44"
       }
     ],
@@ -3589,8 +3588,8 @@
     "version": "0.5.7+commit.6da8b019.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.9",
-  "updatedAt": "2019-08-13T11:10:46.987Z",
+  "schemaVersion": "3.0.0",
+  "updatedAt": "2019-08-17T15:16:25.198Z",
   "devdoc": {
     "methods": {}
   },
