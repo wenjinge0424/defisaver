@@ -6,6 +6,8 @@ const ProxyRegistryInterface = artifacts.require("ProxyRegistryInterface");
 const DSProxy = artifacts.require("DSProxy");
 const Token = artifacts.require("ERC20");
 const ISoloMargin = artifacts.require("ISoloMargin")
+const CTokenInterface = artifacts.require("CTokenInterface")
+const ITokenInterface = artifacts.require("ITokenInterface")
 
 
 contract('SavingsProxy', function (accounts) {
@@ -34,7 +36,6 @@ contract('SavingsProxy', function (accounts) {
         daiToken = await Token.at(daiAddress)
 
         await daiToken.approve(dsProxy.address, web3.utils.toWei(Number.MAX_SAFE_INTEGER.toString(), 'ether'))
-        await daiToken.approve(savingsProxy.address, web3.utils.toWei(Number.MAX_SAFE_INTEGER.toString(), 'ether'))
     });
 
     async function deposit(protocolEnum, amount) {
@@ -76,18 +77,19 @@ contract('SavingsProxy', function (accounts) {
 
     async function getCompoundBalance(account) {
         let cDaiAddress = await savingsProxy.CDAI_ADDRESS();
+        let cTokenInterface = await CTokenInterface.at(cDaiAddress);
 
-        let balance = await getTokenBalance(cDaiAddress, account)
+        let balance = await cTokenInterface.balanceOfUnderlying.call(account)
 
-        return balance;
+        return balance.toString();
     }
 
     async function getFulcrumBalance(account) {
         let iDaiAddress = await savingsProxy.IDAI_ADDRESS();
+        let iTokenInterface = await ITokenInterface.at(iDaiAddress)
 
-        let balance = await getTokenBalance(iDaiAddress, account)
-
-        return balance;
+        let balance = await iTokenInterface.assetBalanceOf.call(account)
+        return balance.toString();
     }
 
     async function getDydxBalance(account) {
@@ -117,13 +119,13 @@ contract('SavingsProxy', function (accounts) {
             console.log("savingsProxy address: ", savingsProxy.address)
 
             let dydxBalance = await getDydxBalance(dsProxy.address);
-            let compoundBalance = await getCompoundBalance(dsProxy.address)
-            let fulcrumBalance = await getFulcrumBalance(dsProxy.address)
-            let daiBalance = await getDaiBalance(dsProxy.address)
             console.log("dydx balance:", dydxBalance)
-            console.log("fulcrum balance:", fulcrumBalance)
+            let compoundBalance = await getCompoundBalance(dsProxy.address)
             console.log("compound balance:", compoundBalance)
+            let daiBalance = await getDaiBalance(dsProxy.address)
             console.log("dai balance:", daiBalance)
+            let fulcrumBalance = await getFulcrumBalance(dsProxy.address)
+            console.log("fulcrum balance:", fulcrumBalance)
         });
     });
 
@@ -146,6 +148,9 @@ contract('SavingsProxy', function (accounts) {
                 let tx = await deposit(DYDX_ENUM, web3.utils.toWei('1', 'ether'))
 
                 let balance = await getDydxBalance(dsProxy.address)
+
+                console.log("Dydx balance:", balance.toString())
+
             } catch(err) {
                 assert.equal(1, 2, err)
             }
@@ -258,13 +263,13 @@ contract('SavingsProxy', function (accounts) {
             try {
                 let depositTx = await deposit(FULCRUM_ENUM, web3.utils.toWei('1', 'ether'));
 
-                let cbalanceBefore = await getCompoundBalance(dsProxy.address)
                 let fbalanceBefore = await getFulcrumBalance(dsProxy.address)
+                let cbalanceBefore = await getCompoundBalance(dsProxy.address)
 
                 let swapTx = await swap(FULCRUM_ENUM, COMPOUND_ENUM, fbalanceBefore)
 
-                let cbalanceAfter = await getCompoundBalance(dsProxy.address)
                 let fbalanceAfter = await getFulcrumBalance(dsProxy.address)
+                let cbalanceAfter = await getCompoundBalance(dsProxy.address)
 
                 console.log("fulcrum")
                 console.log(fbalanceBefore)
@@ -283,7 +288,7 @@ contract('SavingsProxy', function (accounts) {
                 let fbalanceBefore = await getFulcrumBalance(dsProxy.address)
                 let dbalanceBefore = await getDydxBalance(dsProxy.address)
 
-                let swapTx = await swap(FULCRUM_ENUM, DYDX_ENUM, dbalanceBefore)
+                let swapTx = await swap(FULCRUM_ENUM, DYDX_ENUM, fbalanceBefore)
 
                 let fbalanceAfter = await getFulcrumBalance(dsProxy.address)
                 let dbalanceAfter = await getDydxBalance(dsProxy.address)
@@ -301,15 +306,20 @@ contract('SavingsProxy', function (accounts) {
     });
 
     describe('Withdrawing', function () {
-        it('should be able to deposit DAI to Compound', async function () {
+        it('should be able to withdraw DAI to Compound', async function () {
             try {
                 let cDaiBalance = await getCompoundBalance(dsProxy.address)
 
-                let balanceBefore = await getDaiBalance(dsProxy.address);
+                let balanceBefore = await getCompoundBalance(dsProxy.address);
+
+                if (balanceBefore != "0") {
+                    console.log("balance is zero, depositing 1 dai")
+                    await depost(COMPOUND_ENUM, web3.utils.toWei('1', 'ether'))
+                }
 
                 const tx = await withdraw(COMPOUND_ENUM, cDaiBalance)
 
-                let balanceAfter = await getDaiBalance(dsProxy.address);
+                let balanceAfter = await getCompoundBalance(dsProxy.address);
 
                 console.log("compound")
                 console.log(balanceBefore)
@@ -319,15 +329,20 @@ contract('SavingsProxy', function (accounts) {
             }
         });
 
-        it('should be able to deposit DAI to Dydx', async function () {
+        it('should be able to withdraw DAI to Dydx', async function () {
             try {
                 let weiBalance =  await getDydxBalance(dsProxy.address);
 
-                let balanceBefore = await getDaiBalance(dsProxy.address);
+                let balanceBefore = await getDydxBalance(dsProxy.address);
+
+                if (balanceBefore != "0") {
+                    console.log("balance is zero, depositing 1 dai")
+                    await depost(DYDX_ENUM, web3.utils.toWei('1', 'ether'))
+                }
 
                 let tx = await withdraw(DYDX_ENUM, weiBalance)
 
-                let balanceAfter = await getDaiBalance(dsProxy.address);
+                let balanceAfter = await getDydxBalance(dsProxy.address);
 
                 console.log("dydx")
                 console.log(balanceBefore.toString())
@@ -338,15 +353,20 @@ contract('SavingsProxy', function (accounts) {
             }
         });
 
-        it('should be able to deposit DAI to Fulcrum', async function () {
+        it('should be able to withdraw DAI to Fulcrum', async function () {
             try {
                 let iDaiBalance = await getFulcrumBalance(dsProxy.address)
 
-                let balanceBefore = await getDaiBalance(dsProxy.address);
+                let balanceBefore = await getFulcrumBalance(dsProxy.address);
+
+                if (balanceBefore == "0") {
+                    console.log("balance is zero, depositing 1 dai")
+                    await depost(FULCRUM_ENUM, web3.utils.toWei('1', 'ether'))
+                }
 
                 let tx = await withdraw(FULCRUM_ENUM, iDaiBalance);
 
-                let balanceAfter = await getDaiBalance(dsProxy.address);
+                let balanceAfter = await getFulcrumBalance(dsProxy.address);
 
                 console.log("Fulcrum")
                 console.log(balanceBefore.toString())
@@ -356,5 +376,18 @@ contract('SavingsProxy', function (accounts) {
                 assert.equal(1, 2, err)
             }
         });
+
+        it('should be able to return funds to user', async function() {
+            try {
+                const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(SavingsProxy, 'withdrawDai'), []);
+                const tx = await dsProxy.methods['execute(address,bytes)'](savingsProxy.address, data);
+
+                let myBal = await daiToken.balanceOf(accounts[0])
+                console.log("My dai balance:", myBal.toString())
+            } catch(err) {
+                assert.equal(1, 2, err)
+            }
+        });
     });
+
 });

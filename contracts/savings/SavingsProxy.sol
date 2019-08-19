@@ -8,9 +8,9 @@ import "./dydx/ISoloMargin.sol";
 
 contract SavingsProxy is ConstantAddresses {
 
-    address constant public SAVINGS_COMPOUND_ADDRESS = 0x5CeDe2418E64de77efEF3aA85a74fD18CdB18B2a;
-    address constant public SAVINGS_DYDX_ADDRESS = 0x409FB5b8c2B2EfF5d86449f52AbA8a2AF0ee88f2;
-    address constant public SAVINGS_FULCRUM_ADDRESS = 0xB5Be7966144dcd1458c1ECf6b57fdD1adc460f1D;
+    address constant public SAVINGS_COMPOUND_ADDRESS = 0xba7676a6c3E2FFff9f8d16e9C7b1e7848CC0f7DE;
+    address constant public SAVINGS_DYDX_ADDRESS = 0x97a13567879471E1d6a3C37AB1017321980cd0ca;
+    address constant public SAVINGS_FULCRUM_ADDRESS = 0x0F0277EE54403a46f12D68Eeb49e444FE0bd4682;
 
     enum SavingsProtocol { Compound, Dydx, Fulcrum }
 
@@ -28,18 +28,21 @@ contract SavingsProxy is ConstantAddresses {
         ProtocolInterface(getAddress(_protocol)).withdraw(address(this), _amount);
 
         endAction(_protocol);
+
+        withdrawDai();
     }
 
     function swap(SavingsProtocol _from, SavingsProtocol _to, uint _amount) public {
-        approveWithdraw(_from, _amount);
-        approveDeposit(_to, _amount);
-
-        ProtocolInterface(getAddress(_from)).withdraw(address(this), _amount);
-        ProtocolInterface(getAddress(_to)).deposit(address(this), _amount);
-
-        endAction(_from);
-        endAction(_to);
+        withdraw(_from, _amount);
+        deposit(_to, _amount);
     }
+
+    // @dev only DSProxy holds dai, so if its called from random address, balance will be 0
+    function withdrawDai() public {
+
+        ERC20(MAKER_DAI_ADDRESS).transfer(msg.sender, ERC20(MAKER_DAI_ADDRESS).balanceOf(address(this)));
+    }
+
 
     function getAddress(SavingsProtocol _protocol) public pure returns(address) {
         if (_protocol == SavingsProtocol.Compound) {
