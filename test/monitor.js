@@ -7,22 +7,19 @@ const ERC20 = artifacts.require("./ERC20.sol");
 
 contract("Monitor", accounts => {
 
-    let monitor, monitorProxy, registry, proxy, currRatio, decenterLending, daiToken;
+    let monitor, monitorProxy, registry, proxy, currRatio, daiToken;
 
-    const MONITOR_ADDRESS = "0x1a19D66869fb818742BeD9A13b599ecc92fc8998";
-    const DECENTER_MONITOR_LENDING = "0x32a5ee0d96397fab5254f6c28dc9cefa647be3fb";
+    const MONITOR_ADDRESS = "0x6643269a9317085f6731161982c6ce9c53938c63";
 
-    const cdpIdBytes32 = "0x0000000000000000000000000000000000000000000000000000000000001751";
+    const cdpIdBytes32 = "0x000000000000000000000000000000000000000000000000000000000000177c";
 
     let account = accounts[0];
 
     before(async () => {
         monitor = await Monitor.at(MONITOR_ADDRESS);
-        monitorProxy = await MonitorProxy.at("0xF963d81c925718AA167897b0A8A1B2E8a8cAfD66");
+        monitorProxy = await MonitorProxy.at("0x348187d81C3931E35AAB5F8CA3A368e9b5a196B5");
 
         registry = await ProxyRegistryInterface.at("0x64a436ae831c1672ae81f674cab8b6775df3475c");
-
-        decenterLending = await DecenterMonitorLending.at(DECENTER_MONITOR_LENDING);
 
         daiToken = await ERC20.at('0x25a01a05C188DaCBCf1D61Af55D4a5B4021F7eeD');
 
@@ -37,21 +34,6 @@ contract("Monitor", accounts => {
         return abi.find(abi => abi.name === functionName);
       }
 
-      // it('..should set the lending contract', async () => {
-      //   try {
-      //     await monitor.setLendingContract(DECENTER_MONITOR_LENDING);
-
-      //     const amount = web3.utils.toWei('20', 'ether');
-
-      //     await daiToken.approve(DECENTER_MONITOR_LENDING, web3.utils.toWei('200000000', 'ether'));
-
-      //     await decenterLending.deposit(amount);
-
-      //   } catch(err) {
-      //     console.log(err);
-      //   }
-      // });
-
       it('...should get CDPs ratio', async () => {
         const res = await monitor.getRatio.call(cdpIdBytes32);
 
@@ -63,11 +45,10 @@ contract("Monitor", accounts => {
       it('...should subscribe the CDP for monitoring', async () => {
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MonitorProxy, 'subscribe'),
          [cdpIdBytes32,
-          web3.utils.toWei('1.70', 'ether'), // minRatio
-          web3.utils.toWei('1.90', 'ether'), // maxRatio
-          web3.utils.toWei('1.80', 'ether'), // optimalBoostRatio
-          web3.utils.toWei('1.80', 'ether'), // optimalRepay Ratio
-          web3.utils.toWei('10', 'ether'), // slippage
+          web3.utils.toWei('1.80', 'ether'), // minRatio
+          web3.utils.toWei('2.0', 'ether'), // maxRatio
+          web3.utils.toWei('1.90', 'ether'), // optimalBoostRatio
+          web3.utils.toWei('1.90', 'ether'), // optimalRepay Ratio,
           MONITOR_ADDRESS]);
 
         try {
@@ -93,12 +74,26 @@ contract("Monitor", accounts => {
       });
 
 
-      it('...should call the boostFor method for the user', async () => {
+    //   it('...should call the boostFor method for the user', async () => {
 
-        const amount = web3.utils.toWei('2', 'ether'); // 2 dai
+    //     const amount = web3.utils.toWei('12', 'ether'); // 12 dai
+
+    //     try {
+    //         const tx = await monitor.boostFor(cdpIdBytes32, amount, {from: accounts[1]});
+
+    //         console.log(tx);
+
+
+    //     } catch(err) {
+    //         console.log(err);
+    //     }
+    //   });
+
+       it('...should call the repayFor method for the user', async () => {
+        const amount = web3.utils.toWei('0.1', 'ether');
 
         try {
-            const tx = await monitor.boostFor(cdpIdBytes32, amount, {from: accounts[1]});
+            const tx = await monitor.repayFor(cdpIdBytes32, amount, {from: accounts[1]});
 
             console.log(tx);
 
@@ -107,22 +102,6 @@ contract("Monitor", accounts => {
             console.log(err);
         }
       });
-
-      //  it('...should call the repayFor method for the user', async () => {
-      //   const amount = web3.utils.toWei('0.01', 'ether');
-
-      //   const borrowAmount = web3.utils.toWei('10', 'ether');
-
-      //   try {
-      //       const tx = await monitor.repayFor(cdpIdBytes32, amount, borrowAmount, {from: accounts[1]});
-
-      //       console.log(tx);
-
-
-      //   } catch(err) {
-      //       console.log(err);
-      //   }
-      // });
 
 
 });

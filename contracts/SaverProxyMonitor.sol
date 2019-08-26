@@ -196,7 +196,7 @@ contract SaverProxyMonitor is DSMath, ConstantAddresses {
     /// @param _price Price of Eth in Dai so we can take the fee in Dai
     /// @return feeAmount Amount in Dai owner earned on the fee
     function takeFee(uint _amount, uint _gasFee, uint _price) internal returns (uint feeAmount) {
-        uint gasFeeDai = mul(_gasFee, _price); // The gas price of the tx in Dai
+        uint gasFeeDai = wmul(_gasFee, _price); // The gas price of the tx in Dai
 
         feeAmount = add((_amount / SERVICE_FEE), gasFeeDai);
 
