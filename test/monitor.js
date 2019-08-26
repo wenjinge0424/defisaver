@@ -9,7 +9,7 @@ contract("Monitor", accounts => {
 
     let monitor, monitorProxy, registry, proxy, currRatio, daiToken;
 
-    const MONITOR_ADDRESS = "0x6643269a9317085f6731161982c6ce9c53938c63";
+    const MONITOR_ADDRESS = "0x320CC1a24834D7a66220F17e861a847D880b3285";
 
     const cdpIdBytes32 = "0x000000000000000000000000000000000000000000000000000000000000177c";
 
@@ -89,19 +89,19 @@ contract("Monitor", accounts => {
     //     }
     //   });
 
-       it('...should call the repayFor method for the user', async () => {
-        const amount = web3.utils.toWei('0.1', 'ether');
+    //    it('...should call the repayFor method for the user', async () => {
+    //     const amount = web3.utils.toWei('0.1', 'ether');
 
-        try {
-            const tx = await monitor.repayFor(cdpIdBytes32, amount, {from: accounts[1]});
+    //     try {
+    //         const tx = await monitor.repayFor(cdpIdBytes32, amount, {from: accounts[1]});
 
-            console.log(tx);
+    //         console.log(tx);
 
 
-        } catch(err) {
-            console.log(err);
-        }
-      });
+    //     } catch(err) {
+    //         console.log(err);
+    //     }
+    //   });
 
 
 });

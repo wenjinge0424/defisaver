@@ -6,6 +6,7 @@ import "./interfaces/GasTokenInterface.sol";
 import "./interfaces/ERC20.sol";
 import "./DS/DSMath.sol";
 import "./constants/ConstantAddresses.sol";
+import "./utils/Console.sol";
 
 contract Monitor is DSMath, ConstantAddresses {
 
@@ -14,6 +15,9 @@ contract Monitor is DSMath, ConstantAddresses {
     TubInterface tub = TubInterface(TUB_ADDRESS);
     ProxyRegistryInterface registry = ProxyRegistryInterface(PROXY_REGISTRY_INTERFACE_ADDRESS);
     GasTokenInterface gasToken = GasTokenInterface(GAS_TOKEN_INTERFACE_ADDRESS);
+
+    // TESTING
+    Console console = Console(0xf92Fc0960e9B68954FC388190cb19c2a79B144a6);
 
     uint constant public REPAY_GAS_TOKEN = 30;
     uint constant public BOOST_GAS_TOKEN = 19;
@@ -83,6 +87,8 @@ contract Monitor is DSMath, ConstantAddresses {
             optimalRatioRepay: _optimalRatioRepay,
             owner: msg.sender
         });
+
+        console.log("Prosao je upis u struct");
 
         changeIndex++;
 
