@@ -28,6 +28,8 @@ contract SaverProxyMonitor is DSMath, ConstantAddresses {
         approveTub(PETH_ADDRESS);
         approveTub(WETH_ADDRESS);
 
+        address owner = getOwner(tub, _cup);
+
         uint startingRatio = getRatio(tub, _cup);
 
         if (_amount > maxFreeCollateral(tub, _cup)) {
@@ -62,13 +64,14 @@ contract SaverProxyMonitor is DSMath, ConstantAddresses {
 
         if (daiAmount > cdpWholeDebt) {
             tub.wipe(_cup, cdpWholeDebt);
-            ERC20(MAKER_DAI_ADDRESS).transfer(msg.sender, sub(daiAmount, cdpWholeDebt));
+            // FIX
+            ERC20(MAKER_DAI_ADDRESS).transfer(owner, sub(daiAmount, cdpWholeDebt));
         } else {
             tub.wipe(_cup, daiAmount);
             require(getRatio(tub, _cup) > startingRatio, "ratio must be better off at the end");
         }
 
-        SaverLogger(LOGGER_ADDRESS).LogRepay(uint(_cup), msg.sender, _amount, daiAmount);
+        SaverLogger(LOGGER_ADDRESS).LogRepay(uint(_cup), owner, _amount, daiAmount);
     }
 
     /// @notice Boost will draw Dai, swap Dai -> Eth on kyber, and add that Eth to the CDP
@@ -262,5 +265,12 @@ contract SaverProxyMonitor is DSMath, ConstantAddresses {
     /// @param _cup Id of the CDP
     function getDebt(TubInterface _tub, bytes32 _cup) internal returns (uint debt) {
         ( , , debt, ) = _tub.cups(_cup);
+    }
+
+    /// @notice Returns the owner of the CDP
+    /// @param _tub Tub interface
+    /// @param _cup Id of the CDP
+    function getOwner(TubInterface _tub, bytes32 _cup) internal returns (address owner) {
+        ( owner, , , ) = _tub.cups(_cup);
     }
 }

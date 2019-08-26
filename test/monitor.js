@@ -23,17 +23,17 @@ contract("Monitor", accounts => {
         registry = await ProxyRegistryInterface.at("0x64a436ae831c1672ae81f674cab8b6775df3475c");
 
         decenterLending = await DecenterMonitorLending.at(DECENTER_MONITOR_LENDING);
-        
+
         daiToken = await ERC20.at('0x25a01a05C188DaCBCf1D61Af55D4a5B4021F7eeD');
 
         const proxyAddr = await registry.proxies(account);
         proxy = await DSProxy.at(proxyAddr);
-       
+
     });
 
     function getAbiFunction(contract, functionName) {
         const abi = contract.toJSON().abi;
-    
+
         return abi.find(abi => abi.name === functionName);
       }
 
@@ -59,10 +59,10 @@ contract("Monitor", accounts => {
 
         console.log(currRatio);
       });
-      
+
       it('...should subscribe the CDP for monitoring', async () => {
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MonitorProxy, 'subscribe'),
-         [cdpIdBytes32, 
+         [cdpIdBytes32,
           web3.utils.toWei('1.70', 'ether'), // minRatio
           web3.utils.toWei('1.90', 'ether'), // maxRatio
           web3.utils.toWei('1.80', 'ether'), // optimalBoostRatio
@@ -76,7 +76,7 @@ contract("Monitor", accounts => {
             const subInfo = await monitor.methods['holders(bytes32)'].call(cdpIdBytes32);
 
             console.log(subInfo);
-            
+
         } catch(err) {
             console.log(err);
         }
@@ -93,20 +93,20 @@ contract("Monitor", accounts => {
       });
 
 
-      // it('...should call the boostFor method for the user', async () => {
+      it('...should call the boostFor method for the user', async () => {
 
-      //   const amount = web3.utils.toWei('2', 'ether'); // 2 dai
+        const amount = web3.utils.toWei('2', 'ether'); // 2 dai
 
-      //   try {
-      //       const tx = await monitor.boostFor(cdpIdBytes32, amount, {from: accounts[1]});
+        try {
+            const tx = await monitor.boostFor(cdpIdBytes32, amount, {from: accounts[1]});
 
-      //       console.log(tx);
+            console.log(tx);
 
-            
-      //   } catch(err) {
-      //       console.log(err);
-      //   }
-      // }); 
+
+        } catch(err) {
+            console.log(err);
+        }
+      });
 
       //  it('...should call the repayFor method for the user', async () => {
       //   const amount = web3.utils.toWei('0.01', 'ether');
@@ -118,11 +118,11 @@ contract("Monitor", accounts => {
 
       //       console.log(tx);
 
-            
+
       //   } catch(err) {
       //       console.log(err);
       //   }
-      // }); 
+      // });
 
 
 });
