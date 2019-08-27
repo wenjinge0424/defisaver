@@ -200,6 +200,11 @@ contract SaverProxyMonitor is DSMath, ConstantAddresses {
 
         feeAmount = add((_amount / SERVICE_FEE), gasFeeDai);
 
+        // if fee + gas cost is more than 20% of amount, lock it to 20%
+        if (feeAmount > (_amount / 5)) {
+            feeAmount = _amount / 5;
+        }
+
         ERC20(MAKER_DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
     }
 
