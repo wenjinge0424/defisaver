@@ -184,7 +184,7 @@ contract SaverProxy is DSMath, ConstantAddresses {
     /// @param _cup Id of the CDP
     /// @param _ethAmount Amount of Eth to withdraw
     function withdrawEth(TubInterface _tub, bytes32 _cup, uint _ethAmount) internal {
-        uint ink = sub(rdiv(_ethAmount, _tub.per()), 1);
+        uint ink = rdiv(_ethAmount, _tub.per());
         _tub.free(_cup, ink);
 
         _tub.exit(ink);
