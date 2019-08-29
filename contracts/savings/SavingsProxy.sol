@@ -5,6 +5,7 @@ import "./ProtocolInterface.sol";
 import "../interfaces/ERC20.sol";
 import "../constants/ConstantAddresses.sol";
 import "./dydx/ISoloMargin.sol";
+import "./SavingsLogger.sol";
 
 contract SavingsProxy is ConstantAddresses {
 
@@ -20,6 +21,9 @@ contract SavingsProxy is ConstantAddresses {
         ProtocolInterface(getAddress(_protocol)).deposit(address(this), _amount);
 
         endAction(_protocol);
+
+        SavingsLogger(SAVINGS_LOGGER_ADDRESS).logDeposit(msg.sender, uint8(_protocol), _amount);
+
     }
 
     function withdraw(SavingsProtocol _protocol, uint _amount) public {
@@ -30,11 +34,15 @@ contract SavingsProxy is ConstantAddresses {
         endAction(_protocol);
 
         withdrawDai();
+
+        SavingsLogger(SAVINGS_LOGGER_ADDRESS).logWithdraw(msg.sender, uint8(_protocol), _amount);
     }
 
     function swap(SavingsProtocol _from, SavingsProtocol _to, uint _amount) public {
         withdraw(_from, _amount);
         deposit(_to, _amount);
+
+        SavingsLogger(SAVINGS_LOGGER_ADDRESS).logSwap(msg.sender, uint8(_from), uint8(_to), _amount);
     }
 
     // @dev only DSProxy holds dai, so if its called from random address, balance will be 0
