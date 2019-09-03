@@ -95,7 +95,7 @@ contract SavingsProxy is ConstantAddresses {
         }
 
         if (_protocol == SavingsProtocol.Fulcrum) {
-            ERC20(IDAI_ADDRESS).approve(getAddress(_protocol), _amount);
+            ERC20(IDAI_ADDRESS).approve(getAddress(_protocol), ITokenInterface(IDAI_ADDRESS).balanceOf(msg.sender));
         }
     }
 

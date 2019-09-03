@@ -18,6 +18,10 @@ contract MonitorProxy is ConstantAddresses {
         Monitor(_monitor).subscribe(_cup, _minRatio, _maxRatio, _optimalRatioBoost, _optimalRatioRepay);
     }
 
+    function update(bytes32 _cup, uint _minRatio, uint _maxRatio, uint _optimalRatioBoost, uint _optimalRatioRepay, address _monitor) public {
+        Monitor(_monitor).subscribe(_cup, _minRatio, _maxRatio, _optimalRatioBoost, _optimalRatioRepay);
+    }
+
     function unsubscribe(bytes32 _cup, address _monitor) public {
         Monitor(_monitor).unsubscribe(_cup);
     }
