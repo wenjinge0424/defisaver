@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "./ProtocolInterface.sol";
 import "../interfaces/ERC20.sol";
+import "../interfaces/ITokenInterface.sol";
 import "../constants/ConstantAddresses.sol";
 import "./dydx/ISoloMargin.sol";
 import "./SavingsLogger.sol";
