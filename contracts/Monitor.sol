@@ -126,8 +126,8 @@ contract Monitor is DSMath, ConstantAddresses {
 
         uint ratioAfter = getRatio(_cdpId);
 
-        require(ratioAfter >= holders[_cdpId].minRatio);
-        require(ratioAfter <= holders[_cdpId].maxRatio);
+        require(ratioAfter > holders[_cdpId].minRatio);
+        require(ratioAfter < holders[_cdpId].maxRatio);
 
         emit CdpRepay(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
     }
@@ -154,8 +154,8 @@ contract Monitor is DSMath, ConstantAddresses {
 
         uint ratioAfter = getRatio(_cdpId);
 
-        require(ratioAfter >= holders[_cdpId].minRatio);
-        require(ratioAfter <= holders[_cdpId].maxRatio);
+        require(ratioAfter > holders[_cdpId].minRatio);
+        require(ratioAfter < holders[_cdpId].maxRatio);
 
         emit CdpBoost(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
     }
