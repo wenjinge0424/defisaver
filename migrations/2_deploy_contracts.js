@@ -17,7 +17,7 @@ module.exports = function(deployer, network) {
 
   console.log(network);
 
-  if (network == 'kovan') {
+  if (network == 'kovan-fork' || network == 'kovan') {
     //deployer.deploy(Eth2DaiWrapper, {gas: 6720000, overwrite: deployAgain});
 
     // deployer.deploy(Monitor, {gas: 6720000, overwrite: deployAgain});
@@ -37,7 +37,7 @@ module.exports = function(deployer, network) {
   } else if (network == 'rinkeby') {
     deployer.deploy(UniswapWrapper, {gas: 6720000, overwrite: deployAgain});
   } else {
-    deployer.deploy(Monitor, {gas: 6720000, overwrite: deployAgain});
+    // deployer.deploy(Monitor, {gas: 6720000, overwrite: deployAgain});
     // deployer.deploy(CompoundProxy, {gas: 6720000, overwrite: deployAgain});
 
     // deployer.deploy(SaverProxy, {gas: 6720000, overwrite: deployAgain}).then(() => {

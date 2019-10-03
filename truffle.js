@@ -9,18 +9,18 @@ module.exports = {
   networks: {
     mainnet: {
         provider: function() {
-            return new HDWalletProvider(mnemonic, "https://mainnet.decenter.com");
+            return new HDWalletProvider(mnemonic, process.env.INFURA_ENDPOINT);
         },
         network_id: '1',
         gasPrice: 5000000000, // 5 gwei
     },
     kovan: {
         provider: function() {
-            return new HDWalletProvider(mnemonic, "https://kovan.decenter.com", 0, 15);
+            return new HDWalletProvider(mnemonic, process.env.KOVAN_INFURA_ENDPOINT, 0, 15);
         },
         network_id: '42',
         gasPrice: 3000000000,
-        confirmations: 2
+        skipDryRun: true,
     },
     rinkeby: {
         provider: function() {
