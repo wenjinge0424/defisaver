@@ -26,7 +26,7 @@ contract Discount {
 
     function setServiceFee(address _user, uint _fee) public {
         require(msg.sender == owner, "Only owner");
-        require(_fee <= MAX_SERVICE_FEE);
+        require(_fee >= MAX_SERVICE_FEE || _fee == 0);
 
         serviceFees[_user] = CustomServiceFee({
             active: true,
