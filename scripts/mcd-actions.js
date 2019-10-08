@@ -14,6 +14,7 @@ const Jug = require('../build/contracts/Jug.json');
 const Spotter = require('../build/contracts/Spotter.json');
 const MCDSaverProxy = require('../build/contracts/MCDSaverProxy.json');
 const Faucet = require('../build/contracts/Faucet.json');
+const ERC20 = require('../build/contracts/ERC20.json');
 
 const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
 const proxyActionsAddr = '0xc21274797a01e133ebd9d79b23498edbd7166137';
@@ -53,6 +54,7 @@ const ilkData = {
 
 const tokenJoinAddrData = {
     '1': {
+        'ETH': '0xc3abba566bb62c09b7f94704d8dfd9800935d3f9',
         'BAT': '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7',
         'GNT': '0xc81ba844f451d4452a01bbb2104c1c4f89252907',
         'OMG': '0x441b1a74c69ee6e631834b626b29801d42076d38',
@@ -61,6 +63,7 @@ const tokenJoinAddrData = {
         'DGD': '0x62aeec5fb140bb233b1c5612a8747ca1dc56dc1b',
     },
     '42': {
+        'ETH': '0xc3abba566bb62c09b7f94704d8dfd9800935d3f9',
         'BAT': '0xf8e9b4c3e17c1a2d55767d44fb91feed798bb7e8',
         'GNT': '0xc28d56522280d20c1c33b239a8e8ffef1c2d5457',
         'OMG': '0x7d9f9e9ac1c768be3f9c241ad9420e9ac37688e4',
@@ -132,47 +135,43 @@ const initContracts = async () => {
 (async () => {
     await initContracts();
 
-    // const usersCdps = await getCDPsForAddress(proxyAddr);
+    const usersCdps = await getCDPsForAddress(proxyAddr);
 
+    console.log(usersCdps);
 
-    // await addCollateral(usersCdps[0].cdpId);
+    const cdpInfo = await getCdpInfo(usersCdps[5]);
+    console.log(cdpInfo);
+
     // await boost(usersCdps[0].cdpId);
 
     // await faucet.methods.gulp(getTokenAddr('GNT')).send({from: account.address, gas: 300000});
 
-    // const ilkInfo = await getCollateralInfo(ethIlk);
-    // console.log(ilkInfo);
-
-    // const cdpInfo = await getCdpInfo(ilkInfo, usersCdps[0]);
-    // console.log(cdpInfo);
 
 })();
 
-const addCollateral = async (cdpId) => {
+const openCdp = async (type, collateralAmount, daiAmount) => {
     try {
-        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'lockETH'),
-          [cdpManagerAddr, ethAJoinAddr, cdpId]);
 
-          const ethAmount = web3.utils.toWei('0.1', 'ether');
+        daiAmount = web3.utils.toWei(daiAmount, 'ether');
+        collateralAmount = web3.utils.toWei(collateralAmount, 'ether'); //TODO: to collateral precision
 
-          const tx = await proxy.methods['execute(address,bytes)'](proxyActionsAddr, data).send({from: account.address, value: ethAmount, gas: 900000});
+        let value = 0;
+        let data = null;
 
-          console.log(tx);
-    } catch(err) {
-        console.log(err);
-    }
-};
+        if (type === 'ETH') {
+            data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'openLockETHAndDraw'),
+            [cdpManagerAddr, jugAddr, getTokenJoinAddr(type), daiJoinAddr, getIlk(type), daiAmount]);
 
-const addAndDraw = async (cdpId) => {
-    try {
-        const daiAmount = web3.utils.toWei('1', 'ether');
-        const ethAmount = web3.utils.toWei('0.1', 'ether');
+            value = collateralAmount;
+        } else {
+            await approveToken(type);
 
-        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'lockETHAndDraw'),
-          [cdpManagerAddr, jugAddr, ethAJoinAddr, daiJoinAddr, cdpId, daiAmount]);
+            data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'openLockGemAndDraw'),
+            [cdpManagerAddr, jugAddr, getTokenJoinAddr(type), daiJoinAddr, getIlk(type), collateralAmount, daiAmount, true]);
+        }
 
         const tx = await proxy.methods['execute(address,bytes)'](proxyActionsAddr, data).send({
-            from: account.address, gas: 900000, value: ethAmount});
+            from: account.address, gas: 900000, value});
 
         console.log(tx);
     } catch(err) {
@@ -180,9 +179,74 @@ const addAndDraw = async (cdpId) => {
     }
 };
 
-const drawDai = async (cdpId) => {
+const addCollateral = async (cdpId, type, collateralAmount) => {
     try {
-        const daiAmount = web3.utils.toWei('1', 'ether');
+        collateralAmount = web3.utils.toWei(collateralAmount, 'ether'); //TODO: to collateral precision
+
+        let data = null;
+        let value = 0;
+
+        if (type === 'ETH') {
+            data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'lockETH'),
+            [cdpManagerAddr, getTokenJoinAddr(type), cdpId]);
+
+            value = collateralAmount;
+        } else {
+            await approveToken(type);
+
+            data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'lockGem'),
+            [cdpManagerAddr, getTokenJoinAddr(type), cdpId, collateralAmount, true]);
+        }
+
+        const tx = await proxy.methods['execute(address,bytes)'](proxyActionsAddr, data).send({from: account.address, value, gas: 900000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+const freeCollateral = async (cdpId, type, collateralAmount) => {
+    try {
+        collateralAmount = web3.utils.toWei(collateralAmount, 'ether'); //TODO: to collateral precision
+
+        let data = null;
+        let value = 0;
+
+        if (type === 'ETH') {
+            data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'freeETH'),
+            [cdpManagerAddr, getTokenJoinAddr(type), cdpId, collateralAmount]);
+        } else {
+            data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'freeGem'),
+            [cdpManagerAddr, getTokenJoinAddr(type), cdpId, collateralAmount]);
+        }
+
+        const tx = await proxy.methods['execute(address,bytes)'](proxyActionsAddr, data).send({from: account.address, value, gas: 900000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+const generateDai = async (cdpId, daiAmount) => {
+    try {
+        daiAmount = web3.utils.toWei(daiAmount, 'ether');
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'draw'),
+        [cdpManagerAddr, jugAddr, getTokenJoinAddr('DAI'), cdpId, daiAmount]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](proxyActionsAddr, data).send({from: account.address, gas: 900000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+}
+
+const drawDai = async (cdpId, daiAmount) => {
+    try {
+        daiAmount = web3.utils.toWei('1', 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'draw'),
           [cdpManagerAddr, jugAddr, daiJoinAddr, cdpId, daiAmount]);
@@ -196,21 +260,15 @@ const drawDai = async (cdpId) => {
     }
 };
 
-// address manager,
-//         address jug,
-//         address gemJoin,
-//         address daiJoin,
-//         bytes32 ilk,
-//         uint wadC,
-//         uint wadD,
-//         bool transferFrom
-const openCdp = async (type, collateralAmount, daiAmount) => {
-    try {
-        daiAmount = web3.utils.toWei('0.1', 'ether');
-        collateralAmount = web3.utils.toWei('10', 'ether'); //TODO: to collateral precision
 
-        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'openLockGemAndDraw'),
-          [cdpManagerAddr, jugAddr, getTokenJoinAddr(type), daiJoinAddr, getIlk(type), collateralAmount, daiAmount, true]);
+const payback = async (cdpId, daiAmount) => {
+    try {
+        await approveToken('DAI');
+
+        daiAmount = web3.utils.toWei('1', 'ether');
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'wipe'),
+          [cdpManagerAddr, getTokenJoinAddr('DAI'), cdpId, daiAmount]);
 
         const tx = await proxy.methods['execute(address,bytes)'](proxyActionsAddr, data).send({
             from: account.address, gas: 900000});
@@ -220,6 +278,7 @@ const openCdp = async (type, collateralAmount, daiAmount) => {
         console.log(err);
     }
 };
+
 
 const getCollateralInfo = async (ilk) => {
     try {
@@ -272,8 +331,10 @@ const boost = async (cdpId) => {
     }
 };
 
-const getCdpInfo = async (ilkInfo, cdp) => {
+const getCdpInfo = async (cdp) => {
     try {
+
+        const ilkInfo = await getCollateralInfo(cdp.ilk);
         const urn = await vat.methods.urns(cdp.ilk, cdp.urn).call();
 
         const collateral = Dec(urn.ink);
@@ -283,11 +344,16 @@ const getCdpInfo = async (ilkInfo, cdp) => {
         const stabilityFee = debtWithFee.sub(debt);
 
         const price = Dec(ilkInfo.price).div(1e27);
+
+        console.log(price);
+
         const ratio = collateral.times(price).div(debtWithFee).times(100);
 
         const liquidationPrice = debt.times(ilkInfo.liquidationRatio).div(collateral).div(1e27);
 
         return {
+            id: cdp.cdpId,
+            type: cdp.ilk,
             collateral,
             debt,
             debtWithFee, // debt + stabilityFee
@@ -320,11 +386,22 @@ const getStabilityFee = async (ilk) => {
     }
 };
 
+// HELPER FUNCTIONS
 
-    // it('...get info', async () => {
+const approveToken = async (type) => {
+    const token = new web3.eth.Contract(ERC20.abi, getTokenAddr(type));
 
-    //     console.log(join.methods);
-    //     const ilk = await join.ilk.call();
+    const allowance = await token.methods.allowance(account.address, proxyAddr).call();
 
-    //     console.log(ilk.toString());
-    // });
+    console.log(allowance.toString());
+
+   if (allowance.toString() === '0') {
+        await token.methods.approve(proxyAddr, web3.utils.toWei('10000000000000', 'ether')).send({from: account.address, gas: 100000});
+   }
+};
+
+const transferToProxy = async (type, collateralAmount) => {
+    const token = new web3.eth.Contract(ERC20.abi, getTokenAddr(type));
+
+    await token.methods.transfer(proxyAddr, collateralAmount).send({from: account.address, gas: 500000});
+};
