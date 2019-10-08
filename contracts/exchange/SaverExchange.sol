@@ -8,10 +8,51 @@ contract SaverExchange is DSMath, ConstantAddresses {
 
     uint public constant SERVICE_FEE = 800; // 0.125% Fee
 
+    function swapTokenToToken(address _src, address _dest, uint _amount, uint _minPrice, uint _exchangeType) public payable {
+        if (_src == KYBER_ETH_ADDRESS) {
+            require(msg.value >= _amount);
+            // return user if he sent too much
+            msg.sender.transfer(sub(msg.value, _amount));
+        } else {
+            require(ERC20(_src).transferFrom(msg.sender, address(this), _amount));
+        }
+
+        uint fee = takeFee(_amount, _src);
+        _amount = sub(_amount, fee);
+
+        address wrapper;
+        uint price;
+        (wrapper, price) = getBestPrice(_amount, _src, _dest, _exchangeType);
+
+        require(price > _minPrice, "Slippage hit");
+
+        uint tokensReturned;
+        if (_src == KYBER_ETH_ADDRESS) {
+            (tokensReturned,) = ExchangeInterface(wrapper).swapEtherToToken.value(_amount)(_amount, _dest, uint(-1));
+        } else {
+            ERC20(_src).transfer(wrapper, _amount);
+
+            if (_dest == KYBER_ETH_ADDRESS) {
+                tokensReturned = ExchangeInterface(wrapper).swapTokenToEther(_src, _amount, uint(-1));
+            } else {
+                tokensReturned = ExchangeInterface(wrapper).swapTokenToToken(_src, _dest, _amount);
+            }
+        }
+
+        if (_dest == KYBER_ETH_ADDRESS) {
+            msg.sender.transfer(tokensReturned);
+        } else {
+            ERC20(_dest).transfer(msg.sender, tokensReturned);
+        }
+    }
+
+
+    // legacy ------------------------------------------------------------
+
     function swapDaiToEth(uint _amount, uint _minPrice, uint _exchangeType) public {
         require(ERC20(MAKER_DAI_ADDRESS).transferFrom(msg.sender, address(this), _amount));
 
-        uint fee = takeFee(_amount);
+        uint fee = takeFee(_amount, MAKER_DAI_ADDRESS);
         _amount = sub(_amount, fee);
 
         address exchangeWrapper;
@@ -44,7 +85,7 @@ contract SaverExchange is DSMath, ConstantAddresses {
         uint daiReturned;
         (daiReturned, ethReturned) = ExchangeInterface(exchangeWrapper).swapEtherToToken.value(_amount)(_amount, MAKER_DAI_ADDRESS, uint(-1));
 
-        uint fee = takeFee(daiReturned);
+        uint fee = takeFee(daiReturned, MAKER_DAI_ADDRESS);
         daiReturned = sub(daiReturned, fee);
 
         ERC20(MAKER_DAI_ADDRESS).transfer(msg.sender, daiReturned);
@@ -68,12 +109,6 @@ contract SaverExchange is DSMath, ConstantAddresses {
         (expectedRateKyber, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
         // no deployment on kovan
         // (expectedRateUniswap, ) = ExchangeInterface(UNISWAP_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
-        // reverts on kovan
-        // (expectedRateEth2Dai, ) = ExchangeInterface(ETH2DAI_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
-
-        if (_exchangeType == 1) {
-            return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
-        }
 
         if (_exchangeType == 2) {
             return (KYBER_WRAPPER, expectedRateKyber);
@@ -81,6 +116,25 @@ contract SaverExchange is DSMath, ConstantAddresses {
 
         if (_exchangeType == 3) {
             return (UNISWAP_WRAPPER, expectedRateUniswap);
+        }
+
+        if (_exchangeType == 4) {
+            if (expectedRateKyber >= expectedRateUniswap) {
+                return (KYBER_WRAPPER, expectedRateKyber);
+            } else {
+                return (UNISWAP_WRAPPER, expectedRateUniswap);
+            }
+        }
+
+        require((_srcToken == MAKER_DAI_ADDRESS) && (_destToken == KYBER_ETH_ADDRESS) ||
+            (_srcToken == KYBER_ETH_ADDRESS) && (_destToken == MAKER_DAI_ADDRESS),
+            'If exchange type is not 4, must be swap between Ether and DAI');
+
+        /// @dev at this point it must be exchange between eth and dai so we can use eth2dai
+        // reverts on kovan
+        // (expectedRateEth2Dai, ) = ExchangeInterface(ETH2DAI_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
+        if (_exchangeType == 1) {
+            return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
         }
 
         if ((expectedRateEth2Dai >= expectedRateKyber) && (expectedRateEth2Dai >= expectedRateUniswap)) {
@@ -99,10 +153,14 @@ contract SaverExchange is DSMath, ConstantAddresses {
     /// @notice Takes a feePercentage and sends it to wallet
     /// @param _amount Dai amount of the whole trade
     /// @return feeAmount Amount in Dai owner earned on the fee
-    function takeFee(uint _amount) internal returns (uint feeAmount) {
+    function takeFee(uint _amount, address _token) internal returns (uint feeAmount) {
         feeAmount = _amount / SERVICE_FEE;
         if (feeAmount > 0) {
-            ERC20(MAKER_DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
+            if (_token == KYBER_ETH_ADDRESS) {
+                WALLET_ID.transfer(feeAmount);
+            } else {
+                ERC20(_token).transfer(WALLET_ID, feeAmount);
+            }
         }
     }
 

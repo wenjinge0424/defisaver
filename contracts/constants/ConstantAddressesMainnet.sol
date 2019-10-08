@@ -12,7 +12,7 @@ contract ConstantAddressesMainnet {
     address public constant VOX_ADDRESS = 0x9B0F70Df76165442ca6092939132bBAEA77f2d7A;
     address public constant PETH_ADDRESS = 0xf53AD2c6851052A81B42133467480961B2321C09;
     address public constant TUB_ADDRESS = 0x448a5065aeBB8E423F0896E6c5D525C040f59af3;
-    address public constant WALLET_ID = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
+    address payable public constant WALLET_ID = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant LOGGER_ADDRESS = 0xeCf88e1ceC2D2894A0295DB3D86Fe7CE4991E6dF;
     address public constant OTC_ADDRESS = 0x39755357759cE0d7f32dC8dC45414CCa409AE24e;
 
