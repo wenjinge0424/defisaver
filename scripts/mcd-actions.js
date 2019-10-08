@@ -137,10 +137,14 @@ const initContracts = async () => {
 
     const usersCdps = await getCDPsForAddress(proxyAddr);
 
-    console.log(usersCdps);
+    // console.log(usersCdps);
 
-    const cdpInfo = await getCdpInfo(usersCdps[5]);
+    const cdpInfo = await getCdpInfo(usersCdps[0]);
     console.log(cdpInfo);
+
+    // const res = await getCollateralInfo(getIlk('DGD'));
+
+    // console.log(res);
 
     // await boost(usersCdps[0].cdpId);
 
@@ -286,13 +290,19 @@ const getCollateralInfo = async (ilk) => {
 
         const spotInfo = await spotter.methods.ilks(ilk).call();
 
+        let par = Dec(await spotter.methods.par().call()).div(1e27);
+        const spot = Dec(ilkInfo.spot).div(1e27);
+        const mat = Dec(spotInfo.mat).div(1e27);
+
+        const price = spot.times(par).times(mat);
+
         return {
             currentRate: ilkInfo.rate,
-            price: ilkInfo.spot, // TODO: check if true
+            price, // TODO: check if true
             minAmountForCdp: ilkInfo.dust,
             currAmountGlobal: ilkInfo.Art, //total debt TODO: * rate
             maxAmountGlobal: ilkInfo.line,
-            liquidationRatio: spotInfo.mat,
+            liquidationRatio: mat,
         }
     } catch(err) {
         console.log(err);
@@ -343,13 +353,9 @@ const getCdpInfo = async (cdp) => {
         const debtWithFee = debt.times(ilkInfo.currentRate).div(1e27);
         const stabilityFee = debtWithFee.sub(debt);
 
-        const price = Dec(ilkInfo.price).div(1e27);
+        const ratio = collateral.times(ilkInfo.price).div(debtWithFee).times(100);
 
-        console.log(price);
-
-        const ratio = collateral.times(price).div(debtWithFee).times(100);
-
-        const liquidationPrice = debt.times(ilkInfo.liquidationRatio).div(collateral).div(1e27);
+        const liquidationPrice = debt.times(ilkInfo.liquidationRatio).div(collateral);
 
         return {
             id: cdp.cdpId,

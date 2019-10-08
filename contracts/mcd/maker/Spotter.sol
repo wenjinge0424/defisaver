@@ -10,4 +10,6 @@ contract Spotter {
 
     mapping (bytes32 => Ilk) public ilks;
 
+    uint256 public par;
+
 }
