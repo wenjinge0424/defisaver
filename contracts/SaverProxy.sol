@@ -5,6 +5,7 @@ import "./interfaces/ExchangeInterface.sol";
 import "./DS/DSMath.sol";
 import "./SaverLogger.sol";
 import "./constants/ConstantAddresses.sol";
+import "./Discount.sol";
 
 /// @title SaverProxy implements advanced dashboard features repay/boost
 contract SaverProxy is DSMath, ConstantAddresses {
@@ -195,8 +196,18 @@ contract SaverProxy is DSMath, ConstantAddresses {
     /// @param _amount Dai amount of the whole trade
     /// @return feeAmount Amount in Dai owner earned on the fee
     function takeFee(uint _amount) internal returns (uint feeAmount) {
-        feeAmount = _amount / SERVICE_FEE;
-        ERC20(MAKER_DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
+        uint fee = SERVICE_FEE;
+
+        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(msg.sender)) {
+            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(msg.sender);
+        }
+
+        if (fee == 0) {
+            feeAmount = 0;
+        } else {
+            feeAmount = _amount / fee;
+            ERC20(MAKER_DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
+        }
     }
 
     /// @notice Returns the best estimated price from 2 exchanges

@@ -9,6 +9,7 @@ const MarketplaceProxy = artifacts.require("./MarketplaceProxy.sol");
 const SaverLogger = artifacts.require("./SaverLogger.sol");
 const CompoundProxy = artifacts.require("./CompoundProxy.sol");
 const DecenterMonitorLending = artifacts.require("./DecenterMonitorLending.sol");
+const Discount = artifacts.require("./Discount.sol");
 
 require('dotenv').config();
 
@@ -28,7 +29,9 @@ module.exports = function(deployer, network) {
     //   return deployer.deploy(Marketplace, MarketplaceProxy.address, {gas: 6720000, overwrite: deployAgain});
     // });
 
-    deployer.deploy(SaverProxy, {gas: 6720000, overwrite: deployAgain});
+    deployer.deploy(Discount, {gas: 6720000, overwrite: true});
+
+    // deployer.deploy(SaverProxy, {gas: 6720000, overwrite: deployAgain});
 
     //  deployer.deploy(Monitor, {gas: 6720000, overwrite: deployAgain}).then(() => {
     //     return deployer.deploy(DecenterMonitorLending, '0x93cdB0a93Fc36f6a53ED21eCf6305Ab80D06becA', Monitor.address, {gas: 6720000, overwrite: deployAgain});
