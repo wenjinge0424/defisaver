@@ -14,44 +14,31 @@ contract SavingsProxy is ConstantAddresses {
     address constant public SAVINGS_DYDX_ADDRESS = 0x97a13567879471E1d6a3C37AB1017321980cd0ca;
     address constant public SAVINGS_FULCRUM_ADDRESS = 0x0F0277EE54403a46f12D68Eeb49e444FE0bd4682;
 
-    enum SavingsProtocol { Compound, Dydx, Fulcrum }
+    enum SavingsProtocol { Compound, Dydx, Fulcrum, Dsr }
 
     function deposit(SavingsProtocol _protocol, uint _amount) public {
-        approveDeposit(_protocol, _amount);
-
-        ProtocolInterface(getAddress(_protocol)).deposit(address(this), _amount);
-
-        endAction(_protocol);
+        _deposit(_protocol, _amount);
 
         SavingsLogger(SAVINGS_LOGGER_ADDRESS).logDeposit(msg.sender, uint8(_protocol), _amount);
-
     }
 
     function withdraw(SavingsProtocol _protocol, uint _amount) public {
-        approveWithdraw(_protocol, _amount);
-
-        ProtocolInterface(getAddress(_protocol)).withdraw(address(this), _amount);
-
-        endAction(_protocol);
-
-        withdrawDai();
+        _withdraw(_protocol, _amount);
 
         SavingsLogger(SAVINGS_LOGGER_ADDRESS).logWithdraw(msg.sender, uint8(_protocol), _amount);
     }
 
     function swap(SavingsProtocol _from, SavingsProtocol _to, uint _amount) public {
-        withdraw(_from, _amount);
-        deposit(_to, _amount);
+        _withdraw(_from, _amount);
+        _deposit(_to, _amount);
 
         SavingsLogger(SAVINGS_LOGGER_ADDRESS).logSwap(msg.sender, uint8(_from), uint8(_to), _amount);
     }
 
     // @dev only DSProxy holds dai, so if its called from random address, balance will be 0
     function withdrawDai() public {
-
         ERC20(MAKER_DAI_ADDRESS).transfer(msg.sender, ERC20(MAKER_DAI_ADDRESS).balanceOf(address(this)));
     }
-
 
     function getAddress(SavingsProtocol _protocol) public pure returns(address) {
         if (_protocol == SavingsProtocol.Compound) {
@@ -67,7 +54,25 @@ contract SavingsProxy is ConstantAddresses {
         }
     }
 
-    function endAction(SavingsProtocol _protocol)  internal {
+    function _deposit(SavingsProtocol _protocol, uint _amount) internal {
+        approveDeposit(_protocol, _amount);
+
+        ProtocolInterface(getAddress(_protocol)).deposit(address(this), _amount);
+
+        endAction(_protocol);
+    }
+
+    function _withdraw(SavingsProtocol _protocol, uint _amount) public {
+        approveWithdraw(_protocol, _amount);
+
+        ProtocolInterface(getAddress(_protocol)).withdraw(address(this), _amount);
+
+        endAction(_protocol);
+
+        withdrawDai();
+    }
+
+    function endAction(SavingsProtocol _protocol) internal {
         if (_protocol == SavingsProtocol.Dydx) {
             setDydxOperator(false);
         }
