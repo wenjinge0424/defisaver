@@ -137,10 +137,12 @@ const initContracts = async () => {
 
     const usersCdps = await getCDPsForAddress(proxyAddr);
 
-    // console.log(usersCdps);
+    console.log(usersCdps);
 
-    const cdpInfo = await getCdpInfo(usersCdps[0]);
-    console.log(cdpInfo);
+    // const cdpInfo = await getCdpInfo(usersCdps[1]);
+    // console.log(cdpInfo);
+
+    // await transfer(usersCdps[1].cdpId, '0x322d58b9E75a6918f7e7849AEe0fF09369977e08');
 
     // const res = await getCollateralInfo(getIlk('DGD'));
 
@@ -271,6 +273,8 @@ const payback = async (cdpId, daiAmount) => {
 
         daiAmount = web3.utils.toWei('1', 'ether');
 
+        // TODO: wipeAll when we want the whole debt payed
+
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'wipe'),
           [cdpManagerAddr, getTokenJoinAddr('DAI'), cdpId, daiAmount]);
 
@@ -283,6 +287,75 @@ const payback = async (cdpId, daiAmount) => {
     }
 };
 
+const transfer = async (cdpId, receiversAddr) => {
+    try {
+        // TODO: receiversAddr check if not 0x0
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'give'),
+          [cdpManagerAddr, cdpId, receiversAddr]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](proxyActionsAddr, data).send({
+            from: account.address, gas: 900000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+
+// const boost = async (cdpId) => {
+//     try {
+//         const daiAmount = web3.utils.toWei('1', 'ether');
+
+//         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'boost'),
+//           [cdpId, daiAmount, 0, 0]);
+
+//         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
+//             from: account.address, gas: 900000});
+
+//         console.log(tx);
+//     } catch(err) {
+//         console.log(err);
+//     }
+// };
+
+
+
+/****************************** INFO FUNCTIONS *************************************/
+
+
+
+const getCdpInfo = async (cdp) => {
+    try {
+
+        const ilkInfo = await getCollateralInfo(cdp.ilk);
+        const urn = await vat.methods.urns(cdp.ilk, cdp.urn).call();
+
+        const collateral = Dec(urn.ink);
+        const debt = Dec(urn.art);
+
+        const debtWithFee = debt.times(ilkInfo.currentRate).div(1e27);
+        const stabilityFee = debtWithFee.sub(debt);
+
+        const ratio = collateral.times(ilkInfo.price).div(debtWithFee).times(100);
+
+        const liquidationPrice = debt.times(ilkInfo.liquidationRatio).div(collateral);
+
+        return {
+            id: cdp.cdpId,
+            type: cdp.ilk,
+            collateral,
+            debt,
+            debtWithFee, // debt + stabilityFee
+            stabilityFee: stabilityFee.div(1e18),
+            ratio,
+            liquidationPrice
+        };
+    } catch(err) {
+        console.log(err);
+    }
+};
 
 const getCollateralInfo = async (ilk) => {
     try {
@@ -324,53 +397,6 @@ const getCDPsForAddress = async (proxyAddr) => {
 
     return usersCdps;
 }
-
-const boost = async (cdpId) => {
-    try {
-        const daiAmount = web3.utils.toWei('1', 'ether');
-
-        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'boost'),
-          [cdpId, daiAmount, 0, 0]);
-
-        const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
-            from: account.address, gas: 900000});
-
-        console.log(tx);
-    } catch(err) {
-        console.log(err);
-    }
-};
-
-const getCdpInfo = async (cdp) => {
-    try {
-
-        const ilkInfo = await getCollateralInfo(cdp.ilk);
-        const urn = await vat.methods.urns(cdp.ilk, cdp.urn).call();
-
-        const collateral = Dec(urn.ink);
-        const debt = Dec(urn.art);
-
-        const debtWithFee = debt.times(ilkInfo.currentRate).div(1e27);
-        const stabilityFee = debtWithFee.sub(debt);
-
-        const ratio = collateral.times(ilkInfo.price).div(debtWithFee).times(100);
-
-        const liquidationPrice = debt.times(ilkInfo.liquidationRatio).div(collateral);
-
-        return {
-            id: cdp.cdpId,
-            type: cdp.ilk,
-            collateral,
-            debt,
-            debtWithFee, // debt + stabilityFee
-            stabilityFee: stabilityFee.div(1e18),
-            ratio,
-            liquidationPrice
-        };
-    } catch(err) {
-        console.log(err);
-    }
-};
 
 const getStabilityFee = async (ilk) => {
     try {
