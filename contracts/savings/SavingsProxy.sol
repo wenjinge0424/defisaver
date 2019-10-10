@@ -7,8 +7,9 @@ import "../interfaces/ITokenInterface.sol";
 import "../constants/ConstantAddresses.sol";
 import "./dydx/ISoloMargin.sol";
 import "./SavingsLogger.sol";
+import "./dsr/DSRProtocol.sol";
 
-contract SavingsProxy is ConstantAddresses {
+contract SavingsProxy is ConstantAddresses, DSRProtocol {
 
     address constant public SAVINGS_COMPOUND_ADDRESS = 0xba7676a6c3E2FFff9f8d16e9C7b1e7848CC0f7DE;
     address constant public SAVINGS_DYDX_ADDRESS = 0x97a13567879471E1d6a3C37AB1017321980cd0ca;
@@ -17,13 +18,21 @@ contract SavingsProxy is ConstantAddresses {
     enum SavingsProtocol { Compound, Dydx, Fulcrum, Dsr }
 
     function deposit(SavingsProtocol _protocol, uint _amount) public {
-        _deposit(_protocol, _amount);
+        if (_protocol == SavingsProtocol.Dsr) {
+            dsrDeposit(_amount);
+        } else {
+            _deposit(_protocol, _amount);
+        }
 
         SavingsLogger(SAVINGS_LOGGER_ADDRESS).logDeposit(msg.sender, uint8(_protocol), _amount);
     }
 
     function withdraw(SavingsProtocol _protocol, uint _amount) public {
-        _withdraw(_protocol, _amount);
+        if (_protocol == SavingsProtocol.Dsr) {
+            dsrWithdraw(_amount);
+        } else {
+            _withdraw(_protocol, _amount);
+        }
 
         SavingsLogger(SAVINGS_LOGGER_ADDRESS).logWithdraw(msg.sender, uint8(_protocol), _amount);
     }
