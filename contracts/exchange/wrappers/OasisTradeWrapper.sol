@@ -1,15 +1,13 @@
 pragma solidity ^0.5.0;
 
-import "../../interfaces/ERC20.sol";
-import "../../interfaces/KyberNetworkProxyInterface.sol";
 import "../../interfaces/ExchangeInterface.sol";
 import "../../interfaces/Eth2DaiInterface.sol";
+import "../../interfaces/ERC20.sol";
 import "../../interfaces/TokenInterface.sol";
-import "../../DS/DSMath.sol";
 import "../../constants/ConstantAddresses.sol";
+import "../../DS/DSMath.sol";
 
-contract Eth2DaiWrapper is ExchangeInterface, DSMath, ConstantAddresses {
-
+contract OasisTradeWrapper is DSMath, ConstantAddresses, ExchangeInterface {
 
     function swapEtherToToken(uint _ethAmount, address _tokenAddress, uint _maxAmount) external payable returns(uint, uint) {
         require(ERC20(WETH_ADDRESS).approve(OTC_ADDRESS, _ethAmount));
@@ -36,14 +34,29 @@ contract Eth2DaiWrapper is ExchangeInterface, DSMath, ConstantAddresses {
         return ethBought;
     }
 
+    function swapTokenToToken(address _srcToken, address _dstToken, uint _amount) external payable returns(uint) {
+        require(_srcToken != KYBER_ETH_ADDRESS && _dstToken != KYBER_ETH_ADDRESS);
+
+        require(ERC20(_srcToken).transferFrom(msg.sender, address(this), _amount));
+        require(ERC20(_srcToken).approve(OTC_ADDRESS, _amount));
+
+        uint dstAmount = Eth2DaiInterface(OTC_ADDRESS).sellAllAmount(ERC20(_srcToken), _amount,
+                 ERC20(_dstToken), 0);
+
+        ERC20(_dstToken).transfer(msg.sender, dstAmount);
+
+        return dstAmount;
+    }
+
     function getExpectedRate(address _src, address _dest, uint _srcQty) public view returns (uint, uint) {
-        if(_src == KYBER_ETH_ADDRESS) {
+        if (_src == KYBER_ETH_ADDRESS) {
             return (wdiv(Eth2DaiInterface(OTC_ADDRESS).getBuyAmount(ERC20(_dest), ERC20(WETH_ADDRESS), _srcQty), _srcQty), 0);
         } else if (_dest == KYBER_ETH_ADDRESS) {
             return (wdiv(Eth2DaiInterface(OTC_ADDRESS).getBuyAmount(ERC20(WETH_ADDRESS), ERC20(_src), _srcQty), _srcQty), 0);
+        } else {
+            return (wdiv(Eth2DaiInterface(OTC_ADDRESS).getBuyAmount(ERC20(_dest), ERC20(_src), _srcQty), _srcQty), 0);
         }
     }
 
-    function() payable external {
-    }
+    function() payable external {}
 }

@@ -29,7 +29,7 @@ contract UniswapWrapper is ExchangeInterface, DSMath, ConstantAddresses {
         return destAmount;
     }
 
-    function swapEtherToToken (uint _ethAmount, address _tokenAddress, uint _maxAmount) external payable returns(uint, uint) {
+    function swapEtherToToken(uint _ethAmount, address _tokenAddress, uint _maxAmount) external payable returns(uint, uint) {
         address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_tokenAddress);
 
         uint tokenAmount = UniswapExchangeInterface(uniswapTokenAddress).
@@ -38,7 +38,7 @@ contract UniswapWrapper is ExchangeInterface, DSMath, ConstantAddresses {
         return (tokenAmount, 0);
     }
 
-    function swapTokenToEther (address _tokenAddress, uint _amount, uint _maxAmount) external returns(uint) {
+    function swapTokenToEther(address _tokenAddress, uint _amount, uint _maxAmount) external returns(uint) {
         address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_tokenAddress);
 
         ERC20(_tokenAddress).approve(uniswapTokenAddress, _amount);

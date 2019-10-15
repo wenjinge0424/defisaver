@@ -19,9 +19,10 @@ contract ConstantAddressesKovan {
     address public constant STUPID_EXCHANGE = 0x863E41FE88288ebf3fcd91d8Dbb679fb83fdfE17;
     address public constant DISCOUNT_ADDRESS = 0x1297c1105FEDf45E0CF6C102934f32C4EB780929;
 
-    address public constant KYBER_WRAPPER = 0x5595930d576Aedf13945C83cE5aaD827529A1310;
+    address public constant KYBER_WRAPPER = 0xABa933D6fD54BE2905d04f44eC8223B5DB4A6250;
     address public constant UNISWAP_WRAPPER = 0x5595930d576Aedf13945C83cE5aaD827529A1310;
     address public constant ETH2DAI_WRAPPER = 0x823cde416973a19f98Bb9C96d97F4FE6C9A7238B;
+    address public constant OASIS_WRAPPER = 0xB9D22CC741a204a843525e7D028b6e513346f618;
 
     address public constant FACTORY_ADDRESS = 0xc72E74E474682680a414b506699bBcA44ab9a930;
     //

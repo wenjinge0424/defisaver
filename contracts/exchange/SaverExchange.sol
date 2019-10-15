@@ -104,11 +104,16 @@ contract SaverExchange is DSMath, ConstantAddresses {
     function getBestPrice(uint _amount, address _srcToken, address _destToken, uint _exchangeType) public view returns (address, uint) {
         uint expectedRateKyber;
         uint expectedRateUniswap;
-        uint expectedRateEth2Dai;
+        uint expectedRateOasis;
 
         (expectedRateKyber, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
+        (expectedRateOasis, ) = ExchangeInterface(OASIS_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
         // no deployment on kovan
         // (expectedRateUniswap, ) = ExchangeInterface(UNISWAP_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
+
+        if (_exchangeType == 1) {
+            return (OASIS_WRAPPER, expectedRateOasis);
+        }
 
         if (_exchangeType == 2) {
             return (KYBER_WRAPPER, expectedRateKyber);
@@ -118,34 +123,15 @@ contract SaverExchange is DSMath, ConstantAddresses {
             return (UNISWAP_WRAPPER, expectedRateUniswap);
         }
 
-        if (_exchangeType == 4) {
-            if (expectedRateKyber >= expectedRateUniswap) {
-                return (KYBER_WRAPPER, expectedRateKyber);
-            } else {
-                return (UNISWAP_WRAPPER, expectedRateUniswap);
-            }
-        }
-
-        require((_srcToken == MAKER_DAI_ADDRESS) && (_destToken == KYBER_ETH_ADDRESS) ||
-            (_srcToken == KYBER_ETH_ADDRESS) && (_destToken == MAKER_DAI_ADDRESS),
-            'If exchange type is not 4, must be swap between Ether and DAI');
-
-        /// @dev at this point it must be exchange between eth and dai so we can use eth2dai
-        // reverts on kovan
-        // (expectedRateEth2Dai, ) = ExchangeInterface(ETH2DAI_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
-        if (_exchangeType == 1) {
-            return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
-        }
-
-        if ((expectedRateKyber >= expectedRateUniswap) && (expectedRateKyber >= expectedRateEth2Dai)) {
+        if ((expectedRateKyber >= expectedRateUniswap) && (expectedRateKyber >= expectedRateOasis)) {
             return (KYBER_WRAPPER, expectedRateKyber);
         }
 
-        if ((expectedRateEth2Dai >= expectedRateKyber) && (expectedRateEth2Dai >= expectedRateUniswap)) {
-            return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
+        if ((expectedRateOasis >= expectedRateKyber) && (expectedRateOasis >= expectedRateUniswap)) {
+            return (ETH2DAI_WRAPPER, expectedRateOasis);
         }
 
-        if ((expectedRateUniswap >= expectedRateKyber) && (expectedRateUniswap >= expectedRateEth2Dai)) {
+        if ((expectedRateUniswap >= expectedRateKyber) && (expectedRateUniswap >= expectedRateOasis)) {
             return (UNISWAP_WRAPPER, expectedRateUniswap);
         }
     }
