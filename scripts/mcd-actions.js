@@ -32,7 +32,7 @@ const oasisTradeAddr = '0x8EFd472Ca15BED09D8E9D7594b94D4E42Fe62224';
 
 const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
 
-const mcdSaverProxyAddr = '0xa054E265dc4c62a75f3244d5ddFA6b22A07E6597';
+const mcdSaverProxyAddr = '0xE94fB74d18955779fB52706a27dD8cCB3d6c1C9a';
 
 const ilkData = {
     '1' : {
@@ -139,9 +139,7 @@ const initContracts = async () => {
 (async () => {
     await initContracts();
 
-    await swap();
-
-    // const usersCdps = await getCDPsForAddress(proxyAddr);
+    const usersCdps = await getCDPsForAddress(proxyAddr);
 
     // console.log(usersCdps);
 
@@ -154,7 +152,7 @@ const initContracts = async () => {
 
     // console.log(res);
 
-    // await boost(usersCdps[0].cdpId);
+    await boost(usersCdps[0].cdpId);
 
     // await faucet.methods.gulp(getTokenAddr('GNT')).send({from: account.address, gas: 300000});
 
@@ -310,21 +308,21 @@ const transfer = async (cdpId, receiversAddr) => {
 };
 
 
-// const boost = async (cdpId) => {
-//     try {
-//         const daiAmount = web3.utils.toWei('1', 'ether');
+const boost = async (cdpId) => {
+    try {
+        const daiAmount = web3.utils.toWei('0.1', 'ether');
 
-//         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'boost'),
-//           [cdpId, daiAmount, 0, 0]);
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'boost'),
+          [cdpId, ethAJoinAddr, daiAmount]);
 
-//         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
-//             from: account.address, gas: 900000});
+        const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
+            from: account.address, gas: 900000});
 
-//         console.log(tx);
-//     } catch(err) {
-//         console.log(err);
-//     }
-// };
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
 
 
 

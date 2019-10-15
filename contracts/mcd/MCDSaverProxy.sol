@@ -2,6 +2,7 @@ pragma solidity ^0.5.0;
 
 import "../DS/DSMath.sol";
 import "./OasisTrade.sol";
+import "./MCDExchange.sol";
 
 contract ManagerInterface {
     function cdpCan(address, uint, address) public view returns (uint);
@@ -93,11 +94,13 @@ contract MCDSaverProxy is SaverProxyHelper {
     address public constant JUG_ADDRESS = 0x3793181eBbc1a72cc08ba90087D21c7862783FA5;
     address public constant DAI_JOIN_ADDRESS = 0x61Af28390D0B3E806bBaF09104317cb5d26E215D;
 
-    address payable public constant OASIS_TRADE = 0xcde92542190B49da6Eb0385bC19Cb7eb0aA8c7EC;
+    address payable public constant OASIS_TRADE = 0x8EFd472Ca15BED09D8E9D7594b94D4E42Fe62224;
 
     address public constant DAI_ADDRESS = 0x1f9BEAf12D8db1e50eA8a5eD53FB970462386aA0;
 
     address public constant ETH_JOIN_ADDRESS = 0xc3AbbA566bb62c09b7f94704d8dFd9800935D3F9;
+
+    address public constant MCD_EXCHANGE_ADDRESS = 0x2f0449f3E73B1E343ADE21d813eE03aA23bfd2e8;
 
     function repay(uint _cdpId, address _collateralType, uint _collateralAmount) public {
         // check slippage
@@ -125,6 +128,9 @@ contract MCDSaverProxy is SaverProxyHelper {
         _drawDai(manager, _cdpId, _daiAmount);
 
         address collateralAddr = address(GemJoinLike(_collateralJoin).gem());
+
+        // TODO: remove only used for testing
+        MCDExchange(MCD_EXCHANGE_ADDRESS).daiToSai(_daiAmount);
 
         ERC20(collateralAddr).approve(OASIS_TRADE, _daiAmount);
         uint collateralAmount = OasisTrade(OASIS_TRADE).swap(DAI_ADDRESS, collateralAddr, _daiAmount);
