@@ -97,6 +97,7 @@ contract MCDSaverProxy is SaverProxyHelper {
     address payable public constant OASIS_TRADE = 0x8EFd472Ca15BED09D8E9D7594b94D4E42Fe62224;
 
     address public constant DAI_ADDRESS = 0x1f9BEAf12D8db1e50eA8a5eD53FB970462386aA0;
+    address public constant SAI_ADDRESS = 0xC4375B7De8af5a38a93548eb8453a498222C4fF2;
 
     address public constant ETH_JOIN_ADDRESS = 0xc3AbbA566bb62c09b7f94704d8dFd9800935D3F9;
 
@@ -132,8 +133,9 @@ contract MCDSaverProxy is SaverProxyHelper {
         // TODO: remove only used for testing
         MCDExchange(MCD_EXCHANGE_ADDRESS).daiToSai(_daiAmount);
 
-        ERC20(collateralAddr).approve(OASIS_TRADE, _daiAmount);
-        uint collateralAmount = OasisTrade(OASIS_TRADE).swap(DAI_ADDRESS, collateralAddr, _daiAmount);
+        ERC20(SAI_ADDRESS).approve(OASIS_TRADE, _daiAmount);
+        //TODO: change to DAI address
+        uint collateralAmount = OasisTrade(OASIS_TRADE).swap(SAI_ADDRESS, collateralAddr, _daiAmount);
 
         _addCollateral(manager, _cdpId, _collateralJoin, collateralAmount);
 
@@ -160,9 +162,13 @@ contract MCDSaverProxy is SaverProxyHelper {
         DaiJoinInterface(DAI_JOIN_ADDRESS).exit(address(this), _daiAmount);
     }
 
+    event Test(uint, uint);
+
     function _addCollateral(ManagerInterface _manager, uint _cdpId, address _collateralJoin, uint _collateralAmount) public {
         // eth -> weth
         int convertAmount = toInt(convertTo18(_collateralJoin, _collateralAmount));
+
+        emit Test((address(this).balance), _collateralAmount);
 
         if (_collateralJoin == ETH_JOIN_ADDRESS) {
             GemJoinLike(_collateralJoin).gem().deposit.value(_collateralAmount)();
@@ -170,7 +176,7 @@ contract MCDSaverProxy is SaverProxyHelper {
         }
 
         GemJoinLike(_collateralJoin).gem().approve(address(_collateralJoin), _collateralAmount);
-        GemJoinLike(_collateralJoin).join(_manager.urns(_cdpId), _collateralAmount);
+        GemJoinLike(_collateralJoin).join(address(this), _collateralAmount);
 
         // add to cdp
         VatInterface(_manager.vat()).frob(
