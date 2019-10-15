@@ -1,6 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "../DS/DSMath.sol";
+import "./OasisTrade.sol";
 
 contract ManagerInterface {
     function cdpCan(address, uint, address) public view returns (uint);
@@ -50,6 +51,7 @@ contract DaiJoinInterface {
     function exit(address, uint) public;
 }
 
+//TODO: all methods public for testing purposes
 contract MCDSaverProxy is DSMath {
 
     // KOVAN
@@ -58,18 +60,26 @@ contract MCDSaverProxy is DSMath {
     address public constant JUG_ADDRESS = 0x3793181eBbc1a72cc08ba90087D21c7862783FA5;
     address public constant DAI_JOIN_ADDRESS = 0x61Af28390D0B3E806bBaF09104317cb5d26E215D;
 
+    address payable public constant OASIS_TRADE = 0xcde92542190B49da6Eb0385bC19Cb7eb0aA8c7EC;
+
+    address public constant DAI_ADDRESS = 0x1f9BEAf12D8db1e50eA8a5eD53FB970462386aA0;
+
+
     // function repay(uint _cdpId) public {
 
     // }
 
-    function boost(uint _cdpId, uint _daiAmount, uint _slippageLimit, uint _exchangeType) public {
+    function boost(uint _cdpId, address _collateralType, uint _daiAmount, uint _slippageLimit, uint _exchangeType) public {
         // check slippage
+        ManagerInterface manager = ManagerInterface(MANAGER_ADDRESS);
 
-        _drawDai(_cdpId, _daiAmount);
+        _drawDai(manager, _cdpId, _daiAmount);
 
         // convert on exchange to collateral
+        ERC20(_collateralType).approve(OASIS_TRADE, _daiAmount);
+        uint collateralAmount = OasisTrade(OASIS_TRADE).swap(DAI_ADDRESS, _collateralType, _daiAmount);
 
-        _addCollateral(_cdpId, _daiAmount);
+        _addCollateral(manager, _cdpId, collateralAmount);
 
         // ratio check
 
@@ -78,15 +88,14 @@ contract MCDSaverProxy is DSMath {
     }
 
 
-    function _drawDai(uint _cdpId, uint _daiAmount) public {
-        ManagerInterface manager = ManagerInterface(MANAGER_ADDRESS);
-        bytes32 ilk = manager.ilks(_cdpId);
+    function _drawDai(ManagerInterface _manager, uint _cdpId, uint _daiAmount) public {
+        bytes32 ilk = _manager.ilks(_cdpId);
 
         // Update stability fee
         JugInterface(JUG_ADDRESS).drip(ilk);
 
-        manager.frob(_cdpId, int(0), int(_daiAmount)); // draws Dai (TODO: dai amount helper function)
-        manager.move(_cdpId, address(this), _toRad(_daiAmount)); // moves Dai from Vat to Proxy
+        _manager.frob(_cdpId, int(0), int(_daiAmount)); // draws Dai (TODO: dai amount helper function)
+        _manager.move(_cdpId, address(this), _toRad(_daiAmount)); // moves Dai from Vat to Proxy
 
         if (VatInterface(VAT_ADDRESS).can(address(this), address(DAI_JOIN_ADDRESS)) == 0) {
             VatInterface(VAT_ADDRESS).hope(DAI_JOIN_ADDRESS);
@@ -95,11 +104,11 @@ contract MCDSaverProxy is DSMath {
         DaiJoinInterface(DAI_JOIN_ADDRESS).exit(address(this), _daiAmount);
     }
 
-    function _addCollateral(uint _cdpId, uint _daiAmount) public {
+    function _addCollateral(ManagerInterface _manager, uint _cdpId, uint _daiAmount) public {
 
     }
 
-    function _toRad(uint wad) internal pure returns (uint rad) {
+    function _toRad(uint wad) public pure returns (uint rad) {
         rad = mul(wad, 10 ** 27);
     }
 

@@ -15,6 +15,7 @@ const Spotter = require('../build/contracts/Spotter.json');
 const MCDSaverProxy = require('../build/contracts/MCDSaverProxy.json');
 const Faucet = require('../build/contracts/Faucet.json');
 const ERC20 = require('../build/contracts/ERC20.json');
+const OasisTrade = require('../build/contracts/OasisTrade.json');
 
 const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
 const proxyActionsAddr = '0xc21274797a01e133ebd9d79b23498edbd7166137';
@@ -26,6 +27,8 @@ const vatAddr = '0x6e6073260e1a77dfaf57d0b92c44265122da8028';
 const jugAddr = '0x3793181ebbc1a72cc08ba90087d21c7862783fa5';
 const spotterAddr = '0xf5cdfce5a0b85ff06654ef35f4448e74c523c5ac';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
+
+const oasisTradeAddr = '0x8EFd472Ca15BED09D8E9D7594b94D4E42Fe62224';
 
 const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
 
@@ -110,7 +113,7 @@ function getAbiFunction(contract, functionName) {
     return abi.find(abi => abi.name === functionName);
 }
 
-let web3, account, jug, registry, proxy, join, vat, getCdps, proxyAddr, spotter, mcdSaverProxy;
+let web3, account, jug, oasisTrade, registry, proxy, join, vat, getCdps, proxyAddr, spotter, mcdSaverProxy;
 
 const initContracts = async () => {
     web3 = new Web3(new Web3.providers.HttpProvider(process.env.KOVAN_INFURA_ENDPOINT));
@@ -130,14 +133,17 @@ const initContracts = async () => {
     spotter = new web3.eth.Contract(Spotter.abi, spotterAddr);
     mcdSaverProxy = new web3.eth.Contract(MCDSaverProxy.abi, mcdSaverProxyAddr);
     faucet = new web3.eth.Contract(Faucet.abi, faucetAddr);
+    oasisTrade = new web3.eth.Contract(OasisTrade.abi, oasisTradeAddr);
 };
 
 (async () => {
     await initContracts();
 
-    const usersCdps = await getCDPsForAddress(proxyAddr);
+    await swap();
 
-    console.log(usersCdps);
+    // const usersCdps = await getCDPsForAddress(proxyAddr);
+
+    // console.log(usersCdps);
 
     // const cdpInfo = await getCdpInfo(usersCdps[1]);
     // console.log(cdpInfo);
@@ -437,3 +443,14 @@ const transferToProxy = async (type, collateralAmount) => {
 
     await token.methods.transfer(proxyAddr, collateralAmount).send({from: account.address, gas: 500000});
 };
+
+const swap = async () => {
+    try {
+        const token = new web3.eth.Contract(ERC20.abi, '0xC4375B7De8af5a38a93548eb8453a498222C4fF2');
+
+        await token.methods.approve(oasisTradeAddr, web3.utils.toWei('10000000000000', 'ether')).send({from: account.address, gas: 100000});
+        oasisTrade.methods.swap('0xC4375B7De8af5a38a93548eb8453a498222C4fF2', '0xd0A1E359811322d97991E03f863a0C30C2cF029C', '1000').send({from: account.address, gas: 500000});
+    } catch(err) {
+        console.log(err);
+    }
+}
