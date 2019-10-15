@@ -1,9 +1,9 @@
 pragma solidity ^0.5.0;
 
-import "./interfaces/ERC20.sol";
-import "./interfaces/KyberNetworkProxyInterface.sol";
-import "./interfaces/ExchangeInterface.sol";
-import "./constants/ConstantAddresses.sol";
+import "../../interfaces/ERC20.sol";
+import "../../interfaces/KyberNetworkProxyInterface.sol";
+import "../../interfaces/ExchangeInterface.sol";
+import "../../constants/ConstantAddresses.sol";
 
 
 contract KyberWrapper is ExchangeInterface, ConstantAddresses {

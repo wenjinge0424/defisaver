@@ -137,12 +137,12 @@ contract SaverExchange is DSMath, ConstantAddresses {
             return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
         }
 
-        if ((expectedRateEth2Dai >= expectedRateKyber) && (expectedRateEth2Dai >= expectedRateUniswap)) {
-            return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
-        }
-
         if ((expectedRateKyber >= expectedRateUniswap) && (expectedRateKyber >= expectedRateEth2Dai)) {
             return (KYBER_WRAPPER, expectedRateKyber);
+        }
+
+        if ((expectedRateEth2Dai >= expectedRateKyber) && (expectedRateEth2Dai >= expectedRateUniswap)) {
+            return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
         }
 
         if ((expectedRateUniswap >= expectedRateKyber) && (expectedRateUniswap >= expectedRateEth2Dai)) {

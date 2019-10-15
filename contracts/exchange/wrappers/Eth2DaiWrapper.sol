@@ -1,12 +1,12 @@
 pragma solidity ^0.5.0;
 
-import "./interfaces/ERC20.sol";
-import "./interfaces/KyberNetworkProxyInterface.sol";
-import "./interfaces/ExchangeInterface.sol";
-import "./interfaces/Eth2DaiInterface.sol";
-import "./interfaces/TokenInterface.sol";
-import "./DS/DSMath.sol";
-import "./constants/ConstantAddresses.sol";
+import "../../interfaces/ERC20.sol";
+import "../../interfaces/KyberNetworkProxyInterface.sol";
+import "../../interfaces/ExchangeInterface.sol";
+import "../../interfaces/Eth2DaiInterface.sol";
+import "../../interfaces/TokenInterface.sol";
+import "../../DS/DSMath.sol";
+import "../../constants/ConstantAddresses.sol";
 
 contract Eth2DaiWrapper is ExchangeInterface, DSMath, ConstantAddresses {
 
