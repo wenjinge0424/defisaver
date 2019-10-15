@@ -23,6 +23,14 @@ contract ManagerInterface {
     function shift(uint, uint) public;
 }
 
+contract GemLike {
+    function approve(address, uint) public;
+    function transfer(address, uint) public;
+    function transferFrom(address, address, uint) public;
+    function deposit() public payable;
+    function withdraw(uint) public;
+}
+
 contract VatInterface {
     function can(address, address) public view returns (uint);
     function ilks(bytes32) public view returns (uint, uint, uint, uint, uint);
@@ -51,8 +59,33 @@ contract DaiJoinInterface {
     function exit(address, uint) public;
 }
 
+contract GemJoinLike {
+    function dec() public returns (uint);
+    function gem() public returns (GemLike);
+    function join(address, uint) public payable;
+    function exit(address, uint) public;
+}
+
+contract SaverProxyHelper is DSMath {
+    function _toRad(uint wad) public pure returns (uint rad) {
+        rad = mul(wad, 10 ** 27);
+    }
+
+    function convertTo18(address gemJoin, uint256 amt) internal returns (uint256 wad) {
+        wad = mul(
+            amt,
+            10 ** (18 - GemJoinLike(gemJoin).dec())
+        );
+    }
+
+    function toInt(uint x) internal pure returns (int y) {
+        y = int(x);
+        require(y >= 0, "int-overflow");
+    }
+}
+
 //TODO: all methods public for testing purposes
-contract MCDSaverProxy is DSMath {
+contract MCDSaverProxy is SaverProxyHelper {
 
     // KOVAN
     address public constant VAT_ADDRESS = 0x6e6073260e1a77dFaf57D0B92c44265122Da8028;
@@ -64,22 +97,39 @@ contract MCDSaverProxy is DSMath {
 
     address public constant DAI_ADDRESS = 0x1f9BEAf12D8db1e50eA8a5eD53FB970462386aA0;
 
+    address public constant ETH_JOIN_ADDRESS = 0xc3AbbA566bb62c09b7f94704d8dFd9800935D3F9;
 
-    // function repay(uint _cdpId) public {
-
-    // }
-
-    function boost(uint _cdpId, address _collateralType, uint _daiAmount, uint _slippageLimit, uint _exchangeType) public {
+    function repay(uint _cdpId, address _collateralType, uint _collateralAmount) public {
         // check slippage
+
+        ManagerInterface manager = ManagerInterface(MANAGER_ADDRESS);
+
+        _drawCollateral(manager, _cdpId, _collateralAmount);
+
+        // Exchange Collateral -> Dai
+
+        uint daiAmount = 0;
+
+        _paybackDebt(manager, _cdpId, daiAmount);
+
+        // ratio check
+
+        // logs
+    }
+
+    function boost(uint _cdpId, address _collateralJoin, uint _daiAmount) public {
+        // check slippage
+
         ManagerInterface manager = ManagerInterface(MANAGER_ADDRESS);
 
         _drawDai(manager, _cdpId, _daiAmount);
 
-        // convert on exchange to collateral
-        ERC20(_collateralType).approve(OASIS_TRADE, _daiAmount);
-        uint collateralAmount = OasisTrade(OASIS_TRADE).swap(DAI_ADDRESS, _collateralType, _daiAmount);
+        address collateralAddr = address(GemJoinLike(_collateralJoin).gem());
 
-        _addCollateral(manager, _cdpId, collateralAmount);
+        ERC20(collateralAddr).approve(OASIS_TRADE, _daiAmount);
+        uint collateralAmount = OasisTrade(OASIS_TRADE).swap(DAI_ADDRESS, collateralAddr, _daiAmount);
+
+        _addCollateral(manager, _cdpId, _collateralJoin, collateralAmount);
 
         // ratio check
 
@@ -104,12 +154,40 @@ contract MCDSaverProxy is DSMath {
         DaiJoinInterface(DAI_JOIN_ADDRESS).exit(address(this), _daiAmount);
     }
 
-    function _addCollateral(ManagerInterface _manager, uint _cdpId, uint _daiAmount) public {
+    function _addCollateral(ManagerInterface _manager, uint _cdpId, address _collateralJoin, uint _collateralAmount) public {
+        // eth -> weth
+        int convertAmount = toInt(convertTo18(_collateralJoin, _collateralAmount));
+
+        if (_collateralJoin == ETH_JOIN_ADDRESS) {
+            GemJoinLike(_collateralJoin).gem().deposit.value(_collateralAmount)();
+            convertAmount = toInt(_collateralAmount);
+        }
+
+        GemJoinLike(_collateralJoin).gem().approve(address(_collateralJoin), _collateralAmount);
+        GemJoinLike(_collateralJoin).join(_manager.urns(_cdpId), _collateralAmount);
+
+        // add to cdp
+        VatInterface(_manager.vat()).frob(
+            _manager.ilks(_cdpId),
+            _manager.urns(_cdpId),
+            address(this),
+            address(this),
+            convertAmount,
+            0
+        );
 
     }
 
-    function _toRad(uint wad) public pure returns (uint rad) {
-        rad = mul(wad, 10 ** 27);
+    function _drawCollateral(ManagerInterface _manager, uint _cdpId, uint _collateralAmount) public {
+
+    }
+
+    function _paybackDebt(ManagerInterface _manager, uint _cdpId, uint _daiAmount) public {
+
+    }
+
+    function getRatio() public returns (uint) {
+
     }
 
 }
