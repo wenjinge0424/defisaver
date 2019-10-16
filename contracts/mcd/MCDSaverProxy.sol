@@ -3,6 +3,7 @@ pragma solidity ^0.5.0;
 import "../DS/DSMath.sol";
 import "./OasisTrade.sol";
 import "./MCDExchange.sol";
+import "../SaverLogger.sol";
 
 contract ManagerInterface {
     function cdpCan(address, uint, address) public view returns (uint);
@@ -60,6 +61,13 @@ contract DaiJoinInterface {
     function exit(address, uint) public;
 }
 
+contract DaiJoinLike {
+    function vat() public returns (VatInterface);
+    function dai() public returns (GemLike);
+    function join(address, uint) public payable;
+    function exit(address, uint) public;
+}
+
 contract GemJoinLike {
     function dec() public returns (uint);
     function gem() public returns (GemLike);
@@ -83,6 +91,20 @@ contract SaverProxyHelper is DSMath {
         y = int(x);
         require(y >= 0, "int-overflow");
     }
+
+    function _getWipeDart(
+        address vat,
+        address urn,
+        bytes32 ilk
+    ) internal view returns (int dart) {
+        uint dai = VatInterface(vat).dai(urn);
+
+        (, uint rate,,,) = VatInterface(vat).ilks(ilk);
+        (, uint art) = VatInterface(vat).urns(ilk, urn);
+
+        dart = toInt(dai / rate);
+        dart = uint(dart) <= art ? - dart : - toInt(art);
+    }
 }
 
 //TODO: all methods public for testing purposes
@@ -99,30 +121,35 @@ contract MCDSaverProxy is SaverProxyHelper {
     address public constant DAI_ADDRESS = 0x1f9BEAf12D8db1e50eA8a5eD53FB970462386aA0;
     address public constant SAI_ADDRESS = 0xC4375B7De8af5a38a93548eb8453a498222C4fF2;
 
+    address public constant LOGGER_ADDRESS = 0x32d0e18f988F952Eb3524aCE762042381a2c39E5;
+
     address public constant ETH_JOIN_ADDRESS = 0xc3AbbA566bb62c09b7f94704d8dFd9800935D3F9;
 
     address public constant MCD_EXCHANGE_ADDRESS = 0x2f0449f3E73B1E343ADE21d813eE03aA23bfd2e8;
 
-    function repay(uint _cdpId, address _collateralType, uint _collateralAmount) public {
-        // check slippage
+    function repay(uint _cdpId, address _collateralJoin, uint _collateralAmount) public {
+        //TODO: check slippage
 
         ManagerInterface manager = ManagerInterface(MANAGER_ADDRESS);
 
-        _drawCollateral(manager, _cdpId, _collateralAmount);
+        _drawCollateral(manager, _cdpId, _collateralJoin, _collateralAmount);
 
-        // Exchange Collateral -> Dai
+        address collateralAddr = address(GemJoinLike(_collateralJoin).gem());
 
-        uint daiAmount = 0;
+        uint daiAmount = OasisTrade(OASIS_TRADE).swap.value(_collateralAmount)(collateralAddr, SAI_ADDRESS, _collateralAmount);
+
+        // TODO: remove only used for testing
+        MCDExchange(MCD_EXCHANGE_ADDRESS).saiToDai(daiAmount);
 
         _paybackDebt(manager, _cdpId, daiAmount);
 
-        // ratio check
+        //TODO: ratio check
 
-        // logs
+        SaverLogger(LOGGER_ADDRESS).LogRepay(_cdpId, msg.sender, _collateralAmount, daiAmount);
     }
 
     function boost(uint _cdpId, address _collateralJoin, uint _daiAmount) public {
-        // check slippage
+        //TODO: check slippage
 
         ManagerInterface manager = ManagerInterface(MANAGER_ADDRESS);
 
@@ -133,16 +160,18 @@ contract MCDSaverProxy is SaverProxyHelper {
         // TODO: remove only used for testing
         MCDExchange(MCD_EXCHANGE_ADDRESS).daiToSai(_daiAmount);
 
+        //TODO: remove only used for testing
+        ERC20(DAI_ADDRESS).transfer(MCD_EXCHANGE_ADDRESS, ERC20(DAI_ADDRESS).balanceOf(address(this)));
+
         ERC20(SAI_ADDRESS).approve(OASIS_TRADE, _daiAmount);
         //TODO: change to DAI address
         uint collateralAmount = OasisTrade(OASIS_TRADE).swap(SAI_ADDRESS, collateralAddr, _daiAmount);
 
         _addCollateral(manager, _cdpId, _collateralJoin, collateralAmount);
 
-        // ratio check
+        //TODO: ratio check
 
-        // logs
-
+        SaverLogger(LOGGER_ADDRESS).LogBoost(_cdpId, msg.sender, _daiAmount, collateralAmount);
     }
 
 
@@ -151,6 +180,8 @@ contract MCDSaverProxy is SaverProxyHelper {
 
         // Update stability fee
         JugInterface(JUG_ADDRESS).drip(ilk);
+
+        // TODO: check if _daiAmount > maxAmount
 
         _manager.frob(_cdpId, int(0), int(_daiAmount)); // draws Dai (TODO: dai amount helper function)
         _manager.move(_cdpId, address(this), _toRad(_daiAmount)); // moves Dai from Vat to Proxy
@@ -162,13 +193,8 @@ contract MCDSaverProxy is SaverProxyHelper {
         DaiJoinInterface(DAI_JOIN_ADDRESS).exit(address(this), _daiAmount);
     }
 
-    event Test(uint, uint);
-
     function _addCollateral(ManagerInterface _manager, uint _cdpId, address _collateralJoin, uint _collateralAmount) public {
-        // eth -> weth
         int convertAmount = toInt(convertTo18(_collateralJoin, _collateralAmount));
-
-        emit Test((address(this).balance), _collateralAmount);
 
         if (_collateralJoin == ETH_JOIN_ADDRESS) {
             GemJoinLike(_collateralJoin).gem().deposit.value(_collateralAmount)();
@@ -190,12 +216,33 @@ contract MCDSaverProxy is SaverProxyHelper {
 
     }
 
-    function _drawCollateral(ManagerInterface _manager, uint _cdpId, uint _collateralAmount) public {
+    function _drawCollateral(ManagerInterface _manager, uint _cdpId, address _collateralJoin, uint _collateralAmount) public {
+        //TODO: if _collateralAmount
 
+        _manager.frob(
+            _cdpId,
+            address(this),
+            -toInt(_collateralAmount),
+            0
+        );
+
+        GemJoinLike(_collateralJoin).exit(address(this), _collateralAmount);
+
+        if (_collateralJoin == ETH_JOIN_ADDRESS) {
+            GemJoinLike(_collateralJoin).gem().withdraw(_collateralAmount);
+            msg.sender.transfer(_collateralAmount);
+        }
     }
 
     function _paybackDebt(ManagerInterface _manager, uint _cdpId, uint _daiAmount) public {
+        address urn = _manager.urns(_cdpId);
+        bytes32 ilk = _manager.ilks(_cdpId);
 
+        DaiJoinLike(DAI_JOIN_ADDRESS).dai().approve(DAI_JOIN_ADDRESS, _daiAmount);
+
+        DaiJoinLike(DAI_JOIN_ADDRESS).join(urn, _daiAmount);
+
+        _manager.frob(_cdpId, 0, _getWipeDart(address(_manager.vat()), urn, ilk));
     }
 
     function getRatio() public returns (uint) {
