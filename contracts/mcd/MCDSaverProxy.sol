@@ -192,10 +192,13 @@ contract MCDSaverProxy is SaverProxyHelper {
     function _drawDai(ManagerInterface _manager, uint _cdpId, uint _daiAmount) public {
         bytes32 ilk = _manager.ilks(_cdpId);
 
-        // Update stability fee
         JugInterface(JUG_ADDRESS).drip(ilk);
 
-        // TODO: check if _daiAmount > maxAmount
+        uint maxAmount = getMaxDebt(_manager, _cdpId, ilk);
+
+        if (_daiAmount > maxAmount) {
+            _daiAmount = sub(maxAmount, 1);
+        }
 
         _manager.frob(_cdpId, int(0), int(_daiAmount)); // draws Dai (TODO: dai amount helper function)
         _manager.move(_cdpId, address(this), _toRad(_daiAmount)); // moves Dai from Vat to Proxy
@@ -231,7 +234,13 @@ contract MCDSaverProxy is SaverProxyHelper {
     }
 
     function _drawCollateral(ManagerInterface _manager, uint _cdpId, address _collateralJoin, uint _collateralAmount) public {
-        //TODO: if _collateralAmount
+        bytes32 ilk = _manager.ilks(_cdpId);
+
+        uint maxCollateral = getMaxCollateral(_manager, _cdpId, ilk);
+
+        if (_collateralAmount > maxCollateral) {
+            _collateralAmount = sub(maxCollateral, 1);
+        }
 
         _manager.frob(
             _cdpId,
