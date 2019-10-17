@@ -32,7 +32,7 @@ const oasisTradeAddr = '0x8EFd472Ca15BED09D8E9D7594b94D4E42Fe62224';
 
 const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
 
-const mcdSaverProxyAddr = '0xB770A3f2C07785729987C0338132974978451E96';
+const mcdSaverProxyAddr = '0x457eb2877e365511444284f77ccc1cD8fEB15570';
 
 const ilkData = {
     '1' : {
@@ -143,13 +143,15 @@ const initContracts = async () => {
 
     // console.log(usersCdps);
 
+    await getRatioFromContract(usersCdps[0].cdpId);
+
     const cdpInfo = await getCdpInfo(usersCdps[0]);
-    console.log(cdpInfo.ratio, cdpInfo.collateral /  1e18, cdpInfo.debtWithFee / 1e18);
+    console.log(cdpInfo.ratio, cdpInfo.collateral / 1e18, cdpInfo.debtWithFee / 1e18);
 
-    await repay(usersCdps[0].cdpId);
+    // await repay(usersCdps[0].cdpId);
 
-    const cdpInfo2 = await getCdpInfo(usersCdps[0]);
-    console.log(cdpInfo2.ratio, cdpInfo2.collateral /  1e18, cdpInfo2.debtWithFee / 1e18);
+    // const cdpInfo2 = await getCdpInfo(usersCdps[0]);
+    // console.log(cdpInfo2.ratio, cdpInfo2.collateral /  1e18, cdpInfo2.debtWithFee / 1e18);
 
     // await transfer(usersCdps[1].cdpId, '0x322d58b9E75a6918f7e7849AEe0fF09369977e08');
 
@@ -343,6 +345,16 @@ const repay = async (cdpId) => {
     }
 };
 
+const getRatioFromContract = async (cdpId) => {
+    try {
+        const ratio = await mcdSaverProxy.methods.getMaxCollateral(cdpManagerAddr, cdpId, getIlk('ETH')).call();
+
+        console.log(ratio / 1e18);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
 
 
 /****************************** INFO FUNCTIONS *************************************/
@@ -420,6 +432,12 @@ const getCDPsForAddress = async (proxyAddr) => {
 
     return usersCdps;
 }
+
+const calcAfterRatio = async (type, collateral, debt) => {
+    const collateralInfo = getCollateralInfo(getIlk(type));
+
+    return (collateral * collateralInfo.price) / debt;
+};
 
 const getStabilityFee = async (ilk) => {
     try {

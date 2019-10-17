@@ -4,6 +4,7 @@ import "../DS/DSMath.sol";
 import "./OasisTrade.sol";
 import "./MCDExchange.sol";
 import "../SaverLogger.sol";
+import "./maker/Spotter.sol";
 
 contract ManagerInterface {
     function cdpCan(address, uint, address) public view returns (uint);
@@ -105,6 +106,21 @@ contract SaverProxyHelper is DSMath {
         dart = toInt(dai / rate);
         dart = uint(dart) <= art ? - dart : - toInt(art);
     }
+
+    function getCollateralAddr(address _joinAddr) internal returns (address) {
+        return address(GemJoinLike(_joinAddr).gem());
+    }
+
+    function getCdpInfo(ManagerInterface _manager, uint _cdpId, bytes32 _ilk) internal view returns (uint, uint) {
+        uint collateral;
+        uint debt;
+        uint rate;
+
+        (collateral, debt) = VatInterface(_manager.vat()).urns(_ilk, _manager.urns(_cdpId));
+        (,rate,,,) = VatInterface(_manager.vat()).ilks(_ilk);
+
+        return (collateral, rmul(debt, rate));
+    }
 }
 
 //TODO: all methods public for testing purposes
@@ -127,6 +143,8 @@ contract MCDSaverProxy is SaverProxyHelper {
 
     address public constant MCD_EXCHANGE_ADDRESS = 0x2f0449f3E73B1E343ADE21d813eE03aA23bfd2e8;
 
+    address public constant SPOTTER_ADDRESS = 0xF5cDfcE5A0b85fF06654EF35f4448E74C523c5Ac;
+
     function repay(uint _cdpId, address _collateralJoin, uint _collateralAmount) public {
         //TODO: check slippage
 
@@ -134,9 +152,7 @@ contract MCDSaverProxy is SaverProxyHelper {
 
         _drawCollateral(manager, _cdpId, _collateralJoin, _collateralAmount);
 
-        address collateralAddr = address(GemJoinLike(_collateralJoin).gem());
-
-        uint daiAmount = OasisTrade(OASIS_TRADE).swap.value(_collateralAmount)(collateralAddr, SAI_ADDRESS, _collateralAmount);
+        uint daiAmount = OasisTrade(OASIS_TRADE).swap.value(_collateralAmount)(getCollateralAddr(_collateralJoin), SAI_ADDRESS, _collateralAmount);
 
         // TODO: remove only used for testing
         MCDExchange(MCD_EXCHANGE_ADDRESS).saiToDai(daiAmount);
@@ -155,8 +171,6 @@ contract MCDSaverProxy is SaverProxyHelper {
 
         _drawDai(manager, _cdpId, _daiAmount);
 
-        address collateralAddr = address(GemJoinLike(_collateralJoin).gem());
-
         // TODO: remove only used for testing
         MCDExchange(MCD_EXCHANGE_ADDRESS).daiToSai(_daiAmount);
 
@@ -165,7 +179,7 @@ contract MCDSaverProxy is SaverProxyHelper {
 
         ERC20(SAI_ADDRESS).approve(OASIS_TRADE, _daiAmount);
         //TODO: change to DAI address
-        uint collateralAmount = OasisTrade(OASIS_TRADE).swap(SAI_ADDRESS, collateralAddr, _daiAmount);
+        uint collateralAmount = OasisTrade(OASIS_TRADE).swap(SAI_ADDRESS, getCollateralAddr(_collateralJoin), _daiAmount);
 
         _addCollateral(manager, _cdpId, _collateralJoin, collateralAmount);
 
@@ -230,7 +244,6 @@ contract MCDSaverProxy is SaverProxyHelper {
 
         if (_collateralJoin == ETH_JOIN_ADDRESS) {
             GemJoinLike(_collateralJoin).gem().withdraw(_collateralAmount);
-            msg.sender.transfer(_collateralAmount);
         }
     }
 
@@ -245,8 +258,53 @@ contract MCDSaverProxy is SaverProxyHelper {
         _manager.frob(_cdpId, 0, _getWipeDart(address(_manager.vat()), urn, ilk));
     }
 
-    function getRatio() public returns (uint) {
+    // TODO: check if valid
+    function getMaxCollateral(ManagerInterface _manager, uint _cdpId, bytes32 _ilk) public view returns (uint) {
+        uint collateral;
+        uint debt;
+        uint mat;
 
+        uint price = getPrice(_manager, _ilk);
+        (collateral, debt) = getCdpInfo(_manager, _cdpId, _ilk);
+
+        (, mat) = Spotter(SPOTTER_ADDRESS).ilks(_ilk);
+
+        return sub(collateral, (wdiv(wmul(mat, debt), price)));
+    }
+
+    // TODO: check if valid
+    function getMaxDebt(ManagerInterface _manager, uint _cdpId, bytes32 _ilk) public view returns (uint) {
+        uint price = getPrice(_manager, _ilk);
+        uint collateral;
+        uint debt;
+        uint mat;
+
+        (, mat) = Spotter(SPOTTER_ADDRESS).ilks(_ilk);
+        (collateral, debt) = getCdpInfo(_manager, _cdpId, _ilk);
+
+        return sub(wdiv(wmul(collateral, price), mat), debt);
+    }
+
+    function getPrice(ManagerInterface _manager, bytes32 _ilk) public view returns (uint) {
+        uint mat;
+        uint spot;
+
+        uint par = Spotter(SPOTTER_ADDRESS).par();
+        (, mat) = Spotter(SPOTTER_ADDRESS).ilks(_ilk);
+        (,,spot,,) = VatInterface(_manager.vat()).ilks(_ilk);
+
+        return rmul(rmul(spot, par), mat);
+    }
+
+    function getRatio(ManagerInterface _manager, uint _cdpId, bytes32 _ilk) public view returns (uint) {
+        uint collateral;
+        uint debt;
+
+        uint price = getPrice(_manager, _ilk);
+
+        (collateral, debt) = getCdpInfo(_manager, _cdpId, _ilk);
+
+        return rdiv(wmul(collateral, price), debt);
     }
 
 }
