@@ -5,6 +5,7 @@ import "./OasisTrade.sol";
 import "./MCDExchange.sol";
 import "../SaverLogger.sol";
 import "./maker/Spotter.sol";
+import "../Discount.sol";
 
 contract ManagerInterface {
     function cdpCan(address, uint, address) public view returns (uint);
@@ -145,6 +146,9 @@ contract MCDSaverProxy is SaverProxyHelper {
 
     address public constant SPOTTER_ADDRESS = 0xF5cDfcE5A0b85fF06654EF35f4448E74C523c5Ac;
 
+    address public constant DISCOUNT_ADDRESS = 0x1297c1105FEDf45E0CF6C102934f32C4EB780929;
+    address payable public constant WALLET_ID = 0x54b44C6B18fc0b4A1010B21d524c338D1f8065F6;
+
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
 
     modifier boostCheck(uint _cdpId) {
@@ -185,7 +189,9 @@ contract MCDSaverProxy is SaverProxyHelper {
         // TODO: remove only used for testing
         MCDExchange(MCD_EXCHANGE_ADDRESS).saiToDai(daiAmount);
 
-        _paybackDebt(manager, _cdpId, daiAmount);
+        uint daiAfterFee = sub(daiAmount, _getFee(daiAmount));
+
+        _paybackDebt(manager, _cdpId, daiAfterFee);
 
         SaverLogger(LOGGER_ADDRESS).LogRepay(_cdpId, msg.sender, _collateralAmount, daiAmount);
     }
@@ -196,15 +202,17 @@ contract MCDSaverProxy is SaverProxyHelper {
 
         _drawDai(manager, ilk, _cdpId, _daiAmount);
 
+        uint daiAfterFee = sub(_daiAmount, _getFee(_daiAmount));
+
         // TODO: remove only used for testing
-        MCDExchange(MCD_EXCHANGE_ADDRESS).daiToSai(_daiAmount);
+        MCDExchange(MCD_EXCHANGE_ADDRESS).daiToSai(daiAfterFee);
 
         //TODO: remove only used for testing
         ERC20(DAI_ADDRESS).transfer(MCD_EXCHANGE_ADDRESS, ERC20(DAI_ADDRESS).balanceOf(address(this)));
 
-        ERC20(SAI_ADDRESS).approve(OASIS_TRADE, _daiAmount);
+        ERC20(SAI_ADDRESS).approve(OASIS_TRADE, daiAfterFee);
         //TODO: change to DAI address
-        uint collateralAmount = OasisTrade(OASIS_TRADE).swap(SAI_ADDRESS, getCollateralAddr(_collateralJoin), _daiAmount);
+        uint collateralAmount = OasisTrade(OASIS_TRADE).swap(SAI_ADDRESS, getCollateralAddr(_collateralJoin), daiAfterFee);
 
         _addCollateral(manager, _cdpId, _collateralJoin, collateralAmount);
 
@@ -289,10 +297,20 @@ contract MCDSaverProxy is SaverProxyHelper {
         _manager.frob(_cdpId, 0, _getWipeDart(address(_manager.vat()), urn, ilk));
     }
 
-    // function _collectFee() internal {
-    //     feeAmount = _amount / SERVICE_FEE;
-    //     ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
-    // }
+    function _getFee(uint _amount) internal returns (uint feeAmount) {
+        uint fee = SERVICE_FEE;
+
+        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(msg.sender)) {
+            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(msg.sender);
+        }
+
+        if (fee == 0) {
+            feeAmount = 0;
+        } else {
+            feeAmount = _amount / fee;
+            ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
+        }
+    }
 
     // TODO: check if valid
     function getMaxCollateral(ManagerInterface _manager, uint _cdpId, bytes32 _ilk) public view returns (uint) {

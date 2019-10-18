@@ -32,7 +32,7 @@ const oasisTradeAddr = '0x8EFd472Ca15BED09D8E9D7594b94D4E42Fe62224';
 
 const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
 
-const mcdSaverProxyAddr = '0x7617548d346c8E3958AdC5C8c0FCEFF411Bf6335';
+const mcdSaverProxyAddr = '0x4E9ff264078Ae3b99fa953709d3555De081253E1';
 
 const ilkData = {
     '1' : {
