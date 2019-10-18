@@ -126,6 +126,9 @@ contract Monitor is DSMath, ConstantAddresses {
 
         uint ratioAfter = getRatio(_cdpId);
 
+        require(ratioAfter > holders[_cdpId].minRatio);
+        require(ratioAfter < holders[_cdpId].maxRatio);
+
         emit CdpRepay(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
     }
 
@@ -150,6 +153,9 @@ contract Monitor is DSMath, ConstantAddresses {
         DSProxyInterface(holder.owner).execute(saverProxy, abi.encodeWithSignature("boost(bytes32,uint256,uint256)", _cdpId, _amount, gasCost));
 
         uint ratioAfter = getRatio(_cdpId);
+
+        require(ratioAfter > holders[_cdpId].minRatio);
+        require(ratioAfter < holders[_cdpId].maxRatio);
 
         emit CdpBoost(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
     }

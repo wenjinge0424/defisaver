@@ -1,17 +1,17 @@
 pragma solidity ^0.5.0;
 
-import "./interfaces/ERC20.sol";
-import "./interfaces/KyberNetworkProxyInterface.sol";
-import "./interfaces/ExchangeInterface.sol";
-import "./interfaces/Eth2DaiInterface.sol";
-import "./interfaces/TokenInterface.sol";
-import "./DS/DSMath.sol";
-import "./constants/ConstantAddresses.sol";
+import "../../interfaces/ERC20.sol";
+import "../../interfaces/KyberNetworkProxyInterface.sol";
+import "../../interfaces/ExchangeInterface.sol";
+import "../../interfaces/Eth2DaiInterface.sol";
+import "../../interfaces/TokenInterface.sol";
+import "../../DS/DSMath.sol";
+import "../../constants/ConstantAddresses.sol";
 
 contract Eth2DaiWrapper is ExchangeInterface, DSMath, ConstantAddresses {
 
 
-    function swapEtherToToken (uint _ethAmount, address _tokenAddress, uint _maxAmount) external payable returns(uint, uint) {
+    function swapEtherToToken(uint _ethAmount, address _tokenAddress, uint _maxAmount) external payable returns(uint, uint) {
         require(ERC20(WETH_ADDRESS).approve(OTC_ADDRESS, _ethAmount));
         TokenInterface(WETH_ADDRESS).deposit.value(_ethAmount)();
 
@@ -23,7 +23,7 @@ contract Eth2DaiWrapper is ExchangeInterface, DSMath, ConstantAddresses {
         return (daiBought, 0);
     }
 
-    function swapTokenToEther (address _tokenAddress, uint _amount, uint _maxAmount) external returns(uint) {
+    function swapTokenToEther(address _tokenAddress, uint _amount, uint _maxAmount) external returns(uint) {
         require(ERC20(_tokenAddress).approve(OTC_ADDRESS, _amount));
 
         uint ethBought = Eth2DaiInterface(OTC_ADDRESS).sellAllAmount(ERC20(_tokenAddress), _amount,
