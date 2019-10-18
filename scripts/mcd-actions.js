@@ -32,7 +32,7 @@ const oasisTradeAddr = '0x8EFd472Ca15BED09D8E9D7594b94D4E42Fe62224';
 
 const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
 
-const mcdSaverProxyAddr = '0x457eb2877e365511444284f77ccc1cD8fEB15570';
+const mcdSaverProxyAddr = '0x7617548d346c8E3958AdC5C8c0FCEFF411Bf6335';
 
 const ilkData = {
     '1' : {
@@ -143,15 +143,15 @@ const initContracts = async () => {
 
     // console.log(usersCdps);
 
-    await getRatioFromContract(usersCdps[0].cdpId);
+    // await getRatioFromContract(usersCdps[0].cdpId);
 
     const cdpInfo = await getCdpInfo(usersCdps[0]);
     console.log(cdpInfo.ratio, cdpInfo.collateral / 1e18, cdpInfo.debtWithFee / 1e18);
 
-    // await repay(usersCdps[0].cdpId);
+    await boost(usersCdps[0].cdpId);
 
-    // const cdpInfo2 = await getCdpInfo(usersCdps[0]);
-    // console.log(cdpInfo2.ratio, cdpInfo2.collateral /  1e18, cdpInfo2.debtWithFee / 1e18);
+    const cdpInfo2 = await getCdpInfo(usersCdps[0]);
+    console.log(cdpInfo2.ratio, cdpInfo2.collateral /  1e18, cdpInfo2.debtWithFee / 1e18);
 
     // await transfer(usersCdps[1].cdpId, '0x322d58b9E75a6918f7e7849AEe0fF09369977e08');
 
@@ -315,7 +315,7 @@ const transfer = async (cdpId, receiversAddr) => {
 
 const boost = async (cdpId) => {
     try {
-        const daiAmount = web3.utils.toWei('1', 'ether');
+        const daiAmount = web3.utils.toWei('0.1', 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'boost'),
           [cdpId, '0xc3AbbA566bb62c09b7f94704d8dFd9800935D3F9', daiAmount]);

@@ -145,8 +145,36 @@ contract MCDSaverProxy is SaverProxyHelper {
 
     address public constant SPOTTER_ADDRESS = 0xF5cDfcE5A0b85fF06654EF35f4448E74C523c5Ac;
 
-    function repay(uint _cdpId, address _collateralJoin, uint _collateralAmount) public {
-        //TODO: check slippage
+    uint public constant SERVICE_FEE = 400; // 0.25% Fee
+
+    modifier boostCheck(uint _cdpId) {
+        ManagerInterface manager = ManagerInterface(MANAGER_ADDRESS);
+        bytes32 ilk = manager.ilks(_cdpId);
+
+        uint collateralBefore;
+        (collateralBefore, ) = VatInterface(manager.vat()).urns(ilk, manager.urns(_cdpId));
+
+        _;
+
+        uint collateralAfter;
+        (collateralAfter, ) = VatInterface(manager.vat()).urns(ilk, manager.urns(_cdpId));
+
+        require(collateralAfter > collateralBefore);
+    }
+
+    modifier repayCheck(uint _cdpId) {
+        ManagerInterface manager = ManagerInterface(MANAGER_ADDRESS);
+        bytes32 ilk = manager.ilks(_cdpId);
+
+        uint beforeRatio = getRatio(manager, _cdpId, ilk);
+
+        _;
+
+        //TODO: enable when exchange is normal
+        // require(getRatio(manager, _cdpId, ilk) > beforeRatio);
+    }
+
+    function repay(uint _cdpId, address _collateralJoin, uint _collateralAmount) external repayCheck(_cdpId) {
 
         ManagerInterface manager = ManagerInterface(MANAGER_ADDRESS);
 
@@ -159,17 +187,14 @@ contract MCDSaverProxy is SaverProxyHelper {
 
         _paybackDebt(manager, _cdpId, daiAmount);
 
-        //TODO: ratio check
-
         SaverLogger(LOGGER_ADDRESS).LogRepay(_cdpId, msg.sender, _collateralAmount, daiAmount);
     }
 
-    function boost(uint _cdpId, address _collateralJoin, uint _daiAmount) public {
-        //TODO: check slippage
-
+    function boost(uint _cdpId, address _collateralJoin, uint _daiAmount) external boostCheck(_cdpId) {
         ManagerInterface manager = ManagerInterface(MANAGER_ADDRESS);
+        bytes32 ilk = manager.ilks(_cdpId);
 
-        _drawDai(manager, _cdpId, _daiAmount);
+        _drawDai(manager, ilk, _cdpId, _daiAmount);
 
         // TODO: remove only used for testing
         MCDExchange(MCD_EXCHANGE_ADDRESS).daiToSai(_daiAmount);
@@ -183,18 +208,15 @@ contract MCDSaverProxy is SaverProxyHelper {
 
         _addCollateral(manager, _cdpId, _collateralJoin, collateralAmount);
 
-        //TODO: ratio check
-
         SaverLogger(LOGGER_ADDRESS).LogBoost(_cdpId, msg.sender, _daiAmount, collateralAmount);
     }
 
 
-    function _drawDai(ManagerInterface _manager, uint _cdpId, uint _daiAmount) public {
-        bytes32 ilk = _manager.ilks(_cdpId);
+    function _drawDai(ManagerInterface _manager, bytes32 _ilk, uint _cdpId, uint _daiAmount) public {
 
-        JugInterface(JUG_ADDRESS).drip(ilk);
+        JugInterface(JUG_ADDRESS).drip(_ilk);
 
-        uint maxAmount = getMaxDebt(_manager, _cdpId, ilk);
+        uint maxAmount = getMaxDebt(_manager, _cdpId, _ilk);
 
         if (_daiAmount > maxAmount) {
             _daiAmount = sub(maxAmount, 1);
@@ -266,6 +288,11 @@ contract MCDSaverProxy is SaverProxyHelper {
 
         _manager.frob(_cdpId, 0, _getWipeDart(address(_manager.vat()), urn, ilk));
     }
+
+    // function _collectFee() internal {
+    //     feeAmount = _amount / SERVICE_FEE;
+    //     ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
+    // }
 
     // TODO: check if valid
     function getMaxCollateral(ManagerInterface _manager, uint _cdpId, bytes32 _ilk) public view returns (uint) {
