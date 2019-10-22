@@ -29,11 +29,11 @@ const jugAddr = '0x3793181ebbc1a72cc08ba90087d21c7862783fa5';
 const spotterAddr = '0xf5cdfce5a0b85ff06654ef35f4448e74c523c5ac';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
 
-const exchangeAddr = '0xae940a506F28bCA04B9e9A16f464B0344dEb544B';
+const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
 const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
 
-const mcdSaverProxyAddr = '0x56dc81b4be07B2A0F195Fb71384e322442dA0433';
+const mcdSaverProxyAddr = '0x8ADD3A874b9a3473E568Da8e64FF32096F4AC2EC';
 
 const ilkData = {
     '1' : {
@@ -149,9 +149,9 @@ const initContracts = async () => {
     const cdpInfo = await getCdpInfo(usersCdps[0]);
     console.log(cdpInfo.ratio, cdpInfo.collateral, cdpInfo.debtWithFee);
 
-    // await boost(usersCdps[0].cdpId);
+    await boost(usersCdps[0].cdpId);
 
-    await swap();
+   //  await swap();
 
     const cdpInfo2 = await getCdpInfo(usersCdps[0]);
     console.log(cdpInfo2.ratio, cdpInfo2.collateral /  1e18, cdpInfo2.debtWithFee / 1e18);
@@ -492,7 +492,9 @@ const swap = async () => {
 
         // _amount, _src, _dest, _exchangeType
         const res = await exchange.methods.getBestPrice(daiAmount,
-             '0xC4375B7De8af5a38a93548eb8453a498222C4fF2', '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', 2).call();
+             '0xC4375B7De8af5a38a93548eb8453a498222C4fF2', '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', 0).call();
+
+        console.log(res);
     } catch(err) {
         console.log(err);
     }

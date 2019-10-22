@@ -21,11 +21,14 @@ contract Subscriptions {
 
     address public owner;
 
+    uint public minLimit;
+
     event Subscribed(address indexed owner, uint cdpId);
     event Unsubscribed(address indexed owner, uint cdpId);
     event Updated(address indexed owner, uint cdpId);
 
     constructor() public {
+        minLimit = 1700000000000000000;
         owner = msg.sender;
     }
 
@@ -68,14 +71,24 @@ contract Subscriptions {
         subscribers[subInfo.arrPos] = subscribers[subscribers.length - 1];
         delete subscribers[subscribers.length - 1];
 
+        subInfo.subscribed = true;
 
+        emit Unsubscribed(msg.sender, _cdpId);
     }
 
     function isOwner(address _owner, uint _cdpId) internal returns (bool) {
 
     }
 
-    function checkParams() internal returns (bool) {
+    function checkParams(uint32 _minRatio, uint32 _maxRatio, uint32 _optimalBoost, uint32 _optimalRepay) internal view returns (bool) {
+        if (_minRatio < minLimit) {
+            return false;
+        }
 
+        if (_minRatio > _maxRatio) {
+            return false;
+        }
+
+        return true;
     }
 }

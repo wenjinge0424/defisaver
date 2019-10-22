@@ -8,7 +8,7 @@ contract SaverExchangeInterface {
 
 contract ExchangeHelper {
     address public constant WETH_ADDRESS = 0xd0A1E359811322d97991E03f863a0C30C2cF029C;
-    address public constant SAVER_EXCHANGE_ADDRESS = 0xb95D034b010d2E6900D1349F20B988556c480daC;
+    address public constant SAVER_EXCHANGE_ADDRESS = 0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C;
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     function wethToKyberEth(address _src) internal pure returns (address) {
