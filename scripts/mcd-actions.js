@@ -16,6 +16,7 @@ const MCDSaverProxy = require('../build/contracts/MCDSaverProxy.json');
 const Faucet = require('../build/contracts/Faucet.json');
 const ERC20 = require('../build/contracts/ERC20.json');
 const OasisTrade = require('../build/contracts/OasisTrade.json');
+const ExchangeInterface = require('../build/contracts/SaverExchangeInterface.json');
 
 const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
 const proxyActionsAddr = '0xc21274797a01e133ebd9d79b23498edbd7166137';
@@ -28,11 +29,11 @@ const jugAddr = '0x3793181ebbc1a72cc08ba90087d21c7862783fa5';
 const spotterAddr = '0xf5cdfce5a0b85ff06654ef35f4448e74c523c5ac';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
 
-const oasisTradeAddr = '0x8EFd472Ca15BED09D8E9D7594b94D4E42Fe62224';
+const exchangeAddr = '0xb95D034b010d2E6900D1349F20B988556c480daC';
 
 const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
 
-const mcdSaverProxyAddr = '0x46C47bf90aAeeb6A18dfca7dD2cBb2611A9Aa9bc';
+const mcdSaverProxyAddr = '0x56dc81b4be07B2A0F195Fb71384e322442dA0433';
 
 const ilkData = {
     '1' : {
@@ -133,7 +134,7 @@ const initContracts = async () => {
     spotter = new web3.eth.Contract(Spotter.abi, spotterAddr);
     mcdSaverProxy = new web3.eth.Contract(MCDSaverProxy.abi, mcdSaverProxyAddr);
     faucet = new web3.eth.Contract(Faucet.abi, faucetAddr);
-    oasisTrade = new web3.eth.Contract(OasisTrade.abi, oasisTradeAddr);
+    exchange = new web3.eth.Contract(ExchangeInterface.abi, exchangeAddr);
 };
 
 (async () => {
@@ -146,9 +147,11 @@ const initContracts = async () => {
     // await getRatioFromContract(usersCdps[0].cdpId);
 
     const cdpInfo = await getCdpInfo(usersCdps[0]);
-    console.log(cdpInfo.ratio, cdpInfo.collateral / 1e18, cdpInfo.debtWithFee / 1e18);
+    console.log(cdpInfo.ratio, cdpInfo.collateral, cdpInfo.debtWithFee);
 
-    await boost(usersCdps[0].cdpId);
+    // await boost(usersCdps[0].cdpId);
+
+    await swap();
 
     const cdpInfo2 = await getCdpInfo(usersCdps[0]);
     console.log(cdpInfo2.ratio, cdpInfo2.collateral /  1e18, cdpInfo2.debtWithFee / 1e18);
@@ -318,7 +321,7 @@ const boost = async (cdpId) => {
         const daiAmount = web3.utils.toWei('0.1', 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'boost'),
-          [cdpId, '0xc3AbbA566bb62c09b7f94704d8dFd9800935D3F9', daiAmount]);
+          [cdpId, getTokenJoinAddr('ETH'), daiAmount, 0, 4]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
             from: account.address, gas: 900000});
@@ -334,7 +337,7 @@ const repay = async (cdpId) => {
         const ethAmount = web3.utils.toWei('0.001', 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'repay'),
-          [cdpId, '0xc3AbbA566bb62c09b7f94704d8dFd9800935D3F9', ethAmount]);
+          [cdpId, getTokenJoinAddr('ETH'), ethAmount, 0, 4]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
             from: account.address, gas: 900000});
@@ -371,6 +374,7 @@ const getCdpInfo = async (cdp) => {
         const debt = Dec(urn.art);
 
         const debtWithFee = debt.times(ilkInfo.currentRate).div(1e27);
+
         const stabilityFee = debtWithFee.sub(debt);
 
         const ratio = collateral.times(ilkInfo.price).div(debtWithFee).times(100);
@@ -481,10 +485,14 @@ const transferToProxy = async (type, collateralAmount) => {
 
 const swap = async () => {
     try {
-        const token = new web3.eth.Contract(ERC20.abi, '0xC4375B7De8af5a38a93548eb8453a498222C4fF2');
+        const daiAmount = web3.utils.toWei('100', 'ether');
+        // const token = new web3.eth.Contract(ERC20.abi, '0xC4375B7De8af5a38a93548eb8453a498222C4fF2');
 
-        await token.methods.approve(oasisTradeAddr, web3.utils.toWei('10000000000000', 'ether')).send({from: account.address, gas: 100000});
-        oasisTrade.methods.swap('0xC4375B7De8af5a38a93548eb8453a498222C4fF2', '0xd0A1E359811322d97991E03f863a0C30C2cF029C', '1000').send({from: account.address, gas: 500000});
+        // await token.methods.approve(oasisTradeAddr, web3.utils.toWei('10000000000000', 'ether')).send({from: account.address, gas: 100000});
+
+        // _amount, _src, _dest, _exchangeType
+        const res = await exchange.methods.getBestPrice(daiAmount,
+             '0xC4375B7De8af5a38a93548eb8453a498222C4fF2', '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', 4).call();
     } catch(err) {
         console.log(err);
     }

@@ -7,16 +7,25 @@ contract SaverExchangeInterface {
 }
 
 contract ExchangeHelper {
-    address public constant WETH_ADDRESS = 0x1f9BEAf12D8db1e50eA8a5eD53FB970462386aA0;
-    address public constant SAVER_EXCHANGE_ADDRESS = 0x1f9BEAf12D8db1e50eA8a5eD53FB970462386aA0;
+    address public constant WETH_ADDRESS = 0xd0A1E359811322d97991E03f863a0C30C2cF029C;
+    address public constant SAVER_EXCHANGE_ADDRESS = 0xb95D034b010d2E6900D1349F20B988556c480daC;
+    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
+    function wethToKyberEth(address _src) internal pure returns (address) {
+        return _src == WETH_ADDRESS ? KYBER_ETH_ADDRESS : _src;
+    }
 
     function swap(address _src, address _dest, uint _amount, uint _minPrice, uint _exchangeType) public payable returns (uint) {
         address wrapper;
         uint price;
 
+        _src = wethToKyberEth(_src);
+        _dest = wethToKyberEth(_dest);
+
         (wrapper, price) = SaverExchangeInterface(SAVER_EXCHANGE_ADDRESS).getBestPrice(_amount, _src, _dest, _exchangeType);
 
-        require(price > _minPrice, "Slippage hit");
+        //TODO: only for tests
+        // require(price > _minPrice, "Slippage hit");
 
         uint tokensReturned;
         if (_src == WETH_ADDRESS) {
