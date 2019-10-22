@@ -29,7 +29,7 @@ const jugAddr = '0x3793181ebbc1a72cc08ba90087d21c7862783fa5';
 const spotterAddr = '0xf5cdfce5a0b85ff06654ef35f4448e74c523c5ac';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
 
-const exchangeAddr = '0xb95D034b010d2E6900D1349F20B988556c480daC';
+const exchangeAddr = '0xae940a506F28bCA04B9e9A16f464B0344dEb544B';
 
 const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
 
@@ -492,7 +492,7 @@ const swap = async () => {
 
         // _amount, _src, _dest, _exchangeType
         const res = await exchange.methods.getBestPrice(daiAmount,
-             '0xC4375B7De8af5a38a93548eb8453a498222C4fF2', '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', 4).call();
+             '0xC4375B7De8af5a38a93548eb8453a498222C4fF2', '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', 2).call();
     } catch(err) {
         console.log(err);
     }
