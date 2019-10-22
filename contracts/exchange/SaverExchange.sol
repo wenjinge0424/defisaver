@@ -102,38 +102,30 @@ contract SaverExchange is DSMath, ConstantAddresses {
     /// @param _srcToken Address of the source token
     /// @param _destToken Address of the destination token
     /// @return (address, uint) The address of the best exchange and the exchange price
-    function getBestPrice(uint _amount, address _srcToken, address _destToken, uint _exchangeType) public view returns (address, uint) {
+    function getBestPrice(uint _amount, address _srcToken, address _destToken, uint _exchangeType) public returns (address, uint) {
         uint expectedRateKyber;
         uint expectedRateUniswap;
         uint expectedRateOasis;
 
-        (expectedRateKyber, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
-        // no deployment on kovan
-        (expectedRateUniswap, ) = ExchangeInterface(UNISWAP_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
-        expectedRateUniswap = expectedRateUniswap * (10 ** (18 - getDecimals(_destToken)));
 
+        if (_exchangeType == 1) {
+            return (OASIS_WRAPPER, getExpectedRate(OASIS_WRAPPER, _srcToken, _destToken, _amount));
+        }
 
         if (_exchangeType == 2) {
-            return (KYBER_WRAPPER, expectedRateKyber);
+            return (KYBER_WRAPPER, getExpectedRate(KYBER_WRAPPER, _srcToken, _destToken, _amount));
         }
 
         if (_exchangeType == 3) {
+            expectedRateUniswap = getExpectedRate(UNISWAP_WRAPPER, _srcToken, _destToken, _amount);
+            expectedRateUniswap = expectedRateUniswap * (10 ** (18 - getDecimals(_destToken)));
             return (UNISWAP_WRAPPER, expectedRateUniswap);
         }
 
-        if (_exchangeType == 4) {
-            if (expectedRateKyber >= expectedRateUniswap) {
-                return (KYBER_WRAPPER, expectedRateKyber);
-            } else {
-                return (UNISWAP_WRAPPER, expectedRateUniswap);
-            }
-        }
-
-        // reverts if there is not enough volume
-        (expectedRateOasis, ) = ExchangeInterface(OASIS_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
-        if (_exchangeType == 1) {
-            return (OASIS_WRAPPER, expectedRateOasis);
-        }
+        expectedRateKyber = getExpectedRate(KYBER_WRAPPER, _srcToken, _destToken, _amount);
+        expectedRateUniswap = getExpectedRate(UNISWAP_WRAPPER, _srcToken, _destToken, _amount);
+        expectedRateUniswap = expectedRateUniswap * (10 ** (18 - getDecimals(_destToken)));
+        expectedRateOasis = getExpectedRate(OASIS_WRAPPER, _srcToken, _destToken, _amount);
 
         if ((expectedRateKyber >= expectedRateUniswap) && (expectedRateKyber >= expectedRateOasis)) {
             return (KYBER_WRAPPER, expectedRateKyber);
@@ -145,6 +137,19 @@ contract SaverExchange is DSMath, ConstantAddresses {
 
         if ((expectedRateUniswap >= expectedRateKyber) && (expectedRateUniswap >= expectedRateOasis)) {
             return (UNISWAP_WRAPPER, expectedRateUniswap);
+        }
+    }
+
+    function getExpectedRate(address _wrapper, address _srcToken, address _destToken, uint _amount) public returns(uint) {
+        bool success;
+        bytes memory result;
+
+        (success, result) = _wrapper.call(abi.encodeWithSignature("getExpectedRate(address,address,uint256)", _srcToken, _destToken, _amount));
+
+        if (success) {
+            return sliceUint(result, 0);
+        } else {
+            return 0;
         }
     }
 
@@ -170,6 +175,7 @@ contract SaverExchange is DSMath, ConstantAddresses {
         }
     }
 
+
     function getDecimals(address _token) internal view returns(uint) {
         // DGD
         if (_token == address(0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A)) {
@@ -185,6 +191,17 @@ contract SaverExchange is DSMath, ConstantAddresses {
         }
 
         return 18;
+    }
+
+    function sliceUint(bytes memory bs, uint start) internal pure returns (uint) {
+        require(bs.length >= start + 32, "slicing out of range");
+
+        uint x;
+        assembly {
+            x := mload(add(bs, add(0x20, start)))
+        }
+
+        return x;
     }
 
     // receive eth from wrappers
