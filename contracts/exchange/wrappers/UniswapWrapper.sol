@@ -24,7 +24,7 @@ contract UniswapWrapper is ExchangeInterface, DSMath, ConstantAddresses {
         ERC20(_src).approve(uniswapTokenAddress, _amount);
 
         uint destAmount = UniswapExchangeInterface(uniswapTokenAddress).
-                tokenToTokenTransferInput(_amount, 0, 0, block.timestamp + 1, msg.sender, _dest);
+                tokenToTokenTransferInput(_amount, 1, 1, block.timestamp + 1, msg.sender, _dest);
 
         return destAmount;
     }
@@ -58,7 +58,7 @@ contract UniswapWrapper is ExchangeInterface, DSMath, ConstantAddresses {
             return (wdiv(UniswapExchangeInterface(uniswapTokenAddress).getTokenToEthInputPrice(_srcQty), _srcQty), 0);
         } else {
             uint ethBought = UniswapExchangeInterface(UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_src)).getTokenToEthInputPrice(_srcQty);
-            return (wdiv(UniswapExchangeInterface(UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_dest)).getEthToTokenInputPrice(ethBought), ethBought), 0);
+            return (wdiv(UniswapExchangeInterface(UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_dest)).getEthToTokenInputPrice(ethBought), _srcQty), 0);
         }
     }
 

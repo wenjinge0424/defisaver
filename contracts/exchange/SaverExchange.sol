@@ -3,6 +3,7 @@ pragma solidity ^0.5.0;
 import "../interfaces/ExchangeInterface.sol";
 import "../DS/DSMath.sol";
 import "../constants/ConstantAddresses.sol";
+import "../Discount.sol";
 
 contract SaverExchange is DSMath, ConstantAddresses {
 
@@ -107,13 +108,10 @@ contract SaverExchange is DSMath, ConstantAddresses {
         uint expectedRateOasis;
 
         (expectedRateKyber, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
-        (expectedRateOasis, ) = ExchangeInterface(OASIS_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
         // no deployment on kovan
-        // (expectedRateUniswap, ) = ExchangeInterface(UNISWAP_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
+        (expectedRateUniswap, ) = ExchangeInterface(UNISWAP_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
+        expectedRateUniswap = expectedRateUniswap * (10 ** (18 - getDecimals(_destToken)));
 
-        if (_exchangeType == 1) {
-            return (OASIS_WRAPPER, expectedRateOasis);
-        }
 
         if (_exchangeType == 2) {
             return (KYBER_WRAPPER, expectedRateKyber);
@@ -121,6 +119,20 @@ contract SaverExchange is DSMath, ConstantAddresses {
 
         if (_exchangeType == 3) {
             return (UNISWAP_WRAPPER, expectedRateUniswap);
+        }
+
+        if (_exchangeType == 4) {
+            if (expectedRateKyber >= expectedRateUniswap) {
+                return (KYBER_WRAPPER, expectedRateKyber);
+            } else {
+                return (UNISWAP_WRAPPER, expectedRateUniswap);
+            }
+        }
+
+        // reverts if there is not enough volume
+        (expectedRateOasis, ) = ExchangeInterface(OASIS_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
+        if (_exchangeType == 1) {
+            return (OASIS_WRAPPER, expectedRateOasis);
         }
 
         if ((expectedRateKyber >= expectedRateUniswap) && (expectedRateKyber >= expectedRateOasis)) {
@@ -140,14 +152,39 @@ contract SaverExchange is DSMath, ConstantAddresses {
     /// @param _amount Dai amount of the whole trade
     /// @return feeAmount Amount in Dai owner earned on the fee
     function takeFee(uint _amount, address _token) internal returns (uint feeAmount) {
-        feeAmount = _amount / SERVICE_FEE;
-        if (feeAmount > 0) {
+        uint fee = SERVICE_FEE;
+
+        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(msg.sender)) {
+            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(msg.sender);
+        }
+
+        if (fee == 0) {
+            feeAmount = 0;
+        } else {
+            feeAmount = _amount / SERVICE_FEE;
             if (_token == KYBER_ETH_ADDRESS) {
                 WALLET_ID.transfer(feeAmount);
             } else {
                 ERC20(_token).transfer(WALLET_ID, feeAmount);
             }
         }
+    }
+
+    function getDecimals(address _token) internal view returns(uint) {
+        // DGD
+        if (_token == address(0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A)) {
+            return 9;
+        }
+        // USDC
+        if (_token == address(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48)) {
+            return 6;
+        }
+        // WBTC
+        if (_token == address(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599)) {
+            return 8;
+        }
+
+        return 18;
     }
 
     // receive eth from wrappers

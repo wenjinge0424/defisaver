@@ -6,13 +6,19 @@ const HDWalletProvider = require('truffle-hdwallet-provider');
 const mnemonic = process.env.ETHEREUM_ACCOUNT_MNEMONIC;
 
 module.exports = {
+  api_keys: {
+    etherscan: process.env.ETHERSCAN_API_KEY
+  },
+  plugins: [
+    'truffle-plugin-verify'
+  ],
   networks: {
     mainnet: {
         provider: function() {
             return new HDWalletProvider(mnemonic, process.env.INFURA_ENDPOINT);
         },
         network_id: '1',
-        gasPrice: 5000000000, // 5 gwei
+        gasPrice: 3000000000, // 5 gwei
     },
     kovan: {
         provider: function() {
