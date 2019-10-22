@@ -48,13 +48,13 @@ contract OasisTradeWrapper is DSMath, ConstantAddresses, ExchangeInterface {
         return dstAmount;
     }
 
-    function getExpectedRate(address _src, address _dest, uint _srcQty) public view returns (uint, uint) {
+    function getExpectedRate(address _src, address _dest, uint _srcQty) public view returns (uint) {
         if (_src == KYBER_ETH_ADDRESS) {
-            return (wdiv(Eth2DaiInterface(OTC_ADDRESS).getBuyAmount(ERC20(_dest), ERC20(WETH_ADDRESS), _srcQty), _srcQty), 0);
+            return wdiv(Eth2DaiInterface(OTC_ADDRESS).getBuyAmount(ERC20(_dest), ERC20(WETH_ADDRESS), _srcQty), _srcQty);
         } else if (_dest == KYBER_ETH_ADDRESS) {
-            return (wdiv(Eth2DaiInterface(OTC_ADDRESS).getBuyAmount(ERC20(WETH_ADDRESS), ERC20(_src), _srcQty), _srcQty), 0);
+            return wdiv(Eth2DaiInterface(OTC_ADDRESS).getBuyAmount(ERC20(WETH_ADDRESS), ERC20(_src), _srcQty), _srcQty);
         } else {
-            return (wdiv(Eth2DaiInterface(OTC_ADDRESS).getBuyAmount(ERC20(_dest), ERC20(_src), _srcQty), _srcQty), 0);
+            return wdiv(Eth2DaiInterface(OTC_ADDRESS).getBuyAmount(ERC20(_dest), ERC20(_src), _srcQty), _srcQty);
         }
     }
 

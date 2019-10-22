@@ -9,5 +9,5 @@ interface ExchangeInterface {
     function swapTokenToToken(address _src, address _dest, uint _amount) external payable returns(uint);
 
     function getExpectedRate(address src, address dest, uint srcQty) external view
-        returns (uint expectedRate, uint slippageRate);
+        returns (uint expectedRate);
 }

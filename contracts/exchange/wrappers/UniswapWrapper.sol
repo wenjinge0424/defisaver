@@ -24,7 +24,7 @@ contract UniswapWrapper is ExchangeInterface, DSMath, ConstantAddresses {
         ERC20(_src).approve(uniswapTokenAddress, _amount);
 
         uint destAmount = UniswapExchangeInterface(uniswapTokenAddress).
-                tokenToTokenTransferInput(_amount, 0, 0, block.timestamp + 1, msg.sender, _dest);
+                tokenToTokenTransferInput(_amount, 1, 1, block.timestamp + 1, msg.sender, _dest);
 
         return destAmount;
     }
@@ -49,16 +49,16 @@ contract UniswapWrapper is ExchangeInterface, DSMath, ConstantAddresses {
         return ethAmount;
     }
 
-    function getExpectedRate(address _src, address _dest, uint _srcQty) public view returns (uint, uint) {
+    function getExpectedRate(address _src, address _dest, uint _srcQty) public view returns (uint) {
         if(_src == KYBER_ETH_ADDRESS) {
             address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_dest);
-            return (wdiv(UniswapExchangeInterface(uniswapTokenAddress).getEthToTokenInputPrice(_srcQty), _srcQty), 0);
+            return wdiv(UniswapExchangeInterface(uniswapTokenAddress).getEthToTokenInputPrice(_srcQty), _srcQty);
         } else if (_dest == KYBER_ETH_ADDRESS) {
             address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_src);
-            return (wdiv(UniswapExchangeInterface(uniswapTokenAddress).getTokenToEthInputPrice(_srcQty), _srcQty), 0);
+            return wdiv(UniswapExchangeInterface(uniswapTokenAddress).getTokenToEthInputPrice(_srcQty), _srcQty);
         } else {
             uint ethBought = UniswapExchangeInterface(UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_src)).getTokenToEthInputPrice(_srcQty);
-            return (wdiv(UniswapExchangeInterface(UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_dest)).getEthToTokenInputPrice(ethBought), ethBought), 0);
+            return wdiv(UniswapExchangeInterface(UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_dest)).getEthToTokenInputPrice(ethBought), _srcQty);
         }
     }
 

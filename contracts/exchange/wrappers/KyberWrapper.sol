@@ -94,8 +94,11 @@ contract KyberWrapper is ExchangeInterface, ConstantAddresses {
         return destAmount;
     }
 
-    function getExpectedRate(address _src, address _dest, uint _srcQty) public view returns (uint, uint) {
-        return KyberNetworkProxyInterface(KYBER_INTERFACE).getExpectedRate(ERC20(_src), ERC20(_dest), _srcQty);
+    function getExpectedRate(address _src, address _dest, uint _srcQty) public view returns (uint) {
+        uint rate;
+        (rate, ) = KyberNetworkProxyInterface(KYBER_INTERFACE).getExpectedRate(ERC20(_src), ERC20(_dest), _srcQty);
+
+        return rate;
     }
 
     function() payable external {

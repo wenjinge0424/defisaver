@@ -218,9 +218,9 @@ contract SaverProxyMonitor is DSMath, ConstantAddresses {
         uint expectedRateUniswap = 0;
         uint expectedRateEth2Dai = 0;
 
-        (expectedRateKyber, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
-        (expectedRateUniswap, ) = ExchangeInterface(UNISWAP_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
-        (expectedRateEth2Dai, ) = ExchangeInterface(ETH2DAI_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
+        expectedRateKyber = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
+        expectedRateUniswap = ExchangeInterface(UNISWAP_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
+        expectedRateEth2Dai = ExchangeInterface(ETH2DAI_WRAPPER).getExpectedRate(_srcToken, _destToken, _amount);
 
         if (_exchangeType == 1) {
             return (ETH2DAI_WRAPPER, expectedRateEth2Dai);
@@ -250,19 +250,19 @@ contract SaverProxyMonitor is DSMath, ConstantAddresses {
     /// @notice Returns expected rate for Eth -> Dai conversion
     /// @param _amount Amount of Ether
     function estimatedDaiPrice(uint _amount) internal view returns (uint expectedRate) {
-        (expectedRate, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(KYBER_ETH_ADDRESS, MAKER_DAI_ADDRESS, _amount);
+        expectedRate = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(KYBER_ETH_ADDRESS, MAKER_DAI_ADDRESS, _amount);
     }
 
     /// @notice Returns expected rate for Dai -> Eth conversion
     /// @param _amount Amount of Dai
     function estimatedEthPrice(uint _amount) internal view returns (uint expectedRate) {
-        (expectedRate, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(MAKER_DAI_ADDRESS, KYBER_ETH_ADDRESS, _amount);
+        expectedRate = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(MAKER_DAI_ADDRESS, KYBER_ETH_ADDRESS, _amount);
     }
 
     /// @notice Returns expected rate for Eth -> Mkr conversion
     /// @param _amount Amount of Ether
     function estimatedMkrPrice(uint _amount) internal view returns (uint expectedRate) {
-        (expectedRate, ) = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(KYBER_ETH_ADDRESS, MKR_ADDRESS, _amount);
+        expectedRate = ExchangeInterface(KYBER_WRAPPER).getExpectedRate(KYBER_ETH_ADDRESS, MKR_ADDRESS, _amount);
     }
 
     /// @notice Returns current Dai debt of the CDP
