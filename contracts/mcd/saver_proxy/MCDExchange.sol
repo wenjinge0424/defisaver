@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "../interfaces/ERC20.sol";
+import "../../interfaces/ERC20.sol";
 
 contract MCDExchange {
     address public constant SAI_ADDRESS = 0xC4375B7De8af5a38a93548eb8453a498222C4fF2;

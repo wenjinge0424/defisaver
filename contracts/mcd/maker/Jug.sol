@@ -7,4 +7,6 @@ contract Jug {
     }
 
     mapping (bytes32 => Ilk) public ilks;
+
+    function drip(bytes32) public;
 }
