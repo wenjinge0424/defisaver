@@ -33,7 +33,7 @@ const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
 const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
 
-const mcdSaverProxyAddr = '0xE80cD11AC3296b58558Dc32E27c9CE054401F2F5';
+const mcdSaverProxyAddr = '0x68d953a81B39323B925F414F5583741C300D211f';
 
 const ilkData = {
     '1' : {
@@ -321,7 +321,7 @@ const boost = async (cdpId) => {
         const daiAmount = web3.utils.toWei('0.1', 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'boost'),
-          [cdpId, getTokenJoinAddr('ETH'), daiAmount, 0, 2]);
+          [cdpId, getTokenJoinAddr('ETH'), daiAmount, 0, 2, 0]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
             from: account.address, gas: 1200000});
@@ -337,7 +337,7 @@ const repay = async (cdpId) => {
         const ethAmount = web3.utils.toWei('0.001', 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'repay'),
-          [cdpId, getTokenJoinAddr('ETH'), ethAmount, 0, 4]);
+          [cdpId, getTokenJoinAddr('ETH'), ethAmount, 0, 4, 0]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
             from: account.address, gas: 900000});
