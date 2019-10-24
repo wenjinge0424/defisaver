@@ -36,6 +36,17 @@ contract SaverProxyHelper is DSMath {
         dart = uint(dart) <= art ? - dart : - toInt(art);
     }
 
+    function getAllDebt(address _vat, address _usr, address _urn, bytes32 _ilk) internal view returns (uint daiAmount) {
+        (, uint rate,,,) = Vat(_vat).ilks(_ilk);
+        (, uint art) = Vat(_vat).urns(_ilk, _urn);
+        uint dai = Vat(_vat).dai(_usr);
+
+        uint rad = sub(mul(art, rate), dai);
+        daiAmount = rad / RAY;
+
+        daiAmount = mul(daiAmount, RAY) < rad ? daiAmount + 1 : daiAmount;
+    }
+
     function getCollateralAddr(address _joinAddr) internal returns (address) {
         return address(Join(_joinAddr).gem());
     }

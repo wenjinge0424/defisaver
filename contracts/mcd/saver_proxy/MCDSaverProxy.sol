@@ -90,7 +90,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         uint ethDaiPrice = getPrice(manager, ETH_ILK);
         uint daiAfterFee = sub(daiAmount, getFee(daiAmount, _gasCost, ethDaiPrice, owner));
 
-        paybackDebt(manager, _cdpId, daiAfterFee);
+        paybackDebt(manager, _cdpId, daiAfterFee, owner);
 
         SaverLogger(LOGGER_ADDRESS).LogRepay(_cdpId, owner, _collateralAmount, daiAmount);
     }
@@ -193,15 +193,22 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         }
     }
 
-    function paybackDebt(Manager _manager, uint _cdpId, uint _daiAmount) internal {
+    function paybackDebt(Manager _manager, uint _cdpId, uint _daiAmount, address _owner) internal {
         address urn = _manager.urns(_cdpId);
         bytes32 ilk = _manager.ilks(_cdpId);
 
-        //TODO: what if whole debt?
+        uint wholeDebt = getAllDebt(_manager.vat(), urn, urn, ilk);
 
-        DaiJoin(DAI_JOIN_ADDRESS).dai().approve(DAI_JOIN_ADDRESS, _daiAmount);
+        uint daiAmount = _daiAmount;
 
-        DaiJoin(DAI_JOIN_ADDRESS).join(urn, _daiAmount);
+        if (_daiAmount > wholeDebt) {
+            daiAmount = wholeDebt;
+            ERC20(DAI_ADDRESS).transfer(_owner, sub(_daiAmount, wholeDebt));
+        }
+
+        DaiJoin(DAI_JOIN_ADDRESS).dai().approve(DAI_JOIN_ADDRESS, daiAmount);
+
+        DaiJoin(DAI_JOIN_ADDRESS).join(urn, daiAmount);
 
         _manager.frob(_cdpId, 0, _getWipeDart(address(_manager.vat()), urn, ilk));
     }
