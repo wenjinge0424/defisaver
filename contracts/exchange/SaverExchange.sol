@@ -132,7 +132,7 @@ contract SaverExchange is DSMath, ConstantAddresses {
         }
 
         if ((expectedRateOasis >= expectedRateKyber) && (expectedRateOasis >= expectedRateUniswap)) {
-            return (ETH2DAI_WRAPPER, expectedRateOasis);
+            return (OASIS_WRAPPER, expectedRateOasis);
         }
 
         if ((expectedRateUniswap >= expectedRateKyber) && (expectedRateUniswap >= expectedRateOasis)) {
