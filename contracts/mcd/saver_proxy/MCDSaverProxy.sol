@@ -36,6 +36,8 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
     address public constant DISCOUNT_ADDRESS = 0x1297c1105FEDf45E0CF6C102934f32C4EB780929;
     address payable public constant WALLET_ID = 0x54b44C6B18fc0b4A1010B21d524c338D1f8065F6;
 
+    bytes32 public constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
+
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
 
     modifier boostCheck(uint _cdpId) {
@@ -61,11 +63,22 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
         _;
 
-        require(getRatio(manager, _cdpId, ilk) > beforeRatio);
+        uint afterRatio = getRatio(manager, _cdpId, ilk);
+
+        require(afterRatio > beforeRatio || afterRatio == 0);
     }
 
-    function repay(uint _cdpId, address _collateralJoin, uint _collateralAmount, uint _minPrice, uint _exchangeType) external repayCheck(_cdpId) {
+    function repay(
+        uint _cdpId,
+        address _collateralJoin,
+        uint _collateralAmount,
+        uint _minPrice,
+        uint _exchangeType,
+        uint _gasCost
+    ) external repayCheck(_cdpId) {
+
         Manager manager = Manager(MANAGER_ADDRESS);
+        address owner = getOwner(manager, _cdpId);
 
         drawCollateral(manager, _cdpId, _collateralJoin, _collateralAmount);
 
@@ -74,20 +87,31 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         // TODO: remove only used for testing
         MCDExchange(MCD_EXCHANGE_ADDRESS).saiToDai(daiAmount);
 
-        uint daiAfterFee = sub(daiAmount, getFee(daiAmount));
+        uint ethDaiPrice = getPrice(manager, ETH_ILK);
+        uint daiAfterFee = sub(daiAmount, getFee(daiAmount, _gasCost, ethDaiPrice, owner));
 
         paybackDebt(manager, _cdpId, daiAfterFee);
 
-        SaverLogger(LOGGER_ADDRESS).LogRepay(_cdpId, msg.sender, _collateralAmount, daiAmount);
+        SaverLogger(LOGGER_ADDRESS).LogRepay(_cdpId, owner, _collateralAmount, daiAmount);
     }
 
-    function boost(uint _cdpId, address _collateralJoin, uint _daiAmount, uint _minPrice, uint _exchangeType) external boostCheck(_cdpId) {
+    function boost(uint _cdpId,
+        address _collateralJoin,
+        uint _daiAmount,
+        uint _minPrice,
+        uint _exchangeType,
+        uint _gasCost
+    ) external boostCheck(_cdpId) {
+
         Manager manager = Manager(MANAGER_ADDRESS);
         bytes32 ilk = manager.ilks(_cdpId);
 
+        address owner = getOwner(manager, _cdpId);
+
         drawDai(manager, ilk, _cdpId, _daiAmount);
 
-        uint daiAfterFee = sub(_daiAmount, getFee(_daiAmount));
+        uint ethDaiPrice = getPrice(manager, ETH_ILK);
+        uint daiAfterFee = sub(_daiAmount, getFee(_daiAmount, _gasCost, ethDaiPrice, owner));
 
         // TODO: remove only used for testing
         MCDExchange(MCD_EXCHANGE_ADDRESS).daiToSai(daiAfterFee);
@@ -99,7 +123,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
         addCollateral(manager, _cdpId, _collateralJoin, collateralAmount);
 
-        SaverLogger(LOGGER_ADDRESS).LogBoost(_cdpId, msg.sender, _daiAmount, collateralAmount);
+        SaverLogger(LOGGER_ADDRESS).LogBoost(_cdpId, owner, _daiAmount, collateralAmount);
     }
 
 
@@ -173,6 +197,8 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         address urn = _manager.urns(_cdpId);
         bytes32 ilk = _manager.ilks(_cdpId);
 
+        //TODO: what if whole debt?
+
         DaiJoin(DAI_JOIN_ADDRESS).dai().approve(DAI_JOIN_ADDRESS, _daiAmount);
 
         DaiJoin(DAI_JOIN_ADDRESS).join(urn, _daiAmount);
@@ -180,17 +206,25 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         _manager.frob(_cdpId, 0, _getWipeDart(address(_manager.vat()), urn, ilk));
     }
 
-    function getFee(uint _amount) internal returns (uint feeAmount) {
+    function getFee(uint _amount, uint _gasCost, uint _price, address _owner) internal returns (uint feeAmount) {
         uint fee = SERVICE_FEE;
 
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(msg.sender)) {
-            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(msg.sender);
+        uint daiGasCost = _gasCost;
+
+        if (daiGasCost != 0) {
+            daiGasCost = wmul(_gasCost, _price);
+        }
+
+        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_owner)) {
+            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_owner);
         }
 
         if (fee == 0) {
             feeAmount = 0;
+            feeAmount = add(feeAmount, daiGasCost);
         } else {
             feeAmount = _amount / fee;
+            feeAmount = add(feeAmount, daiGasCost);
             ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
         }
     }
@@ -240,6 +274,10 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         uint price = getPrice(_manager, _ilk);
 
         (collateral, debt) = getCdpInfo(_manager, _cdpId, _ilk);
+
+        if (debt == 0) {
+            return 0;
+        }
 
         return rdiv(wmul(collateral, price), debt);
     }

@@ -50,4 +50,8 @@ contract SaverProxyHelper is DSMath {
 
         return (collateral, rmul(debt, rate));
     }
+
+    function getOwner(Manager _manager, uint _cdpId) public view returns (address) {
+        return _manager.owns(_cdpId);
+    }
 }
