@@ -131,7 +131,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
             convertAmount = toInt(_collateralAmount);
         }
 
-        Join(_collateralJoin).gem().approve(address(_collateralJoin), _collateralAmount);
+        Join(_collateralJoin).gem().approve(_collateralJoin, _collateralAmount);
         Join(_collateralJoin).join(address(this), _collateralAmount);
 
         // add to cdp

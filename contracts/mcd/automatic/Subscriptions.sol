@@ -1,7 +1,10 @@
 pragma solidity ^0.5.0;
 
+import "../maker/Manager.sol";
+import "./ISubscriptions.sol";
+
 // TODO: better handle if user transfers CDP
-contract Subscriptions {
+contract Subscriptions is ISubscriptions {
 
     struct CdpHolder {
         uint32 minRatio;
@@ -22,14 +25,16 @@ contract Subscriptions {
     address public owner;
 
     uint public minLimit;
+    Manager public manager;
 
     event Subscribed(address indexed owner, uint cdpId);
     event Unsubscribed(address indexed owner, uint cdpId);
     event Updated(address indexed owner, uint cdpId);
 
-    constructor() public {
+    constructor(address _managerAddr) public {
         minLimit = 1700000000000000000;
         owner = msg.sender;
+        manager = Manager(_managerAddr);
     }
 
     function subscribe(uint _cdpId, uint32 _minRatio, uint32 _maxRatio, uint32 _optimalBoost, uint32 _optimalRepay) external {
@@ -90,5 +95,17 @@ contract Subscriptions {
         }
 
         return true;
+    }
+
+    function canCall(Method _method, uint _cdpId) public view returns(bool) {
+
+    }
+
+    function getOwner(uint _cdpId) public view returns(address) {
+        return manager.owns(_cdpId);
+    }
+
+    function ratioGoodAfter(Method _method, uint _cdpId) public view returns(bool) {
+
     }
 }

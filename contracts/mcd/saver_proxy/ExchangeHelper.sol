@@ -28,12 +28,12 @@ contract ExchangeHelper {
         // require(price > _minPrice, "Slippage hit");
 
         uint tokensReturned;
-        if (_src == WETH_ADDRESS) {
+        if (_src == KYBER_ETH_ADDRESS) {
             (tokensReturned,) = ExchangeInterface(wrapper).swapEtherToToken.value(_amount)(_amount, _dest, uint(-1));
         } else {
             ERC20(_src).transfer(wrapper, _amount);
 
-            if (_dest == WETH_ADDRESS) {
+            if (_dest == KYBER_ETH_ADDRESS) {
                 tokensReturned = ExchangeInterface(wrapper).swapTokenToEther(_src, _amount, uint(-1));
             } else {
                 tokensReturned = ExchangeInterface(wrapper).swapTokenToToken(_src, _dest, _amount);
