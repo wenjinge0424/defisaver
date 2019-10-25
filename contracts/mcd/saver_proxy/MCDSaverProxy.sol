@@ -62,10 +62,9 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
         _;
 
-        //TODO: removed for testing
-        // uint afterRatio = getRatio(manager, _cdpId, ilk);
+        uint afterRatio = getRatio(manager, _cdpId, ilk);
 
-        // require(afterRatio > beforeRatio || afterRatio == 0);
+        require(afterRatio > beforeRatio || afterRatio == 0);
     }
 
     function repay(
@@ -76,10 +75,11 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         uint _exchangeType,
         uint _gasCost
     ) external repayCheck(_cdpId) {
+        Manager manager = Manager(MANAGER_ADDRESS);
 
-        address owner = getOwner(Manager(MANAGER_ADDRESS), _cdpId);
+        address owner = getOwner(manager, _cdpId);
 
-        drawCollateral(Manager(MANAGER_ADDRESS), _cdpId, _collateralJoin, _collateralAmount);
+        drawCollateral(manager, _cdpId, _collateralJoin, _collateralAmount);
 
         uint daiAmount = swap(getCollateralAddr(_collateralJoin), SAI_ADDRESS, _collateralAmount, _minPrice, _exchangeType);
 
@@ -88,7 +88,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
         uint daiAfterFee = sub(daiAmount, getFee(daiAmount, _gasCost, owner));
 
-        paybackDebt(Manager(MANAGER_ADDRESS), _cdpId, daiAfterFee, owner);
+        paybackDebt(manager, _cdpId, daiAfterFee, owner);
 
         SaverLogger(LOGGER_ADDRESS).LogRepay(_cdpId, owner, _collateralAmount, daiAmount);
     }

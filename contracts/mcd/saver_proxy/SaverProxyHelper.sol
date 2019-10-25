@@ -56,8 +56,11 @@ contract SaverProxyHelper is DSMath {
         uint debt;
         uint rate;
 
-        (collateral, debt) = Vat(_manager.vat()).urns(_ilk, _manager.urns(_cdpId));
-        (,rate,,,) = Vat(_manager.vat()).ilks(_ilk);
+        address vat = _manager.vat();
+        address urn = _manager.urns(_cdpId);
+
+        (collateral, debt) = Vat(vat).urns(_ilk, urn);
+        (,rate,,,) = Vat(vat).ilks(_ilk);
 
         return (collateral, rmul(debt, rate));
     }

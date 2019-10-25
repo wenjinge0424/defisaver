@@ -33,7 +33,7 @@ const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
 const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
 
-const mcdSaverProxyAddr = '0x68d953a81B39323B925F414F5583741C300D211f';
+const mcdSaverProxyAddr = '0x1Bc95157D7C7a19767591Db4Bd30023469EAc6f0';
 
 const ilkData = {
     '1' : {
@@ -149,7 +149,7 @@ const initContracts = async () => {
     const cdpInfo = await getCdpInfo(usersCdps[0]);
     console.log(cdpInfo.ratio, cdpInfo.collateral, cdpInfo.debtWithFee);
 
-    await repay(usersCdps[0].cdpId);
+    await boost(usersCdps[0].cdpId);
 
    //  await swap();
 
@@ -340,7 +340,7 @@ const repay = async (cdpId) => {
           [cdpId, getTokenJoinAddr('ETH'), ethAmount, 0, 4, 0]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
-            from: account.address, gas: 900000});
+            from: account.address, gas: 1200000});
 
         // console.log(tx);
     } catch(err) {
