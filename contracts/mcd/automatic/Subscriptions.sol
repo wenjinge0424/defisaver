@@ -42,6 +42,7 @@ contract Subscriptions is ISubscriptions {
 
     function subscribe(uint _cdpId, uint32 _minRatio, uint32 _maxRatio, uint32 _optimalBoost, uint32 _optimalRepay) external {
         require(isOwner(msg.sender, _cdpId), "Must be called by Cdp owner");
+        require(checkParams(_minRatio, _maxRatio), "Must be correct params");
 
         SubPosition storage subInfo = subscribersPos[_cdpId];
 
@@ -84,11 +85,12 @@ contract Subscriptions is ISubscriptions {
         emit Unsubscribed(msg.sender, _cdpId);
     }
 
-    function isOwner(address _owner, uint _cdpId) internal returns (bool) {
+    function isOwner(address _owner, uint _cdpId) internal view returns (bool) {
         return getOwner(_cdpId) == _owner;
     }
 
-    function checkParams(uint32 _minRatio, uint32 _maxRatio, uint32 _optimalBoost, uint32 _optimalRepay) internal view returns (bool) {
+    // TODO: should we implement the 5% difference limit?
+    function checkParams(uint32 _minRatio, uint32 _maxRatio) internal view returns (bool) {
         if (_minRatio < minLimit) {
             return false;
         }
