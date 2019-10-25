@@ -112,6 +112,9 @@ contract Subscriptions is ISubscriptions {
         if (!subInfo.subscribed) return false;
 
         CdpHolder memory subscriber = subscribers[subInfo.arrPos];
+
+        if (getOwner(_cdpId) != subscriber.owner) return false;
+
         uint currRatio = getRatio(_cdpId);
 
         if (_method == Method.Repay) {
@@ -127,9 +130,6 @@ contract Subscriptions is ISubscriptions {
 
     function ratioGoodAfter(Method _method, uint _cdpId) public view returns(bool) {
         SubPosition memory subInfo = subscribersPos[_cdpId];
-
-        if (!subInfo.subscribed) return false;
-
         CdpHolder memory subscriber = subscribers[subInfo.arrPos];
 
         uint currRatio = getRatio(_cdpId);
