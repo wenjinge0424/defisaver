@@ -2,6 +2,7 @@ pragma solidity ^0.5.0;
 
 import "../maker/Manager.sol";
 import "./ISubscriptions.sol";
+import "../saver_proxy/MCDSaverProxy.sol";
 
 // TODO: better handle if user transfers CDP
 contract Subscriptions is ISubscriptions {
@@ -26,15 +27,17 @@ contract Subscriptions is ISubscriptions {
 
     uint public minLimit;
     Manager public manager;
+    MCDSaverProxy public saverProxy;
 
     event Subscribed(address indexed owner, uint cdpId);
     event Unsubscribed(address indexed owner, uint cdpId);
     event Updated(address indexed owner, uint cdpId);
 
-    constructor(address _managerAddr) public {
+    constructor(address _managerAddr, address _saverProxy) public {
         minLimit = 1700000000000000000;
         owner = msg.sender;
         manager = Manager(_managerAddr);
+        saverProxy = MCDSaverProxy(_saverProxy);
     }
 
     function subscribe(uint _cdpId, uint32 _minRatio, uint32 _maxRatio, uint32 _optimalBoost, uint32 _optimalRepay) external {
@@ -82,7 +85,7 @@ contract Subscriptions is ISubscriptions {
     }
 
     function isOwner(address _owner, uint _cdpId) internal returns (bool) {
-
+        return getOwner(_cdpId) == _owner;
     }
 
     function checkParams(uint32 _minRatio, uint32 _maxRatio, uint32 _optimalBoost, uint32 _optimalRepay) internal view returns (bool) {
@@ -97,8 +100,23 @@ contract Subscriptions is ISubscriptions {
         return true;
     }
 
-    function canCall(Method _method, uint _cdpId) public view returns(bool) {
+    function getRatio(uint _cdpId) public view returns (uint) {
+        return saverProxy.getRatio(manager, _cdpId,manager.ilks(_cdpId));
+    }
 
+    function canCall(Method _method, uint _cdpId) public view returns(bool) {
+        SubPosition memory subInfo = subscribersPos[_cdpId];
+
+        if (!subInfo.subscribed) return false;
+
+        CdpHolder memory subscriber = subscribers[subInfo.arrPos];
+        uint currRatio = getRatio(_cdpId);
+
+        if (_method == Method.Repay) {
+            return currRatio < subscriber.minRatio;
+        } else if (_method == Method.Boost) {
+            return currRatio > subscriber.maxRatio;
+        }
     }
 
     function getOwner(uint _cdpId) public view returns(address) {
@@ -106,6 +124,18 @@ contract Subscriptions is ISubscriptions {
     }
 
     function ratioGoodAfter(Method _method, uint _cdpId) public view returns(bool) {
+        SubPosition memory subInfo = subscribersPos[_cdpId];
 
+        if (!subInfo.subscribed) return false;
+
+        CdpHolder memory subscriber = subscribers[subInfo.arrPos];
+
+        uint currRatio = getRatio(_cdpId);
+
+        if (_method == Method.Repay) {
+            return currRatio < subscriber.maxRatio;
+        } else if (_method == Method.Boost) {
+            return currRatio > subscriber.minRatio;
+        }
     }
 }
