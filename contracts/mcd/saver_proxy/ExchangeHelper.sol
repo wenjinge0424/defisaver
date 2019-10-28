@@ -24,8 +24,7 @@ contract ExchangeHelper {
 
         (wrapper, price) = SaverExchangeInterface(SAVER_EXCHANGE_ADDRESS).getBestPrice(_amount, _src, _dest, _exchangeType);
 
-        //TODO: only for tests
-        // require(price > _minPrice, "Slippage hit");
+        require(price > _minPrice, "Slippage hit");
 
         uint tokensReturned;
         if (_src == KYBER_ETH_ADDRESS) {

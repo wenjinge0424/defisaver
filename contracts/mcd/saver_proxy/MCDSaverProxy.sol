@@ -229,8 +229,14 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         } else {
             feeAmount = _amount / fee;
             feeAmount = add(feeAmount, daiGasCost);
-            ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
         }
+
+        // can't go over 20%
+        if (feeAmount > (_amount / 5)) {
+            feeAmount = _amount / 5;
+        }
+
+        ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
     }
 
     // TODO: check if valid
