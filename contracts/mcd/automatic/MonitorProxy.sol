@@ -45,7 +45,7 @@ contract MonitorProxy {
     }
 
     function confirmNewMonitor() public {
-        require((changeRequestedTimestamp + CHANGE_PERIOD) > now);
+        require((changeRequestedTimestamp + CHANGE_PERIOD) < now);
         require(changeRequestedTimestamp != 0);
 
         monitor = newMonitor;
