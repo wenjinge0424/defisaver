@@ -35,6 +35,7 @@ contract MCDMonitorProxy {
     function setMonitor(address _monitor) public onlyAllowed {
         require(!MONITOR_SETTED_FIRST_TIME);
         monitor = _monitor;
+        MONITOR_SETTED_FIRST_TIME = true;
     }
 
     function callExecute(address _owner, address _saverProxy, bytes memory data) public onlyMonitor {

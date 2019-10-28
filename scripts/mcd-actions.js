@@ -15,8 +15,13 @@ const Spotter = require('../build/contracts/Spotter.json');
 const MCDSaverProxy = require('../build/contracts/MCDSaverProxy.json');
 const Faucet = require('../build/contracts/Faucet.json');
 const ERC20 = require('../build/contracts/ERC20.json');
-const OasisTrade = require('../build/contracts/OasisTrade.json');
+const OasisTrade = require('../build/contracts/OasisTradeWrapper.json');
 const ExchangeInterface = require('../build/contracts/SaverExchangeInterface.json');
+
+const SubscriptionsProxy = require('../build/contracts/SubscriptionsProxy.json');
+const Subscriptions = require('../build/contracts/Subscriptions.json');
+const MCDMonitorProxy = require('../build/contracts/MCDMonitorProxy.json');
+const MCDMonitor = require('../build/contracts/MCDMonitor.json');
 
 const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
 const proxyActionsAddr = '0xc21274797a01e133ebd9d79b23498edbd7166137';
@@ -28,6 +33,10 @@ const vatAddr = '0x6e6073260e1a77dfaf57d0b92c44265122da8028';
 const jugAddr = '0x3793181ebbc1a72cc08ba90087d21c7862783fa5';
 const spotterAddr = '0xf5cdfce5a0b85ff06654ef35f4448e74c523c5ac';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
+const subscriptionsProxyAddr = '0x17a32a3Ad2E01F1b5EbAAd52208b677a19aB1b7b';
+const subscriptionsAddr = '0x9a68De67786Bc6f415F8f06311D0D52112840993';
+const mcdMonitorAddr = '0x6E250308d3744dE4c8021CE029E8FC60bdaA92D3';
+const mcdMonitorProxyAddr = '0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
@@ -114,7 +123,7 @@ function getAbiFunction(contract, functionName) {
     return abi.find(abi => abi.name === functionName);
 }
 
-let web3, account, jug, oasisTrade, registry, proxy, join, vat, getCdps, proxyAddr, spotter, mcdSaverProxy;
+let web3, account, jug, oasisTrade, registry, proxy, join, vat, getCdps, proxyAddr, spotter, mcdSaverProxy, mcdMonitor, mcdMonitorProxy, subscriptions, subscriptionsProxy;
 
 const initContracts = async () => {
     web3 = new Web3(new Web3.providers.HttpProvider(process.env.KOVAN_INFURA_ENDPOINT));
@@ -135,37 +144,73 @@ const initContracts = async () => {
     mcdSaverProxy = new web3.eth.Contract(MCDSaverProxy.abi, mcdSaverProxyAddr);
     faucet = new web3.eth.Contract(Faucet.abi, faucetAddr);
     exchange = new web3.eth.Contract(ExchangeInterface.abi, exchangeAddr);
+
+    mcdMonitor = new web3.eth.Contract(MCDMonitor.abi, mcdMonitorAddr);
+    mcdMonitorProxy = new web3.eth.Contract(MCDMonitorProxy.abi, mcdMonitorProxyAddr);
+    subscriptionsProxy = new web3.eth.Contract(SubscriptionsProxy.abi, subscriptionsProxyAddr);
+    subscriptions = new web3.eth.Contract(Subscriptions.abi, subscriptionsAddr);
 };
 
 (async () => {
     await initContracts();
 
-    const usersCdps = await getCDPsForAddress(proxyAddr);
+    // await openCdp("ETH", "1", "50");
 
-    // console.log(usersCdps);
+    const usersCdps = await getCDPsForAddress(proxyAddr);
+    console.log(usersCdps);
 
     // await getRatioFromContract(usersCdps[0].cdpId);
 
-    const cdpInfo = await getCdpInfo(usersCdps[1]);
+
+    // let minRatio = web3.utils.toWei('6.0', 'ether');
+    // let maxRatio = web3.utils.toWei('7.0', 'ether');
+    // let optimalRatio = web3.utils.toWei('6.5', 'ether');
+
+    // console.log(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
+    // await subscribeCdp(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
+
+    // const cdp = await subscriptions.methods.getCdp(usersCdps[0].cdpId).call();
+    // console.log("cdp:", cdp);
+
+    await boost(usersCdps[0].cdpId, '1');
+
+    const cdpInfo = await getCdpInfo(usersCdps[0]);
     console.log(cdpInfo.ratio, cdpInfo.collateral, cdpInfo.debtWithFee);
 
-   //  await boost(usersCdps[1].cdpId);
+    //  await swap();
 
-   //  await swap();
-
-    const cdpInfo2 = await getCdpInfo(usersCdps[1]);
-    console.log(cdpInfo2.ratio, cdpInfo2.collateral /  1e18, cdpInfo2.debtWithFee / 1e18);
+    // const cdpInfo2 = await getCdpInfo(usersCdps[1]);
+    // console.log(cdpInfo2.ratio, cdpInfo2.collateral /  1e18, cdpInfo2.debtWithFee / 1e18);
 
     // await transfer(usersCdps[1].cdpId, '0x322d58b9E75a6918f7e7849AEe0fF09369977e08');
 
-    const res = await getCollateralInfo(getIlk('REP'));
+    // const res = await getCollateralInfo(getIlk('REP'));
 
-    console.log(res);
+    // console.log(res);
 
     // await faucet.methods.gulp(getTokenAddr('GNT')).send({from: account.address, gas: 300000});
 
 
 })();
+
+const subscribeCdp = async (cdpId, minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay) => {
+    try {
+        data = web3.eth.abi.encodeFunctionCall(getAbiFunction(SubscriptionsProxy, 'subscribe'),
+            [cdpId, minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, subscriptionsAddr]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](subscriptionsProxyAddr, data).send({
+            from: account.address, gas: 9000000
+        });
+
+        console.log(tx);
+
+        const cdp = await subscriptions.methods.getCdp(usersCdps[0].cdpId).call();
+
+        console.log("cdp:", cdp);
+    } catch(err) {
+        console.log(err);
+    }
+}
 
 const openCdp = async (type, collateralAmount, daiAmount) => {
     try {
@@ -316,9 +361,9 @@ const transfer = async (cdpId, receiversAddr) => {
 };
 
 
-const boost = async (cdpId) => {
+const boost = async (cdpId, amount) => {
     try {
-        const daiAmount = web3.utils.toWei('10', 'ether');
+        const daiAmount = web3.utils.toWei(amount, 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'boost'),
           [cdpId, getTokenJoinAddr('ETH'), daiAmount, 0, 2, 0]);
@@ -332,9 +377,9 @@ const boost = async (cdpId) => {
     }
 };
 
-const repay = async (cdpId) => {
+const repay = async (cdpId, amount) => {
     try {
-        const ethAmount = web3.utils.toWei('0.001', 'ether');
+        const ethAmount = web3.utils.toWei(amount, 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'repay'),
           [cdpId, getTokenJoinAddr('ETH'), ethAmount, 0, 4, 0]);

@@ -9,10 +9,10 @@ import "../../constants/ConstantAddresses.sol";
 contract Subscriptions is ISubscriptions, ConstantAddresses {
 
     struct CdpHolder {
-        uint32 minRatio;
-        uint32 maxRatio;
-        uint32 optimalRatioBoost;
-        uint32 optimalRatioRepay;
+        uint128 minRatio;
+        uint128 maxRatio;
+        uint128 optimalRatioBoost;
+        uint128 optimalRatioRepay;
         address owner;
     }
 
@@ -41,7 +41,7 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
         saverProxy = MCDSaverProxy(_saverProxy);
     }
 
-    function subscribe(uint _cdpId, uint32 _minRatio, uint32 _maxRatio, uint32 _optimalBoost, uint32 _optimalRepay) external {
+    function subscribe(uint _cdpId, uint128 _minRatio, uint128 _maxRatio, uint128 _optimalBoost, uint128 _optimalRepay) external {
         require(isOwner(msg.sender, _cdpId), "Must be called by Cdp owner");
         require(checkParams(_minRatio, _maxRatio), "Must be correct params");
 
@@ -91,7 +91,7 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
     }
 
     // TODO: should we implement the 5% difference limit?
-    function checkParams(uint32 _minRatio, uint32 _maxRatio) internal view returns (bool) {
+    function checkParams(uint128 _minRatio, uint128 _maxRatio) internal view returns (bool) {
         if (_minRatio < minLimit) {
             return false;
         }
@@ -140,5 +140,14 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
         } else if (_method == Method.Boost) {
             return currRatio > subscriber.minRatio;
         }
+    }
+
+    function getCdp(uint _cdpId) public view returns(bool, uint128, uint128, uint128, uint128, address) {
+        SubPosition memory subInfo = subscribersPos[_cdpId];
+
+        if (!subInfo.subscribed) return (false, 0, 0, 0, 0, address(0));
+
+        CdpHolder memory subscriber = subscribers[subInfo.arrPos];
+        return (true, subscriber.minRatio, subscriber.maxRatio, subscriber.optimalRatioRepay, subscriber.optimalRatioBoost, subscriber.owner);
     }
 }
