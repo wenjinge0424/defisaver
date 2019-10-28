@@ -51,20 +51,17 @@ contract Monitor is ConstantAddresses, ISubscriptions, DSMath {
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     /// @param _cdpId Id of the cdp
     /// @param _amount Amount of Eth to convert to Dai
-    function repayFor(uint _cdpId, uint _amount) public onlyApproved {
+    function repayFor(uint _cdpId, uint _amount, address _collateralJoin) public onlyApproved {
         if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
             gasToken.free(BOOST_GAS_TOKEN);
         }
 
-        // 0 for Repay
         require(subscriptionsContract.canCall(Method.Repay, _cdpId));
 
         uint gasCost = calcGasCost(REPAY_GAS_COST);
 
-        // TODO: needs to be changed to reflect real repay
-        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("repay(bytes32,uint256,uint256)", _cdpId, _amount, gasCost));
+        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("repay(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, 0, gasCost));
 
-        // 0 for Repay
         require(subscriptionsContract.ratioGoodAfter(Method.Repay, _cdpId));
 
         emit CdpRepay(_cdpId, msg.sender, _amount);
@@ -83,8 +80,7 @@ contract Monitor is ConstantAddresses, ISubscriptions, DSMath {
 
         uint gasCost = calcGasCost(BOOST_GAS_COST);
 
-        // TODO: needs to be changed to reflect real boost
-        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("boost(bytes32,uint256,uint256)", _cdpId, _amount, gasCost));
+        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("boost(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, 0, gasCost));
 
         require(subscriptionsContract.ratioGoodAfter(Method.Boost, _cdpId));
 
