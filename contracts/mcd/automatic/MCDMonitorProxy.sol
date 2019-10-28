@@ -2,14 +2,18 @@ pragma solidity ^0.5.0;
 
 import "../../interfaces/DSProxyInterface.sol";
 
-contract MonitorProxy {
+contract MCDMonitorProxy {
 
-    uint public CHANGE_PERIOD = 15 days;
+    // mainnet
+    // uint public CHANGE_PERIOD = 15 days;
+    // testing
+    uint public CHANGE_PERIOD = 0;
 
     address public monitor;
     address public owner;
     address public newMonitor;
     uint public changeRequestedTimestamp;
+    bool public MONITOR_SETTED_FIRST_TIME = false;
 
     mapping(address => bool) public allowed;
 
@@ -24,9 +28,13 @@ contract MonitorProxy {
         _;
     }
 
-    constructor(address _monitor) public {
-        monitor = _monitor;
+    constructor() public {
         owner = msg.sender;
+    }
+
+    function setMonitor(address _monitor) public onlyAllowed {
+        require(!MONITOR_SETTED_FIRST_TIME);
+        monitor = _monitor;
     }
 
     function callExecute(address _owner, address _saverProxy, bytes memory data) public onlyMonitor {

@@ -1,9 +1,8 @@
 pragma solidity ^0.5.0;
 
-// TODO: better handle if user transfers CDP
-interface ISubscriptions {
+import "./Static.sol";
 
-    enum Method { Boost, Repay }
+contract ISubscriptions is Static {
 
     function canCall(Method _method, uint _cdpId) external view returns(bool);
     function getOwner(uint _cdpId) external view returns(address);

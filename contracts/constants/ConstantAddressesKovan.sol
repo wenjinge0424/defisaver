@@ -35,4 +35,8 @@ contract ConstantAddressesKovan {
 
     // Rinkeby, when no Kovan
     address public constant UNISWAP_FACTORY = 0xf5D915570BC477f9B8D6C0E980aA81757A3AaC36;
+
+
+    // new MCD contracts
+    address public constant MANAGER_ADDRESS = 0x1Cb0d969643aF4E929b3FafA5BA82950e31316b8;
 }

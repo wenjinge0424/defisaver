@@ -3,9 +3,10 @@ pragma solidity ^0.5.0;
 import "../maker/Manager.sol";
 import "./ISubscriptions.sol";
 import "../saver_proxy/MCDSaverProxy.sol";
+import "../../constants/ConstantAddresses.sol";
 
 // TODO: better handle if user transfers CDP
-contract Subscriptions is ISubscriptions {
+contract Subscriptions is ISubscriptions, ConstantAddresses {
 
     struct CdpHolder {
         uint32 minRatio;
@@ -33,10 +34,10 @@ contract Subscriptions is ISubscriptions {
     event Unsubscribed(address indexed owner, uint cdpId);
     event Updated(address indexed owner, uint cdpId);
 
-    constructor(address _managerAddr, address _saverProxy) public {
+    constructor(address _saverProxy) public {
         minLimit = 1700000000000000000;
         owner = msg.sender;
-        manager = Manager(_managerAddr);
+        manager = Manager(MANAGER_ADDRESS);
         saverProxy = MCDSaverProxy(_saverProxy);
     }
 

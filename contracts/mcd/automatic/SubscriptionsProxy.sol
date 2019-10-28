@@ -8,7 +8,7 @@ import "../../constants/ConstantAddresses.sol";
 /// @title SubscriptionsProxy handles authorization and interaction with the Subscriptions contract
 contract SubscriptionsProxy is ConstantAddresses {
 
-    address public constant MONITOR_PROXY_ADDRESS = 0xdeaDDeADDEaDdeaDdEAddEADDEAdDeadDEADDEaD;
+    address public constant MONITOR_PROXY_ADDRESS = 0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1;
 
     function subscribe(uint _cdpId, uint32 _minRatio, uint32 _maxRatio, uint32 _optimalRatioBoost, uint32 _optimalRatioRepay, address _subscriptions) public {
         DSGuard guard = DSGuardFactory(FACTORY_ADDRESS).newGuard();

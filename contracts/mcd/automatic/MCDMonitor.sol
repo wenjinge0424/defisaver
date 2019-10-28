@@ -1,12 +1,13 @@
 pragma solidity ^0.5.0;
 
 import "./ISubscriptions.sol";
-import "./MonitorProxy.sol";
+import "./Static.sol";
+import "./MCDMonitorProxy.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../../interfaces/GasTokenInterface.sol";
 import "../../DS/DSMath.sol";
 
-contract Monitor is ConstantAddresses, ISubscriptions, DSMath {
+contract MCDMonitor is ConstantAddresses, DSMath, Static {
 
     uint constant public REPAY_GAS_TOKEN = 30;
     uint constant public BOOST_GAS_TOKEN = 19;
@@ -16,7 +17,7 @@ contract Monitor is ConstantAddresses, ISubscriptions, DSMath {
     uint constant public REPAY_GAS_COST = 1500000;
     uint constant public BOOST_GAS_COST = 750000;
 
-    MonitorProxy public monitorProxyContract;
+    MCDMonitorProxy public monitorProxyContract;
     ISubscriptions public subscriptionsContract;
     GasTokenInterface gasToken = GasTokenInterface(GAS_TOKEN_INTERFACE_ADDRESS);
     address public owner;
@@ -42,7 +43,7 @@ contract Monitor is ConstantAddresses, ISubscriptions, DSMath {
         approvedCallers[msg.sender] = true;
         owner = msg.sender;
 
-        monitorProxyContract = MonitorProxy(_monitorProxy);
+        monitorProxyContract = MCDMonitorProxy(_monitorProxy);
         subscriptionsContract = ISubscriptions(_subscriptions);
         mcdSaverProxyAddress = _mcdSaverProxyAddress;
     }
@@ -71,7 +72,7 @@ contract Monitor is ConstantAddresses, ISubscriptions, DSMath {
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     /// @param _cdpId Id of the cdp
     /// @param _amount Amount of Dai to convert to Eth
-    function boostFor(uint _cdpId, uint _amount) public onlyApproved {
+    function boostFor(uint _cdpId, uint _amount, address _collateralJoin) public onlyApproved {
         if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
             gasToken.free(REPAY_GAS_TOKEN);
         }
