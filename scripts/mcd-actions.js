@@ -33,7 +33,7 @@ const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
 const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
 
-const mcdSaverProxyAddr = '0x1Bc95157D7C7a19767591Db4Bd30023469EAc6f0';
+const mcdSaverProxyAddr = '0x204Da20DfE363E654Bd93351dE4bE26dd59D5e98';
 
 const ilkData = {
     '1' : {
@@ -146,21 +146,21 @@ const initContracts = async () => {
 
     // await getRatioFromContract(usersCdps[0].cdpId);
 
-    const cdpInfo = await getCdpInfo(usersCdps[0]);
+    const cdpInfo = await getCdpInfo(usersCdps[1]);
     console.log(cdpInfo.ratio, cdpInfo.collateral, cdpInfo.debtWithFee);
 
-    await boost(usersCdps[0].cdpId);
+   //  await boost(usersCdps[1].cdpId);
 
    //  await swap();
 
-    const cdpInfo2 = await getCdpInfo(usersCdps[0]);
+    const cdpInfo2 = await getCdpInfo(usersCdps[1]);
     console.log(cdpInfo2.ratio, cdpInfo2.collateral /  1e18, cdpInfo2.debtWithFee / 1e18);
 
     // await transfer(usersCdps[1].cdpId, '0x322d58b9E75a6918f7e7849AEe0fF09369977e08');
 
-    // const res = await getCollateralInfo(getIlk('DGD'));
+    const res = await getCollateralInfo(getIlk('REP'));
 
-    // console.log(res);
+    console.log(res);
 
     // await faucet.methods.gulp(getTokenAddr('GNT')).send({from: account.address, gas: 300000});
 
@@ -318,7 +318,7 @@ const transfer = async (cdpId, receiversAddr) => {
 
 const boost = async (cdpId) => {
     try {
-        const daiAmount = web3.utils.toWei('0.1', 'ether');
+        const daiAmount = web3.utils.toWei('10', 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'boost'),
           [cdpId, getTokenJoinAddr('ETH'), daiAmount, 0, 2, 0]);
