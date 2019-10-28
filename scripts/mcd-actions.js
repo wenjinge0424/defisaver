@@ -33,16 +33,16 @@ const vatAddr = '0x6e6073260e1a77dfaf57d0b92c44265122da8028';
 const jugAddr = '0x3793181ebbc1a72cc08ba90087d21c7862783fa5';
 const spotterAddr = '0xf5cdfce5a0b85ff06654ef35f4448e74c523c5ac';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
-const subscriptionsProxyAddr = '0x17a32a3Ad2E01F1b5EbAAd52208b677a19aB1b7b';
-const subscriptionsAddr = '0x9a68De67786Bc6f415F8f06311D0D52112840993';
-const mcdMonitorAddr = '0x6E250308d3744dE4c8021CE029E8FC60bdaA92D3';
+const subscriptionsProxyAddr = '0xed12C94Ef80B688F60bE11C18B6197474657661a';
+const subscriptionsAddr = '0xbd487984BA05cecA8B3012990459A0a9Ac350877';
+const mcdMonitorAddr = '0xE465b84D9fc4a040BAF062cfd90347da3d340877';
 const mcdMonitorProxyAddr = '0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
 const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
 
-const mcdSaverProxyAddr = '0x204Da20DfE363E654Bd93351dE4bE26dd59D5e98';
+const mcdSaverProxyAddr = '0x043f86361c25494cf59cB04ec32b7845Cd2779b9';
 
 const ilkData = {
     '1' : {
@@ -162,20 +162,25 @@ const initContracts = async () => {
     // await getRatioFromContract(usersCdps[0].cdpId);
 
 
-    // let minRatio = web3.utils.toWei('6.0', 'ether');
-    // let maxRatio = web3.utils.toWei('7.0', 'ether');
-    // let optimalRatio = web3.utils.toWei('6.5', 'ether');
+    let minRatio = web3.utils.toWei('6.0', 'ether');
+    let maxRatio = web3.utils.toWei('7.0', 'ether');
+    let optimalRatio = web3.utils.toWei('6.5', 'ether');
 
     // console.log(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
     // await subscribeCdp(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
 
     // const cdp = await subscriptions.methods.getCdp(usersCdps[0].cdpId).call();
-    // console.log("cdp:", cdp);
+    // console.log("subscribed: ", cdp);
 
-    await boost(usersCdps[0].cdpId, '1');
+    // await boost(usersCdps[0].cdpId, '20');
+
+    await repayFor(usersCdps[0].cdpId, web3.utils.toWei('0.001', 'ether'), getTokenJoinAddr('ETH'));
+
+    const ratio = await subscriptions.methods.getRatio(224).call();
+    console.log('ola: ', ratio);
 
     const cdpInfo = await getCdpInfo(usersCdps[0]);
-    console.log(cdpInfo.ratio, cdpInfo.collateral, cdpInfo.debtWithFee);
+    console.log("ratio: ", cdpInfo.ratio);
 
     //  await swap();
 
@@ -192,6 +197,30 @@ const initContracts = async () => {
 
 
 })();
+
+const repayFor = async (cdpId, amount, collateralJoin) => {
+    try {
+        const tx = await mcdMonitor.methods.repayFor(cdpId, amount, collateralJoin).send({
+            from: account.address, gas: 9000000
+        });
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+}
+
+const boostFor = async (cdpId, amount, collateralJoin) => {
+    try {
+        const tx = await mcdMonitor.methods.boostFor(cdpId, amount, collateralJoin).send({
+            from: account.address, gas: 9000000
+        });
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+}
 
 const subscribeCdp = async (cdpId, minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay) => {
     try {
