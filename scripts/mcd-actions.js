@@ -33,16 +33,16 @@ const vatAddr = '0x6e6073260e1a77dfaf57d0b92c44265122da8028';
 const jugAddr = '0x3793181ebbc1a72cc08ba90087d21c7862783fa5';
 const spotterAddr = '0xf5cdfce5a0b85ff06654ef35f4448e74c523c5ac';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
-const subscriptionsProxyAddr = '0xed12C94Ef80B688F60bE11C18B6197474657661a';
-const subscriptionsAddr = '0xbd487984BA05cecA8B3012990459A0a9Ac350877';
-const mcdMonitorAddr = '0xE465b84D9fc4a040BAF062cfd90347da3d340877';
+const subscriptionsProxyAddr = '0xD6EA3d74115BACdf79436dCa8f21C9910B35F0d1';
+const subscriptionsAddr = '0x164b3447ce4f13b2F3a509CdbED408650aAf3159';
+const mcdMonitorAddr = '0x6bB86511D3E0f35dBbF1b592A1fC0Be952e488D7';
 const mcdMonitorProxyAddr = '0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
 const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
 
-const mcdSaverProxyAddr = '0x043f86361c25494cf59cB04ec32b7845Cd2779b9';
+const mcdSaverProxyAddr = '0x98D2fEDe8AA4eB5014aC6001eCd0c1AbF0fbF408';
 
 const ilkData = {
     '1' : {
@@ -172,15 +172,14 @@ const initContracts = async () => {
     // const cdp = await subscriptions.methods.getCdp(usersCdps[0].cdpId).call();
     // console.log("subscribed: ", cdp);
 
-    // await boost(usersCdps[0].cdpId, '20');
+    await repay(usersCdps[0].cdpId, '0.05');
 
-    await repayFor(usersCdps[0].cdpId, web3.utils.toWei('0.001', 'ether'), getTokenJoinAddr('ETH'));
-
-    const ratio = await subscriptions.methods.getRatio(224).call();
-    console.log('ola: ', ratio);
+    // await repayFor(usersCdps[0].cdpId, web3.utils.toWei('0.1', 'ether'), getTokenJoinAddr('ETH'));
+    // await boostFor(usersCdps[0].cdpId, web3.utils.toWei('0.4', 'ether'), getTokenJoinAddr('ETH'));
 
     const cdpInfo = await getCdpInfo(usersCdps[0]);
     console.log("ratio: ", cdpInfo.ratio);
+    console.log("cdp: ", cdpInfo);
 
     //  await swap();
 
@@ -408,6 +407,7 @@ const boost = async (cdpId, amount) => {
 
 const repay = async (cdpId, amount) => {
     try {
+        console.log("Regular repay");
         const ethAmount = web3.utils.toWei(amount, 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'repay'),

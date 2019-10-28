@@ -115,7 +115,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
         ERC20(SAI_ADDRESS).approve(OASIS_TRADE, daiAfterFee);
         //TODO: change to DAI address
-        uint collateralAmount = swap(SAI_ADDRESS, getCollateralAddr(_collateralJoin), _daiAmount, _minPrice, _exchangeType);
+        uint collateralAmount = swap(SAI_ADDRESS, getCollateralAddr(_collateralJoin), daiAfterFee, _minPrice, _exchangeType);
 
         addCollateral(manager, _cdpId, _collateralJoin, collateralAmount);
 
