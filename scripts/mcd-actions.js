@@ -42,7 +42,7 @@ const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
 const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
 
-const mcdSaverProxyAddr = '0x98D2fEDe8AA4eB5014aC6001eCd0c1AbF0fbF408';
+const mcdSaverProxyAddr = '0x6Dca70a1F95644cf18Ba96a04Ff1A4e0d36773c1';
 
 const ilkData = {
     '1' : {
@@ -172,7 +172,7 @@ const initContracts = async () => {
     // const cdp = await subscriptions.methods.getCdp(usersCdps[0].cdpId).call();
     // console.log("subscribed: ", cdp);
 
-    await repay(usersCdps[0].cdpId, '0.05');
+    await boost(usersCdps[0].cdpId, '1');
 
     // await repayFor(usersCdps[0].cdpId, web3.utils.toWei('0.1', 'ether'), getTokenJoinAddr('ETH'));
     // await boostFor(usersCdps[0].cdpId, web3.utils.toWei('0.4', 'ether'), getTokenJoinAddr('ETH'));

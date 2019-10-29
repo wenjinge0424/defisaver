@@ -104,7 +104,7 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
     }
 
     function getRatio(uint _cdpId) public view returns (uint) {
-        return saverProxy.getRatio(manager, _cdpId,manager.ilks(_cdpId)) / (10 ** 18);
+        return saverProxy.getRatio(_cdpId, manager.ilks(_cdpId)) / (10 ** 18);
     }
 
     function canCall(Method _method, uint _cdpId) public view returns(bool) {
