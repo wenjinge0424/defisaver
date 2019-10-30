@@ -39,4 +39,6 @@ contract ConstantAddressesKovan {
 
     // new MCD contracts
     address public constant MANAGER_ADDRESS = 0x1Cb0d969643aF4E929b3FafA5BA82950e31316b8;
+    address public constant VAT_ADDRESS = 0x6e6073260e1a77dFaf57D0B92c44265122Da8028;
+    address public constant SPOTTER_ADDRESS = 0xF5cDfcE5A0b85fF06654EF35f4448E74C523c5Ac;
 }
