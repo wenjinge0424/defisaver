@@ -4,6 +4,8 @@ import "../maker/Manager.sol";
 import "./ISubscriptions.sol";
 import "../saver_proxy/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
+import "../maker/Vat.sol";
+import "../maker/Spotter.sol";
 
 // TODO: better handle if user transfers CDP
 contract Subscriptions is ISubscriptions, ConstantAddresses {
@@ -25,10 +27,13 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
     mapping (uint => SubPosition) public subscribersPos;
 
     address public owner;
+    uint public changeIndex;
 
     uint public minLimit;
     Manager public manager;
     MCDSaverProxy public saverProxy;
+    Vat public vat;
+    Spotter public spotter;
 
     event Subscribed(address indexed owner, uint cdpId);
     event Unsubscribed(address indexed owner, uint cdpId);
@@ -39,6 +44,8 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
         owner = msg.sender;
         manager = Manager(MANAGER_ADDRESS);
         saverProxy = MCDSaverProxy(_saverProxy);
+        vat = Vat(VAT_ADDRESS);
+        spotter = Spotter(SPOTTER_ADDRESS);
     }
 
     function subscribe(uint _cdpId, uint128 _minRatio, uint128 _maxRatio, uint128 _optimalBoost, uint128 _optimalRepay) external {
@@ -54,6 +61,8 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
                 optimalRatioRepay: _optimalRepay,
                 owner: msg.sender
             });
+
+        changeIndex++;
 
         if (subInfo.subscribed) {
             subscribers[subInfo.arrPos] = subscription;
@@ -81,6 +90,7 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
         subscribers[subInfo.arrPos] = subscribers[subscribers.length - 1];
         delete subscribers[subscribers.length - 1];
 
+        changeIndex++;
         subInfo.subscribed = true;
 
         emit Unsubscribed(msg.sender, _cdpId);
@@ -142,12 +152,23 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
         }
     }
 
-    function getCdp(uint _cdpId) public view returns(bool, uint128, uint128, uint128, uint128, address) {
+    function getSubscribedInfo(uint _cdpId) public view returns(bool, uint128, uint128, uint128, uint128, address) {
         SubPosition memory subInfo = subscribersPos[_cdpId];
 
         if (!subInfo.subscribed) return (false, 0, 0, 0, 0, address(0));
 
         CdpHolder memory subscriber = subscribers[subInfo.arrPos];
         return (true, subscriber.minRatio, subscriber.maxRatio, subscriber.optimalRatioRepay, subscriber.optimalRatioBoost, subscriber.owner);
+    }
+
+    function getIlkInfo(bytes32 _ilk, uint _cdpId) public view returns(uint art, uint rate, uint spot, uint line, uint dust, uint mat, uint par) {
+        // send either ilk or cdpId
+        if (_ilk == bytes32(0)) {
+            _ilk = manager.ilks(_cdpId);
+        }
+
+        (,mat) = spotter.ilks(_ilk);
+        par = spotter.par();
+        (art, rate, spot, line, dust) = vat.ilks(_ilk);
     }
 }
