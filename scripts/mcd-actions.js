@@ -40,9 +40,7 @@ const mcdMonitorProxyAddr = '0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
-const batAddr = '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7';
-
-const mcdSaverProxyAddr = '0x6Dca70a1F95644cf18Ba96a04Ff1A4e0d36773c1';
+const mcdSaverProxyAddr = '0x0BC21d4eb212ce700Ee628fEC45dc1eC5Ac677A4';
 
 const ilkData = {
     '1' : {
@@ -157,7 +155,7 @@ const initContracts = async () => {
     // await openCdp("ETH", "1", "50");
 
     const usersCdps = await getCDPsForAddress(proxyAddr);
-    console.log(usersCdps);
+    // console.log(usersCdps);
 
     // await getRatioFromContract(usersCdps[0].cdpId);
 
@@ -172,12 +170,12 @@ const initContracts = async () => {
     // const cdp = await subscriptions.methods.getCdp(usersCdps[0].cdpId).call();
     // console.log("subscribed: ", cdp);
 
-    await boost(usersCdps[0].cdpId, '1');
+    await boost(usersCdps[6].cdpId, '1');
 
     // await repayFor(usersCdps[0].cdpId, web3.utils.toWei('0.1', 'ether'), getTokenJoinAddr('ETH'));
     // await boostFor(usersCdps[0].cdpId, web3.utils.toWei('0.4', 'ether'), getTokenJoinAddr('ETH'));
 
-    const cdpInfo = await getCdpInfo(usersCdps[0]);
+    const cdpInfo = await getCdpInfo(usersCdps[6]);
     console.log("ratio: ", cdpInfo.ratio);
     console.log("cdp: ", cdpInfo);
 
@@ -394,7 +392,7 @@ const boost = async (cdpId, amount) => {
         const daiAmount = web3.utils.toWei(amount, 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'boost'),
-          [cdpId, getTokenJoinAddr('ETH'), daiAmount, 0, 2, 0]);
+          [cdpId, getTokenJoinAddr('OMG'), daiAmount, 0, 2, 0]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
             from: account.address, gas: 1200000});
@@ -411,7 +409,7 @@ const repay = async (cdpId, amount) => {
         const ethAmount = web3.utils.toWei(amount, 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'repay'),
-          [cdpId, getTokenJoinAddr('ETH'), ethAmount, 0, 4, 0]);
+          [cdpId, getTokenJoinAddr('OMG'), ethAmount, 0, 4, 0]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
             from: account.address, gas: 1200000});
