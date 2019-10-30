@@ -24,14 +24,13 @@ const MCDMonitorProxy = require('../build/contracts/MCDMonitorProxy.json');
 const MCDMonitor = require('../build/contracts/MCDMonitor.json');
 
 const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
-const proxyActionsAddr = '0xc21274797a01e133ebd9d79b23498edbd7166137';
-const cdpManagerAddr = '0x1cb0d969643af4e929b3fafa5ba82950e31316b8';
-const ethAJoinAddr = '0xc3abba566bb62c09b7f94704d8dfd9800935d3f9';
-const daiJoinAddr = '0x61af28390d0b3e806bbaf09104317cb5d26e215d';
-const getCdpsAddr = '0xb5907a51e3b747dbf9d5125ab77eff3a55e50b7d';
-const vatAddr = '0x6e6073260e1a77dfaf57d0b92c44265122da8028';
-const jugAddr = '0x3793181ebbc1a72cc08ba90087d21c7862783fa5';
-const spotterAddr = '0xf5cdfce5a0b85ff06654ef35f4448e74c523c5ac';
+const proxyActionsAddr = '0x19ee8a65a26f5e4e70b59fdcd8e1047920b57c13';
+const cdpManagerAddr = '0xb1fd1f2c83a6cb5155866169d81a9b7cf9e2019d';
+const daiJoinAddr = '0x9e0d5a6a836a6c323cf45eb07cb40cfc81664eec';
+const getCdpsAddr = '0x05e0690128dcef6e16126e5a4f8f4a226797567d';
+const vatAddr = '0xb597803e4b5b2a43a92f3e1dcafea5425c873116';
+const jugAddr = '0x9404a7fd173f1aa716416f391accd28bd0d84406';
+const spotterAddr = '0x932e82e999fad1f7ea9566f42cd3e94a4f46897e';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
 const subscriptionsProxyAddr = '0xD6EA3d74115BACdf79436dCa8f21C9910B35F0d1';
 const subscriptionsAddr = '0x164b3447ce4f13b2F3a509CdbED408650aAf3159';
@@ -40,7 +39,7 @@ const mcdMonitorProxyAddr = '0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
-const mcdSaverProxyAddr = '0x0BC21d4eb212ce700Ee628fEC45dc1eC5Ac677A4';
+const mcdSaverProxyAddr = '0x517063901EB05ED58D8F328D98104E4e29F62007';
 
 const ilkData = {
     '1' : {
@@ -65,22 +64,22 @@ const ilkData = {
 
 const tokenJoinAddrData = {
     '1': {
-        'ETH': '0xc3abba566bb62c09b7f94704d8dfd9800935d3f9',
-        'BAT': '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7',
-        'GNT': '0xc81ba844f451d4452a01bbb2104c1c4f89252907',
-        'OMG': '0x441b1a74c69ee6e631834b626b29801d42076d38',
-        'ZRX': '0x18392097549390502069c17700d21403ea3c721a',
-        'REP': '0xc7aa227823789e363f29679f23f7e8f6d9904a9b',
-        'DGD': '0x62aeec5fb140bb233b1c5612a8747ca1dc56dc1b',
+        'ETH': '0x55cd2f4cf74edc7c869bcf5e16086781ee97ee40',
+        'BAT': '0xe56b354524115f101798d243e05fd891f7d92e99',
+        'GNT': '0xc667ac878fd8eb4412dcad07988fea80008b65ee',
+        'OMG': '0x2ebb31f1160c7027987a03482ab0fec130e98251',
+        'ZRX': '0x1f4150647b4aa5eb36287d06d757a5247700c521',
+        'REP': '0xd40163ea845abbe53a12564395e33fe108f90cd3',
+        'DGD': '0xd5f63712af0d62597ad6bf8d357f163bc699e18c',
     },
     '42': {
-        'ETH': '0xc3abba566bb62c09b7f94704d8dfd9800935d3f9',
-        'BAT': '0xf8e9b4c3e17c1a2d55767d44fb91feed798bb7e8',
-        'GNT': '0xc28d56522280d20c1c33b239a8e8ffef1c2d5457',
-        'OMG': '0x7d9f9e9ac1c768be3f9c241ad9420e9ac37688e4',
-        'ZRX': '0x79f15b0da982a99b7bcf602c8f384c56f0b0e8cd',
-        'REP': '0xebbd300bb527f1d50abd937f8ca11d7fd0e5b68b',
-        'DGD': '0x92a3b1c0882e6e17aa41c5116e01b0b9cf117cf2',
+        'ETH': '0x55cd2f4cf74edc7c869bcf5e16086781ee97ee40',
+        'BAT': '0xe56b354524115f101798d243e05fd891f7d92e99',
+        'GNT': '0xc667ac878fd8eb4412dcad07988fea80008b65ee',
+        'OMG': '0x2ebb31f1160c7027987a03482ab0fec130e98251',
+        'ZRX': '0x1f4150647b4aa5eb36287d06d757a5247700c521',
+        'REP': '0xd40163ea845abbe53a12564395e33fe108f90cd3',
+        'DGD': '0xd5f63712af0d62597ad6bf8d357f163bc699e18c',
     }
 };
 
@@ -155,7 +154,7 @@ const initContracts = async () => {
     // await openCdp("ETH", "1", "50");
 
     const usersCdps = await getCDPsForAddress(proxyAddr);
-    // console.log(usersCdps);
+    console.log(usersCdps);
 
     // await getRatioFromContract(usersCdps[0].cdpId);
 
@@ -170,16 +169,16 @@ const initContracts = async () => {
     // const cdp = await subscriptions.methods.getCdp(usersCdps[0].cdpId).call();
     // console.log("subscribed: ", cdp);
 
-    await boost(usersCdps[6].cdpId, '1');
+    await boost(usersCdps[0].cdpId, '10');
 
     // await repayFor(usersCdps[0].cdpId, web3.utils.toWei('0.1', 'ether'), getTokenJoinAddr('ETH'));
     // await boostFor(usersCdps[0].cdpId, web3.utils.toWei('0.4', 'ether'), getTokenJoinAddr('ETH'));
 
-    const cdpInfo = await getCdpInfo(usersCdps[6]);
+    const cdpInfo = await getCdpInfo(usersCdps[0]);
     console.log("ratio: ", cdpInfo.ratio);
     console.log("cdp: ", cdpInfo);
 
-    //  await swap();
+    // await openCdp('ETH', '2', '100');
 
     // const cdpInfo2 = await getCdpInfo(usersCdps[1]);
     // console.log(cdpInfo2.ratio, cdpInfo2.collateral /  1e18, cdpInfo2.debtWithFee / 1e18);
@@ -392,7 +391,7 @@ const boost = async (cdpId, amount) => {
         const daiAmount = web3.utils.toWei(amount, 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'boost'),
-          [cdpId, getTokenJoinAddr('OMG'), daiAmount, 0, 2, 0]);
+          [cdpId, getTokenJoinAddr('ETH'), daiAmount, 0, 2, 0]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
             from: account.address, gas: 1200000});
@@ -409,7 +408,7 @@ const repay = async (cdpId, amount) => {
         const ethAmount = web3.utils.toWei(amount, 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'repay'),
-          [cdpId, getTokenJoinAddr('OMG'), ethAmount, 0, 4, 0]);
+          [cdpId, getTokenJoinAddr('ETH'), ethAmount, 0, 4, 0]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
             from: account.address, gas: 1200000});
