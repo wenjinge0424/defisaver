@@ -33,9 +33,9 @@ const vatAddr = '0x6e6073260e1a77dfaf57d0b92c44265122da8028';
 const jugAddr = '0x3793181ebbc1a72cc08ba90087d21c7862783fa5';
 const spotterAddr = '0xf5cdfce5a0b85ff06654ef35f4448e74c523c5ac';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
-const subscriptionsProxyAddr = '0xD6EA3d74115BACdf79436dCa8f21C9910B35F0d1';
-const subscriptionsAddr = '0x164b3447ce4f13b2F3a509CdbED408650aAf3159';
-const mcdMonitorAddr = '0x6bB86511D3E0f35dBbF1b592A1fC0Be952e488D7';
+const subscriptionsProxyAddr = '0x70A1C12A73f6651B985bC8D24cb22Af55723fd1b';
+const subscriptionsAddr = '0x8A03402992dE0057f3cc588002f2fD825CE5971c';
+const mcdMonitorAddr = '0xE8531b07418DD1C988C1f76501432E21C27905De';
 const mcdMonitorProxyAddr = '0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
@@ -162,9 +162,9 @@ const initContracts = async () => {
     // await getRatioFromContract(usersCdps[0].cdpId);
 
 
-    let minRatio = web3.utils.toWei('6.0', 'ether');
-    let maxRatio = web3.utils.toWei('7.0', 'ether');
-    let optimalRatio = web3.utils.toWei('6.5', 'ether');
+    // let minRatio = web3.utils.toWei('6.0', 'ether');
+    // let maxRatio = web3.utils.toWei('7.0', 'ether');
+    // let optimalRatio = web3.utils.toWei('6.5', 'ether');
 
     // console.log(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
     // await subscribeCdp(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
@@ -172,14 +172,18 @@ const initContracts = async () => {
     // const cdp = await subscriptions.methods.getCdp(usersCdps[0].cdpId).call();
     // console.log("subscribed: ", cdp);
 
-    await repay(usersCdps[0].cdpId, '0.05');
+    // await repay(usersCdps[0].cdpId, '0.05');
 
     // await repayFor(usersCdps[0].cdpId, web3.utils.toWei('0.1', 'ether'), getTokenJoinAddr('ETH'));
     // await boostFor(usersCdps[0].cdpId, web3.utils.toWei('0.4', 'ether'), getTokenJoinAddr('ETH'));
 
-    const cdpInfo = await getCdpInfo(usersCdps[0]);
-    console.log("ratio: ", cdpInfo.ratio);
-    console.log("cdp: ", cdpInfo);
+    // const cdpInfo = await getCdpInfo(usersCdps[0]);
+
+
+    const info1 = await getCollateralInfo(usersCdps[0].ilk);
+    const info2 = await getCollateralInfo2(usersCdps[0].cdpId);
+    console.log("info1: ", info1);
+    console.log("info2: ", info2);
 
     //  await swap();
 
@@ -472,13 +476,11 @@ const getCdpInfo = async (cdp) => {
 
 const getCollateralInfo = async (ilk) => {
     try {
-        const ilkInfo = await vat.methods.ilks(ilk).call();
+        const ilkInfo = await subscriptions.methods.getIlkInfo(ilk, 0).call();
 
-        const spotInfo = await spotter.methods.ilks(ilk).call();
-
-        let par = Dec(await spotter.methods.par().call()).div(1e27);
+        let par = Dec(ilkInfo.par).div(1e27);
         const spot = Dec(ilkInfo.spot).div(1e27);
-        const mat = Dec(spotInfo.mat).div(1e27);
+        const mat = Dec(ilkInfo.mat).div(1e27);
 
         const price = spot.times(par).times(mat);
 
@@ -486,7 +488,7 @@ const getCollateralInfo = async (ilk) => {
             currentRate: ilkInfo.rate,
             price, // TODO: check if true
             minAmountForCdp: ilkInfo.dust,
-            currAmountGlobal: ilkInfo.Art, //total debt TODO: * rate
+            currAmountGlobal: ilkInfo.art, //total debt TODO: * rate
             maxAmountGlobal: ilkInfo.line,
             liquidationRatio: mat,
         }
