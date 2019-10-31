@@ -37,7 +37,6 @@ contract OasisTradeWrapper is DSMath, ConstantAddresses, ExchangeInterface {
     function swapTokenToToken(address _srcToken, address _dstToken, uint _amount) external payable returns(uint) {
         require(_srcToken != KYBER_ETH_ADDRESS && _dstToken != KYBER_ETH_ADDRESS);
 
-        require(ERC20(_srcToken).transferFrom(msg.sender, address(this), _amount));
         require(ERC20(_srcToken).approve(OTC_ADDRESS, _amount));
 
         uint dstAmount = Eth2DaiInterface(OTC_ADDRESS).sellAllAmount(ERC20(_srcToken), _amount,
