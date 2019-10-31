@@ -32,9 +32,9 @@ const vatAddr = '0xb597803e4b5b2a43a92f3e1dcafea5425c873116';
 const jugAddr = '0x9404a7fd173f1aa716416f391accd28bd0d84406';
 const spotterAddr = '0x932e82e999fad1f7ea9566f42cd3e94a4f46897e';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
-const subscriptionsProxyAddr = '0xd41F2e4A5DbB06e2606C0f6cC3ACD7634fAf7B3a';
-const subscriptionsAddr = '0x5f0859a934675bABed3ca8A6167F4945127976F1';
-const mcdMonitorAddr = '0xB6527F4aD826B5d108060a57B328A4D7a5B13b56';
+const subscriptionsProxyAddr = '0xded3dFe71059c58C092E993571fe6C9ef13105d5';
+const subscriptionsAddr = '0x9f92E6B2fd0a8ab3b717BfFaa2C36f330e3ec5BE';
+const mcdMonitorAddr = '0xAce09a79eA6B43438686aC79f31358dA5bd62c74';
 const mcdMonitorProxyAddr = '0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
@@ -163,11 +163,11 @@ const initContracts = async () => {
     let maxRatio = web3.utils.toWei('7.0', 'ether');
     let optimalRatio = web3.utils.toWei('6.5', 'ether');
 
-    console.log(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
-    await subscribeCdp(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
+    // console.log(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
+    // await subscribeCdp(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
 
-    // const cdp = await subscriptions.methods.getCdp(usersCdps[0].cdpId).call();
-    // console.log("subscribed: ", cdp);
+    const cdp = await subscriptions.methods.getSubscribedInfo(usersCdps[0].cdpId).call();
+    console.log("cdp:", cdp);
 
     // await boost(usersCdps[0].cdpId, '10');
 
@@ -229,8 +229,7 @@ const subscribeCdp = async (cdpId, minRatio, maxRatio, optimalRatioBoost, optima
 
         console.log(tx);
 
-        const cdp = await subscriptions.methods.getCdp(usersCdps[0].cdpId).call();
-
+        const cdp = await subscriptions.methods.getSubscribedInfo(cdpId).call();
         console.log("cdp:", cdp);
     } catch(err) {
         console.log(err);
