@@ -32,9 +32,9 @@ const vatAddr = '0xb597803e4b5b2a43a92f3e1dcafea5425c873116';
 const jugAddr = '0x9404a7fd173f1aa716416f391accd28bd0d84406';
 const spotterAddr = '0x932e82e999fad1f7ea9566f42cd3e94a4f46897e';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
-const subscriptionsProxyAddr = '0x70A1C12A73f6651B985bC8D24cb22Af55723fd1b';
-const subscriptionsAddr = '0x8A03402992dE0057f3cc588002f2fD825CE5971c';
-const mcdMonitorAddr = '0xE8531b07418DD1C988C1f76501432E21C27905De';
+const subscriptionsProxyAddr = '0xd41F2e4A5DbB06e2606C0f6cC3ACD7634fAf7B3a';
+const subscriptionsAddr = '0x5f0859a934675bABed3ca8A6167F4945127976F1';
+const mcdMonitorAddr = '0xB6527F4aD826B5d108060a57B328A4D7a5B13b56';
 const mcdMonitorProxyAddr = '0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
