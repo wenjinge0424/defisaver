@@ -12,7 +12,7 @@ contract SaverProxy is DSMath, ConstantAddresses {
 
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
 
-    /// @notice Withdraws Eth collateral, swaps Eth -> Dai with Kyber, and pays back the debt in Dai
+    /// @notice Withdraws Eth collateral, swaps Eth -> Dai on the exchange with best current rate, and pays back the debt in Dai
     /// @dev If _buyMkr is false user needs to have MKR tokens and approve his DSProxy
     /// @param _cup Id of the CDP
     /// @param _amount Amount of Eth to sell
