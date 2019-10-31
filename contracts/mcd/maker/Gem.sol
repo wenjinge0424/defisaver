@@ -7,8 +7,9 @@ contract Gem {
     function exit(address, uint) public;
 
     function approve(address, uint) public;
-    function transfer(address, uint) public;
-    function transferFrom(address, address, uint) public;
+    function transfer(address, uint) public returns (bool);
+    function transferFrom(address, address, uint) public returns (bool);
     function deposit() public payable;
     function withdraw(uint) public;
+    function allowance(address, address) public returns (uint);
 }
