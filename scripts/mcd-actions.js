@@ -159,24 +159,24 @@ const initContracts = async () => {
     // await getRatioFromContract(usersCdps[0].cdpId);
 
 
-    // let minRatio = web3.utils.toWei('6.0', 'ether');
-    // let maxRatio = web3.utils.toWei('7.0', 'ether');
-    // let optimalRatio = web3.utils.toWei('6.5', 'ether');
+    let minRatio = web3.utils.toWei('6.0', 'ether');
+    let maxRatio = web3.utils.toWei('7.0', 'ether');
+    let optimalRatio = web3.utils.toWei('6.5', 'ether');
 
-    // console.log(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
-    // await subscribeCdp(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
+    console.log(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
+    await subscribeCdp(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
 
     // const cdp = await subscriptions.methods.getCdp(usersCdps[0].cdpId).call();
     // console.log("subscribed: ", cdp);
 
-    await boost(usersCdps[0].cdpId, '10');
+    // await boost(usersCdps[0].cdpId, '10');
 
     // await repayFor(usersCdps[0].cdpId, web3.utils.toWei('0.1', 'ether'), getTokenJoinAddr('ETH'));
     // await boostFor(usersCdps[0].cdpId, web3.utils.toWei('0.4', 'ether'), getTokenJoinAddr('ETH'));
 
-    const cdpInfo = await getCdpInfo(usersCdps[0]);
-    console.log("ratio: ", cdpInfo.ratio);
-    console.log("cdp: ", cdpInfo);
+    // const cdpInfo = await getCdpInfo(usersCdps[0]);
+    // console.log("ratio: ", cdpInfo.ratio);
+    // console.log("cdp: ", cdpInfo);
 
     // await openCdp('ETH', '2', '100');
 
