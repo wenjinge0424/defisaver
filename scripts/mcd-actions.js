@@ -17,6 +17,7 @@ const Faucet = require('../build/contracts/Faucet.json');
 const ERC20 = require('../build/contracts/ERC20.json');
 const OasisTrade = require('../build/contracts/OasisTradeWrapper.json');
 const ExchangeInterface = require('../build/contracts/SaverExchangeInterface.json');
+const MonitorMigrate = require('../build/contracts/MonitorMigrateProxy.json');
 
 const SubscriptionsProxy = require('../build/contracts/SubscriptionsProxy.json');
 const Subscriptions = require('../build/contracts/Subscriptions.json');
@@ -36,6 +37,7 @@ const subscriptionsProxyAddr = '0xded3dFe71059c58C092E993571fe6C9ef13105d5';
 const subscriptionsAddr = '0x9f92E6B2fd0a8ab3b717BfFaa2C36f330e3ec5BE';
 const mcdMonitorAddr = '0xAce09a79eA6B43438686aC79f31358dA5bd62c74';
 const mcdMonitorProxyAddr = '0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1';
+const monitorMigrateAddr = '0xe60cD00a5ec218E44F57D128129a6372BD4cF219';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
@@ -120,7 +122,23 @@ function getAbiFunction(contract, functionName) {
     return abi.find(abi => abi.name === functionName);
 }
 
-let web3, account, jug, oasisTrade, registry, proxy, join, vat, getCdps, proxyAddr, spotter, mcdSaverProxy, mcdMonitor, mcdMonitorProxy, subscriptions, subscriptionsProxy;
+let web3,
+    account,
+    jug,
+    oasisTrade,
+    registry,
+    proxy,
+    join,
+    vat,
+    getCdps,
+    proxyAddr,
+    spotter,
+    mcdSaverProxy,
+    mcdMonitor,
+    mcdMonitorProxy,
+    subscriptions,
+    subscriptionsProxy,
+    monitorMigrate;
 
 const initContracts = async () => {
     web3 = new Web3(new Web3.providers.HttpProvider(process.env.KOVAN_INFURA_ENDPOINT));
@@ -146,17 +164,18 @@ const initContracts = async () => {
     mcdMonitorProxy = new web3.eth.Contract(MCDMonitorProxy.abi, mcdMonitorProxyAddr);
     subscriptionsProxy = new web3.eth.Contract(SubscriptionsProxy.abi, subscriptionsProxyAddr);
     subscriptions = new web3.eth.Contract(Subscriptions.abi, subscriptionsAddr);
+    monitorMigrate = new web3.eth.Contract(MonitorMigrate.abi, monitorMigrateAddr);
 };
 
 (async () => {
     await initContracts();
 
-    // await openCdp("ETH", "1", "50");
-
     const usersCdps = await getCDPsForAddress(proxyAddr);
     console.log(usersCdps);
 
     // await getRatioFromContract(usersCdps[0].cdpId);
+
+    // await migrateAndSubscribe('0x0000000000000000000000000000000000000000000000000000000000001560');
 
 
     let minRatio = web3.utils.toWei('6.0', 'ether');
@@ -166,8 +185,8 @@ const initContracts = async () => {
     // console.log(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
     // await subscribeCdp(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
 
-    const cdp = await subscriptions.methods.getSubscribedInfo(usersCdps[0].cdpId).call();
-    console.log("cdp:", cdp);
+    // const cdp = await subscriptions.methods.getSubscribedInfo(usersCdps[0].cdpId).call();
+    // console.log("cdp:", cdp);
 
     // await boost(usersCdps[0].cdpId, '10');
 
@@ -321,7 +340,7 @@ const generateDai = async (cdpId, daiAmount) => {
         daiAmount = web3.utils.toWei(daiAmount, 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'draw'),
-        [cdpManagerAddr, jugAddr, getTokenJoinAddr('DAI'), cdpId, daiAmount]);
+        [cdpManagerAddr, jugAddr, daiJoinAddr, cdpId, daiAmount]);
 
         const tx = await proxy.methods['execute(address,bytes)'](proxyActionsAddr, data).send({from: account.address, gas: 900000});
 
@@ -423,6 +442,21 @@ const getRatioFromContract = async (cdpId) => {
         const ratio = await mcdSaverProxy.methods.getMaxCollateral(cdpManagerAddr, cdpId, getIlk('ETH')).call();
 
         console.log(ratio / 1e18);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+const migrateAndSubscribe = async (oldCdpId) => {
+    try {
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MonitorMigrate, 'migrateAndSubscribe'),
+          [oldCdpId]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](monitorMigrateAddr, data).send({
+            from: account.address, gas: 2200000});
+
+        console.log(tx);
     } catch(err) {
         console.log(err);
     }
