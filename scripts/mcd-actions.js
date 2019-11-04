@@ -32,9 +32,9 @@ const vatAddr = '0xb597803e4b5b2a43a92f3e1dcafea5425c873116';
 const jugAddr = '0x9404a7fd173f1aa716416f391accd28bd0d84406';
 const spotterAddr = '0x932e82e999fad1f7ea9566f42cd3e94a4f46897e';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
-const subscriptionsProxyAddr = '0xded3dFe71059c58C092E993571fe6C9ef13105d5';
-const subscriptionsAddr = '0x9f92E6B2fd0a8ab3b717BfFaa2C36f330e3ec5BE';
-const mcdMonitorAddr = '0xAce09a79eA6B43438686aC79f31358dA5bd62c74';
+const subscriptionsProxyAddr = '0x3DF33b19CB5099e2060E488c4B153F87b563891A';
+const subscriptionsAddr = '0xa62676b25ffdC8A813507F59C4e36b190AF83609';
+const mcdMonitorAddr = '0x657ABc9B678eCd71E332d33c44bD1285f2819D43';
 const mcdMonitorProxyAddr = '0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
@@ -158,16 +158,20 @@ const initContracts = async () => {
 
     // await getRatioFromContract(usersCdps[0].cdpId);
 
+    await addCollateral(usersCdps[0].cdpId, 'ETH', '0.01')
 
-    let minRatio = web3.utils.toWei('6.0', 'ether');
-    let maxRatio = web3.utils.toWei('7.0', 'ether');
-    let optimalRatio = web3.utils.toWei('6.5', 'ether');
+    // let minRatio = web3.utils.toWei('6.0', 'ether');
+    // let maxRatio = web3.utils.toWei('7.0', 'ether');
+    // let optimalRatio = web3.utils.toWei('6.5', 'ether');
 
     // console.log(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
-    // await subscribeCdp(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
+    // await updateCdp(usersCdps[0].cdpId, minRatio, maxRatio, optimalRatio, optimalRatio);
 
-    const cdp = await subscriptions.methods.getSubscribedInfo(usersCdps[0].cdpId).call();
-    console.log("cdp:", cdp);
+    // const cdp = await subscriptions.methods.getSubscribedInfo(usersCdps[0].cdpId).call();
+    // console.log("cdp:", cdp);
+
+    // const a = await getCollateralInfo('0x0', usersCdps[0].cdpId);
+    // console.log(a);
 
     // await boost(usersCdps[0].cdpId, '10');
 
@@ -221,6 +225,24 @@ const boostFor = async (cdpId, amount, collateralJoin) => {
 const subscribeCdp = async (cdpId, minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay) => {
     try {
         data = web3.eth.abi.encodeFunctionCall(getAbiFunction(SubscriptionsProxy, 'subscribe'),
+            [cdpId, minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, subscriptionsAddr]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](subscriptionsProxyAddr, data).send({
+            from: account.address, gas: 9000000
+        });
+
+        console.log(tx);
+
+        const cdp = await subscriptions.methods.getSubscribedInfo(cdpId).call();
+        console.log("cdp:", cdp);
+    } catch(err) {
+        console.log(err);
+    }
+}
+
+const updateCdp = async (cdpId, minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay) => {
+    try {
+        data = web3.eth.abi.encodeFunctionCall(getAbiFunction(SubscriptionsProxy, 'update'),
             [cdpId, minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, subscriptionsAddr]);
 
         const tx = await proxy.methods['execute(address,bytes)'](subscriptionsProxyAddr, data).send({
@@ -466,9 +488,10 @@ const getCdpInfo = async (cdp) => {
     }
 };
 
-const getCollateralInfo = async (ilk) => {
+// either ilk or cdpId, if cdpId send bytes32(0) for ilk
+const getCollateralInfo = async (ilk, cdpId) => {
     try {
-        const ilkInfo = await subscriptions.methods.getIlkInfo(ilk, 0).call();
+        const ilkInfo = await subscriptions.methods.getIlkInfo(ilk, cdpId).call();
 
         let par = Dec(ilkInfo.par).div(1e27);
         const spot = Dec(ilkInfo.spot).div(1e27);
