@@ -71,7 +71,7 @@ contract MigrationProxyActions is DSMath {
         address otc,                        // Otc address
         address payGem,                     // Token address to be used for purchasing govFee MKR
         uint maxPayAmt                      // Max amount of payGem to sell for govFee MKR needed
-    ) external returns (uint cdp) {
+    ) public returns (uint cdp) {
         SaiTubLike tub = ScdMcdMigration(scdMcdMigration).tub();
         // Get necessary MKR fee and move it to the migration contract
         (uint val, bool ok) = tub.pep().peek();
@@ -116,7 +116,7 @@ contract MigrationProxyActions is DSMath {
         address otc,                        // Otc address
         uint maxPayAmt,                     // Max amount of SAI to generate to sell for govFee MKR needed
         uint minRatio                       // Min collateralization ratio after generating new debt (e.g. 180% = 1.8 RAY)
-    ) external returns (uint cdp) {
+    ) public returns (uint cdp) {
         SaiTubLike tub = ScdMcdMigration(scdMcdMigration).tub();
         // Get necessary MKR fee and move it to the migration contract
         (uint val, bool ok) = tub.pep().peek();
