@@ -8,8 +8,6 @@ import "../maker/Spotter.sol";
 import "../maker/Jug.sol";
 import "../maker/DaiJoin.sol";
 
-import "./MCDExchange.sol";
-import "./MCDTokenExchange.sol";
 import "./ExchangeHelper.sol";
 import "./SaverProxyHelper.sol";
 
@@ -25,8 +23,6 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
     address public constant ETH_JOIN_ADDRESS = 0x55cD2f4cF74eDc7c869BcF5e16086781eE97EE40;
     address public constant SPOTTER_ADDRESS = 0x932E82e999Fad1f7Ea9566f42cd3E94a4F46897E;
 
-    address public constant MCD_EXCHANGE_ADDRESS = 0x4835810E9910338E8713ceeD7a464f6FfDD4978A;
-
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
 
     address public constant SAI_ADDRESS = 0xC4375B7De8af5a38a93548eb8453a498222C4fF2;
@@ -36,13 +32,10 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
     bytes32 public constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
 
-    address payable public constant MCD_TOKEN_EXCHANGE = 0x1f116BC86C83D1562df05b037b0FecA4A59680AB;
-
     Manager public constant manager = Manager(MANAGER_ADDRESS);
     Vat public constant vat = Vat(VAT_ADDRESS);
     DaiJoin public constant daiJoin = DaiJoin(DAI_JOIN_ADDRESS);
     Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
-    MCDTokenExchange public constant tokenExchange = MCDTokenExchange(MCD_TOKEN_EXCHANGE);
 
     /// @notice Checks if the collateral amount is increased after boost
     /// @param _cdpId The Id of the CDP
@@ -92,16 +85,10 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
         address owner = getOwner(manager, _cdpId);
         bytes32 ilk = manager.ilks(_cdpId);
-        address collateralAddr = getCollateralAddr(_joinAddr);
 
         drawCollateral(_cdpId, ilk, _joinAddr, _amount);
 
-        tokenExchange.newToOld(collateralAddr, _amount);
-
-        // TESTING: SWITCH TO DAI_ADDRESS
-        uint daiAmount = swap(tokenExchange.getOld(collateralAddr), SAI_ADDRESS, _amount, _minPrice, _exchangeType);
-
-        MCDExchange(MCD_EXCHANGE_ADDRESS).saiToDai(daiAmount); // TESTING
+        uint daiAmount = swap(getCollateralAddr(_joinAddr), DAI_ADDRESS, _amount, _minPrice, _exchangeType);
 
         uint daiAfterFee = sub(daiAmount, getFee(daiAmount, _gasCost, owner));
 
@@ -125,24 +112,16 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         uint _minPrice,
         uint _exchangeType,
         uint _gasCost
-    ) external { //TESTING: return boost check
-
+    ) external boostCheck(_cdpId) {
         address owner = getOwner(manager, _cdpId);
 
         drawDai(_cdpId, manager.ilks(_cdpId), _daiAmount);
 
         uint daiAfterFee = sub(_daiAmount, getFee(_daiAmount, _gasCost, owner));
 
-        // TODO: remove only used for testing
-        MCDExchange(MCD_EXCHANGE_ADDRESS).daiToSai(daiAfterFee);
-        ERC20(DAI_ADDRESS).transfer(MCD_EXCHANGE_ADDRESS, ERC20(DAI_ADDRESS).balanceOf(address(this)));
+        uint collateralAmount = swap(DAI_ADDRESS, getCollateralAddr(_joinAddr), daiAfterFee, _minPrice, _exchangeType);
 
-        //TESTING: change to DAI address and tokenExchange
-        uint collateralAmount = swap(SAI_ADDRESS, tokenExchange.getOld(getCollateralAddr(_joinAddr)), daiAfterFee, _minPrice, _exchangeType);
-
-        tokenExchange.oldToNew(getCollateralAddr(_joinAddr), 10000000);
-
-        addCollateral(_cdpId, _joinAddr, 10000000);
+        addCollateral(_cdpId, _joinAddr, collateralAmount);
 
         SaverLogger(LOGGER_ADDRESS).LogBoost(_cdpId, owner, _daiAmount, collateralAmount);
     }

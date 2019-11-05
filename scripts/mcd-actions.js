@@ -15,7 +15,6 @@ const Spotter = require('../build/contracts/Spotter.json');
 const MCDSaverProxy = require('../build/contracts/MCDSaverProxy.json');
 const Faucet = require('../build/contracts/Faucet.json');
 const ERC20 = require('../build/contracts/ERC20.json');
-const OasisTrade = require('../build/contracts/OasisTradeWrapper.json');
 const ExchangeInterface = require('../build/contracts/SaverExchangeInterface.json');
 const MonitorMigrate = require('../build/contracts/MonitorMigrateProxy.json');
 
@@ -41,7 +40,7 @@ const monitorMigrateAddr = '0xe60cD00a5ec218E44F57D128129a6372BD4cF219';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
-const mcdSaverProxyAddr = '0x517063901EB05ED58D8F328D98104E4e29F62007';
+const mcdSaverProxyAddr = '0xe61a6a4c351fb519516fcdabdb2ce2ffbc854426';
 
 const ilkData = {
     '1' : {
@@ -188,7 +187,7 @@ const initContracts = async () => {
     // const cdp = await subscriptions.methods.getSubscribedInfo(usersCdps[0].cdpId).call();
     // console.log("cdp:", cdp);
 
-    // await boost(usersCdps[0].cdpId, '10');
+    await boost(usersCdps[3].cdpId, '1', 'BAT');
 
     // await repayFor(usersCdps[0].cdpId, web3.utils.toWei('0.1', 'ether'), getTokenJoinAddr('ETH'));
     // await boostFor(usersCdps[0].cdpId, web3.utils.toWei('0.4', 'ether'), getTokenJoinAddr('ETH'));
@@ -197,7 +196,7 @@ const initContracts = async () => {
     // console.log("ratio: ", cdpInfo.ratio);
     // console.log("cdp: ", cdpInfo);
 
-    // await openCdp('ETH', '2', '100');
+    // await openCdp('BAT', '1000', '10');
 
     // const cdpInfo2 = await getCdpInfo(usersCdps[1]);
     // console.log(cdpInfo2.ratio, cdpInfo2.collateral /  1e18, cdpInfo2.debtWithFee / 1e18);
@@ -404,15 +403,15 @@ const transfer = async (cdpId, receiversAddr) => {
 };
 
 
-const boost = async (cdpId, amount) => {
+const boost = async (cdpId, amount, type) => {
     try {
         const daiAmount = web3.utils.toWei(amount, 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'boost'),
-          [cdpId, getTokenJoinAddr('ETH'), daiAmount, 0, 2, 0]);
+          [cdpId, getTokenJoinAddr(type), daiAmount, 0, 4, 0]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
-            from: account.address, gas: 1200000});
+            from: account.address, gas: 1900000});
 
         // console.log(tx);
     } catch(err) {
@@ -420,16 +419,16 @@ const boost = async (cdpId, amount) => {
     }
 };
 
-const repay = async (cdpId, amount) => {
+const repay = async (cdpId, amount, type) => {
     try {
         console.log("Regular repay");
         const ethAmount = web3.utils.toWei(amount, 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'repay'),
-          [cdpId, getTokenJoinAddr('ETH'), ethAmount, 0, 4, 0]);
+          [cdpId, getTokenJoinAddr(type), ethAmount, 0, 4, 0]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
-            from: account.address, gas: 1200000});
+            from: account.address, gas: 1900000});
 
         // console.log(tx);
     } catch(err) {
