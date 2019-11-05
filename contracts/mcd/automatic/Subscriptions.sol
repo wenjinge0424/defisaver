@@ -161,12 +161,13 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
         return (true, subscriber.minRatio, subscriber.maxRatio, subscriber.optimalRatioRepay, subscriber.optimalRatioBoost, subscriber.owner);
     }
 
-    function getIlkInfo(bytes32 _ilk, uint _cdpId) public view returns(uint art, uint rate, uint spot, uint line, uint dust, uint mat, uint par) {
+    function getIlkInfo(bytes32 _ilk, uint _cdpId) public view returns(bytes32 ilk, uint art, uint rate, uint spot, uint line, uint dust, uint mat, uint par) {
         // send either ilk or cdpId
         if (_ilk == bytes32(0)) {
             _ilk = manager.ilks(_cdpId);
         }
 
+        ilk = _ilk;
         (,mat) = spotter.ilks(_ilk);
         par = spotter.par();
         (art, rate, spot, line, dust) = vat.ilks(_ilk);
