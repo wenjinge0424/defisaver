@@ -16,6 +16,7 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
         uint128 optimalRatioBoost;
         uint128 optimalRatioRepay;
         address owner;
+        uint cdpId;
     }
 
     struct SubPosition {
@@ -59,7 +60,8 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
                 maxRatio: _maxRatio,
                 optimalRatioBoost: _optimalBoost,
                 optimalRatioRepay: _optimalRepay,
-                owner: msg.sender
+                owner: msg.sender,
+                cdpId: _cdpId
             });
 
         changeIndex++;
@@ -152,13 +154,25 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
         }
     }
 
-    function getSubscribedInfo(uint _cdpId) public view returns(bool, uint128, uint128, uint128, uint128, address) {
+    function getSubscribedInfo(uint _cdpId) public view returns(bool, uint128, uint128, uint128, uint128, address, uint coll, uint debt) {
         SubPosition memory subInfo = subscribersPos[_cdpId];
 
-        if (!subInfo.subscribed) return (false, 0, 0, 0, 0, address(0));
+        if (!subInfo.subscribed) return (false, 0, 0, 0, 0, address(0), 0, 0);
+
+        (coll, debt) = saverProxy.getCdpInfo(manager, _cdpId, manager.ilks(_cdpId));
 
         CdpHolder memory subscriber = subscribers[subInfo.arrPos];
-        return (true, subscriber.minRatio, subscriber.maxRatio, subscriber.optimalRatioRepay, subscriber.optimalRatioBoost, subscriber.owner);
+
+        return (
+            true,
+            subscriber.minRatio,
+            subscriber.maxRatio,
+            subscriber.optimalRatioRepay,
+            subscriber.optimalRatioBoost,
+            subscriber.owner,
+            coll,
+            debt
+        );
     }
 
     function getIlkInfo(bytes32 _ilk, uint _cdpId) public view returns(bytes32 ilk, uint art, uint rate, uint spot, uint line, uint dust, uint mat, uint par) {

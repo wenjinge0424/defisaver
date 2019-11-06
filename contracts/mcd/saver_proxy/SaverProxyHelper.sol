@@ -69,7 +69,7 @@ contract SaverProxyHelper is DSMath {
     /// @param _manager Manager contract
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
-    function getCdpInfo(Manager _manager, uint _cdpId, bytes32 _ilk) internal view returns (uint, uint) {
+    function getCdpInfo(Manager _manager, uint _cdpId, bytes32 _ilk) public view returns (uint, uint) {
         address vat = _manager.vat();
         address urn = _manager.urns(_cdpId);
 

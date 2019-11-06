@@ -9,7 +9,7 @@ import "../../constants/ConstantAddresses.sol";
 contract MonitorMigrateProxy is MigrationProxyActions, ConstantAddresses {
 
     address payable public constant scdMcdMigration = 0x97cB5A9aBcdBE291D0CD85915fA5b08746Fe948A;
-    address public constant subscriptionsContract = 0x9f92E6B2fd0a8ab3b717BfFaa2C36f330e3ec5BE;
+    address public constant subscriptionsContract = 0x267a8E54a6510784A168A2B4cc177e34D4f670B8;
     address public constant monitorContract = 0x32ED63E1FD1D6D3E03A174088f6E1a32daD964FC;
 
     enum MigrationType { WITH_MKR, WITH_CONVERSION, WITH_DEBT }
@@ -36,7 +36,7 @@ contract MonitorMigrateProxy is MigrationProxyActions, ConstantAddresses {
         // Migrate
         if (_type == MigrationType.WITH_MKR) {
             newCdpId = migrate(scdMcdMigration, _cdpId);
-        } else if (_type == MigrationType.WITH_MKR) {
+        } else if (_type == MigrationType.WITH_CONVERSION) {
             newCdpId = migratePayFeeWithGem(scdMcdMigration, _cdpId, OTC_ADDRESS, MAKER_DAI_ADDRESS, uint(-1));
         } else if (_type == MigrationType.WITH_DEBT) {
              newCdpId = migratePayFeeWithDebt(scdMcdMigration, _cdpId, OTC_ADDRESS, uint(-1), _minRatio);

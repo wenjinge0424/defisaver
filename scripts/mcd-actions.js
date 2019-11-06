@@ -40,7 +40,7 @@ const monitorMigrateAddr = '0xe60cD00a5ec218E44F57D128129a6372BD4cF219';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
-const mcdSaverProxyAddr = '0xe61a6a4c351fb519516fcdabdb2ce2ffbc854426';
+const mcdSaverProxyAddr = '0x2B4a8FBEF9894442E206D3Cc005d9c2462a5321F';
 
 const ilkData = {
     '1' : {
