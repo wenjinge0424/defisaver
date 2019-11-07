@@ -1,4 +1,5 @@
 pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
 
 import "../maker/Manager.sol";
 import "./ISubscriptions.sol";
@@ -185,5 +186,9 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
         (,mat) = spotter.ilks(_ilk);
         par = spotter.par();
         (art, rate, spot, line, dust) = vat.ilks(_ilk);
+    }
+
+    function getSubscribers() public view returns (CdpHolder[] memory) {
+        return subscribers;
     }
 }

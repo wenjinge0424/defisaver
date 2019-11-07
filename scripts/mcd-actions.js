@@ -33,7 +33,7 @@ const jugAddr = '0x9404a7fd173f1aa716416f391accd28bd0d84406';
 const spotterAddr = '0x932e82e999fad1f7ea9566f42cd3e94a4f46897e';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
 const subscriptionsProxyAddr = '0x3DF33b19CB5099e2060E488c4B153F87b563891A';
-const subscriptionsAddr = '0xa62676b25ffdC8A813507F59C4e36b190AF83609';
+const subscriptionsAddr = '0x988977137a4B4B03F94D97A137D92ad2dd049c04';
 const mcdMonitorAddr = '0x657ABc9B678eCd71E332d33c44bD1285f2819D43';
 const mcdMonitorProxyAddr = '0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1';
 const monitorMigrateAddr = '0xe60cD00a5ec218E44F57D128129a6372BD4cF219';
@@ -174,7 +174,12 @@ const initContracts = async () => {
 
     // await getRatioFromContract(usersCdps[0].cdpId);
 
-    await addCollateral(usersCdps[0].cdpId, 'ETH', '0.01')
+    await subscribeCdp(usersCdps[0].cdpId,  web3.utils.toWei('1.9', 'ether'),
+        web3.utils.toWei('2.7', 'ether'),
+        web3.utils.toWei('2.2', 'ether'),
+        web3.utils.toWei('2.2', 'ether'));
+
+    // await addCollateral(usersCdps[0].cdpId, 'ETH', '0.01')
     // await migrateAndSubscribe('0x0000000000000000000000000000000000000000000000000000000000001560');
 
     // let minRatio = web3.utils.toWei('6.0', 'ether');
@@ -187,7 +192,7 @@ const initContracts = async () => {
     // const cdp = await subscriptions.methods.getSubscribedInfo(usersCdps[0].cdpId).call();
     // console.log("cdp:", cdp);
 
-    await boost(usersCdps[3].cdpId, '1', 'BAT');
+    // await boost(usersCdps[3].cdpId, '1', 'BAT');
 
     // await repayFor(usersCdps[0].cdpId, web3.utils.toWei('0.1', 'ether'), getTokenJoinAddr('ETH'));
     // await boostFor(usersCdps[0].cdpId, web3.utils.toWei('0.4', 'ether'), getTokenJoinAddr('ETH'));
