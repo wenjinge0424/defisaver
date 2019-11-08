@@ -32,15 +32,15 @@ const vatAddr = '0xb597803e4b5b2a43a92f3e1dcafea5425c873116';
 const jugAddr = '0x9404a7fd173f1aa716416f391accd28bd0d84406';
 const spotterAddr = '0x932e82e999fad1f7ea9566f42cd3e94a4f46897e';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
-const subscriptionsProxyAddr = '0x3DF33b19CB5099e2060E488c4B153F87b563891A';
-const subscriptionsAddr = '0x988977137a4B4B03F94D97A137D92ad2dd049c04';
-const mcdMonitorAddr = '0x657ABc9B678eCd71E332d33c44bD1285f2819D43';
+const subscriptionsProxyAddr = '0xE3d7D76af7006FD2FC2a772ceDf1E1B827D4652e';
+const subscriptionsAddr = '0x697edafc19f9aa4365E7C6283b0d6068F94EbF27';
+const mcdMonitorAddr = '0x8924F37B831866f8f1e02257A6663EDf43905722';
 const mcdMonitorProxyAddr = '0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1';
 const monitorMigrateAddr = '0xe60cD00a5ec218E44F57D128129a6372BD4cF219';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
-const mcdSaverProxyAddr = '0x2B4a8FBEF9894442E206D3Cc005d9c2462a5321F';
+const mcdSaverProxyAddr = '0x81c064c5564C466ad7ed999cd8A18814158DFDe5';
 
 const ilkData = {
     '1' : {
@@ -174,10 +174,10 @@ const initContracts = async () => {
 
     // await getRatioFromContract(usersCdps[0].cdpId);
 
-    await subscribeCdp(usersCdps[0].cdpId,  web3.utils.toWei('1.9', 'ether'),
-        web3.utils.toWei('2.7', 'ether'),
-        web3.utils.toWei('2.2', 'ether'),
-        web3.utils.toWei('2.2', 'ether'));
+    await subscribeCdp(usersCdps[0].cdpId,  web3.utils.toWei('6', 'ether'),
+        web3.utils.toWei('7.2', 'ether'),
+        web3.utils.toWei('7', 'ether'),
+        web3.utils.toWei('7', 'ether'));
 
     // await addCollateral(usersCdps[0].cdpId, 'ETH', '0.01')
     // await migrateAndSubscribe('0x0000000000000000000000000000000000000000000000000000000000001560');
