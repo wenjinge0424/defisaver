@@ -296,7 +296,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
     /// @notice Gets CDP info (collateral, debt, price, ilk)
     /// @param _cdpId Id of the CDP
-    function getCdpDetailedInfo(uint _cdpId) internal view returns (uint collateral, uint debt, uint price, bytes32 ilk) {
+    function getCdpDetailedInfo(uint _cdpId) public view returns (uint collateral, uint debt, uint price, bytes32 ilk) {
         address urn = manager.urns(_cdpId);
         ilk = manager.ilks(_cdpId);
 
