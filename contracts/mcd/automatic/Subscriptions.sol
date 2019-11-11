@@ -11,6 +11,9 @@ import "../maker/Spotter.sol";
 // TODO: better handle if user transfers CDP
 contract Subscriptions is ISubscriptions, ConstantAddresses {
 
+    bytes32 internal constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
+    bytes32 internal constant BAT_ILK = 0x4241542d41000000000000000000000000000000000000000000000000000000;
+
     struct CdpHolder {
         uint128 minRatio;
         uint128 maxRatio;
@@ -28,31 +31,32 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
     CdpHolder[] public subscribers;
     mapping (uint => SubPosition) public subscribersPos;
 
+    mapping (bytes32 => uint) public minLimits;
+
     address public owner;
     uint public changeIndex;
 
-    uint public minLimit;
-    Manager public manager;
+    Manager public manager = Manager(MANAGER_ADDRESS);
+    Vat public vat = Vat(VAT_ADDRESS);
+    Spotter public spotter = Spotter(SPOTTER_ADDRESS);
     MCDSaverProxy public saverProxy;
-    Vat public vat;
-    Spotter public spotter;
 
     event Subscribed(address indexed owner, uint cdpId);
     event Unsubscribed(address indexed owner, uint cdpId);
     event Updated(address indexed owner, uint cdpId);
 
     constructor(address _saverProxy) public {
-        minLimit = 1700000000000000000;
         owner = msg.sender;
-        manager = Manager(MANAGER_ADDRESS);
+
         saverProxy = MCDSaverProxy(_saverProxy);
-        vat = Vat(VAT_ADDRESS);
-        spotter = Spotter(SPOTTER_ADDRESS);
+
+        minLimits[ETH_ILK] = 1700000000000000000;
+        minLimits[BAT_ILK] = 1700000000000000000;
     }
 
     function subscribe(uint _cdpId, uint128 _minRatio, uint128 _maxRatio, uint128 _optimalBoost, uint128 _optimalRepay) external {
         require(isOwner(msg.sender, _cdpId), "Must be called by Cdp owner");
-        require(checkParams(_minRatio, _maxRatio), "Must be correct params");
+        require(checkParams(manager.ilks(_cdpId), _minRatio, _maxRatio), "Must be correct params");
 
         SubPosition storage subInfo = subscribersPos[_cdpId];
 
@@ -81,31 +85,18 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
         }
     }
 
-
     function unsubscribe(uint _cdpId) external {
         require(isOwner(msg.sender, _cdpId), "Must be called by Cdp owner");
-        require(subscribers.length > 0, "Must have subscribers in the list");
 
-        SubPosition storage subInfo = subscribersPos[_cdpId];
-
-        require(subInfo.subscribed, "Must first be subscribed");
-
-        subscribers[subInfo.arrPos] = subscribers[subscribers.length - 1];
-        delete subscribers[subscribers.length - 1];
-
-        changeIndex++;
-        subInfo.subscribed = true;
-
-        emit Unsubscribed(msg.sender, _cdpId);
+        _unsubscribe(_cdpId);
     }
 
     function isOwner(address _owner, uint _cdpId) internal view returns (bool) {
         return getOwner(_cdpId) == _owner;
     }
 
-    // TODO: should we implement the 5% difference limit?
-    function checkParams(uint128 _minRatio, uint128 _maxRatio) internal view returns (bool) {
-        if (_minRatio < minLimit) {
+    function checkParams(bytes32 _ilk, uint128 _minRatio, uint128 _maxRatio) internal view returns (bool) {
+        if (_minRatio < minLimits[_ilk]) {
             return false;
         }
 
@@ -136,6 +127,22 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
         } else if (_method == Method.Boost) {
             return currRatio > subscriber.maxRatio;
         }
+    }
+
+    function _unsubscribe(uint _cdpId) internal {
+        require(subscribers.length > 0, "Must have subscribers in the list");
+
+        SubPosition storage subInfo = subscribersPos[_cdpId];
+
+        require(subInfo.subscribed, "Must first be subscribed");
+
+        subscribers[subInfo.arrPos] = subscribers[subscribers.length - 1];
+        delete subscribers[subscribers.length - 1];
+
+        changeIndex++;
+        subInfo.subscribed = false;
+
+        emit Unsubscribed(msg.sender, _cdpId);
     }
 
     function getOwner(uint _cdpId) public view returns(address) {
@@ -190,5 +197,29 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
 
     function getSubscribers() public view returns (CdpHolder[] memory) {
         return subscribers;
+    }
+
+
+    ////////////// ADMIN METHODS ///////////////////
+
+    function changeMinRatios(bytes32 _ilk, uint _newRatio) public {
+        require(msg.sender == owner, "Must be owner");
+
+        minLimits[_ilk] = _newRatio;
+    }
+
+    function unsubscribeIfMoved(uint _cdpId) public {
+        require(msg.sender == owner, "Must be owner");
+
+        SubPosition storage subInfo = subscribersPos[_cdpId];
+
+        if (subInfo.subscribed) {
+
+
+            if (getOwner(_cdpId) != subscribers[subInfo.arrPos].owner) {
+
+            }
+        }
+
     }
 }
