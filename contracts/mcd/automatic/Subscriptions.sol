@@ -93,8 +93,8 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
         }
     }
 
-    /// @dev Called by the users DSProxy
-    /// @title Owner who subscribed cancels his subscription
+    /// @notice Called by the users DSProxy
+    /// @dev Owner who subscribed cancels his subscription
     function unsubscribe(uint _cdpId) external {
         require(isOwner(msg.sender, _cdpId), "Must be called by Cdp owner");
 

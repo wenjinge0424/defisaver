@@ -2,6 +2,7 @@ pragma solidity ^0.5.0;
 
 import "../../interfaces/DSProxyInterface.sol";
 
+/// @title Implements logic for calling MCDSaverProxy always from same contract
 contract MCDMonitorProxy {
 
     uint public CHANGE_PERIOD;
@@ -9,7 +10,6 @@ contract MCDMonitorProxy {
     address public owner;
     address public newMonitor;
     uint public changeRequestedTimestamp;
-    bool public MONITOR_SETTED_FIRST_TIME = false; // NOTICE: nepotrebno
 
     mapping(address => bool) public allowed;
 
@@ -26,24 +26,23 @@ contract MCDMonitorProxy {
 
     constructor(uint _changePeriod) public {
         owner = msg.sender;
-        CHANGE_PERIOD = _changePeriod days; // NOTICE: ovo nije dobra sintaksa ne znam sta si hteo ovde
+        CHANGE_PERIOD = _changePeriod * 1 days;
     }
 
     /// @notice Allowed users are able to set Monitor contract without any waiting period first time
     /// @param _monitor Address of Monitor contract
     function setMonitor(address _monitor) public onlyAllowed {
-        require(!MONITOR_SETTED_FIRST_TIME); // NOTICE: just check if monitor == address(0)
+        require(monitor == address(0));
         monitor = _monitor;
-        MONITOR_SETTED_FIRST_TIME = true;
     }
 
     /// @notice Only monitor contract is able to call execute on users proxy
     /// @param _owner Address of cdp owner (users DSProxy address)
     /// @param _saverProxy Address of MCDSaverProxy
     /// @param _data Data to send to MCDSaverProxy
-    function callExecute(address _owner, address _saverProxy, bytes memory data) public onlyMonitor {
+    function callExecute(address _owner, address _saverProxy, bytes memory _data) public onlyMonitor {
         // execute reverts if calling specific method fails
-        DSProxyInterface(_owner).execute(_saverProxy, data);
+        DSProxyInterface(_owner).execute(_saverProxy, _data);
     }
 
     /// @notice Allowed users are able to start procedure for changing monitor
@@ -61,7 +60,7 @@ contract MCDMonitorProxy {
     }
 
     /// @notice Anyone is able to confirm new monitor after CHANGE_PERIOD if process is started
-    function confirmNewMonitor() public { // NOTICE: nema razloga da moze bilo ko, samo otvara attack vector
+    function confirmNewMonitor() public onlyAllowed {
         require((changeRequestedTimestamp + CHANGE_PERIOD) < now);
         require(changeRequestedTimestamp != 0);
         require(newMonitor != address(0));

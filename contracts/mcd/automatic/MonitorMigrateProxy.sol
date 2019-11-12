@@ -6,6 +6,7 @@ import "./Subscriptions.sol";
 import "../../Monitor.sol";
 import "../../constants/ConstantAddresses.sol";
 
+/// @title Implements logic for migrating CDP to MCD cdp
 contract MonitorMigrateProxy is MigrationProxyActions, ConstantAddresses {
 
     address payable public constant scdMcdMigration = 0x97cB5A9aBcdBE291D0CD85915fA5b08746Fe948A;

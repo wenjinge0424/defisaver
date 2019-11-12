@@ -7,6 +7,7 @@ import "../../constants/ConstantAddresses.sol";
 import "../../interfaces/GasTokenInterface.sol";
 import "../../DS/DSMath.sol";
 
+/// @title Implements logic that allows bots to call Boost and Repay
 contract MCDMonitor is ConstantAddresses, DSMath, Static {
 
     uint constant public REPAY_GAS_TOKEN = 30;
