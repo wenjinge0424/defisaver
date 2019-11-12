@@ -13,7 +13,8 @@ module.exports = function(deployer, network, accounts) {
         let mcdSaverProxyAddress = '0x601D535253a2A221Fe9c67BbF8a621EC88B7Ba8E';
 
         // ------- first deploy this ----------
-        // await deployer.deploy(MCDMonitorProxy, {gas: maxGas, overwrite: deployAgain});
+        // let changePeriod = 15; // set to 0 for Kovan deployment
+        // await deployer.deploy(MCDMonitorProxy, changePeriod, {gas: maxGas, overwrite: deployAgain});
 
 
         // ------- deploy subscription, but change SubscriptionProxy.sol first ---------

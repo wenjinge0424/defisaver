@@ -14,8 +14,8 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
 
     uint constant public MAX_GAS_PRICE = 40000000000; // 40 gwei
 
-    uint constant public REPAY_GAS_COST = 1500000;
-    uint constant public BOOST_GAS_COST = 750000;
+    uint public REPAY_GAS_COST = 1800000;
+    uint public BOOST_GAS_COST = 1250000;
 
     MCDMonitorProxy public monitorProxyContract;
     ISubscriptions public subscriptionsContract;
@@ -23,7 +23,7 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
     address public owner;
     address public mcdSaverProxyAddress;
 
-    /// @dev This will be Bot addresses which will trigger the calls
+    /// @dev Addresses that are able to call methods for repay and boost
     mapping(address => bool) public approvedCallers;
 
     event CdpRepay(uint indexed cdpId, address indexed caller, uint _amount);
@@ -52,6 +52,7 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     /// @param _cdpId Id of the cdp
     /// @param _amount Amount of Eth to convert to Dai
+    /// @param _collateralJoin Address of collateral join for specific CDP
     function repayFor(uint _cdpId, uint _amount, address _collateralJoin) public onlyApproved {
         if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
             gasToken.free(BOOST_GAS_TOKEN);
@@ -63,6 +64,7 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
 
         monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("repay(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, 0, gasCost));
 
+        // doesn't allow user to repay too much
         require(subscriptionsContract.ratioGoodAfter(Method.Repay, _cdpId));
 
         emit CdpRepay(_cdpId, msg.sender, _amount);
@@ -72,6 +74,7 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     /// @param _cdpId Id of the cdp
     /// @param _amount Amount of Dai to convert to Eth
+    /// @param _collateralJoin Address of collateral join for specific CDP
     function boostFor(uint _cdpId, uint _amount, address _collateralJoin) public onlyApproved {
         if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
             gasToken.free(REPAY_GAS_TOKEN);
@@ -99,19 +102,35 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
 
 /******************* OWNER ONLY OPERATIONS ********************************/
 
-    /// @notice Adds a new bot address which can call repay/boost
+    /// @notice Allows owner to change gas cost for boost operation, but only up to 3 millions
+    /// @param _gasCost New gas cost for boost method
+    function changeBoostGasCost(uint _gasCost) public onlyOwner {
+        require(_gasCost < 3000000);
+
+        BOOST_GAS_COST = _gasCost;
+    }
+
+    /// @notice Allows owner to change gas cost for repay operation, but only up to 3 millions
+    /// @param _gasCost New gas cost for repay method
+    function changeRepayGasCost(uint _gasCost) public onlyOwner {
+        require(_gasCost < 3000000);
+
+        REPAY_GAS_COST = _gasCost;
+    }
+
+    /// @notice Adds a new bot address which will be able to call repay/boost
     /// @param _caller Bot address
     function addCaller(address _caller) public onlyOwner {
         approvedCallers[_caller] = true;
     }
 
-    /// @notice Removed a bot address so it can't call repay/boost
+    /// @notice Removes a bot address so it can't call repay/boost
     /// @param _caller Bot address
     function removeCaller(address _caller) public onlyOwner {
         approvedCallers[_caller] = false;
     }
 
-    /// @notice If any tokens gets stuck in the contract
+    /// @notice If any tokens gets stuck in the contract owner can withdraw it
     /// @param _tokenAddress Address of the ERC20 token
     /// @param _to Address of the receiver
     /// @param _amount The amount to be sent
@@ -119,7 +138,7 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
         ERC20(_tokenAddress).transfer(_to, _amount);
     }
 
-    /// @notice If any Eth gets stuck in the contract
+    /// @notice If any Eth gets stuck in the contract owner can withdraw it
     /// @param _to Address of the receiver
     /// @param _amount The amount to be sent
     function transferEth(address payable _to, uint _amount) public onlyOwner {
