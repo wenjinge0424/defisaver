@@ -136,7 +136,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
         uint maxAmount = getMaxDebt(_cdpId, _ilk);
 
-        if (_daiAmount > maxAmount) { // TOFIX: Should be >=, because if == it will fail
+        if (_daiAmount >= maxAmount) {
             _daiAmount = sub(maxAmount, 1);
         }
 
@@ -155,14 +155,16 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
     /// @param _joinAddr Address of the join contract for the CDP collateral
     /// @param _amount Amount of collateral to add
     function addCollateral(uint _cdpId, address _joinAddr, uint _amount) internal {
-        int convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount)); // TOFIX: no need for this if ETH_JOIN_ADDRESS, maybe put in else statement?
+        int convertAmount = 0;
 
         if (_joinAddr == ETH_JOIN_ADDRESS) {
             Join(_joinAddr).gem().deposit.value(_amount)();
             convertAmount = toPositiveInt(_amount);
+        } else {
+            convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
         }
 
-        Join(_joinAddr).gem().approve(_joinAddr, _amount); // TOFIX: is this needed for ETH_JOIN_ADDRESS ?
+        Join(_joinAddr).gem().approve(_joinAddr, _amount);
         Join(_joinAddr).join(address(this), _amount);
 
         vat.frob(
@@ -185,7 +187,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
     function drawCollateral(uint _cdpId, bytes32 _ilk, address _joinAddr, uint _amount) internal {
         uint maxCollateral = getMaxCollateral(_cdpId, _ilk);
 
-        if (_amount > maxCollateral) { // TOFIX: should be >=
+        if (_amount >= maxCollateral) {
             _amount = sub(maxCollateral, 1);
         }
 
@@ -227,7 +229,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         uint fee = SERVICE_FEE;
 
         if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_owner)) {
-            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_owner); // TOFIX: can we just return 0 if customFee is not set, no need for two calls
+            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_owner);
         }
 
         feeAmount = (fee == 0) ? 0 : (_amount / fee);
