@@ -14,10 +14,6 @@ import "../maker/ScdMcdMigration.sol";
 /// @title Implements logic for migrating CDP to MCD cdp
 contract PartialMigrationProxy is PayProxyActions, ConstantAddresses {
 
-    address payable public constant scdMcdMigration = 0x97cB5A9aBcdBE291D0CD85915fA5b08746Fe948A;
-    address public constant subscriptionsContract = 0x267a8E54a6510784A168A2B4cc177e34D4f670B8;
-    address public constant monitorContract = 0x32ED63E1FD1D6D3E03A174088f6E1a32daD964FC;
-
     enum MigrationType { WITH_MKR, WITH_CONVERSION, WITH_DEBT }
 
     constructor() public {}
@@ -41,11 +37,11 @@ contract PartialMigrationProxy is PayProxyActions, ConstantAddresses {
 
         // wipe old cup with SAI
         if (_type == MigrationType.WITH_MKR) {
-            pay(scdMcdMigration, _cup, _saiAmount);
+            pay(SCD_MCD_MIGRATION, _cup, _saiAmount);
         } else if (_type == MigrationType.WITH_CONVERSION) {
-            payFeeWithGem(scdMcdMigration, _cup, _saiAmount, OTC_ADDRESS, MAKER_DAI_ADDRESS);
+            payFeeWithGem(SCD_MCD_MIGRATION, _cup, _saiAmount, OTC_ADDRESS, MAKER_DAI_ADDRESS);
         } else if (_type == MigrationType.WITH_DEBT) {
-            payFeeWithDebt(scdMcdMigration, _cup, _saiAmount, OTC_ADDRESS, _minRatio);
+            payFeeWithDebt(SCD_MCD_MIGRATION, _cup, _saiAmount, OTC_ADDRESS, _minRatio);
         }
 
         tub.wipe(_cup, _saiAmount);
@@ -62,12 +58,12 @@ contract PartialMigrationProxy is PayProxyActions, ConstantAddresses {
 
         /// @dev Called by DSProxy
     function migrate(bytes32 _cdpId, TubInterface _tub) private returns(uint) {
-        Subscriptions sub = Subscriptions(subscriptionsContract);
-        Monitor monitor = Monitor(monitorContract);
+        Subscriptions sub = Subscriptions(SUBSCRIPTION_ADDRESS);
+        Monitor monitor = Monitor(MONITOR_ADDRESS);
         DSGuard guard = getDSGuard();
 
-        _tub.give(_cdpId, address(scdMcdMigration));
-        uint newCdpId = ScdMcdMigration(scdMcdMigration).migrate(_cdpId);
+        _tub.give(_cdpId, address(SCD_MCD_MIGRATION));
+        uint newCdpId = ScdMcdMigration(SCD_MCD_MIGRATION).migrate(_cdpId);
 
         // Authorize
         guard.forbid(address(monitor), address(this), bytes4(keccak256("execute(address,bytes)")));
