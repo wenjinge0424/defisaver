@@ -18,6 +18,7 @@ contract ConstantAddressesKovan {
     address public constant CDAI_ADDRESS = 0xb6b09fBffBa6A5C4631e5F7B2e3Ee183aC259c0d;
     address public constant STUPID_EXCHANGE = 0x863E41FE88288ebf3fcd91d8Dbb679fb83fdfE17;
     address public constant DISCOUNT_ADDRESS = 0x1297c1105FEDf45E0CF6C102934f32C4EB780929;
+    address public constant SAI_SAVER_PROXY = 0xADB7c74bCe932fC6C27ddA3Ac2344707d2fBb0E6;
 
     address public constant KYBER_WRAPPER = 0x0eED9d768BBed73A66201ab1441fa6a039e65228;
     address public constant UNISWAP_WRAPPER = 0xb07a1Cb9661957E6949362bce42BD6930f861673;
