@@ -1,6 +1,8 @@
 pragma solidity ^0.5.0;
 
 import "../../interfaces/ExchangeInterface.sol";
+import "../../constants/ConstantAddresses.sol";
+
 import "../../SaverLogger.sol";
 import "../../Discount.sol";
 
@@ -11,25 +13,11 @@ import "../maker/DaiJoin.sol";
 import "./ExchangeHelper.sol";
 import "./SaverProxyHelper.sol";
 
+
 /// @title Implements Boost and Repay for MCD CDPs
 contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
-    // KOVAN
-    address public constant VAT_ADDRESS = 0xb597803e4B5b2A43A92F3e1DCaFEA5425c873116;
-    address public constant MANAGER_ADDRESS = 0xb1fd1f2c83A6cb5155866169D81a9b7cF9e2019D;
-    address public constant JUG_ADDRESS = 0x9404A7Fd173f1AA716416f391ACCD28Bd0d84406;
-    address public constant DAI_JOIN_ADDRESS = 0x9E0d5a6a836a6C323Cf45Eb07Cb40CFc81664eec;
-    address public constant DAI_ADDRESS = 0x1D7e3a1A65a367db1D1D3F51A54aC01a2c4C92ff;
-    address public constant ETH_JOIN_ADDRESS = 0x55cD2f4cF74eDc7c869BcF5e16086781eE97EE40;
-    address public constant SPOTTER_ADDRESS = 0x932E82e999Fad1f7Ea9566f42cd3E94a4F46897E;
-
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
-
-    address public constant SAI_ADDRESS = 0xC4375B7De8af5a38a93548eb8453a498222C4fF2;
-    address public constant DISCOUNT_ADDRESS = 0x1297c1105FEDf45E0CF6C102934f32C4EB780929;
-    address payable public constant WALLET_ID = 0x54b44C6B18fc0b4A1010B21d524c338D1f8065F6;
-    address public constant LOGGER_ADDRESS = 0x32d0e18f988F952Eb3524aCE762042381a2c39E5;
-
     bytes32 public constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
 
     Manager public constant manager = Manager(MANAGER_ADDRESS);

@@ -24,23 +24,24 @@ const MCDMonitorProxy = require('../build/contracts/MCDMonitorProxy.json');
 const MCDMonitor = require('../build/contracts/MCDMonitor.json');
 
 const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
-const proxyActionsAddr = '0x19ee8a65a26f5e4e70b59fdcd8e1047920b57c13';
-const cdpManagerAddr = '0xb1fd1f2c83a6cb5155866169d81a9b7cf9e2019d';
-const daiJoinAddr = '0x9e0d5a6a836a6c323cf45eb07cb40cfc81664eec';
-const getCdpsAddr = '0x05e0690128dcef6e16126e5a4f8f4a226797567d';
-const vatAddr = '0xb597803e4b5b2a43a92f3e1dcafea5425c873116';
-const jugAddr = '0x9404a7fd173f1aa716416f391accd28bd0d84406';
-const spotterAddr = '0x932e82e999fad1f7ea9566f42cd3e94a4f46897e';
+const proxyActionsAddr = '0x3b411dbf49ad4768fe581be2cb3d14bf513116ad';
+const cdpManagerAddr = '0x1476483dd8c35f25e568113c5f70249d3976ba21';
+const daiJoinAddr = '0x5aa71a3ae1c0bd6ac27a1f28e1415fffb6f15b8c';
+const getCdpsAddr = '0x592301a23d37c591c5856f28726af820af8e7014';
+const vatAddr = '0xba987bdb501d131f766fee8180da5d81b34b69d9';
+const jugAddr = '0xcbb7718c9f39d05aeede1c472ca8bf804b2f1ead';
+const spotterAddr = '0x3a042de6413edb15f2784f2f97cc68c7e9750b2d';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
-const subscriptionsProxyAddr = '0xE3d7D76af7006FD2FC2a772ceDf1E1B827D4652e';
-const subscriptionsAddr = '0x697edafc19f9aa4365E7C6283b0d6068F94EbF27';
-const mcdMonitorAddr = '0x8924F37B831866f8f1e02257A6663EDf43905722';
-const mcdMonitorProxyAddr = '0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1';
-const monitorMigrateAddr = '0xe60cD00a5ec218E44F57D128129a6372BD4cF219';
+
+const subscriptionsProxyAddr = '0x554a70Bb3c54Befe00e8bc65C4C79361e48928c8';
+const subscriptionsAddr = '0x6Ea8714B553fceb8da6c33598aC0f732b0dD7FF1';
+const mcdMonitorAddr = '0x5BeB17EB01e4ecEeaf2616c2d675c58C52A1139a';
+const mcdMonitorProxyAddr = '0xAc343cda73DCaE6b57f29836267a448A8e7E8249';
+const monitorMigrateAddr = '0x025B7ddCBd2Dfc41719f48f04E8Be86BBEb9358C';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
-const mcdSaverProxyAddr = '0x81c064c5564C466ad7ed999cd8A18814158DFDe5';
+const mcdSaverProxyAddr = '0x9DaEa3a746E19A40f61624f82B39C9435604ded1';
 
 const ilkData = {
     '1' : {
