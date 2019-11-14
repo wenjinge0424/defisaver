@@ -17,6 +17,7 @@ const Faucet = require('../build/contracts/Faucet.json');
 const ERC20 = require('../build/contracts/ERC20.json');
 const ExchangeInterface = require('../build/contracts/SaverExchangeInterface.json');
 const MonitorMigrate = require('../build/contracts/MonitorMigrateProxy.json');
+const PartialMigrate = require('../build/contracts/PartialMigrationProxy.json');
 
 const SubscriptionsProxy = require('../build/contracts/SubscriptionsProxy.json');
 const Subscriptions = require('../build/contracts/Subscriptions.json');
@@ -37,7 +38,8 @@ const subscriptionsProxyAddr = '0x554a70Bb3c54Befe00e8bc65C4C79361e48928c8';
 const subscriptionsAddr = '0x6Ea8714B553fceb8da6c33598aC0f732b0dD7FF1';
 const mcdMonitorAddr = '0x5BeB17EB01e4ecEeaf2616c2d675c58C52A1139a';
 const mcdMonitorProxyAddr = '0xAc343cda73DCaE6b57f29836267a448A8e7E8249';
-const monitorMigrateAddr = '0x025B7ddCBd2Dfc41719f48f04E8Be86BBEb9358C';
+const monitorMigrateAddr = '0xE6BB141B9F850ed240459b843D7c071570C62832';
+const partialMigrateAddr = '0xecf5d04E25101a66b2337f07CeCCeB78555AC798';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
@@ -138,7 +140,8 @@ let web3,
     mcdMonitorProxy,
     subscriptions,
     subscriptionsProxy,
-    monitorMigrate;
+    monitorMigrate,
+    partialMigrate;
 
 const initContracts = async () => {
     web3 = new Web3(new Web3.providers.HttpProvider(process.env.KOVAN_INFURA_ENDPOINT));
@@ -165,15 +168,25 @@ const initContracts = async () => {
     subscriptionsProxy = new web3.eth.Contract(SubscriptionsProxy.abi, subscriptionsProxyAddr);
     subscriptions = new web3.eth.Contract(Subscriptions.abi, subscriptionsAddr);
     monitorMigrate = new web3.eth.Contract(MonitorMigrate.abi, monitorMigrateAddr);
+    partialMigrate = new web3.eth.Contract(PartialMigrate.abi, partialMigrateAddr);
 };
 
 (async () => {
     await initContracts();
 
-    await getAvailableDaiForMigration();
+    // await getAvailableDaiForMigration();
 
     // const usersCdps = await getCDPsForAddress(proxyAddr);
     // console.log(usersCdps);
+
+
+    let oldCdpId = '0x0000000000000000000000000000000000000000000000000000000000001abb';
+    let ethAmount = '510000000000000000';
+    let saiAmount = '57800000000000000000';
+    let minRatio = 0;
+    let migrationType = 0;
+    let currentVault = 54;
+    await migratePart(oldCdpId, ethAmount, saiAmount, minRatio, migrationType, currentVault);
 
     // await getRatioFromContract(usersCdps[0].cdpId);
 
@@ -479,6 +492,21 @@ const migrateAndSubscribe = async (oldCdpId) => {
           [oldCdpId]);
 
         const tx = await proxy.methods['execute(address,bytes)'](monitorMigrateAddr, data).send({
+            from: account.address, gas: 2200000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+const migratePart = async (oldCdpId, ethAmount, saiAmount, minRatio, migrationType, currentVault) => {
+    try {
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(PartialMigrate, 'migratePart'),
+          [oldCdpId, ethAmount, saiAmount, minRatio, migrationType, currentVault]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](partialMigrateAddr, data).send({
             from: account.address, gas: 2200000});
 
         console.log(tx);
