@@ -8,5 +8,5 @@ contract Jug {
 
     mapping (bytes32 => Ilk) public ilks;
 
-    function drip(bytes32) public;
+    function drip(bytes32) public returns (uint);
 }
