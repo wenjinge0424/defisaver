@@ -3,12 +3,11 @@ pragma solidity ^0.5.0;
 import "../../interfaces/ExchangeInterface.sol";
 import "../../interfaces/SaverExchangeInterface.sol";
 
-/// @title Helper methods for integration with SaverExchange
-contract ExchangeHelper {
+import "../../constants/ConstantAddresses.sol";
 
-    address public constant WETH_ADDRESS = 0xd0A1E359811322d97991E03f863a0C30C2cF029C;
-    address public constant SAVER_EXCHANGE_ADDRESS = 0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C;
-    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
+/// @title Helper methods for integration with SaverExchange
+contract ExchangeHelper is ConstantAddresses {
 
     /// @notice Swaps 2 tokens on the Saver Exchange
     /// @dev ETH is sent with Weth address

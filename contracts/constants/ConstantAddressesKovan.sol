@@ -26,6 +26,9 @@ contract ConstantAddressesKovan {
     address public constant ETH2DAI_WRAPPER = 0x823cde416973a19f98Bb9C96d97F4FE6C9A7238B;
     address public constant OASIS_WRAPPER = 0x6Ab7e1d38B16731cdd0540d2494FeE6d000D451C;
 
+    address public constant SAVER_EXCHANGE_ADDRESS = 0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C;
+
+
     address public constant FACTORY_ADDRESS = 0xc72E74E474682680a414b506699bBcA44ab9a930;
     //
     address public constant PIP_INTERFACE_ADDRESS = 0xA944bd4b25C9F186A846fd5668941AA3d3B8425F;
@@ -38,9 +41,15 @@ contract ConstantAddressesKovan {
     // Rinkeby, when no Kovan
     address public constant UNISWAP_FACTORY = 0xf5D915570BC477f9B8D6C0E980aA81757A3AaC36;
 
-
     // new MCD contracts
-    address public constant MANAGER_ADDRESS = 0xb1fd1f2c83A6cb5155866169D81a9b7cF9e2019D;
-    address public constant VAT_ADDRESS = 0xb597803e4B5b2A43A92F3e1DCaFEA5425c873116;
-    address public constant SPOTTER_ADDRESS = 0x932E82e999Fad1f7Ea9566f42cd3E94a4F46897E;
+    address public constant MANAGER_ADDRESS = 0x1476483dD8C35F25e568113C5f70249D3976ba21;
+    address public constant VAT_ADDRESS = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
+    address public constant SPOTTER_ADDRESS = 0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D;
+
+    address public constant JUG_ADDRESS = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
+    address public constant DAI_JOIN_ADDRESS = 0x5AA71a3ae1C0bd6ac27A1f28e1415fFFB6F15B8c;
+    address public constant ETH_JOIN_ADDRESS = 0x775787933e92b709f2a3C70aa87999696e74A9F8;
+
+    address public constant SAI_ADDRESS = 0xC4375B7De8af5a38a93548eb8453a498222C4fF2;
+    address public constant DAI_ADDRESS = 0x1D7e3a1A65a367db1D1D3F51A54aC01a2c4C92ff;
 }

@@ -8,7 +8,7 @@ import "../../constants/ConstantAddresses.sol";
 /// @title SubscriptionsProxy handles authorization and interaction with the Subscriptions contract
 contract SubscriptionsProxy is ConstantAddresses {
 
-    address public constant MONITOR_PROXY_ADDRESS = 0xB77bCacE6Fa6415F40798F9960d395135F4b3cc1;
+    address public constant MONITOR_PROXY_ADDRESS = 0xAc343cda73DCaE6b57f29836267a448A8e7E8249;
 
     function subscribe(uint _cdpId, uint128 _minRatio, uint128 _maxRatio, uint128 _optimalRatioBoost, uint128 _optimalRatioRepay, address _subscriptions) public {
         DSGuard guard = DSGuardFactory(FACTORY_ADDRESS).newGuard();
@@ -24,7 +24,9 @@ contract SubscriptionsProxy is ConstantAddresses {
     }
 
     function unsubscribe(uint _cdpId, address _subscriptions) public {
-        //TODO: remove permission
         Subscriptions(_subscriptions).unsubscribe(_cdpId);
+
+        DSGuard guard = DSGuard(address(DSAuth(address(this)).authority));
+        guard.forbid(MONITOR_PROXY_ADDRESS, address(this), bytes4(keccak256("execute(address,bytes)")));
     }
 }
