@@ -179,7 +179,9 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
             _amount = sub(maxCollateral, 1);
         }
 
-        manager.frob(_cdpId, address(this), -toPositiveInt(_amount), 0);
+        manager.frob(_cdpId, -toPositiveInt(_amount), 0);
+        manager.flux(_cdpId, address(this), _amount);
+
         Join(_joinAddr).exit(address(this), _amount);
 
         if (_joinAddr == ETH_JOIN_ADDRESS) {

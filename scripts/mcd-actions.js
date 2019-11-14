@@ -170,15 +170,17 @@ const initContracts = async () => {
 (async () => {
     await initContracts();
 
-    const usersCdps = await getCDPsForAddress(proxyAddr);
-    console.log(usersCdps);
+    await getAvailableDaiForMigration();
+
+    // const usersCdps = await getCDPsForAddress(proxyAddr);
+    // console.log(usersCdps);
 
     // await getRatioFromContract(usersCdps[0].cdpId);
 
-    await subscribeCdp(usersCdps[0].cdpId,  web3.utils.toWei('6', 'ether'),
-        web3.utils.toWei('7.2', 'ether'),
-        web3.utils.toWei('7', 'ether'),
-        web3.utils.toWei('7', 'ether'));
+    // await subscribeCdp(usersCdps[0].cdpId,  web3.utils.toWei('6', 'ether'),
+    //     web3.utils.toWei('7.2', 'ether'),
+    //     web3.utils.toWei('7', 'ether'),
+    //     web3.utils.toWei('7', 'ether'));
 
     // await addCollateral(usersCdps[0].cdpId, 'ETH', '0.01')
     // await migrateAndSubscribe('0x0000000000000000000000000000000000000000000000000000000000001560');
@@ -483,6 +485,18 @@ const migrateAndSubscribe = async (oldCdpId) => {
     } catch(err) {
         console.log(err);
     }
+};
+
+// if CDP debt is < 20 SAI migration fails
+const getAvailableDaiForMigration = async () => {
+    const saiIlk = '0x5341490000000000000000000000000000000000000000000000000000000000';
+
+    //TODO: based on which network you're on should change
+    const scdMcdMigrationAddr = '0x411b2faa662c8e3e5cf8f01dfdae0aee482ca7b0';
+
+    const specialCDP = await vat.methods.urns(saiIlk, scdMcdMigrationAddr).call();
+
+    return Dec(specialCDP.ink).sub(1000);
 };
 
 

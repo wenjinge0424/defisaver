@@ -49,5 +49,5 @@ contract ConstantAddressesKovan {
     address public constant ETH_JOIN_ADDRESS = 0x775787933e92b709f2a3C70aa87999696e74A9F8;
 
     address public constant SAI_ADDRESS = 0xC4375B7De8af5a38a93548eb8453a498222C4fF2;
-    address public constant DAI_ADDRESS = 0x1D7e3a1A65a367db1D1D3F51A54aC01a2c4C92ff;
+    address public constant DAI_ADDRESS = 0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa;
 }
