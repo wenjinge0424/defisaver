@@ -53,8 +53,9 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     /// @param _cdpId Id of the cdp
     /// @param _amount Amount of Eth to convert to Dai
+    /// @param _exchangeType Which exchange to use, 0 is to select best one
     /// @param _collateralJoin Address of collateral join for specific CDP
-    function repayFor(uint _cdpId, uint _amount, address _collateralJoin) public onlyApproved {
+    function repayFor(uint _cdpId, uint _amount, address _collateralJoin, uint _exchangeType) public onlyApproved {
         if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
             gasToken.free(BOOST_GAS_TOKEN);
         }
@@ -63,7 +64,7 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
 
         uint gasCost = calcGasCost(REPAY_GAS_COST);
 
-        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("repay(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, 0, gasCost));
+        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("repay(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, _exchangeType, gasCost));
 
         // doesn't allow user to repay too much
         require(subscriptionsContract.ratioGoodAfter(Method.Repay, _cdpId));
@@ -75,8 +76,9 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     /// @param _cdpId Id of the cdp
     /// @param _amount Amount of Dai to convert to Eth
+    /// @param _exchangeType Which exchange to use, 0 is to select best one
     /// @param _collateralJoin Address of collateral join for specific CDP
-    function boostFor(uint _cdpId, uint _amount, address _collateralJoin) public onlyApproved {
+    function boostFor(uint _cdpId, uint _amount, address _collateralJoin, uint _exchangeType) public onlyApproved {
         if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
             gasToken.free(REPAY_GAS_TOKEN);
         }
@@ -85,7 +87,7 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
 
         uint gasCost = calcGasCost(BOOST_GAS_COST);
 
-        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("boost(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, 0, gasCost));
+        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("boost(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, _exchangeType, gasCost));
 
         require(subscriptionsContract.ratioGoodAfter(Method.Boost, _cdpId));
 
