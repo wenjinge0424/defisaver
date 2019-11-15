@@ -9,17 +9,13 @@ import "../../constants/ConstantAddresses.sol";
 /// @title Implements logic for migrating CDP to MCD cdp
 contract MonitorMigrateProxy is MigrationProxyActions, ConstantAddresses {
 
-    address payable public constant scdMcdMigration = 0x97cB5A9aBcdBE291D0CD85915fA5b08746Fe948A;
-    address public constant subscriptionsContract = 0x267a8E54a6510784A168A2B4cc177e34D4f670B8;
-    address public constant monitorContract = 0x32ED63E1FD1D6D3E03A174088f6E1a32daD964FC;
-
     enum MigrationType { WITH_MKR, WITH_CONVERSION, WITH_DEBT }
 
     /// @dev Called by DSProxy
     function migrateAndSubscribe(bytes32 _cdpId, uint _minRatio, MigrationType _type) external {
 
-        Subscriptions sub = Subscriptions(subscriptionsContract);
-        Monitor monitor = Monitor(monitorContract);
+        Subscriptions sub = Subscriptions(SUBSCRIPTION_ADDRESS);
+        Monitor monitor = Monitor(MONITOR_ADDRESS);
         DSGuard guard = getDSGuard();
 
         // Get and cancel old subscription
@@ -36,11 +32,11 @@ contract MonitorMigrateProxy is MigrationProxyActions, ConstantAddresses {
 
         // Migrate
         if (_type == MigrationType.WITH_MKR) {
-            newCdpId = migrate(scdMcdMigration, _cdpId);
+            newCdpId = migrate(SCD_MCD_MIGRATION, _cdpId);
         } else if (_type == MigrationType.WITH_CONVERSION) {
-            newCdpId = migratePayFeeWithGem(scdMcdMigration, _cdpId, OTC_ADDRESS, MAKER_DAI_ADDRESS, uint(-1));
+            newCdpId = migratePayFeeWithGem(SCD_MCD_MIGRATION, _cdpId, OTC_ADDRESS, MAKER_DAI_ADDRESS, uint(-1));
         } else if (_type == MigrationType.WITH_DEBT) {
-             newCdpId = migratePayFeeWithDebt(scdMcdMigration, _cdpId, OTC_ADDRESS, uint(-1), _minRatio);
+             newCdpId = migratePayFeeWithDebt(SCD_MCD_MIGRATION, _cdpId, OTC_ADDRESS, uint(-1), _minRatio);
         }
 
         // Authorize
