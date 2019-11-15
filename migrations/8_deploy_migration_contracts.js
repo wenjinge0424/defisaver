@@ -8,6 +8,8 @@ module.exports = function(deployer, network, accounts) {
     const maxGas = 6720000;
 
     deployer.then(async () => {
+        // before deploying first add SUBSCRIPTION and MONITOR address in Constant Addresses
+
         await deployer.deploy(PartialMigration, {gas: maxGas, overwrite: deployAgain});
         await deployer.deploy(MonitorMigrate, {gas: maxGas, overwrite: deployAgain});
     });

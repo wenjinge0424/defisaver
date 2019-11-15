@@ -1,12 +1,11 @@
 pragma solidity ^0.5.0;
 
 import "../../DS/DSGuard.sol";
+import "../../DS/DSProxy.sol";
 import "../migration/PayProxyActions.sol";
-import "./Subscriptions.sol";
 import "../../Monitor.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../maker/Manager.sol";
-import "../../interfaces/SaiProxyInterface.sol";
 import "../../interfaces/ERC20.sol";
 import "../../interfaces/TubInterface.sol";
 import "../maker/ScdMcdMigration.sol";
@@ -16,11 +15,8 @@ contract PartialMigrationProxy is PayProxyActions, ConstantAddresses {
 
     enum MigrationType { WITH_MKR, WITH_CONVERSION, WITH_DEBT }
 
-    constructor() public {}
-
     function migratePart(bytes32 _cup, uint _ethAmount, uint _saiAmount, uint _minRatio, MigrationType _type, uint _currentVault) external {
         TubInterface tub = TubInterface(TUB_ADDRESS);
-        SaiProxyInterface saiProxy = SaiProxyInterface(SAI_SAVER_PROXY);
         Manager manager = Manager(MANAGER_ADDRESS);
 
         // withdraw ETH
@@ -58,15 +54,13 @@ contract PartialMigrationProxy is PayProxyActions, ConstantAddresses {
 
         /// @dev Called by DSProxy
     function migrate(bytes32 _cdpId, TubInterface _tub) private returns(uint) {
-        Subscriptions sub = Subscriptions(SUBSCRIPTION_ADDRESS);
-        Monitor monitor = Monitor(MONITOR_ADDRESS);
         DSGuard guard = getDSGuard();
 
         _tub.give(_cdpId, address(SCD_MCD_MIGRATION));
         uint newCdpId = ScdMcdMigration(SCD_MCD_MIGRATION).migrate(_cdpId);
 
         // Authorize
-        guard.forbid(address(monitor), address(this), bytes4(keccak256("execute(address,bytes)")));
+        guard.forbid(MONITOR_ADDRESS, address(this), bytes4(keccak256("execute(address,bytes)")));
 
         return newCdpId;
     }

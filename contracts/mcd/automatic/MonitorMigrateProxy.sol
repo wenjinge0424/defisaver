@@ -1,10 +1,14 @@
 pragma solidity ^0.5.0;
 
 import "../../DS/DSGuard.sol";
+import "../../DS/DSProxy.sol";
 import "../migration/MigrationProxyActions.sol";
-import "./Subscriptions.sol";
 import "../../Monitor.sol";
 import "../../constants/ConstantAddresses.sol";
+
+contract Subscriptions {
+    function subscribe(uint _cdpId, uint128 _minRatio, uint128 _maxRatio, uint128 _optimalBoost, uint128 _optimalRepay) external {}
+}
 
 /// @title Implements logic for migrating CDP to MCD cdp
 contract MonitorMigrateProxy is MigrationProxyActions, ConstantAddresses {

@@ -53,6 +53,8 @@ contract ConstantAddressesKovan {
     address public constant DAI_ADDRESS = 0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa;
 
     address payable public constant SCD_MCD_MIGRATION = 0x411B2Faa662C8e3E5cF8f01dFdae0aeE482ca7b0;
-    address public constant SUBSCRIPTION_ADDRESS = 0x6Ea8714B553fceb8da6c33598aC0f732b0dD7FF1;
-    address public constant MONITOR_ADDRESS = 0x025B7ddCBd2Dfc41719f48f04E8Be86BBEb9358C;
+
+    // Our contracts
+    address public constant SUBSCRIPTION_ADDRESS = 0x17d3d3EE7201cF9057BfA0cc8E759f299e020cF1;
+    address public constant MONITOR_ADDRESS = 0xD6bB6867c3f1f599d991398dd6645E44d0E2440E;
 }

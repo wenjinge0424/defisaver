@@ -38,8 +38,8 @@ const subscriptionsProxyAddr = '0xB78347c9D86f54Eb61424bd8250D4936bb5Fd295';
 const subscriptionsAddr = '0x17d3d3EE7201cF9057BfA0cc8E759f299e020cF1';
 const mcdMonitorAddr = '0xD6bB6867c3f1f599d991398dd6645E44d0E2440E';
 const mcdMonitorProxyAddr = '0x791ED1A311446da4E801b14F5B4d2a7Bbc4a86c9';
-const monitorMigrateAddr = '0xE6BB141B9F850ed240459b843D7c071570C62832';
-const partialMigrateAddr = '0xecf5d04E25101a66b2337f07CeCCeB78555AC798';
+const monitorMigrateAddr = '0xA6db1E423ba7b7e1438Fe46dd52e2FD505F450Ce';
+const partialMigrateAddr = '0x0D605358Ae375726F660D03cCaA661847b7D6B17';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
