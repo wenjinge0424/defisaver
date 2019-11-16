@@ -10,7 +10,7 @@ module.exports = function(deployer, network, accounts) {
     const maxGas = 6720000;
 
     deployer.then(async () => {
-        let mcdSaverProxyAddress = '0x9DaEa3a746E19A40f61624f82B39C9435604ded1';
+        let mcdSaverProxyAddress = '0x6A23B50E2bDaB4dE70452085fCBC08A9429ab34D';
 
         // ------- first deploy this ----------
         // let changePeriod = 15; // set to 0 for Kovan deployment
