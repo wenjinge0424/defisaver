@@ -12,7 +12,7 @@ contract Subscriptions {
 /// @title SubscriptionsProxy handles authorization and interaction with the Subscriptions contract
 contract SubscriptionsProxy is ConstantAddresses {
 
-    address public constant MONITOR_PROXY_ADDRESS = 0x791ED1A311446da4E801b14F5B4d2a7Bbc4a86c9;
+    address public constant MONITOR_PROXY_ADDRESS = 0xE7F2f21a65ad615329cA1328aBCe421D608d4a60;
 
     function subscribe(uint _cdpId, uint128 _minRatio, uint128 _maxRatio, uint128 _optimalRatioBoost, uint128 _optimalRatioRepay, address _subscriptions) public {
         DSGuard guard = DSGuardFactory(FACTORY_ADDRESS).newGuard();

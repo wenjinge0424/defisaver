@@ -55,6 +55,6 @@ contract ConstantAddressesKovan {
     address payable public constant SCD_MCD_MIGRATION = 0x411B2Faa662C8e3E5cF8f01dFdae0aeE482ca7b0;
 
     // Our contracts
-    address public constant SUBSCRIPTION_ADDRESS = 0x17d3d3EE7201cF9057BfA0cc8E759f299e020cF1;
-    address public constant MONITOR_ADDRESS = 0xD6bB6867c3f1f599d991398dd6645E44d0E2440E;
+    address public constant SUBSCRIPTION_ADDRESS = 0x07315C7021A989432F6e7647c17B8905aC215127;
+    address public constant MONITOR_ADDRESS = 0x88a38275E99d9b666a598Ac14982c18Ce3805be2;
 }
