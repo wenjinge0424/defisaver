@@ -269,21 +269,6 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         return sub(wdiv(wmul(collateral, price), mat), debt);
     }
 
-    function testDaiMax(uint _cdpId, bytes32 _ilk) public view returns (uint, uint, uint) {
-        address urn = manager.urns(_cdpId);
-        (,uint rate, uint spot,,) = vat.ilks(_ilk);
-
-        (uint ink, uint art) = Vat(vat).urns(_ilk, urn);
-
-        uint debtWithFee = mul(rate, art);
-
-        uint daiWithdrawn = sub(mul(ink, spot), debtWithFee);
-
-        uint newDebt = mul(add(daiWithdrawn, mul(art, RAY)), rate);
-
-        return (newDebt, mul(ink, spot), rate);
-    }
-
     /// @notice Gets a price of the asset
     /// @param _ilk Ilk of the CDP
     function getPrice(bytes32 _ilk) public view returns (uint) {

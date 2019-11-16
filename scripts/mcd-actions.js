@@ -208,7 +208,7 @@ const initContracts = async () => {
     // const cdp = await subscriptions.methods.getSubscribedInfo(usersCdps[0].cdpId).call();
     // console.log("cdp:", cdp);
 
-    const res = await mcdSaverProxy.methods.getOwner(cdpManagerAddr,usersCdps[1].cdpId).call();
+    const res = await mcdSaverProxy.methods.getMaxCollateral(usersCdps[0].cdpId, getIlk('ETH')).call();
 
     console.log(res);
 
