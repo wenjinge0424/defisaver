@@ -43,7 +43,7 @@ const partialMigrateAddr = '0x0D605358Ae375726F660D03cCaA661847b7D6B17';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
-const mcdSaverProxyAddr = '0x2313654ACB5132B8270207551D05F4abC834D83f';
+const mcdSaverProxyAddr = '0x25d0317Fa944b93bcaFEFB6628F5705a6FF99b08';
 
 const ilkData = {
     '1' : {
@@ -208,11 +208,11 @@ const initContracts = async () => {
     // const cdp = await subscriptions.methods.getSubscribedInfo(usersCdps[0].cdpId).call();
     // console.log("cdp:", cdp);
 
-    // const res = await mcdSaverProxy.methods.getMaxDebt(usersCdps[1].cdpId, getIlk('ETH')).call();
+    const res = await mcdSaverProxy.methods.getOwner(cdpManagerAddr,usersCdps[1].cdpId).call();
 
-    // console.log(res);
+    console.log(res);
 
-    await repay(usersCdps[1].cdpId, '0.001', 'ETH');
+   // await repay(usersCdps[1].cdpId, '3', 'ETH');
 
     // await repayFor(usersCdps[0].cdpId, web3.utils.toWei('0.1', 'ether'), getTokenJoinAddr('ETH'));
     // await boostFor(usersCdps[0].cdpId, web3.utils.toWei('0.4', 'ether'), getTokenJoinAddr('ETH'));

@@ -94,6 +94,8 @@ contract SaverProxyHelper is DSMath {
     /// @param _manager Manager contract
     /// @param _cdpId Id of the CDP
     function getOwner(Manager _manager, uint _cdpId) public view returns (address) {
-        return address(DSProxy(uint160(_manager.owns(_cdpId))).owner);
+        DSProxy proxy = DSProxy(uint160(_manager.owns(_cdpId)));
+
+        return proxy.owner();
     }
 }
