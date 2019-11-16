@@ -43,7 +43,7 @@ const partialMigrateAddr = '0xecf5d04E25101a66b2337f07CeCCeB78555AC798';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
-const mcdSaverProxyAddr = '0x9DaEa3a746E19A40f61624f82B39C9435604ded1';
+const mcdSaverProxyAddr = '0x2313654ACB5132B8270207551D05F4abC834D83f';
 
 const ilkData = {
     '1' : {
@@ -68,8 +68,8 @@ const ilkData = {
 
 const tokenJoinAddrData = {
     '1': {
-        'ETH': '0x55cd2f4cf74edc7c869bcf5e16086781ee97ee40',
-        'BAT': '0xe56b354524115f101798d243e05fd891f7d92e99',
+        'ETH': '0x775787933e92b709f2a3c70aa87999696e74a9f8',
+        'BAT': '0x2a4c485b1b8dfb46accfbecaf75b6188a59dbd0a',
         'GNT': '0xc667ac878fd8eb4412dcad07988fea80008b65ee',
         'OMG': '0x2ebb31f1160c7027987a03482ab0fec130e98251',
         'ZRX': '0x1f4150647b4aa5eb36287d06d757a5247700c521',
@@ -77,8 +77,8 @@ const tokenJoinAddrData = {
         'DGD': '0xd5f63712af0d62597ad6bf8d357f163bc699e18c',
     },
     '42': {
-        'ETH': '0x55cd2f4cf74edc7c869bcf5e16086781ee97ee40',
-        'BAT': '0xe56b354524115f101798d243e05fd891f7d92e99',
+        'ETH': '0x775787933e92b709f2a3c70aa87999696e74a9f8',
+        'BAT': '0x2a4c485b1b8dfb46accfbecaf75b6188a59dbd0a',
         'GNT': '0xc667ac878fd8eb4412dcad07988fea80008b65ee',
         'OMG': '0x2ebb31f1160c7027987a03482ab0fec130e98251',
         'ZRX': '0x1f4150647b4aa5eb36287d06d757a5247700c521',
@@ -176,17 +176,17 @@ const initContracts = async () => {
 
     // await getAvailableDaiForMigration();
 
-    // const usersCdps = await getCDPsForAddress(proxyAddr);
-    // console.log(usersCdps);
+    const usersCdps = await getCDPsForAddress(proxyAddr);
+    console.log(usersCdps);
 
 
-    let oldCdpId = '0x0000000000000000000000000000000000000000000000000000000000001abb';
-    let ethAmount = '510000000000000000';
-    let saiAmount = '57800000000000000000';
-    let minRatio = 0;
-    let migrationType = 0;
-    let currentVault = 54;
-    await migratePart(oldCdpId, ethAmount, saiAmount, minRatio, migrationType, currentVault);
+    // let oldCdpId = '0x0000000000000000000000000000000000000000000000000000000000001abb';
+    // let ethAmount = '510000000000000000';
+    // let saiAmount = '57800000000000000000';
+    // let minRatio = 0;
+    // let migrationType = 0;
+    // let currentVault = 54;
+    // await migratePart(oldCdpId, ethAmount, saiAmount, minRatio, migrationType, currentVault);
 
     // await getRatioFromContract(usersCdps[0].cdpId);
 
@@ -208,7 +208,11 @@ const initContracts = async () => {
     // const cdp = await subscriptions.methods.getSubscribedInfo(usersCdps[0].cdpId).call();
     // console.log("cdp:", cdp);
 
-    // await boost(usersCdps[3].cdpId, '1', 'BAT');
+    // const res = await mcdSaverProxy.methods.getMaxDebt(usersCdps[1].cdpId, getIlk('ETH')).call();
+
+    // console.log(res);
+
+    await repay(usersCdps[1].cdpId, '0.001', 'ETH');
 
     // await repayFor(usersCdps[0].cdpId, web3.utils.toWei('0.1', 'ether'), getTokenJoinAddr('ETH'));
     // await boostFor(usersCdps[0].cdpId, web3.utils.toWei('0.4', 'ether'), getTokenJoinAddr('ETH'));
@@ -447,7 +451,7 @@ const boost = async (cdpId, amount, type) => {
         const daiAmount = web3.utils.toWei(amount, 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'boost'),
-          [cdpId, getTokenJoinAddr(type), daiAmount, 0, 4, 0]);
+          [cdpId, getTokenJoinAddr(type), daiAmount, 0, 2, 0]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
             from: account.address, gas: 1900000});
@@ -464,7 +468,7 @@ const repay = async (cdpId, amount, type) => {
         const ethAmount = web3.utils.toWei(amount, 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'repay'),
-          [cdpId, getTokenJoinAddr(type), ethAmount, 0, 4, 0]);
+          [cdpId, getTokenJoinAddr(type), ethAmount, 0, 2, 0]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddr, data).send({
             from: account.address, gas: 1900000});

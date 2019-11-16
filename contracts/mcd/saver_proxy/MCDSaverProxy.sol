@@ -74,15 +74,15 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         address owner = getOwner(manager, _cdpId);
         bytes32 ilk = manager.ilks(_cdpId);
 
-        drawCollateral(_cdpId, ilk, _joinAddr, _amount);
+        uint collDrawn = drawCollateral(_cdpId, ilk, _joinAddr, _amount);
 
-        uint daiAmount = swap(getCollateralAddr(_joinAddr), DAI_ADDRESS, _amount, _minPrice, _exchangeType);
+        uint daiAmount = swap(getCollateralAddr(_joinAddr), DAI_ADDRESS, collDrawn, _minPrice, _exchangeType);
 
         uint daiAfterFee = sub(daiAmount, getFee(daiAmount, _gasCost, owner));
 
         paybackDebt(_cdpId, ilk, daiAfterFee, owner);
 
-        SaverLogger(LOGGER_ADDRESS).LogRepay(_cdpId, owner, _amount, daiAmount);
+        SaverLogger(LOGGER_ADDRESS).LogRepay(_cdpId, owner, collDrawn, daiAmount);
     }
 
     /// @notice Boost - draws Dai, converts to collateral and adds to CDP
@@ -103,15 +103,15 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
     ) external boostCheck(_cdpId) {
         address owner = getOwner(manager, _cdpId);
 
-        drawDai(_cdpId, manager.ilks(_cdpId), _daiAmount);
+        uint daiDrawn = drawDai(_cdpId, manager.ilks(_cdpId), _daiAmount);
 
-        uint daiAfterFee = sub(_daiAmount, getFee(_daiAmount, _gasCost, owner));
+        uint daiAfterFee = sub(daiDrawn, getFee(daiDrawn, _gasCost, owner));
 
         uint collateralAmount = swap(DAI_ADDRESS, getCollateralAddr(_joinAddr), daiAfterFee, _minPrice, _exchangeType);
 
         addCollateral(_cdpId, _joinAddr, collateralAmount);
 
-        SaverLogger(LOGGER_ADDRESS).LogBoost(_cdpId, owner, _daiAmount, collateralAmount);
+        SaverLogger(LOGGER_ADDRESS).LogBoost(_cdpId, owner, daiDrawn, collateralAmount);
     }
 
     /// @notice Draws Dai from the CDP
@@ -119,8 +119,9 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
     /// @param _daiAmount Amount of Dai to draw
-    function drawDai(uint _cdpId, bytes32 _ilk, uint _daiAmount) internal {
-        Jug(JUG_ADDRESS).drip(_ilk);
+    function drawDai(uint _cdpId, bytes32 _ilk, uint _daiAmount) internal returns (uint) {
+        uint rate = Jug(JUG_ADDRESS).drip(_ilk);
+        uint daiVatBalance = vat.dai(manager.urns(_cdpId));
 
         uint maxAmount = getMaxDebt(_cdpId, _ilk);
 
@@ -128,7 +129,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
             _daiAmount = sub(maxAmount, 1);
         }
 
-        manager.frob(_cdpId, int(0), int(_daiAmount));
+        manager.frob(_cdpId, int(0), normalizeDrawAmount(_daiAmount, rate, daiVatBalance));
         manager.move(_cdpId, address(this), toRad(_daiAmount));
 
         if (vat.can(address(this), address(DAI_JOIN_ADDRESS)) == 0) {
@@ -136,6 +137,8 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         }
 
         DaiJoin(DAI_JOIN_ADDRESS).exit(address(this), _daiAmount);
+
+        return _daiAmount;
     }
 
     /// @notice Adds collateral to the CDP
@@ -172,7 +175,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
     /// @param _ilk Ilk of the CDP
     /// @param _joinAddr Address of the join contract for the CDP collateral
     /// @param _amount Amount of collateral to draw
-    function drawCollateral(uint _cdpId, bytes32 _ilk, address _joinAddr, uint _amount) internal {
+    function drawCollateral(uint _cdpId, bytes32 _ilk, address _joinAddr, uint _amount) internal returns (uint) {
         uint maxCollateral = getMaxCollateral(_cdpId, _ilk);
 
         if (_amount >= maxCollateral) {
@@ -187,6 +190,8 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         if (_joinAddr == ETH_JOIN_ADDRESS) {
             Join(_joinAddr).gem().withdraw(_amount); // Weth -> Eth
         }
+
+        return _amount;
     }
 
     /// @notice Paybacks Dai debt
@@ -208,7 +213,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         daiJoin.dai().approve(DAI_JOIN_ADDRESS, _daiAmount);
         daiJoin.join(urn, _daiAmount);
 
-        manager.frob(_cdpId, 0, getPaybackAmount(VAT_ADDRESS, urn, _ilk));
+        manager.frob(_cdpId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, _ilk));
     }
 
     /// @notice Calculates the fee amount
@@ -262,6 +267,21 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         (uint collateral, uint debt) = getCdpInfo(manager, _cdpId, _ilk);
 
         return sub(wdiv(wmul(collateral, price), mat), debt);
+    }
+
+    function testDaiMax(uint _cdpId, bytes32 _ilk) public view returns (uint, uint, uint) {
+        address urn = manager.urns(_cdpId);
+        (,uint rate, uint spot,,) = vat.ilks(_ilk);
+
+        (uint ink, uint art) = Vat(vat).urns(_ilk, urn);
+
+        uint debtWithFee = mul(rate, art);
+
+        uint daiWithdrawn = sub(mul(ink, spot), debtWithFee);
+
+        uint newDebt = mul(add(daiWithdrawn, mul(art, RAY)), rate);
+
+        return (newDebt, mul(ink, spot), rate);
     }
 
     /// @notice Gets a price of the asset

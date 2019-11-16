@@ -9,6 +9,17 @@ import "../maker/Vat.sol";
 /// @title Helper methods for MCDSaverProxy
 contract SaverProxyHelper is DSMath {
 
+    /// @notice Returns a normalized debt _amount based on the current rate
+    /// @param _amount Amount of dai to be normalized
+    /// @param _rate Current rate of the stability fee
+    /// @param _daiVatBalance Balance od Dai in the Vat for that CDP
+    function normalizeDrawAmount(uint _amount, uint _rate, uint _daiVatBalance) internal pure returns (int dart) {
+        if (_daiVatBalance < mul(_amount, RAY)) {
+            dart = toPositiveInt(sub(mul(_amount, RAY), _daiVatBalance) / _rate);
+            dart = mul(uint(dart), _rate) < mul(_amount, RAY) ? dart + 1 : dart;
+        }
+    }
+
     /// @notice Converts a number to Rad percision
     /// @param _wad The input number in wad percision
     function toRad(uint _wad) internal pure returns (uint) {
@@ -33,7 +44,7 @@ contract SaverProxyHelper is DSMath {
     /// @param _vat Address of Vat contract
     /// @param _urn Urn of the Cdp
     /// @param _ilk Ilk of the Cdp
-    function getPaybackAmount(address _vat, address _urn, bytes32 _ilk) internal view returns (int amount) {
+    function normalizePaybackAmount(address _vat, address _urn, bytes32 _ilk) internal view returns (int amount) {
         uint dai = Vat(_vat).dai(_urn);
 
         (, uint rate,,,) = Vat(_vat).ilks(_ilk);
