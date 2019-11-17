@@ -154,6 +154,7 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
 
         subscribers[subInfo.arrPos] = subscribers[subscribers.length - 1];
         delete subscribers[subscribers.length - 1];
+        subscribers.length--;
 
         changeIndex++;
         subInfo.subscribed = false;
