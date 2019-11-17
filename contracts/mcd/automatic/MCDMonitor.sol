@@ -27,8 +27,8 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
     /// @dev Addresses that are able to call methods for repay and boost
     mapping(address => bool) public approvedCallers;
 
-    event CdpRepay(uint indexed cdpId, address indexed caller, uint _amount);
-    event CdpBoost(uint indexed cdpId, address indexed caller, uint _amount);
+    event CdpRepay(uint indexed cdpId, address indexed caller, uint amount, uint beforeRatio, uint afterRatio);
+    event CdpBoost(uint indexed cdpId, address indexed caller, uint amount, uint beforeRatio, uint afterRatio);
 
     modifier onlyApproved() {
         require(approvedCallers[msg.sender]);
@@ -60,16 +60,18 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
             gasToken.free(BOOST_GAS_TOKEN);
         }
 
+        uint ratioBefore = subscriptionsContract.getRatio(_cdpId);
         require(subscriptionsContract.canCall(Method.Repay, _cdpId));
 
         uint gasCost = calcGasCost(REPAY_GAS_COST);
 
         monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("repay(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, _exchangeType, gasCost));
 
+        uint ratioAfter = subscriptionsContract.getRatio(_cdpId);
         // doesn't allow user to repay too much
         require(subscriptionsContract.ratioGoodAfter(Method.Repay, _cdpId));
 
-        emit CdpRepay(_cdpId, msg.sender, _amount);
+        emit CdpRepay(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
     }
 
     /// @notice Bots call this method to boost for user when conditions are met
@@ -83,15 +85,17 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
             gasToken.free(REPAY_GAS_TOKEN);
         }
 
+        uint ratioBefore = subscriptionsContract.getRatio(_cdpId);
         require(subscriptionsContract.canCall(Method.Boost, _cdpId));
 
         uint gasCost = calcGasCost(BOOST_GAS_COST);
 
         monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("boost(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, _exchangeType, gasCost));
 
+        uint ratioAfter = subscriptionsContract.getRatio(_cdpId);
         require(subscriptionsContract.ratioGoodAfter(Method.Boost, _cdpId));
 
-        emit CdpBoost(_cdpId, msg.sender, _amount);
+        emit CdpBoost(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
     }
 
     /// @notice Calculates gas cost (in Eth) of tx
