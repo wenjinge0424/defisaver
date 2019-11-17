@@ -1,4 +1,3 @@
-
 pragma solidity ^0.5.0;
 
 contract GemLike {
@@ -62,6 +61,10 @@ contract HopeLike {
     function nope(address) public;
 }
 
+contract ProxyRegistryInterface {
+    function build(address) public returns (address);
+}
+
 contract EndLike {
     function fix(bytes32) public view returns (uint);
     function cash(bytes32, uint) public;
@@ -88,10 +91,6 @@ contract ProxyRegistryLike {
 
 contract ProxyLike {
     function owner() public view returns (address);
-}
-
-contract ProxyRegistryInterface {
-    function build(address) public returns (address);
 }
 
 contract DSProxy {
@@ -125,9 +124,11 @@ contract Common {
 }
 
 contract SaverProxyActions is Common {
-    // Internal functions
+
 
     event CDPAction(string indexed, uint indexed, uint, uint);
+
+    // Internal functions
 
     function sub(uint x, uint y) internal pure returns (uint z) {
         require((z = x - y) <= x, "sub-overflow");
@@ -360,6 +361,12 @@ contract SaverProxyActions is Common {
         ManagerLike(manager).shift(cdpSrc, cdpOrg);
     }
 
+    function makeGemBag(
+        address gemJoin
+    ) public returns (address bag) {
+        bag = GNTJoinLike(gemJoin).make(address(this));
+    }
+
     function lockETH(
         address manager,
         address ethJoin,
@@ -402,7 +409,6 @@ contract SaverProxyActions is Common {
         emit CDPAction('lockGem', cdp, wad, 0);
     }
 
-
     function freeETH(
         address manager,
         address ethJoin,
@@ -438,6 +444,36 @@ contract SaverProxyActions is Common {
         GemJoinLike(gemJoin).exit(msg.sender, wad);
 
         emit CDPAction('freeGem', cdp, wad, 0);
+    }
+
+    function exitETH(
+        address manager,
+        address ethJoin,
+        uint cdp,
+        uint wad
+    ) public {
+        // Moves the amount from the CDP urn to proxy's address
+        flux(manager, cdp, address(this), wad);
+
+        // Exits WETH amount to proxy address as a token
+        GemJoinLike(ethJoin).exit(address(this), wad);
+        // Converts WETH to ETH
+        GemJoinLike(ethJoin).gem().withdraw(wad);
+        // Sends ETH back to the user's wallet
+        msg.sender.transfer(wad);
+    }
+
+    function exitGem(
+        address manager,
+        address gemJoin,
+        uint cdp,
+        uint wad
+    ) public {
+        // Moves the amount from the CDP urn to proxy's address
+        flux(manager, cdp, address(this), convertTo18(gemJoin, wad));
+
+        // Exits token amount to the user's wallet as a token
+        GemJoinLike(gemJoin).exit(msg.sender, wad);
     }
 
     function draw(
@@ -555,7 +591,21 @@ contract SaverProxyActions is Common {
         DaiJoinLike(daiJoin).exit(msg.sender, wadD);
     }
 
-      function lockGemAndDraw(
+    function openLockETHAndDraw(
+        address manager,
+        address jug,
+        address ethJoin,
+        address daiJoin,
+        bytes32 ilk,
+        uint wadD
+    ) public payable returns (uint cdp) {
+        cdp = open(manager, ilk, address(this));
+        lockETHAndDraw(manager, jug, ethJoin, daiJoin, cdp, wadD);
+
+        emit CDPAction('openLockETHAndDraw', cdp, msg.value, wadD);
+    }
+
+    function lockGemAndDraw(
         address manager,
         address jug,
         address gemJoin,
@@ -583,21 +633,6 @@ contract SaverProxyActions is Common {
 
     }
 
-    function openLockETHAndDraw(
-        address manager,
-        address jug,
-        address ethJoin,
-        address daiJoin,
-        bytes32 ilk,
-        uint wadD
-    ) public payable returns (uint cdp) {
-        cdp = open(manager, ilk, address(this));
-        lockETHAndDraw(manager, jug, ethJoin, daiJoin, cdp, wadD);
-
-        emit CDPAction('openLockETHAndDraw', cdp, msg.value, wadD);
-    }
-
-
     function openLockGemAndDraw(
         address manager,
         address jug,
@@ -612,6 +647,7 @@ contract SaverProxyActions is Common {
         lockGemAndDraw(manager, jug, gemJoin, daiJoin, cdp, wadC, wadD, transferFrom);
 
         emit CDPAction('openLockGemAndDraw', cdp, wadC, wadD);
+
     }
 
     function wipeAllAndFreeETH(
@@ -647,6 +683,30 @@ contract SaverProxyActions is Common {
         emit CDPAction('wipeAllAndFreeETH', cdp, wadC, art);
     }
 
+    function wipeAndFreeGem(
+        address manager,
+        address gemJoin,
+        address daiJoin,
+        uint cdp,
+        uint wadC,
+        uint wadD
+    ) public {
+        address urn = ManagerLike(manager).urns(cdp);
+        // Joins DAI amount into the vat
+        daiJoin_join(daiJoin, urn, wadD);
+        uint wad18 = convertTo18(gemJoin, wadC);
+        // Paybacks debt to the CDP and unlocks token amount from it
+        frob(
+            manager,
+            cdp,
+            -toInt(wad18),
+            _getWipeDart(ManagerLike(manager).vat(), VatLike(ManagerLike(manager).vat()).dai(urn), urn, ManagerLike(manager).ilks(cdp))
+        );
+        // Moves the amount from the CDP urn to proxy's address
+        flux(manager, cdp, address(this), wad18);
+        // Exits token amount to the user's wallet as a token
+        GemJoinLike(gemJoin).exit(msg.sender, wadC);
+    }
 
     function wipeAllAndFreeGem(
         address manager,
@@ -686,21 +746,21 @@ contract SaverProxyActions is Common {
         bytes32 ilk,
         uint wadD,
         address registry
-        ) public payable returns(uint cdp) {
+        ) public payable returns(uint) {
 
-            address proxy = ProxyRegistryInterface(registry).build(address(this));
+            address proxy = ProxyRegistryInterface(registry).build(msg.sender);
 
-            DSProxy(proxy).execute.value(msg.value)(address(this), abi.encodeWithSignature(
-                "openLockETHAndDraw(address,address,address,address,bytes32,uint256)",
-                manager,
+            uint cdp = openLockETHAndDraw(manager,
                 jug,
                 ethJoin,
                 daiJoin,
                 ilk,
                 wadD
-                ));
+                );
 
-            DSProxy(proxy).setOwner(msg.sender);
+            give(manager, cdp, address(proxy));
+
+            return cdp;
 
     }
 
@@ -714,23 +774,22 @@ contract SaverProxyActions is Common {
         uint wadD,
         bool transferFrom,
         address registry
-        ) public returns(uint cdp) {
+        ) public returns(uint) {
 
 
-            address proxy = ProxyRegistryInterface(registry).build(address(this));
+            address proxy = ProxyRegistryInterface(registry).build(msg.sender);
 
-            DSProxy(proxy).execute(address(this), abi.encodeWithSignature(
-                "openLockGemAndDraw(address,address,address,address,bytes32,uint256,uint256,bool)",
-                manager,
+            uint cdp = openLockGemAndDraw(manager,
                 jug,
                 gemJoin,
                 daiJoin,
                 ilk,
                 wadC,
                 wadD,
-                transferFrom
-                ));
+                transferFrom);
 
-            DSProxy(proxy).setOwner(msg.sender);
+            give(manager, cdp, address(proxy));
+
+            return cdp;
     }
 }
