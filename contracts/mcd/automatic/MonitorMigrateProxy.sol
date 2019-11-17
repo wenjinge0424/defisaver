@@ -6,7 +6,7 @@ import "../migration/MigrationProxyActions.sol";
 import "../../Monitor.sol";
 import "../../constants/ConstantAddresses.sol";
 
-contract Subscriptions {
+contract SubscriptionsInterface {
     function subscribe(uint _cdpId, uint128 _minRatio, uint128 _maxRatio, uint128 _optimalBoost, uint128 _optimalRepay) external {}
 }
 
@@ -18,7 +18,7 @@ contract MonitorMigrateProxy is MigrationProxyActions, ConstantAddresses {
     /// @dev Called by DSProxy
     function migrateAndSubscribe(bytes32 _cdpId, uint _minRatio, MigrationType _type) external {
 
-        Subscriptions sub = Subscriptions(SUBSCRIPTION_ADDRESS);
+        SubscriptionsInterface sub = SubscriptionsInterface(SUBSCRIPTION_ADDRESS);
         Monitor monitor = Monitor(MONITOR_ADDRESS);
         DSGuard guard = getDSGuard();
 
