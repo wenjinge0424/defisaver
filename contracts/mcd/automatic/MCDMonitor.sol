@@ -60,16 +60,21 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
             gasToken.free(BOOST_GAS_TOKEN);
         }
 
-        uint ratioBefore = subscriptionsContract.getRatio(_cdpId);
-        require(subscriptionsContract.canCall(Method.Repay, _cdpId));
+
+        uint ratioBefore;
+        bool canCall;
+        (canCall, ratioBefore) = subscriptionsContract.canCall(Method.Repay, _cdpId);
+        require(canCall);
 
         uint gasCost = calcGasCost(REPAY_GAS_COST);
 
         monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("repay(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, _exchangeType, gasCost));
 
-        uint ratioAfter = subscriptionsContract.getRatio(_cdpId);
+        uint ratioAfter;
+        bool ratioGoodAfter;
+        (ratioGoodAfter, ratioAfter) = subscriptionsContract.ratioGoodAfter(Method.Repay, _cdpId);
         // doesn't allow user to repay too much
-        require(subscriptionsContract.ratioGoodAfter(Method.Repay, _cdpId));
+        require(ratioGoodAfter);
 
         emit CdpRepay(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
     }
@@ -85,15 +90,20 @@ contract MCDMonitor is ConstantAddresses, DSMath, Static {
             gasToken.free(REPAY_GAS_TOKEN);
         }
 
-        uint ratioBefore = subscriptionsContract.getRatio(_cdpId);
-        require(subscriptionsContract.canCall(Method.Boost, _cdpId));
+        uint ratioBefore;
+        bool canCall;
+        (canCall, ratioBefore) = subscriptionsContract.canCall(Method.Boost, _cdpId);
+        require(canCall);
 
         uint gasCost = calcGasCost(BOOST_GAS_COST);
 
         monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("boost(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, _exchangeType, gasCost));
 
-        uint ratioAfter = subscriptionsContract.getRatio(_cdpId);
-        require(subscriptionsContract.ratioGoodAfter(Method.Boost, _cdpId));
+        uint ratioAfter;
+        bool ratioGoodAfter;
+        (ratioGoodAfter, ratioAfter) = subscriptionsContract.ratioGoodAfter(Method.Boost, _cdpId);
+        // doesn't allow user to boost too much
+        require(ratioGoodAfter);
 
         emit CdpBoost(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
     }

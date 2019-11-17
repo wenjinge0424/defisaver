@@ -126,21 +126,21 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
 
     /// @notice Checks if Boost/Repay could be triggered for the CDP
     /// @dev Called by MCDMonitor to enforce the min/max check
-    function canCall(Method _method, uint _cdpId) public view returns(bool) {
+    function canCall(Method _method, uint _cdpId) public view returns(bool, uint) {
         SubPosition memory subInfo = subscribersPos[_cdpId];
 
-        if (!subInfo.subscribed) return false;
+        if (!subInfo.subscribed) return (false, 0);
 
         CdpHolder memory subscriber = subscribers[subInfo.arrPos];
 
-        if (getOwner(_cdpId) != subscriber.owner) return false;
+        if (getOwner(_cdpId) != subscriber.owner) return (false, 0);
 
         uint currRatio = getRatio(_cdpId);
 
         if (_method == Method.Repay) {
-            return currRatio < subscriber.minRatio;
+            return (currRatio < subscriber.minRatio, currRatio);
         } else if (_method == Method.Boost) {
-            return currRatio > subscriber.maxRatio;
+            return (currRatio > subscriber.maxRatio, currRatio);
         }
     }
 
@@ -168,16 +168,16 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
     }
 
     /// @dev After the Boost/Repay check if the ratio doesn't trigger another call
-    function ratioGoodAfter(Method _method, uint _cdpId) public view returns(bool) {
+    function ratioGoodAfter(Method _method, uint _cdpId) public view returns(bool, uint) {
         SubPosition memory subInfo = subscribersPos[_cdpId];
         CdpHolder memory subscriber = subscribers[subInfo.arrPos];
 
         uint currRatio = getRatio(_cdpId);
 
         if (_method == Method.Repay) {
-            return currRatio < subscriber.maxRatio;
+            return (currRatio < subscriber.maxRatio, currRatio);
         } else if (_method == Method.Boost) {
-            return currRatio > subscriber.minRatio;
+            return (currRatio > subscriber.minRatio, currRatio);
         }
     }
 

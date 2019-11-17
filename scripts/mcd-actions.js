@@ -34,12 +34,12 @@ const jugAddr = '0xcbb7718c9f39d05aeede1c472ca8bf804b2f1ead';
 const spotterAddr = '0x3a042de6413edb15f2784f2f97cc68c7e9750b2d';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
 
-const subscriptionsProxyAddr = '0xE43e2C45D1692Ac5832BAb6deBCDd6cf18b26642';
-const subscriptionsAddr = '0x95b235fC87bB920AB25b0bBFaa401ECBE8679912';
-const mcdMonitorAddr = '0x4A43Cf68adE204A9DaBA8b3214700666300D2Fdd';
-const mcdMonitorProxyAddr = '0x4D515341231c59873Bb2A882Be5494a8A3F20996';
-const monitorMigrateAddr = '0x068632E5AA9763Ea6eBde1Bc32ebfeE704Bd75A5';
-const partialMigrateAddr = '0xf2764756248DaF6331dfcc54305Df6D95b6d0A6d';
+const subscriptionsProxyAddr = '0xa1D7Fe7a4415dBad3237c6A90B271B522BF09701';
+const subscriptionsAddr = '0x3737a272E86d9a527e9f20629B68D1A5FCF671f4';
+const mcdMonitorAddr = '0x72D8e0FAEFdF5c203d1e9daf6bd11D411408D536';
+const mcdMonitorProxyAddr = '0xDeb9C2f02c6Eccb5dE13531b8060F9eF30C2123F';
+const monitorMigrateAddr = '0xfCD4ab690bc156De4e3487293d5C7d6d26C9798E';
+const partialMigrateAddr = '0x8abc15d9BA3C196e3B74D5C6d642e01d1bf0D2E7';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
