@@ -11,6 +11,7 @@ module.exports = function(deployer, network, accounts) {
 
     deployer.then(async () => {
         let mcdSaverProxyAddress = '0x25d0317Fa944b93bcaFEFB6628F5705a6FF99b08';
+        let botAddress = '0x5365a5bb25FF41C9D1E35c26259e0fa431d406be';
 
         // ------- first deploy this ----------
         // let changePeriod = 15; // set to 0 for Kovan deployment
@@ -27,5 +28,6 @@ module.exports = function(deployer, network, accounts) {
         await deployer.deploy(MCDMonitor, monitorProxy.address, subscriptions.address, mcdSaverProxyAddress, {gas: maxGas, overwrite: deployAgain});
         let monitor = await MCDMonitor.deployed();
         await monitorProxy.setMonitor(monitor.address);
+        await monitor.addCaller()
     });
 };
