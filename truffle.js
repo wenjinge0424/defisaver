@@ -18,7 +18,7 @@ module.exports = {
             return new HDWalletProvider(mnemonic, process.env.INFURA_ENDPOINT);
         },
         network_id: '1',
-        gasPrice: 3000000000, // 5 gwei
+        gasPrice: 3100000000, // 3.1 gwei
     },
     kovan: {
         provider: function() {
