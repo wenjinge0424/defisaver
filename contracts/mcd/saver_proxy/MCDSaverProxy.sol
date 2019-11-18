@@ -231,7 +231,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
         if (_gasCost != 0) {
             uint ethDaiPrice = getPrice(ETH_ILK);
-            _gasCost = wmul(_gasCost, ethDaiPrice);
+            _gasCost = rmul(_gasCost, ethDaiPrice);
 
             feeAmount = add(feeAmount, _gasCost);
         }
