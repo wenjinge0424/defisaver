@@ -43,7 +43,7 @@ const partialMigrateAddr = '0x05df3eDe984A159e0B27364f8eF5A471C9D76445';
 
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
-const mcdSaverProxyAddr = '0x25d0317Fa944b93bcaFEFB6628F5705a6FF99b08';
+const mcdSaverProxyAddr = '0xDbfdfDBcA9f796Bf955B8B4EB2b46dBb51CaE30B';
 
 const ilkData = {
     '1' : {
