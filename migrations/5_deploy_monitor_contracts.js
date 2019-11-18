@@ -28,6 +28,6 @@ module.exports = function(deployer, network, accounts) {
         await deployer.deploy(MCDMonitor, monitorProxy.address, subscriptions.address, mcdSaverProxyAddress, {gas: maxGas, overwrite: deployAgain});
         let monitor = await MCDMonitor.deployed();
         await monitorProxy.setMonitor(monitor.address);
-        await monitor.addCaller()
+        await monitor.addCaller(botAddress);
     });
 };
