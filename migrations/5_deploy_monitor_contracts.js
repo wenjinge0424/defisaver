@@ -10,7 +10,7 @@ module.exports = function(deployer, network, accounts) {
     const maxGas = 6720000;
 
     deployer.then(async () => {
-        let mcdSaverProxyAddress = '0x25d0317Fa944b93bcaFEFB6628F5705a6FF99b08';
+        let mcdSaverProxyAddress = '0xDbfdfDBcA9f796Bf955B8B4EB2b46dBb51CaE30B';
         let botAddress = '0x5365a5bb25FF41C9D1E35c26259e0fa431d406be';
 
         // ------- first deploy this ----------
@@ -28,6 +28,6 @@ module.exports = function(deployer, network, accounts) {
         await deployer.deploy(MCDMonitor, monitorProxy.address, subscriptions.address, mcdSaverProxyAddress, {gas: maxGas, overwrite: deployAgain});
         let monitor = await MCDMonitor.deployed();
         await monitorProxy.setMonitor(monitor.address);
-        await monitor.addCaller()
+        await monitor.addCaller(botAddress);
     });
 };
