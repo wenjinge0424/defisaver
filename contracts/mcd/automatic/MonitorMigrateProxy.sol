@@ -19,7 +19,7 @@ contract MonitorMigrateProxy is MigrationProxyActions, ConstantAddresses {
     function migrateAndSubscribe(bytes32 _cdpId, uint _minRatio, MigrationType _type) external {
 
         SubscriptionsInterface sub = SubscriptionsInterface(SUBSCRIPTION_ADDRESS);
-        Monitor monitor = Monitor(MONITOR_ADDRESS);
+        Monitor monitor = Monitor(0x65114Af041A921180220b300B3cB4AEBaD04601a);
         DSGuard guard = getDSGuard();
 
         // Get and cancel old subscription
