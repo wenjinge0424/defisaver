@@ -22,6 +22,8 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
     }
 
     address public owner;
+    uint public changeIndex;
+
     mapping (address => bool) public approvedCallers;
     mapping (bytes32 => Subscription) public subscribers;
 
@@ -40,7 +42,7 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
         _;
     }
 
-    event Subscribed(address indexed owner, bytes32 cdpId);
+    event Subscribed(address indexed owner, bytes32 cdpId, MigrationType migType);
     event Unsubscribed(address indexed owner, bytes32 cdpId);
     event Migrated(bytes32 indexed oldCdp, uint indexed newCdp, address owner, uint timestamp);
 
@@ -57,7 +59,9 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
             migType: _type
         });
 
-        emit Subscribed(msg.sender, _cdpId);
+        changeIndex++;
+
+        emit Subscribed(msg.sender, _cdpId, _type);
     }
 
     function unsubscribe(bytes32 _cdpId) external {
@@ -65,6 +69,8 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
         require(subscribers[_cdpId].owner == msg.sender);
 
         delete subscribers[_cdpId];
+
+        changeIndex++;
 
         emit Unsubscribed(msg.sender, _cdpId);
     }
@@ -100,9 +106,13 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
         (, migrationSai) = vat.urns(SAI_ILK, SCD_MCD_MIGRATION);
         migrationSai = sub(migrationSai, 1000);
 
-        ( , , cdpDebt, ) = tubContract.cups(_cdpId);
+        cdpDebt = getDebt(_cdpId);
 
         return migrationSai > cdpDebt;
+    }
+
+    function getDebt(bytes32 _cdpId) public returns (uint cdpDebt) {
+        ( , , cdpDebt, ) = tubContract.cups(_cdpId);
     }
 
     function drawCollateral(uint _cdpId, uint _amount) internal {
