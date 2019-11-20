@@ -26,4 +26,5 @@ contract SaiTubLike {
     function shut(bytes32) public;
     function exit(uint) public;
     function give(bytes32, address) public;
+    function cups(bytes32) public returns (address, uint, uint, uint);
 }
