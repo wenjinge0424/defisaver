@@ -24,6 +24,9 @@ const Subscriptions = require('../build/contracts/Subscriptions.json');
 const MCDMonitorProxy = require('../build/contracts/MCDMonitorProxy.json');
 const MCDMonitor = require('../build/contracts/MCDMonitor.json');
 
+const AutomaticMigration = require('../build/contracts/AutomaticMigration.json');
+const AutomaticMigrationProxy = require('../build/contracts/AutomaticMigrationProxy.json');
+
 const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
 const proxyActionsAddr = '0x3b411dbf49ad4768fe581be2cb3d14bf513116ad';
 const cdpManagerAddr = '0x1476483dd8c35f25e568113c5f70249d3976ba21';
@@ -44,6 +47,9 @@ const partialMigrateAddr = '0x951507e4671a98d5f1687bBba9BFa47d3BD9Da6a';
 const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
 const mcdSaverProxyAddr = '0xDbfdfDBcA9f796Bf955B8B4EB2b46dBb51CaE30B';
+
+const automaticMigrationAddr = '0xeAc69774716667bC9e8ea35D7C5AAD22bd866bCA';
+const automaticMigrationProxyAddr = '0x1A469880789e4F7Efd089161fccf32b5aeBE49Bd';
 
 const ilkData = {
     '1' : {
@@ -141,7 +147,9 @@ let web3,
     subscriptions,
     subscriptionsProxy,
     monitorMigrate,
-    partialMigrate;
+    partialMigrate,
+    automaticMigration,
+    automaticMigrationProxy;
 
 const initContracts = async () => {
     web3 = new Web3(new Web3.providers.HttpProvider(process.env.KOVAN_INFURA_ENDPOINT));
@@ -169,6 +177,9 @@ const initContracts = async () => {
     subscriptions = new web3.eth.Contract(Subscriptions.abi, subscriptionsAddr);
     monitorMigrate = new web3.eth.Contract(MonitorMigrate.abi, monitorMigrateAddr);
     partialMigrate = new web3.eth.Contract(PartialMigrate.abi, partialMigrateAddr);
+
+    automaticMigration = new web3.eth.Contract(AutomaticMigration.abi, automaticMigrationAddr);
+    automaticMigrationProxy = new web3.eth.Contract(AutomaticMigrationProxy.abi, automaticMigrationProxyAddr);
 };
 
 (async () => {
@@ -176,9 +187,12 @@ const initContracts = async () => {
 
     // await getAvailableDaiForMigration();
 
-    const usersCdps = await getCDPsForAddress(proxyAddr);
-    console.log(usersCdps);
+    // const usersCdps = await getCDPsForAddress(proxyAddr);
+    // console.log(usersCdps);
 
+    await subscribeForMigration('0x000000000000000000000000000000000000000000000000000000000000140a', 2);
+
+    // await callMigration('0x000000000000000000000000000000000000000000000000000000000000140a');
 
     // let oldCdpId = '0x0000000000000000000000000000000000000000000000000000000000001abb';
     // let ethAmount = '510000000000000000';
@@ -208,9 +222,9 @@ const initContracts = async () => {
     // const cdp = await subscriptions.methods.getSubscribedInfo(usersCdps[0].cdpId).call();
     // console.log("cdp:", cdp);
 
-    const res = await mcdSaverProxy.methods.getMaxCollateral(usersCdps[0].cdpId, getIlk('ETH')).call();
+    // const res = await mcdSaverProxy.methods.getMaxCollateral(usersCdps[0].cdpId, getIlk('ETH')).call();
 
-    console.log(res);
+    // console.log(res);
 
    // await repay(usersCdps[1].cdpId, '3', 'ETH');
 
@@ -531,6 +545,36 @@ const getAvailableDaiForMigration = async () => {
     return Dec(specialCDP.ink).sub(1000);
 };
 
+
+const subscribeForMigration = async (cdpId, type) => {
+    try {
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(AutomaticMigrationProxy, 'subscribe'),
+          [cdpId, automaticMigrationAddr, type]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](automaticMigrationProxyAddr, data).send({
+            from: account.address, gas: 2200000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+const callMigration = async (cdpId) => {
+    try {
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(AutomaticMigration, 'migrateFor'),
+          [cdpId]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](automaticMigrationAddr, data).send({
+            from: account.address, gas: 2200000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
 
 
 /****************************** INFO FUNCTIONS *************************************/

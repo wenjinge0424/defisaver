@@ -4,6 +4,7 @@ import "../migration/SaiTubLike.sol";
 import "../maker/ScdMcdMigration.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../migration/MigrationProxyActions.sol";
+import "../../interfaces/DSProxyInterface.sol";
 import "../maker/Manager.sol";
 import "../maker/Join.sol";
 
@@ -48,10 +49,12 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
 
     constructor() public {
         owner = msg.sender;
+        approvedCallers[owner] = true;
     }
 
     function subscribe(bytes32 _cdpId, MigrationType _type) external {
         require(subscribers[_cdpId].owner == address(0x0));
+        require(isOwner(msg.sender, _cdpId));
 
         subscribers[_cdpId] = Subscription({
             cdpId: _cdpId,
@@ -66,7 +69,7 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
 
     function unsubscribe(bytes32 _cdpId) external {
         require(subscribers[_cdpId].owner != address(0x0));
-        require(subscribers[_cdpId].owner == msg.sender);
+        require(isOwner(msg.sender, _cdpId));
 
         delete subscribers[_cdpId];
 
@@ -87,14 +90,17 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
         MigrationType migType = subscribers[_cdpId].migType;
 
         if (migType == MigrationType.WITH_MKR) {
-            newCdpId = migrate(SCD_MCD_MIGRATION, _cdpId);
+            DSProxyInterface(subscribers[_cdpId].owner).execute(MIGRATION_ACTIONS_PROXY,
+                abi.encodeWithSignature("migrate(address,bytes32)", SCD_MCD_MIGRATION, _cdpId));
         } else if (migType == MigrationType.WITH_CONVERSION) {
-            newCdpId = migratePayFeeWithGem(SCD_MCD_MIGRATION, _cdpId, OTC_ADDRESS, MAKER_DAI_ADDRESS, uint(-1));
+            DSProxyInterface(subscribers[_cdpId].owner).execute(MIGRATION_ACTIONS_PROXY,
+                abi.encodeWithSignature("migratePayFeeWithGem(address,bytes32,address,address,uint256)", SCD_MCD_MIGRATION, _cdpId, OTC_ADDRESS, MAKER_DAI_ADDRESS, uint(-1)));
         } else if (migType == MigrationType.WITH_DEBT) {
-             newCdpId = migratePayFeeWithDebt(SCD_MCD_MIGRATION, _cdpId, OTC_ADDRESS, uint(-1), 0);
+             DSProxyInterface(subscribers[_cdpId].owner).execute(MIGRATION_ACTIONS_PROXY,
+                abi.encodeWithSignature("migratePayFeeWithDebt(address,bytes32,address,uint256,uint256)", SCD_MCD_MIGRATION, _cdpId, OTC_ADDRESS, uint(-1), 0));
         }
 
-        drawCollateral(newCdpId, calcTxCost(startGas));
+        // drawCollateral(newCdpId, calcTxCost(startGas));
 
         emit Migrated(_cdpId, newCdpId, subscribers[_cdpId].owner, block.timestamp);
     }
@@ -131,6 +137,12 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
         uint gasPrice = tx.gasprice > MAX_GAS_PRICE ? MAX_GAS_PRICE : tx.gasprice;
 
         return mul(gasPrice, gasUsed);
+    }
+
+    function isOwner(address _owner, bytes32 _cdpId) internal view returns(bool) {
+        require(tubContract.lad(_cdpId) == _owner);
+
+        return true;
     }
 
 
