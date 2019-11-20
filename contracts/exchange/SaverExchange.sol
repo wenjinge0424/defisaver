@@ -9,6 +9,8 @@ contract SaverExchange is DSMath, ConstantAddresses {
 
     uint public constant SERVICE_FEE = 800; // 0.125% Fee
 
+    event Swap(address src, address dest, uint amountSold, uint amountBought);
+
     function swapTokenToToken(address _src, address _dest, uint _amount, uint _minPrice, uint _exchangeType) public payable {
         if (_src == KYBER_ETH_ADDRESS) {
             require(msg.value >= _amount);
@@ -45,6 +47,8 @@ contract SaverExchange is DSMath, ConstantAddresses {
         } else {
             ERC20(_dest).transfer(msg.sender, tokensReturned);
         }
+
+        emit Swap(_src, _dest, _amount, tokensReturned);
     }
 
 
@@ -132,7 +136,7 @@ contract SaverExchange is DSMath, ConstantAddresses {
         }
 
         if ((expectedRateOasis >= expectedRateKyber) && (expectedRateOasis >= expectedRateUniswap)) {
-            return (ETH2DAI_WRAPPER, expectedRateOasis);
+            return (OASIS_WRAPPER, expectedRateOasis);
         }
 
         if ((expectedRateUniswap >= expectedRateKyber) && (expectedRateUniswap >= expectedRateOasis)) {
