@@ -48,8 +48,8 @@ const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
 const mcdSaverProxyAddr = '0xDbfdfDBcA9f796Bf955B8B4EB2b46dBb51CaE30B';
 
-const automaticMigrationAddr = '0x1c5b6E44d9F9230C4B8d7f1c8C8fD5a6b38d0FD9';
-const automaticMigrationProxyAddr = '0x38009D77B35cbE297a385392A73fC0C03c80e529';
+const automaticMigrationAddr = '0x16E479552Cea78CAb2c3Dc560cccB4360BAc899c';
+const automaticMigrationProxyAddr = '0x837B2De19e73b38856a7Fee10c9b60B5c9383F77';
 
 const ilkData = {
     '1' : {

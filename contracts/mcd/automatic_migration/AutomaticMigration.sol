@@ -105,7 +105,6 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
         DSProxyInterface(subscribers[_cdpId].owner).execute(PROXY_ACTIONS,
                 abi.encodeWithSignature("freeETH(address,address,uint256,uint256)", MANAGER_ADDRESS, ETH_JOIN_ADDRESS, newVault, gasCost));
 
-
         emit Migrated(_cdpId, newVault, subscribers[_cdpId].owner, block.timestamp);
     }
 
@@ -125,17 +124,6 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
         ( , , cdpDebt, ) = tubContract.cups(_cdpId);
     }
 
-    function drawCollateral(uint _cdpId, uint _amount) internal {
-
-        manager.frob(_cdpId, -int(_amount), 0);
-        manager.flux(_cdpId, address(this), _amount);
-
-        Join(ETH_JOIN_ADDRESS).exit(address(this), _amount);
-
-        Join(ETH_JOIN_ADDRESS).gem().withdraw(_amount); // Weth -> Eth
-
-    }
-
     function calcTxCost(uint _startGas) public view returns(uint) {
         uint gasUsed = sub(_startGas, gasleft());
         uint gasPrice = tx.gasprice > MAX_GAS_PRICE ? MAX_GAS_PRICE : tx.gasprice;
@@ -149,6 +137,7 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
         return true;
     }
 
+    function() external payable {}
 
     //////////////// Admin only functions /////////////////////////
 
@@ -163,5 +152,11 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
     /// @param _caller Bot address
     function removeCaller(address _caller) public onlyOwner {
         approvedCallers[_caller] = false;
+    }
+
+    /// @notice Gets the Eth acumulated for the fee
+    /// @param _caller Bot address
+    function getFee() public onlyOwner {
+        owner.transfer(address(this).balance);
     }
 }
