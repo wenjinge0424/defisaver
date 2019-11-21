@@ -23,8 +23,8 @@ contract PayProxyActions is DSMath {
             // Calculate necessary value of MKR to pay the govFee
             uint govFee = wdiv(rmul(amount, rdiv(tub.rap(cup), tub.tab(cup))) + 1, val); // 1 extra wei MKR to avoid any possible rounding issue after drawing new SAI
 
-            // Get MKR from the user's wallet and transfer to Migration contract
-            require(tub.gov().transferFrom(msg.sender, address(scdMcdMigration), govFee), "transfer-failed");
+            // Get MKR from the user's wallet
+            require(tub.gov().transferFrom(msg.sender, address(this), govFee), "transfer-failed");
         }
     }
 
@@ -51,8 +51,6 @@ contract PayProxyActions is DSMath {
             require(Gem(payGem).transferFrom(msg.sender, address(this), payAmt), "transfer-failed");
             // Trade it for govFee amount of MKR
             OtcInterface(otc).buyAllAmount(address(tub.gov()), govFee, payGem, payAmt);
-            // Transfer govFee amount of MKR to Migration contract
-            require(tub.gov().transfer(address(scdMcdMigration), govFee), "transfer-failed");
         }
     }
 
@@ -93,9 +91,6 @@ contract PayProxyActions is DSMath {
             }
             // Trade it for govFee amount of MKR
             OtcInterface(otc).buyAllAmount(address(tub.gov()), govFee, address(tub.sai()), payAmt);
-            // Transfer real needed govFee amount of MKR to Migration contract (it might leave some MKR dust in the proxy contract)
-            govFee = wdiv(tub.rap(cup), val);
-            require(tub.gov().transfer(address(scdMcdMigration), govFee), "transfer-failed");
         }
     }
 }
