@@ -33,7 +33,7 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
     Vat public vat = Vat(VAT_ADDRESS);
     Manager public manager = Manager(MANAGER_ADDRESS);
 
-    modifier isApprovedCaller(bytes32 _cdpId) {
+    modifier isApprovedCaller() {
         require(approvedCallers[msg.sender]);
         _;
     }
@@ -78,7 +78,7 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
         emit Unsubscribed(msg.sender, _cdpId);
     }
 
-    function migrateFor(bytes32 _cdpId) external isApprovedCaller(_cdpId) {
+    function migrateFor(bytes32 _cdpId) external isApprovedCaller() {
         uint256 startGas = gasleft();
 
         require(subscribers[_cdpId].cdpId == _cdpId);
@@ -99,8 +99,12 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
         }
 
         uint newVault = manager.last(subscribers[_cdpId].owner);
+        uint gasCost = calcTxCost(startGas);
 
-        drawCollateral(newVault, calcTxCost(startGas));
+        // Draw eth to pay for gas cost
+        DSProxyInterface(subscribers[_cdpId].owner).execute(PROXY_ACTIONS,
+                abi.encodeWithSignature("freeETH(address,address,uint256,uint256)", MANAGER_ADDRESS, ETH_JOIN_ADDRESS, newVault, gasCost));
+
 
         emit Migrated(_cdpId, newVault, subscribers[_cdpId].owner, block.timestamp);
     }

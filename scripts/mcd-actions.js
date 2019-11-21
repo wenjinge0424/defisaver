@@ -48,8 +48,8 @@ const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
 const mcdSaverProxyAddr = '0xDbfdfDBcA9f796Bf955B8B4EB2b46dBb51CaE30B';
 
-const automaticMigrationAddr = '0xeAc69774716667bC9e8ea35D7C5AAD22bd866bCA';
-const automaticMigrationProxyAddr = '0x1A469880789e4F7Efd089161fccf32b5aeBE49Bd';
+const automaticMigrationAddr = '0x1c5b6E44d9F9230C4B8d7f1c8C8fD5a6b38d0FD9';
+const automaticMigrationProxyAddr = '0x38009D77B35cbE297a385392A73fC0C03c80e529';
 
 const ilkData = {
     '1' : {
@@ -190,9 +190,9 @@ const initContracts = async () => {
     // const usersCdps = await getCDPsForAddress(proxyAddr);
     // console.log(usersCdps);
 
-    await subscribeForMigration('0x000000000000000000000000000000000000000000000000000000000000140a', 2);
+    await subscribeForMigration('0x0000000000000000000000000000000000000000000000000000000000001306', 2);
 
-    // await callMigration('0x000000000000000000000000000000000000000000000000000000000000140a');
+    // await callMigration('0x0000000000000000000000000000000000000000000000000000000000001306');
 
     // let oldCdpId = '0x0000000000000000000000000000000000000000000000000000000000001abb';
     // let ethAmount = '510000000000000000';
