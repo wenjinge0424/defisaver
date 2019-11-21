@@ -25,6 +25,11 @@ contract PayProxyActions is DSMath {
 
             // Get MKR from the user's wallet
             require(tub.gov().transferFrom(msg.sender, address(this), govFee), "transfer-failed");
+
+            // Approve tub to get SAI
+            tub.sai().approve(address(tub), amount);
+            // Approve tub to get MKR
+            tub.gov().approve(address(tub), govFee);
         }
     }
 
@@ -51,6 +56,11 @@ contract PayProxyActions is DSMath {
             require(Gem(payGem).transferFrom(msg.sender, address(this), payAmt), "transfer-failed");
             // Trade it for govFee amount of MKR
             OtcInterface(otc).buyAllAmount(address(tub.gov()), govFee, payGem, payAmt);
+
+            // Approve tub to get SAI
+            tub.sai().approve(address(tub), amount);
+            // Approve tub to get MKR
+            tub.gov().approve(address(tub), govFee);
         }
     }
 
@@ -91,6 +101,11 @@ contract PayProxyActions is DSMath {
             }
             // Trade it for govFee amount of MKR
             OtcInterface(otc).buyAllAmount(address(tub.gov()), govFee, address(tub.sai()), payAmt);
+
+            // Approve tub to get SAI
+            tub.sai().approve(address(tub), amount);
+            // Approve tub to get MKR
+            tub.gov().approve(address(tub), govFee);
         }
     }
 }
