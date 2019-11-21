@@ -59,9 +59,6 @@ contract PartialMigrationProxy is PayProxyActions, ConstantAddresses {
         _tub.give(_cdpId, address(SCD_MCD_MIGRATION));
         uint newCdpId = ScdMcdMigration(SCD_MCD_MIGRATION).migrate(_cdpId);
 
-        // Authorize
-        guard.forbid(MONITOR_ADDRESS, address(this), bytes4(keccak256("execute(address,bytes)")));
-
         return newCdpId;
     }
 
