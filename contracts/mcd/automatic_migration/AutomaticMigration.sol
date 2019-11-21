@@ -85,8 +85,6 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
 
         require(hasEnoughLiquidity(_cdpId));
 
-        uint newCdpId;
-
         MigrationType migType = subscribers[_cdpId].migType;
 
         if (migType == MigrationType.WITH_MKR) {
@@ -100,9 +98,11 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
                 abi.encodeWithSignature("migratePayFeeWithDebt(address,bytes32,address,uint256,uint256)", SCD_MCD_MIGRATION, _cdpId, OTC_ADDRESS, uint(-1), 0));
         }
 
-        // drawCollateral(newCdpId, calcTxCost(startGas));
+        uint newVault = manager.last(subscribers[_cdpId].owner);
 
-        emit Migrated(_cdpId, newCdpId, subscribers[_cdpId].owner, block.timestamp);
+        drawCollateral(newVault, calcTxCost(startGas));
+
+        emit Migrated(_cdpId, newVault, subscribers[_cdpId].owner, block.timestamp);
     }
 
     function hasEnoughLiquidity(bytes32 _cdpId) public returns (bool) {

@@ -1,6 +1,7 @@
 pragma solidity ^0.5.0;
 
 contract Manager {
+    function last(address) public returns (uint);
     function cdpCan(address, uint, address) public view returns (uint);
     function ilks(uint) public view returns (bytes32);
     function owns(uint) public view returns (address);
