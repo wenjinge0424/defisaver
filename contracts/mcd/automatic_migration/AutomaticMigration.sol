@@ -22,7 +22,7 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
         MigrationType migType;
     }
 
-    address public owner;
+    address payable public owner;
     uint public changeIndex;
 
     mapping (address => bool) public approvedCallers;
@@ -155,7 +155,6 @@ contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
     }
 
     /// @notice Gets the Eth acumulated for the fee
-    /// @param _caller Bot address
     function getFee() public onlyOwner {
         owner.transfer(address(this).balance);
     }
