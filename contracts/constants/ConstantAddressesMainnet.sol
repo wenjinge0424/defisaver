@@ -55,7 +55,7 @@ contract ConstantAddressesMainnet {
     address payable public constant SCD_MCD_MIGRATION = 0xc73e0383F3Aff3215E6f04B0331D58CeCf0Ab849;
 
     // Our contracts
-    address public constant SUBSCRIPTION_ADDRESS = 0x05A78A2a1Afeb699d73363D096659B53D3B1969E;
+    address public constant SUBSCRIPTION_ADDRESS = 0x83152CAA0d344a2Fd428769529e2d490A88f4393;
     address public constant MONITOR_ADDRESS = 0x3F4339816EDEF8D3d3970DB2993e2e0Ec6010760;
 
 }

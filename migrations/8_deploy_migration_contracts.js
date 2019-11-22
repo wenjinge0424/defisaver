@@ -11,6 +11,6 @@ module.exports = function(deployer, network, accounts) {
         // before deploying first add SUBSCRIPTION and MONITOR address in Constant Addresses
 
         await deployer.deploy(PartialMigration, {gas: maxGas, overwrite: deployAgain});
-        // await deployer.deploy(MonitorMigrate, {gas: maxGas, overwrite: deployAgain});
+        await deployer.deploy(MonitorMigrate, {gas: maxGas, overwrite: deployAgain});
     });
 };

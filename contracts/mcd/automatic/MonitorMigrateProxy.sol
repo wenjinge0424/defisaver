@@ -15,6 +15,8 @@ contract MonitorMigrateProxy is MigrationProxyActions, ConstantAddresses {
 
     enum MigrationType { WITH_MKR, WITH_CONVERSION, WITH_DEBT }
 
+    address public constant MONITOR_PROXY_ADDRESS = 0x93Efcf86b6a7a33aE961A7Ec6C741F49bce11DA7;
+
     /// @dev Called by DSProxy
     function migrateAndSubscribe(bytes32 _cdpId, uint _minRatio, MigrationType _type) external {
 
@@ -45,7 +47,7 @@ contract MonitorMigrateProxy is MigrationProxyActions, ConstantAddresses {
 
         // Authorize
         guard.forbid(address(monitor), address(this), bytes4(keccak256("execute(address,bytes)")));
-        guard.permit(address(sub), address(this), bytes4(keccak256("execute(address,bytes)")));
+        guard.permit(MONITOR_PROXY_ADDRESS, address(this), bytes4(keccak256("execute(address,bytes)")));
 
         // New Subscription
         sub.subscribe(
@@ -59,7 +61,7 @@ contract MonitorMigrateProxy is MigrationProxyActions, ConstantAddresses {
 
     function getDSGuard() internal view returns (DSGuard) {
         DSProxy proxy = DSProxy(address(uint160(address(this))));
-        DSAuth auth = DSAuth(address(proxy.authority));
+        DSAuth auth = DSAuth(address(proxy.authority()));
 
         return DSGuard(address(auth));
     }
