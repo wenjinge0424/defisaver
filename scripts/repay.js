@@ -33,19 +33,34 @@ function getAbiFunction(contract, functionName) {
 const getRatio = async (cdpId) => {
     const cdpInfo = await mcdSaverProxy.methods.getCdpDetailedInfo(cdpId).call();
 
+     console.log(cdpInfo.debt / 1e18);
+
     return ((cdpInfo.collateral * (cdpInfo.price / 1e27)) /  cdpInfo.debt) * 100;
 }
+
+const ratioAfterPayback = async (cdpId, amount) => {
+    const cdpInfo = await mcdSaverProxy.methods.getCdpDetailedInfo(cdpId).call();
+    const payedDebt = web3.utils.toWei(amount, 'ether');
+
+    return ((cdpInfo.collateral * (cdpInfo.price / 1e27)) /  (cdpInfo.debt - payedDebt)) * 100;
+};
 
 (async () => {
     await initContracts();
 
-    let affected = [767];
+    let affected = [683, 954, 626, 562];
 
     const ratio1 = await getRatio(affected[0]);
+    const ratio2 = await getRatio(affected[1]);
+    const ratio3 = await getRatio(affected[2]);
+    const ratio4 = await getRatio(affected[3]);
 
-    console.log(ratio1);
+    console.log(ratio1, ratio2, ratio3, ratio4);
 
-    // await payback(670, '20');
+    // const ratioAfter = await ratioAfterPayback(affected[0], '30');
+    // console.log(ratioAfter);
+
+   //  await payback(affected[2], '20');
 
 })();
 
