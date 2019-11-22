@@ -10,7 +10,7 @@ module.exports = function(deployer, network, accounts) {
     const maxGas = 6720000;
 
     deployer.then(async () => {
-        let mcdSaverProxyAddress = '0xDbfdfDBcA9f796Bf955B8B4EB2b46dBb51CaE30B';
+        let mcdSaverProxyAddress = '0x260c1543743fd03cd98a1d1edc3a4724af0a1fce';
         let botAddress = '0x5365a5bb25FF41C9D1E35c26259e0fa431d406be';
 
         // ------- first deploy this ----------
