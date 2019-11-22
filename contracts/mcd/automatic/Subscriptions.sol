@@ -152,12 +152,20 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
 
         require(subInfo.subscribed, "Must first be subscribed");
 
+        uint lastCdpId = subscribers[subscribers.length - 1].cdpId;
+
+        SubPosition storage subInfo2 = subscribersPos[lastCdpId];
+        subInfo2.arrPos = subInfo.arrPos;
+
         subscribers[subInfo.arrPos] = subscribers[subscribers.length - 1];
         delete subscribers[subscribers.length - 1];
         subscribers.length--;
 
+
+
         changeIndex++;
         subInfo.subscribed = false;
+        subInfo.arrPos = 0;
 
         emit Unsubscribed(msg.sender, _cdpId);
     }

@@ -1,14 +1,14 @@
 pragma solidity ^0.5.0;
 
+import "../../DS/DSMath.sol";
 import "../migration/SaiTubLike.sol";
 import "../maker/ScdMcdMigration.sol";
 import "../../constants/ConstantAddresses.sol";
-import "../migration/MigrationProxyActions.sol";
 import "../../interfaces/DSProxyInterface.sol";
 import "../maker/Manager.sol";
 import "../maker/Join.sol";
 
-contract AutomaticMigration is ConstantAddresses, MigrationProxyActions {
+contract AutomaticMigration is DSMath, ConstantAddresses {
 
     enum MigrationType { WITH_MKR, WITH_CONVERSION, WITH_DEBT }
 

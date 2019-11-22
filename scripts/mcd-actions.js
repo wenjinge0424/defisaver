@@ -48,8 +48,8 @@ const exchangeAddr = '0xB14aE674cfa02d9358B0e93440d751fd9Ab2831C';
 
 const mcdSaverProxyAddr = '0xDbfdfDBcA9f796Bf955B8B4EB2b46dBb51CaE30B';
 
-const automaticMigrationAddr = '0x16E479552Cea78CAb2c3Dc560cccB4360BAc899c';
-const automaticMigrationProxyAddr = '0x837B2De19e73b38856a7Fee10c9b60B5c9383F77';
+const automaticMigrationAddr = '0x8DdA02a8485919673261dd13966CFDe41612440F';
+const automaticMigrationProxyAddr = '0xe53c1293B1A47A3dE6268686E9d401b110913cD0';
 
 const ilkData = {
     '1' : {
@@ -187,12 +187,10 @@ const initContracts = async () => {
 
     // await getAvailableDaiForMigration();
 
-    // const usersCdps = await getCDPsForAddress(proxyAddr);
-    // console.log(usersCdps);
+    const usersCdps = await getCDPsForAddress(proxyAddr);
+    console.log(usersCdps);
 
-    await subscribeForMigration('0x0000000000000000000000000000000000000000000000000000000000001306', 2);
 
-    // await callMigration('0x0000000000000000000000000000000000000000000000000000000000001306');
 
     // let oldCdpId = '0x0000000000000000000000000000000000000000000000000000000000001abb';
     // let ethAmount = '510000000000000000';
@@ -222,9 +220,9 @@ const initContracts = async () => {
     // const cdp = await subscriptions.methods.getSubscribedInfo(usersCdps[0].cdpId).call();
     // console.log("cdp:", cdp);
 
-    // const res = await mcdSaverProxy.methods.getMaxCollateral(usersCdps[0].cdpId, getIlk('ETH')).call();
+    const res = await mcdSaverProxy.methods.getMaxCollateral(usersCdps[0].cdpId, getIlk('ETH')).call();
 
-    // console.log(res);
+    console.log(res);
 
    // await repay(usersCdps[1].cdpId, '3', 'ETH');
 
@@ -550,24 +548,9 @@ const subscribeForMigration = async (cdpId, type) => {
     try {
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(AutomaticMigrationProxy, 'subscribe'),
-          [cdpId, automaticMigrationAddr, type]);
+          [cdpId, type]);
 
         const tx = await proxy.methods['execute(address,bytes)'](automaticMigrationProxyAddr, data).send({
-            from: account.address, gas: 2200000});
-
-        console.log(tx);
-    } catch(err) {
-        console.log(err);
-    }
-};
-
-const callMigration = async (cdpId) => {
-    try {
-
-        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(AutomaticMigration, 'migrateFor'),
-          [cdpId]);
-
-        const tx = await proxy.methods['execute(address,bytes)'](automaticMigrationAddr, data).send({
             from: account.address, gas: 2200000});
 
         console.log(tx);
