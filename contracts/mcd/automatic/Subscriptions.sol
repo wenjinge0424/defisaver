@@ -161,8 +161,6 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
         delete subscribers[subscribers.length - 1];
         subscribers.length--;
 
-
-
         changeIndex++;
         subInfo.subscribed = false;
         subInfo.arrPos = 0;

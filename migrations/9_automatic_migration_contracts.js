@@ -1,5 +1,4 @@
-const AutomaticMigration = artifacts.require("./AutomaticMigration.sol");
-const AutomaticMigrationProxy = artifacts.require("./AutomaticMigrationProxy.sol");
+const Subscriptions = artifacts.require("./Subscriptions.sol");
 
 require('dotenv').config();
 
@@ -7,7 +6,6 @@ module.exports = function(deployer, network, accounts) {
     let deployAgain = (process.env.DEPLOY_AGAIN === 'true') ? true : false;
     const maxGas = 6720000;
 
-   deployer.deploy(AutomaticMigrationProxy, {gas: maxGas, overwrite: deployAgain});
-    deployer.deploy(AutomaticMigration, {gas: maxGas, overwrite: deployAgain});
+   deployer.deploy(Subscriptions, "0x322d58b9E75a6918f7e7849AEe0fF09369977e08", {gas: maxGas, overwrite: deployAgain});
 
 };

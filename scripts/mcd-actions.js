@@ -38,7 +38,7 @@ const spotterAddr = '0x3a042de6413edb15f2784f2f97cc68c7e9750b2d';
 const faucetAddr = '0x94598157fcf0715c3bc9b4a35450cce82ac57b20';
 
 const subscriptionsProxyAddr = '0x8e5a0fb6Cd9a38bE2CAABb83744f27acd20102A5';
-const subscriptionsAddr = '0xFC41f79776061a396635aD0b9dF7a640A05063C1';
+const subscriptionsAddr = '0xa71Ff713742420faC84Ed9Fe44db6bDF9DDFA73B';
 const mcdMonitorAddr = '0xfC1Fc0502e90B7A3766f93344E1eDb906F8A75DD';
 const mcdMonitorProxyAddr = '0xe414750C11DC8E47A81B31785880F8DcBc320D87';
 const monitorMigrateAddr = '0x07a597cCeFc9C3976F4D34a95eA9d455a2e1A1AC';
@@ -190,6 +190,9 @@ const initContracts = async () => {
     const usersCdps = await getCDPsForAddress(proxyAddr);
     console.log(usersCdps);
 
+    await subscribeCdp(usersCdps[2].cdpId, '17500000000000000000', '22200000000000000000', '20000000000000000000', '20000000000000000000');
+
+    // await unsubscribeCdp(usersCdps[1].cdpId);
 
 
     // let oldCdpId = '0x0000000000000000000000000000000000000000000000000000000000001abb';
@@ -220,9 +223,9 @@ const initContracts = async () => {
     // const cdp = await subscriptions.methods.getSubscribedInfo(usersCdps[0].cdpId).call();
     // console.log("cdp:", cdp);
 
-    const res = await mcdSaverProxy.methods.getMaxCollateral(usersCdps[0].cdpId, getIlk('ETH')).call();
+    // const res = await mcdSaverProxy.methods.getMaxCollateral(usersCdps[0].cdpId, getIlk('ETH')).call();
 
-    console.log(res);
+    // console.log(res);
 
    // await repay(usersCdps[1].cdpId, '3', 'ETH');
 
@@ -283,9 +286,21 @@ const subscribeCdp = async (cdpId, minRatio, maxRatio, optimalRatioBoost, optima
         });
 
         console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+}
 
-        const cdp = await subscriptions.methods.getSubscribedInfo(cdpId).call();
-        console.log("cdp:", cdp);
+const unsubscribeCdp = async (cdpId) => {
+    try {
+        data = web3.eth.abi.encodeFunctionCall(getAbiFunction(SubscriptionsProxy, 'unsubscribe'),
+            [cdpId, subscriptionsAddr]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](subscriptionsProxyAddr, data).send({
+            from: account.address, gas: 9000000
+        });
+
+        console.log(tx);
     } catch(err) {
         console.log(err);
     }
