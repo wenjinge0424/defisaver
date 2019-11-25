@@ -23,8 +23,5 @@ contract AutomaticMigrationProxy is ConstantAddresses {
 
     function unsubscribe(bytes32 _cdpId, address payable _automaticMigration) public {
         AutomaticMigration(_automaticMigration).unsubscribe(_cdpId);
-
-        DSGuard guard = DSGuard(address(DSAuth(address(this)).authority));
-        guard.forbid(_automaticMigration, address(this), bytes4(keccak256("execute(address,bytes)")));
     }
 }

@@ -35,8 +35,5 @@ contract SubscriptionsProxy is ConstantAddresses {
 
     function unsubscribe(uint _cdpId, address _subscriptions) public {
         SubscriptionsInterface(_subscriptions).unsubscribe(_cdpId);
-
-        DSGuard guard = DSGuard(address(DSAuth(address(this)).authority));
-        guard.forbid(MONITOR_PROXY_ADDRESS, address(this), bytes4(keccak256("execute(address,bytes)")));
     }
 }

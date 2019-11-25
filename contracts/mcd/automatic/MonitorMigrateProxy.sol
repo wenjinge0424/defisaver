@@ -46,7 +46,6 @@ contract MonitorMigrateProxy is MigrationProxyActions, ConstantAddresses {
         }
 
         // Authorize
-        guard.forbid(address(monitor), address(this), bytes4(keccak256("execute(address,bytes)")));
         guard.permit(MONITOR_PROXY_ADDRESS, address(this), bytes4(keccak256("execute(address,bytes)")));
 
         // New Subscription
