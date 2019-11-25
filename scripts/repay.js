@@ -48,19 +48,27 @@ const ratioAfterPayback = async (cdpId, amount) => {
 (async () => {
     await initContracts();
 
-    let affected = [683, 954, 626, 562];
+    let affected = [683, 954, 562];
 
     const ratio1 = await getRatio(affected[0]);
     const ratio2 = await getRatio(affected[1]);
     const ratio3 = await getRatio(affected[2]);
-    const ratio4 = await getRatio(affected[3]);
 
-    console.log(ratio1, ratio2, ratio3, ratio4);
+    console.log(ratio1, ratio2, ratio3);
 
-    // const ratioAfter = await ratioAfterPayback(affected[0], '30');
-    // console.log(ratioAfter);
+    //  if (ratio3 < 168) {
+    //     await payback(affected[2], '1');
+    // }
 
-   //  await payback(affected[2], '20');
+    // if (ratio1 < 165) {
+    //     await payback(affected[0], '10');
+    // }
+
+    // if (ratio2 < 165) {
+    //     await payback(affected[1], '30');
+    // }
+
+    console.log('All gud');
 
 })();
 
@@ -74,7 +82,7 @@ const payback = async (cdpId, daiAmount) => {
           ['0x5ef30b9986345249bc32d8928b7ee64de9435e39', '0x9759a6ac90977b93b58547b4a71c78317f391a28', cdpId, daiAmount]);
 
         const tx = await proxy.methods['execute(address,bytes)']('0xa483cfe6403949bf38c74f8c340651fb02246d21', data).send({
-            from: account.address, gas: 400000});
+            from: account.address, gas: 400000, gasPrice: 21100000000});
 
         console.log(tx);
     } catch(err) {
