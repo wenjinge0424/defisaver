@@ -8,8 +8,13 @@ import "./AutomaticMigration.sol";
 contract AutomaticMigrationProxy is ConstantAddresses {
 
     function subscribe(bytes32 _cdpId, address payable _automaticMigration, AutomaticMigration.MigrationType _type) public {
-        DSGuard guard = DSGuardFactory(FACTORY_ADDRESS).newGuard();
-        DSAuth(address(this)).setAuthority(DSAuthority(address(guard)));
+        address currAuthority = address(DSAuth(address(this)).authority());
+        DSGuard guard = DSGuard(currAuthority);
+
+        if (currAuthority == address(0)) {
+            guard = DSGuardFactory(FACTORY_ADDRESS).newGuard();
+            DSAuth(address(this)).setAuthority(DSAuthority(address(guard)));
+        }
 
         guard.permit(_automaticMigration, address(this), bytes4(keccak256("execute(address,bytes)")));
 
