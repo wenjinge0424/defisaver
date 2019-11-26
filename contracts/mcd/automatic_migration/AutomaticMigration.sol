@@ -16,6 +16,8 @@ contract AutomaticMigration is DSMath, ConstantAddresses {
 
     uint MAX_GAS_PRICE = 50000000000;
 
+    address public constant CUSTOM_MIGRATION_ACTIONS_PROXY = 0x4128638037EB777E47BBA38e8c77f342178Ae760;
+
     struct Subscription {
         bytes32 cdpId;
         address owner;
@@ -88,18 +90,20 @@ contract AutomaticMigration is DSMath, ConstantAddresses {
         MigrationType migType = subscribers[_cdpId].migType;
 
         if (migType == MigrationType.WITH_MKR) {
-            DSProxyInterface(subscribers[_cdpId].owner).execute(MIGRATION_ACTIONS_PROXY,
+            DSProxyInterface(subscribers[_cdpId].owner).execute(CUSTOM_MIGRATION_ACTIONS_PROXY,
                 abi.encodeWithSignature("migrate(address,bytes32)", SCD_MCD_MIGRATION, _cdpId));
         } else if (migType == MigrationType.WITH_CONVERSION) {
-            DSProxyInterface(subscribers[_cdpId].owner).execute(MIGRATION_ACTIONS_PROXY,
+            DSProxyInterface(subscribers[_cdpId].owner).execute(CUSTOM_MIGRATION_ACTIONS_PROXY,
                 abi.encodeWithSignature("migratePayFeeWithGem(address,bytes32,address,address,uint256)", SCD_MCD_MIGRATION, _cdpId, OTC_ADDRESS, MAKER_DAI_ADDRESS, uint(-1)));
         } else if (migType == MigrationType.WITH_DEBT) {
-             DSProxyInterface(subscribers[_cdpId].owner).execute(MIGRATION_ACTIONS_PROXY,
+             DSProxyInterface(subscribers[_cdpId].owner).execute(CUSTOM_MIGRATION_ACTIONS_PROXY,
                 abi.encodeWithSignature("migratePayFeeWithDebt(address,bytes32,address,uint256,uint256)", SCD_MCD_MIGRATION, _cdpId, OTC_ADDRESS, uint(-1), 0));
         }
 
         uint newVault = manager.last(subscribers[_cdpId].owner);
-        uint gasCost = calcTxCost(startGas);
+
+        uint currGasLeft = gasleft();
+        uint gasCost = calcTxCost(startGas, currGasLeft);
 
         // Draw eth to pay for gas cost
         DSProxyInterface(subscribers[_cdpId].owner).execute(PROXY_ACTIONS,
@@ -124,9 +128,11 @@ contract AutomaticMigration is DSMath, ConstantAddresses {
         ( , , cdpDebt, ) = tubContract.cups(_cdpId);
     }
 
-    function calcTxCost(uint _startGas) public view returns(uint) {
-        uint gasUsed = sub(_startGas, gasleft());
+    function calcTxCost(uint _startGas, uint _currGasLeft) public view returns(uint) {
+        uint gasUsed = sub(_startGas, _currGasLeft);
         uint gasPrice = tx.gasprice > MAX_GAS_PRICE ? MAX_GAS_PRICE : tx.gasprice;
+
+        gasUsed = add(gasUsed, 180000); // add for freeEth and log
 
         return mul(gasPrice, gasUsed);
     }
