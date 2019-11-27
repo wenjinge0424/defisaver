@@ -16,7 +16,7 @@ contract AutomaticMigration is DSMath, ConstantAddresses {
 
     uint MAX_GAS_PRICE = 50000000000;
 
-    address public constant CUSTOM_MIGRATION_ACTIONS_PROXY = 0x4128638037EB777E47BBA38e8c77f342178Ae760;
+    address public constant CUSTOM_MIGRATION_ACTIONS_PROXY = 0xc2429Ea56D3Eb580c9bda2A8ee08Fb8837Cb400c;
 
     struct Subscription {
         bytes32 cdpId;

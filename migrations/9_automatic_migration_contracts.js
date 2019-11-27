@@ -12,6 +12,6 @@ module.exports = function(deployer, network, accounts) {
    // deployer.deploy(CustomMigrationProxyActions, {gas: maxGas, overwrite: deployAgain});
 
     // then this, switch in AutomaticMigration the addr
-   // deployer.deploy(AutomaticMigrationProxy, {gas: maxGas, overwrite: deployAgain});
+    deployer.deploy(AutomaticMigrationProxy, {gas: maxGas, overwrite: deployAgain});
    deployer.deploy(AutomaticMigration, {gas: maxGas, overwrite: deployAgain});
 };
