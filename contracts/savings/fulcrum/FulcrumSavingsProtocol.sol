@@ -19,28 +19,28 @@ contract FulcrumSavingsProtocol is ProtocolInterface, ConstantAddresses, DSAuth 
         require(msg.sender == _user);
 
         // get dai from user
-        require(ERC20(MAKER_DAI_ADDRESS).transferFrom(_user, address(this), _amount));
+        require(ERC20(DAI_ADDRESS).transferFrom(_user, address(this), _amount));
 
         // approve dai to Fulcrum
-        ERC20(MAKER_DAI_ADDRESS).approve(IDAI_ADDRESS, uint(-1));
+        ERC20(DAI_ADDRESS).approve(NEW_IDAI_ADDRESS, uint(-1));
 
         // mint iDai
-        ITokenInterface(IDAI_ADDRESS).mint(_user, _amount);
+        ITokenInterface(NEW_IDAI_ADDRESS).mint(_user, _amount);
     }
 
     function withdraw(address _user, uint _amount) public {
         require(msg.sender == _user);
 
         // transfer all users tokens to our contract
-        require(ERC20(IDAI_ADDRESS).transferFrom(_user, address(this), ITokenInterface(IDAI_ADDRESS).balanceOf(_user)));
+        require(ERC20(NEW_IDAI_ADDRESS).transferFrom(_user, address(this), ITokenInterface(NEW_IDAI_ADDRESS).balanceOf(_user)));
 
         // approve iDai to that contract
-        ERC20(IDAI_ADDRESS).approve(IDAI_ADDRESS, uint(-1));
+        ERC20(NEW_IDAI_ADDRESS).approve(NEW_IDAI_ADDRESS, uint(-1));
 
         // get dai from iDai contract
-        ITokenInterface(IDAI_ADDRESS).burn(_user, _amount);
+        ITokenInterface(NEW_IDAI_ADDRESS).burn(_user, _amount);
 
         // return all remaining tokens back to user
-        require(ERC20(IDAI_ADDRESS).transfer(_user, ITokenInterface(IDAI_ADDRESS).balanceOf(address(this))));
+        require(ERC20(NEW_IDAI_ADDRESS).transfer(_user, ITokenInterface(NEW_IDAI_ADDRESS).balanceOf(address(this))));
     }
 }
