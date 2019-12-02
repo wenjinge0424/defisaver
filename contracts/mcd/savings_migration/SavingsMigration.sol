@@ -5,6 +5,7 @@ import "../migration/SaiTubLike.sol";
 import "../../interfaces/ITokenInterface.sol";
 import "../../interfaces/DSProxyInterface.sol";
 import "../../interfaces/CTokenInterface.sol";
+import "../../interfaces/ERC20.sol";
 import "../../constants/ConstantAddresses.sol";
 
 contract SavingsProxyInterface {
@@ -52,5 +53,22 @@ contract SavingsMigration is ConstantAddresses {
             DSProxyInterface(address(this)).execute(NEW_PROXY_ADDRESS,
                 abi.encodeWithSignature("deposit(uint8,uint256)", SavingsProxyInterface.SavingsProtocol.Fulcrum, fulcrumBalance));
         }
+    }
+
+    function withdraw() external {
+        uint fulcrumBalance = iDai.assetBalanceOf(address(this));
+        uint compoundBalance = cDai.balanceOfUnderlying(address(this));
+
+        if (compoundBalance != 0) {
+            DSProxyInterface(address(this)).execute(OLD_PROXY_ADDRESS,
+                abi.encodeWithSignature("withdraw(uint8,uint256)", SavingsProxyInterface.SavingsProtocol.Compound, compoundBalance));
+        }
+
+        if (fulcrumBalance != 0) {
+            DSProxyInterface(address(this)).execute(OLD_PROXY_ADDRESS,
+                abi.encodeWithSignature("withdraw(uint8,uint256)", SavingsProxyInterface.SavingsProtocol.Fulcrum, fulcrumBalance));
+        }
+
+        ERC20(SAI_ADDRESS).transfer(msg.sender, ERC20(SAI_ADDRESS).balanceOf(address(this)));
     }
 }
