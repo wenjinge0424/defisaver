@@ -18,6 +18,7 @@ const ERC20 = require('../build/contracts/ERC20.json');
 const ExchangeInterface = require('../build/contracts/SaverExchangeInterface.json');
 const MonitorMigrate = require('../build/contracts/MonitorMigrateProxy.json');
 const PartialMigrate = require('../build/contracts/PartialMigrationProxy.json');
+const SavingsProxy = require('../build/contracts/SavingsProxy.json');
 
 const SubscriptionsProxy = require('../build/contracts/SubscriptionsProxy.json');
 const Subscriptions = require('../build/contracts/Subscriptions.json');
@@ -50,6 +51,8 @@ const mcdSaverProxyAddr = '0xDbfdfDBcA9f796Bf955B8B4EB2b46dBb51CaE30B';
 
 const automaticMigrationAddr = '0x8DdA02a8485919673261dd13966CFDe41612440F';
 const automaticMigrationProxyAddr = '0xe53c1293B1A47A3dE6268686E9d401b110913cD0';
+
+const savingsProxyAddr = '0x5bc8a712Aac5965E2Ef7428b59645D46a6c1cc6d';
 
 const ilkData = {
     '1' : {
@@ -149,7 +152,8 @@ let web3,
     monitorMigrate,
     partialMigrate,
     automaticMigration,
-    automaticMigrationProxy;
+    automaticMigrationProxy,
+    savingsProxy;
 
 const initContracts = async () => {
     web3 = new Web3(new Web3.providers.HttpProvider(process.env.KOVAN_INFURA_ENDPOINT));
@@ -180,6 +184,8 @@ const initContracts = async () => {
 
     automaticMigration = new web3.eth.Contract(AutomaticMigration.abi, automaticMigrationAddr);
     automaticMigrationProxy = new web3.eth.Contract(AutomaticMigrationProxy.abi, automaticMigrationProxyAddr);
+
+    savingsProxy = new web3.eth.Contract(SavingsProxy.abi, savingsProxyAddr);
 };
 
 (async () => {
@@ -190,10 +196,10 @@ const initContracts = async () => {
     const usersCdps = await getCDPsForAddress(proxyAddr);
     console.log(usersCdps);
 
-    await subscribeCdp(usersCdps[2].cdpId, '17500000000000000000', '22200000000000000000', '20000000000000000000', '20000000000000000000');
+    // await depositDsr('139');
+    await withdrawDsr('100');
 
     // await unsubscribeCdp(usersCdps[1].cdpId);
-
 
     // let oldCdpId = '0x0000000000000000000000000000000000000000000000000000000000001abb';
     // let ethAmount = '510000000000000000';
@@ -566,6 +572,39 @@ const subscribeForMigration = async (cdpId, type) => {
           [cdpId, type]);
 
         const tx = await proxy.methods['execute(address,bytes)'](automaticMigrationProxyAddr, data).send({
+            from: account.address, gas: 2200000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+
+const depositDsr = async (amount) => {
+    try {
+        const daiAmount = web3.utils.toWei(amount, 'ether');
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(SavingsProxy, 'deposit'),
+          [3, daiAmount]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](savingsProxyAddr, data).send({
+            from: account.address, gas: 2200000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+const withdrawDsr = async (amount) => {
+    try {
+        const daiAmount = web3.utils.toWei(amount, 'ether');
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(SavingsProxy, 'withdraw'),
+          [3, daiAmount]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](savingsProxyAddr, data).send({
             from: account.address, gas: 2200000});
 
         console.log(tx);

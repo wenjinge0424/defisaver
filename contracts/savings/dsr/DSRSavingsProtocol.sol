@@ -14,9 +14,8 @@ contract VatLike {
 }
 
 contract PotLike {
-    function chi() public view returns (uint);
     function pie(address) public view returns (uint);
-    function drip() public;
+    function drip() public returns (uint);
     function join(uint) public;
     function exit(uint) public;
 }
@@ -36,16 +35,20 @@ contract DaiJoinLike {
     function exit(address, uint) public;
 }
 
-contract DSRProtocol is DSMath {
+contract DSRSavingsProtocol is DSMath {
 
-    // Kovan not sure what are mainnet addrs
-    address public constant DAI_JOIN_ADDRESS = 0x61Af28390D0B3E806bBaF09104317cb5d26E215D;
-    address public constant POT_ADDRESS = 0x24e89801DAD4603a3E2280eE30FB77f183Cb9eD9;
+    // Kovan
+    // address public constant DAI_JOIN_ADDRESS = 0x5AA71a3ae1C0bd6ac27A1f28e1415fFFB6F15B8c;
+    // address public constant POT_ADDRESS = 0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb;
+
+    // Mainnet
+    address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
+    address public constant POT_ADDRESS = 0x197E90f9FAD81970bA7976f33CbD77088E5D7cf7;
 
     function dsrDeposit(uint _amount) internal {
         VatLike vat = DaiJoinLike(DAI_JOIN_ADDRESS).vat();
 
-        PotLike(POT_ADDRESS).drip();
+        uint chi = PotLike(POT_ADDRESS).drip();
 
         daiJoin_join(DAI_JOIN_ADDRESS, address(this), _amount);
 
@@ -53,30 +56,31 @@ contract DSRProtocol is DSMath {
             vat.hope(POT_ADDRESS);
         }
 
-        PotLike(POT_ADDRESS).join(mul(_amount, RAY) / PotLike(POT_ADDRESS).chi());
+        PotLike(POT_ADDRESS).join(mul(_amount, RAY) / chi);
     }
 
     function dsrWithdraw(uint _amount) internal {
         VatLike vat = DaiJoinLike(DAI_JOIN_ADDRESS).vat();
 
-        PotLike(POT_ADDRESS).drip();
-
-        uint pie = mul(_amount, RAY) / PotLike(POT_ADDRESS).chi();
+        uint chi = PotLike(POT_ADDRESS).drip();
+        uint pie = mul(_amount, RAY) / chi;
 
         PotLike(POT_ADDRESS).exit(pie);
-
-        uint bal = DaiJoinLike(DAI_JOIN_ADDRESS).vat().dai(address(this));
+        uint balance = DaiJoinLike(DAI_JOIN_ADDRESS).vat().dai(address(this));
 
         if (vat.can(address(this), address(DAI_JOIN_ADDRESS)) == 0) {
             vat.hope(DAI_JOIN_ADDRESS);
         }
 
-        DaiJoinLike(DAI_JOIN_ADDRESS).exit(
-            msg.sender,
-            bal >= mul(_amount, RAY) ? _amount : bal / RAY
-        );
+        if (_amount == uint(-1)) {
+            DaiJoinLike(DAI_JOIN_ADDRESS).exit(msg.sender, mul(chi, pie) / RAY);
+        } else {
+            DaiJoinLike(DAI_JOIN_ADDRESS).exit(
+                msg.sender,
+                balance >= mul(_amount, RAY) ? _amount : balance / RAY
+            );
+        }
     }
-
 
     function daiJoin_join(address apt, address urn, uint wad) internal {
         DaiJoinLike(apt).dai().transferFrom(msg.sender, address(this), wad);

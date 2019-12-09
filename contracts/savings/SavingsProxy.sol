@@ -7,13 +7,13 @@ import "../interfaces/ITokenInterface.sol";
 import "../constants/ConstantAddresses.sol";
 import "./dydx/ISoloMargin.sol";
 import "./SavingsLogger.sol";
-import "./dsr/DSRProtocol.sol";
+import "./dsr/DSRSavingsProtocol.sol";
 
-contract SavingsProxy is ConstantAddresses, DSRProtocol {
+contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
 
-    address constant public SAVINGS_COMPOUND_ADDRESS = 0xba7676a6c3E2FFff9f8d16e9C7b1e7848CC0f7DE;
-    address constant public SAVINGS_DYDX_ADDRESS = 0x97a13567879471E1d6a3C37AB1017321980cd0ca;
-    address constant public SAVINGS_FULCRUM_ADDRESS = 0x0F0277EE54403a46f12D68Eeb49e444FE0bd4682;
+    address constant public SAVINGS_COMPOUND_ADDRESS = 0x457F044216E34807E525DF8dB62EAD3bA24b6C48;
+    address constant public SAVINGS_DYDX_ADDRESS = 0xf14521B32342B518164587EAAC64AF22Fdf08Ae0;
+    address constant public SAVINGS_FULCRUM_ADDRESS = 0x589BAad81ef3e995CD7617f52FE9aC6A2F6C20Ed;
 
     enum SavingsProtocol { Compound, Dydx, Fulcrum, Dsr }
 
