@@ -1,6 +1,12 @@
 pragma solidity ^0.5.0;
 
 import "../maker/ScdMcdMigration.sol";
+import "../migration/SaiTubLike.sol";
+import "../../interfaces/ITokenInterface.sol";
+import "../../interfaces/DSProxyInterface.sol";
+import "../../interfaces/CTokenInterface.sol";
+import "../../interfaces/ERC20.sol";
+import "../../constants/ConstantAddresses.sol";
 
 contract SavingsProxyInterface {
     enum SavingsProtocol { Compound, Dydx, Fulcrum, Dsr }
@@ -9,40 +15,60 @@ contract SavingsProxyInterface {
     function withdraw(SavingsProtocol _protocol, uint _amount) public;
 }
 
-contract SavingsMigration {
+contract SavingsMigration is ConstantAddresses {
 
-    SavingsProxyInterface public constant oldSavingsProxy = SavingsProxyInterface(address(0));
-    SavingsProxyInterface public constant newSavingsProxy = SavingsProxyInterface(address(0));
+    address public constant OLD_PROXY_ADDRESS = 0x296420A79fE17B72Eb4749ca26d4E53602f4EDef;
+    address public constant NEW_PROXY_ADDRESS = 0x622C283769e08Da806d938EB493cb8C4Cb47E64C;
+    ScdMcdMigration public constant scdMcdMigration = ScdMcdMigration(SCD_MCD_MIGRATION);
+    ITokenInterface public constant iDai = ITokenInterface(IDAI_ADDRESS);
+    CTokenInterface public constant cDai = CTokenInterface(CDAI_ADDRESS);
 
-    ScdMcdMigration public constant migrationContract = ScdMcdMigration(address(0));
+    function migrateSavings() external {
 
-    function migrateSavings(uint _compoundBalance, uint _dydxBalance, uint _fulcrumBalance) external {
+        uint fulcrumBalance = iDai.assetBalanceOf(address(this));
+        uint compoundBalance = cDai.balanceOfUnderlying(address(this));
 
-        if (_compoundBalance != 0) {
-            oldSavingsProxy.withdraw(SavingsProxyInterface.SavingsProtocol.Compound, _compoundBalance);
+        if (compoundBalance != 0) {
+            DSProxyInterface(address(this)).execute(OLD_PROXY_ADDRESS,
+                abi.encodeWithSignature("withdraw(uint8,uint256)", SavingsProxyInterface.SavingsProtocol.Compound, compoundBalance));
         }
 
-        if (_dydxBalance != 0) {
-            oldSavingsProxy.withdraw(SavingsProxyInterface.SavingsProtocol.Dydx, _dydxBalance);
+        if (fulcrumBalance != 0) {
+            DSProxyInterface(address(this)).execute(OLD_PROXY_ADDRESS,
+                abi.encodeWithSignature("withdraw(uint8,uint256)", SavingsProxyInterface.SavingsProtocol.Fulcrum, fulcrumBalance));
         }
 
-        if (_fulcrumBalance != 0) {
-            oldSavingsProxy.withdraw(SavingsProxyInterface.SavingsProtocol.Fulcrum, _fulcrumBalance);
+        uint sumOfSai = compoundBalance + fulcrumBalance;
+
+        Gem sai = SaiTubLike(scdMcdMigration.tub()).sai();
+        sai.approve(address(scdMcdMigration), sumOfSai);
+        scdMcdMigration.swapSaiToDai(sumOfSai);
+
+        if (compoundBalance != 0) {
+            DSProxyInterface(address(this)).execute(NEW_PROXY_ADDRESS,
+                abi.encodeWithSignature("deposit(uint8,uint256)", SavingsProxyInterface.SavingsProtocol.Compound, compoundBalance));
         }
 
-        uint sumOfSai = _compoundBalance + _dydxBalance + _fulcrumBalance;
-        migrationContract.swapSaiToDai(sumOfSai);
+        if (fulcrumBalance != 0) {
+            DSProxyInterface(address(this)).execute(NEW_PROXY_ADDRESS,
+                abi.encodeWithSignature("deposit(uint8,uint256)", SavingsProxyInterface.SavingsProtocol.Fulcrum, fulcrumBalance));
+        }
+    }
 
-        if (_compoundBalance != 0) {
-            newSavingsProxy.deposit(SavingsProxyInterface.SavingsProtocol.Compound, _compoundBalance);
+    function withdraw() external {
+        uint fulcrumBalance = iDai.assetBalanceOf(address(this));
+        uint compoundBalance = cDai.balanceOfUnderlying(address(this));
+
+        if (compoundBalance != 0) {
+            DSProxyInterface(address(this)).execute(OLD_PROXY_ADDRESS,
+                abi.encodeWithSignature("withdraw(uint8,uint256)", SavingsProxyInterface.SavingsProtocol.Compound, compoundBalance));
         }
 
-        if (_dydxBalance != 0) {
-            newSavingsProxy.deposit(SavingsProxyInterface.SavingsProtocol.Dydx, _dydxBalance);
+        if (fulcrumBalance != 0) {
+            DSProxyInterface(address(this)).execute(OLD_PROXY_ADDRESS,
+                abi.encodeWithSignature("withdraw(uint8,uint256)", SavingsProxyInterface.SavingsProtocol.Fulcrum, fulcrumBalance));
         }
 
-        if (_fulcrumBalance != 0) {
-            newSavingsProxy.deposit(SavingsProxyInterface.SavingsProtocol.Fulcrum, _fulcrumBalance);
-        }
+        ERC20(SAI_ADDRESS).transfer(msg.sender, ERC20(SAI_ADDRESS).balanceOf(address(this)));
     }
 }

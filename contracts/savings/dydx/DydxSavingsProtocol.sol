@@ -11,14 +11,12 @@ contract DydxSavingsProtocol is ProtocolInterface, ConstantAddresses, DSAuth {
 
 
     ISoloMargin public soloMargin;
-    ERC20 public dai;
     address public savingsProxy;
 
-    uint daiMarketId = 1;
+    uint daiMarketId = 3;
 
     constructor() public {
         soloMargin = ISoloMargin(SOLO_MARGIN_ADDRESS);
-        dai = ERC20(MAKER_DAI_ADDRESS);
     }
 
     function addSavingsProxy(address _savingsProxy) public auth {

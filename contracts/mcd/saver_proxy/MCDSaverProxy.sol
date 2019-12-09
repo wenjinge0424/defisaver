@@ -254,7 +254,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
         (, uint mat) = Spotter(SPOTTER_ADDRESS).ilks(_ilk);
 
-        return sub(collateral, (wdiv(wmul(mat, debt), price)));
+        return sub(collateral, (div(mul(mat, debt), price)));
     }
 
     /// @notice Gets the maximum amount of debt available to generate

@@ -28,6 +28,8 @@ const MCDMonitor = require('../build/contracts/MCDMonitor.json');
 const AutomaticMigration = require('../build/contracts/AutomaticMigration.json');
 const AutomaticMigrationProxy = require('../build/contracts/AutomaticMigrationProxy.json');
 
+const SavingsMigrationProxy = require('../build/contracts/SavingsMigration.json');
+
 const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
 const proxyActionsAddr = '0x3b411dbf49ad4768fe581be2cb3d14bf513116ad';
 const cdpManagerAddr = '0x1476483dd8c35f25e568113c5f70249d3976ba21';
@@ -52,7 +54,11 @@ const mcdSaverProxyAddr = '0xDbfdfDBcA9f796Bf955B8B4EB2b46dBb51CaE30B';
 const automaticMigrationAddr = '0x8DdA02a8485919673261dd13966CFDe41612440F';
 const automaticMigrationProxyAddr = '0xe53c1293B1A47A3dE6268686E9d401b110913cD0';
 
+<<<<<<< HEAD
 const savingsProxyAddr = '0x5bc8a712Aac5965E2Ef7428b59645D46a6c1cc6d';
+=======
+const savingsMigrationProxyAddr = '0x2C6bbd638FfEE611a1C007FEe25F445437318264';
+>>>>>>> f3d9c6342fdb19df8faa5c743ec60fa3308817f6
 
 const ilkData = {
     '1' : {
@@ -153,7 +159,11 @@ let web3,
     partialMigrate,
     automaticMigration,
     automaticMigrationProxy,
+<<<<<<< HEAD
     savingsProxy;
+=======
+    savingsMigrationProxy;
+>>>>>>> f3d9c6342fdb19df8faa5c743ec60fa3308817f6
 
 const initContracts = async () => {
     web3 = new Web3(new Web3.providers.HttpProvider(process.env.KOVAN_INFURA_ENDPOINT));
@@ -161,6 +171,7 @@ const initContracts = async () => {
     account = web3.eth.accounts.privateKeyToAccount('0x'+process.env.PRIV_KEY)
     web3.eth.accounts.wallet.add(account)
 
+<<<<<<< HEAD
     registry = new web3.eth.Contract(ProxyRegistryInterface.abi, proxyRegistryAddr);
 
     proxyAddr = await registry.methods.proxies(account.address).call();
@@ -186,18 +197,51 @@ const initContracts = async () => {
     automaticMigrationProxy = new web3.eth.Contract(AutomaticMigrationProxy.abi, automaticMigrationProxyAddr);
 
     savingsProxy = new web3.eth.Contract(SavingsProxy.abi, savingsProxyAddr);
+=======
+    // registry = new web3.eth.Contract(ProxyRegistryInterface.abi, proxyRegistryAddr);
+
+    // proxyAddr = await registry.methods.proxies(account.address).call();
+    proxy = new web3.eth.Contract(DSProxy.abi, '0x81D217E8063F5E1f002c99ef2f686576876Fade3');
+
+    // join = new web3.eth.Contract(Join.abi, '0x92a3b1c0882e6e17aa41c5116e01b0b9cf117cf2');
+    // getCdps = new web3.eth.Contract(GetCdps.abi, getCdpsAddr);
+    // vat = new web3.eth.Contract(Vat.abi, vatAddr);
+    // jug = new web3.eth.Contract(Jug.abi, jugAddr);
+    // spotter = new web3.eth.Contract(Spotter.abi, spotterAddr);
+    // mcdSaverProxy = new web3.eth.Contract(MCDSaverProxy.abi, mcdSaverProxyAddr);
+    // faucet = new web3.eth.Contract(Faucet.abi, faucetAddr);
+    // exchange = new web3.eth.Contract(ExchangeInterface.abi, exchangeAddr);
+
+    // mcdMonitor = new web3.eth.Contract(MCDMonitor.abi, mcdMonitorAddr);
+    // mcdMonitorProxy = new web3.eth.Contract(MCDMonitorProxy.abi, mcdMonitorProxyAddr);
+    // subscriptionsProxy = new web3.eth.Contract(SubscriptionsProxy.abi, subscriptionsProxyAddr);
+    // subscriptions = new web3.eth.Contract(Subscriptions.abi, subscriptionsAddr);
+    // monitorMigrate = new web3.eth.Contract(MonitorMigrate.abi, monitorMigrateAddr);
+    // partialMigrate = new web3.eth.Contract(PartialMigrate.abi, partialMigrateAddr);
+
+    // automaticMigration = new web3.eth.Contract(AutomaticMigration.abi, automaticMigrationAddr);
+    // automaticMigrationProxy = new web3.eth.Contract(AutomaticMigrationProxy.abi, automaticMigrationProxyAddr);
+
+    savingsMigrationProxy = new web3.eth.Contract(SavingsMigrationProxy.abi, savingsMigrationProxyAddr);
+>>>>>>> f3d9c6342fdb19df8faa5c743ec60fa3308817f6
 };
 
 (async () => {
     await initContracts();
 
+    await migrateSavings();
+
     // await getAvailableDaiForMigration();
 
-    const usersCdps = await getCDPsForAddress(proxyAddr);
-    console.log(usersCdps);
+    // const usersCdps = await getCDPsForAddress(proxyAddr);
+    // console.log(usersCdps);
 
+<<<<<<< HEAD
     // await depositDsr('139');
     await withdrawDsr('100');
+=======
+    // await subscribeCdp(usersCdps[2].cdpId, '17500000000000000000', '22200000000000000000', '20000000000000000000', '20000000000000000000');
+>>>>>>> f3d9c6342fdb19df8faa5c743ec60fa3308817f6
 
     // await unsubscribeCdp(usersCdps[1].cdpId);
 
@@ -257,6 +301,25 @@ const initContracts = async () => {
 
 
 })();
+
+const migrateSavings = async () => {
+    try {
+        console.log('preparing');
+
+        data = web3.eth.abi.encodeFunctionCall(getAbiFunction(SavingsMigrationProxy, 'migrateSavings'),
+            []);
+
+        console.log('data', data);
+
+        const tx = await proxy.methods['execute(address,bytes)'](savingsMigrationProxyAddr, data).send({
+            from: account.address, gas: 4000000, nonce: 179, gasPrice: 4100000000
+        });
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+}
 
 const repayFor = async (cdpId, amount, collateralJoin) => {
     try {

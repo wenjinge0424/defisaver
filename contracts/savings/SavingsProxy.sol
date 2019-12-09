@@ -15,24 +15,17 @@ contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
     address constant public SAVINGS_DYDX_ADDRESS = 0xf14521B32342B518164587EAAC64AF22Fdf08Ae0;
     address constant public SAVINGS_FULCRUM_ADDRESS = 0x589BAad81ef3e995CD7617f52FE9aC6A2F6C20Ed;
 
-    enum SavingsProtocol { Compound, Dydx, Fulcrum, Dsr }
+    enum SavingsProtocol { Compound, Dydx, Fulcrum }
 
     function deposit(SavingsProtocol _protocol, uint _amount) public {
-        if (_protocol == SavingsProtocol.Dsr) {
-            dsrDeposit(_amount);
-        } else {
-            _deposit(_protocol, _amount);
-        }
+
+        _deposit(_protocol, _amount);
 
         SavingsLogger(SAVINGS_LOGGER_ADDRESS).logDeposit(msg.sender, uint8(_protocol), _amount);
     }
 
     function withdraw(SavingsProtocol _protocol, uint _amount) public {
-        if (_protocol == SavingsProtocol.Dsr) {
-            dsrWithdraw(_amount);
-        } else {
-            _withdraw(_protocol, _amount);
-        }
+        _withdraw(_protocol, _amount);
 
         SavingsLogger(SAVINGS_LOGGER_ADDRESS).logWithdraw(msg.sender, uint8(_protocol), _amount);
     }
@@ -46,7 +39,7 @@ contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
 
     // @dev only DSProxy holds dai, so if its called from random address, balance will be 0
     function withdrawDai() public {
-        ERC20(MAKER_DAI_ADDRESS).transfer(msg.sender, ERC20(MAKER_DAI_ADDRESS).balanceOf(address(this)));
+        ERC20(DAI_ADDRESS).transfer(msg.sender, ERC20(DAI_ADDRESS).balanceOf(address(this)));
     }
 
     function getAddress(SavingsProtocol _protocol) public pure returns(address) {
@@ -88,21 +81,21 @@ contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
     }
 
     function approveDeposit(SavingsProtocol _protocol, uint _amount) internal {
-        ERC20(MAKER_DAI_ADDRESS).transferFrom(msg.sender, address(this), _amount);
+        ERC20(DAI_ADDRESS).transferFrom(msg.sender, address(this), _amount);
 
         if (_protocol == SavingsProtocol.Compound || _protocol == SavingsProtocol.Fulcrum) {
-            ERC20(MAKER_DAI_ADDRESS).approve(getAddress(_protocol), _amount);
+            ERC20(DAI_ADDRESS).approve(getAddress(_protocol), uint(-1));
         }
 
         if (_protocol == SavingsProtocol.Dydx) {
-            ERC20(MAKER_DAI_ADDRESS).approve(SOLO_MARGIN_ADDRESS, _amount);
+            ERC20(DAI_ADDRESS).approve(SOLO_MARGIN_ADDRESS, uint(-1));
             setDydxOperator(true);
         }
     }
 
     function approveWithdraw(SavingsProtocol _protocol, uint _amount) internal {
         if (_protocol == SavingsProtocol.Compound) {
-            ERC20(CDAI_ADDRESS).approve(getAddress(_protocol), _amount);
+            ERC20(NEW_CDAI_ADDRESS).approve(getAddress(_protocol), uint(-1));
         }
 
         if (_protocol == SavingsProtocol.Dydx) {
@@ -110,7 +103,7 @@ contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
         }
 
         if (_protocol == SavingsProtocol.Fulcrum) {
-            ERC20(IDAI_ADDRESS).approve(getAddress(_protocol), ITokenInterface(IDAI_ADDRESS).balanceOf(msg.sender));
+            ERC20(NEW_IDAI_ADDRESS).approve(getAddress(_protocol), uint(-1));
         }
     }
 
