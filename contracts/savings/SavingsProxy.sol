@@ -11,33 +11,49 @@ import "./dsr/DSRSavingsProtocol.sol";
 
 contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
 
-    address constant public SAVINGS_COMPOUND_ADDRESS = 0x457F044216E34807E525DF8dB62EAD3bA24b6C48;
-    address constant public SAVINGS_DYDX_ADDRESS = 0xf14521B32342B518164587EAAC64AF22Fdf08Ae0;
-    address constant public SAVINGS_FULCRUM_ADDRESS = 0x589BAad81ef3e995CD7617f52FE9aC6A2F6C20Ed;
+    address constant public SAVINGS_COMPOUND_ADDRESS = 0xc2D61949a299BBbEff14d12C00748888a9336B3b;
+    address constant public SAVINGS_DYDX_ADDRESS = 0x180F0e433BE3550F93bC1842bB2b6A3af96dFE1f;
+    address constant public SAVINGS_FULCRUM_ADDRESS = 0x34E941297dc9ADfB6f85395BC4652CFc20D03A49;
 
-    enum SavingsProtocol { Compound, Dydx, Fulcrum }
+    enum SavingsProtocol { Compound, Dydx, Fulcrum, Dsr }
 
     function deposit(SavingsProtocol _protocol, uint _amount) public {
-
-        _deposit(_protocol, _amount);
+        if (_protocol == SavingsProtocol.Dsr) {
+            dsrDeposit(_amount);
+        } else {
+            _deposit(_protocol, _amount);
+        }
 
         SavingsLogger(SAVINGS_LOGGER_ADDRESS).logDeposit(msg.sender, uint8(_protocol), _amount);
     }
 
     function withdraw(SavingsProtocol _protocol, uint _amount) public {
-        _withdraw(_protocol, _amount);
+        if (_protocol == SavingsProtocol.Dsr) {
+            dsrWithdraw(_amount);
+        } else {
+            _withdraw(_protocol, _amount);
+        }
 
         SavingsLogger(SAVINGS_LOGGER_ADDRESS).logWithdraw(msg.sender, uint8(_protocol), _amount);
     }
 
     function swap(SavingsProtocol _from, SavingsProtocol _to, uint _amount) public {
-        _withdraw(_from, _amount);
-        _deposit(_to, _amount);
+        if (_from == SavingsProtocol.Dsr) {
+            dsrWithdraw(_amount);
+        } else {
+            _withdraw(_from, _amount);
+        }
+
+        if (_to == SavingsProtocol.Dsr) {
+            dsrDeposit(_amount);
+        } else {
+            _deposit(_to, _amount);
+        }
 
         SavingsLogger(SAVINGS_LOGGER_ADDRESS).logSwap(msg.sender, uint8(_from), uint8(_to), _amount);
     }
 
-    // @dev only DSProxy holds dai, so if its called from random address, balance will be 0
+
     function withdrawDai() public {
         ERC20(DAI_ADDRESS).transfer(msg.sender, ERC20(DAI_ADDRESS).balanceOf(address(this)));
     }
