@@ -11,9 +11,9 @@ import "./dsr/DSRSavingsProtocol.sol";
 
 contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
 
-    address constant public SAVINGS_COMPOUND_ADDRESS = 0xc2D61949a299BBbEff14d12C00748888a9336B3b;
-    address constant public SAVINGS_DYDX_ADDRESS = 0x180F0e433BE3550F93bC1842bB2b6A3af96dFE1f;
-    address constant public SAVINGS_FULCRUM_ADDRESS = 0x34E941297dc9ADfB6f85395BC4652CFc20D03A49;
+    address constant public SAVINGS_COMPOUND_ADDRESS = 0x72c5a18D651DA5568EFfE731a98484dE62C9F347;
+    address constant public SAVINGS_DYDX_ADDRESS = 0x03b1565e070df392e48e7a8e01798C4B00E534A5;
+    address constant public SAVINGS_FULCRUM_ADDRESS = 0xe9ea575d2d8Ca26b0E026a2146994592e0Ee1Dd9;
 
     enum SavingsProtocol { Compound, Dydx, Fulcrum, Dsr }
 

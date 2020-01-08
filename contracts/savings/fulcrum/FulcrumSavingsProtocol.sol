@@ -10,6 +10,7 @@ import "../../DS/DSAuth.sol";
 contract FulcrumSavingsProtocol is ProtocolInterface, ConstantAddresses, DSAuth {
 
     address public savingsProxy;
+    uint public decimals = 10 ** 18;
 
     function addSavingsProxy(address _savingsProxy) public auth {
         savingsProxy = _savingsProxy;
@@ -36,9 +37,10 @@ contract FulcrumSavingsProtocol is ProtocolInterface, ConstantAddresses, DSAuth 
 
         // approve iDai to that contract
         ERC20(NEW_IDAI_ADDRESS).approve(NEW_IDAI_ADDRESS, uint(-1));
+        uint tokenPrice = ITokenInterface(NEW_IDAI_ADDRESS).tokenPrice();
 
         // get dai from iDai contract
-        ITokenInterface(NEW_IDAI_ADDRESS).burn(_user, _amount);
+        ITokenInterface(NEW_IDAI_ADDRESS).burn(_user, _amount * decimals / tokenPrice);
 
         // return all remaining tokens back to user
         require(ERC20(NEW_IDAI_ADDRESS).transfer(_user, ITokenInterface(NEW_IDAI_ADDRESS).balanceOf(address(this))));
