@@ -34,12 +34,12 @@ contract MCDSaverFlashProxy is MCDSaverProxy {
 
         if (isRepay) {
             IDAI.flashBorrowToken(loanAmount, address(this), address(this), "",
-                abi.encodeWithSignature('repayWithLoan(uint256,address,uint256,uint256,uint256,uint256,uint256,bool)',
+                abi.encodeWithSignature('actionWithLoan(uint256,address,uint256,uint256,uint256,uint256,uint256,bool)',
                 _cdpId, _joinAddr, _amount, loanAmount, _minPrice, _exchangeType, _gasCost, isRepay)
             );
         } else {
             IDAI.flashBorrowToken(loanAmount, address(this), address(this), "",
-                abi.encodeWithSignature('repayWithLoan(uint256,address,uint256,uint256,uint256,uint256,uint256,bool)',
+                abi.encodeWithSignature('actionWithLoan(uint256,address,uint256,uint256,uint256,uint256,uint256,bool)',
                 _cdpId, _joinAddr, _amount, loanAmount, _minPrice, _exchangeType, _gasCost, isRepay)
             );
         }
