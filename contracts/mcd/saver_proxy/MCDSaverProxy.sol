@@ -69,7 +69,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         uint _minPrice,
         uint _exchangeType,
         uint _gasCost
-    ) external repayCheck(_cdpId) {
+    ) public repayCheck(_cdpId) {
 
         address owner = getOwner(manager, _cdpId);
         bytes32 ilk = manager.ilks(_cdpId);
@@ -100,7 +100,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         uint _minPrice,
         uint _exchangeType,
         uint _gasCost
-    ) external boostCheck(_cdpId) {
+    ) public boostCheck(_cdpId) {
         address owner = getOwner(manager, _cdpId);
 
         uint daiDrawn = drawDai(_cdpId, manager.ilks(_cdpId), _daiAmount);
