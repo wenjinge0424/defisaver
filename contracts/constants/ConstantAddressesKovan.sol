@@ -59,4 +59,8 @@ contract ConstantAddressesKovan {
     // Our contracts
     address public constant SUBSCRIPTION_ADDRESS = 0xFC41f79776061a396635aD0b9dF7a640A05063C1;
     address public constant MONITOR_ADDRESS = 0xfC1Fc0502e90B7A3766f93344E1eDb906F8A75DD;
+
+    // TODO: find out what the
+    address public constant NEW_CDAI_ADDRESS = 0xe7bc397DBd069fC7d0109C0636d06888bb50668c;
+    address public constant NEW_IDAI_ADDRESS = 0x6c1E2B0f67e00c06c8e2BE7Dc681Ab785163fF4D;
 }

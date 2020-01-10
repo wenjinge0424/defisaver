@@ -16,7 +16,7 @@ contract IDaiToken {
 
 contract MCDSaverFlashProxy is MCDSaverProxy {
 
-    IDaiToken public constant IDAI = IDaiToken(IDAI_ADDRESS);
+    IDaiToken public constant IDAI = IDaiToken(NEW_IDAI_ADDRESS);
     Manager public constant manager = Manager(MANAGER_ADDRESS);
 
     function getLoan(
@@ -29,6 +29,8 @@ contract MCDSaverFlashProxy is MCDSaverProxy {
         bool isRepay
     ) external {
         uint maxDebt = getMaxDebt(_cdpId, manager.ilks(_cdpId));
+
+        // TODO: Should we handle if maxDebt > _amount ?
 
         uint loanAmount = sub(_amount, maxDebt);
 
