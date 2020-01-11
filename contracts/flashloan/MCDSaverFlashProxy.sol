@@ -14,10 +14,13 @@ contract IDaiToken {
         payable;
 }
 
-contract MCDSaverFlashProxy is MCDSaverProxy {
+contract MCDFlashLoanTaker is MCDSaverProxy {
+    address public constant MCD_SAVER_FLASH_PROXY = 0x4b3FB6725c5B57377b6a140f71bE50649AbdE721;
 
-    IDaiToken public constant IDAI = IDaiToken(NEW_IDAI_ADDRESS);
     Manager public constant manager = Manager(MANAGER_ADDRESS);
+    IDaiToken public constant IDAI = IDaiToken(NEW_IDAI_ADDRESS);
+
+    enum ActionTypes { Repay, Boost }
 
     function getLoan(
         uint _cdpId,
@@ -30,22 +33,37 @@ contract MCDSaverFlashProxy is MCDSaverProxy {
     ) external {
         uint maxDebt = getMaxDebt(_cdpId, manager.ilks(_cdpId));
 
-        // TODO: Should we handle if maxDebt > _amount ?
-
-        uint loanAmount = sub(_amount, maxDebt);
+        uint debtAmount = _amount;
 
         if (isRepay) {
-            IDAI.flashBorrowToken(loanAmount, address(this), address(this), "",
+            uint ethPrice = getPrice(ETH_ILK);
+            debtAmount = rmul(_amount, add(ethPrice, div(ethPrice, 10)));
+        }
+
+        uint loanAmount = sub(debtAmount, maxDebt);
+
+        manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_PROXY, 1);
+
+        if (isRepay) {
+            IDAI.flashBorrowToken(loanAmount, MCD_SAVER_FLASH_PROXY, MCD_SAVER_FLASH_PROXY, "",
                 abi.encodeWithSignature('actionWithLoan(uint256,address,uint256,uint256,uint256,uint256,uint256,bool)',
                 _cdpId, _joinAddr, _amount, loanAmount, _minPrice, _exchangeType, _gasCost, isRepay)
             );
-        } else {
-            IDAI.flashBorrowToken(loanAmount, address(this), address(this), "",
+        } else  {
+            IDAI.flashBorrowToken(loanAmount, MCD_SAVER_FLASH_PROXY, MCD_SAVER_FLASH_PROXY, "",
                 abi.encodeWithSignature('actionWithLoan(uint256,address,uint256,uint256,uint256,uint256,uint256,bool)',
                 _cdpId, _joinAddr, _amount, loanAmount, _minPrice, _exchangeType, _gasCost, isRepay)
             );
         }
+
+        manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_PROXY, 0);
     }
+}
+
+contract MCDSaverFlashProxy is MCDSaverProxy {
+
+    IDaiToken public constant IDAI = IDaiToken(NEW_IDAI_ADDRESS);
+    Manager public constant manager = Manager(MANAGER_ADDRESS);
 
     function actionWithLoan(
         uint _cdpId,
@@ -56,7 +74,7 @@ contract MCDSaverFlashProxy is MCDSaverProxy {
         uint _exchangeType,
         uint _gasCost,
         bool isRepay
-    ) internal {
+    ) public {
 
         // payback the CDP debt with loan amount
         address owner = getOwner(manager, _cdpId);
@@ -72,5 +90,7 @@ contract MCDSaverFlashProxy is MCDSaverProxy {
         drawDai(_cdpId, manager.ilks(_cdpId), _loanAmount);
         ERC20(DAI_ADDRESS).transfer(address(IDAI), _loanAmount);
     }
+
+    function() external payable {}
 
 }
