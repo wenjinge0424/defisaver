@@ -10,7 +10,7 @@ const DSSProxyActions = require('../build/contracts/DSSProxyActions.json');
 const MCDFlashLoanTaker = require('../build/contracts/MCDFlashLoanTaker.json');
 
 const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
-const mcdFlashLoanTakerAddr = '0xc42fA79c01D91Ec5d6be39ec7b6A3fb52926949E';
+const mcdFlashLoanTakerAddr = '0xf603e0FAD2e985f31574E9aA2AED7BD8e41800F3';
 
 const tokenJoinAddrData = {
     '1': {
@@ -71,8 +71,8 @@ const repayWithLoan = async (cdpId, joinAddr, daiAmount) => {
     try {
         daiAmount = web3.utils.toWei(daiAmount, 'ether');
 
-        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDFlashLoanTaker, 'getLoan'),
-          [cdpId, joinAddr, daiAmount, 0, 4, 0, true]);
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDFlashLoanTaker, 'repayWithLoan'),
+          [cdpId, joinAddr, daiAmount, 0, 4, 0]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdFlashLoanTakerAddr, data).send({
             from: account.address, gas: 2400000, gasPrice: 21100000000});
@@ -87,8 +87,8 @@ const boostWithLoan = async (cdpId, joinAddr, amount) => {
     try {
         amount = web3.utils.toWei(amount, 'ether');
 
-        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDFlashLoanTaker, 'getLoan'),
-          [cdpId, joinAddr, amount, 0, 4, 0, false]);
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDFlashLoanTaker, 'boostWithLoan'),
+          [cdpId, joinAddr, amount, 0, 4, 0]);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdFlashLoanTakerAddr, data).send({
             from: account.address, gas: 2400000, gasPrice: 21100000000});
