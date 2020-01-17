@@ -247,6 +247,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
     /// @notice Gets the maximum amount of collateral available to draw
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
+    /// @dev Substracts 10 wei to aviod rounding error later on
     function getMaxCollateral(uint _cdpId, bytes32 _ilk) public view returns (uint) {
         uint price = getPrice(_ilk);
 
@@ -254,19 +255,20 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
         (, uint mat) = Spotter(SPOTTER_ADDRESS).ilks(_ilk);
 
-        return sub(collateral, (div(mul(mat, debt), price)));
+        return sub(sub(collateral, (div(mul(mat, debt), price))), 10);
     }
 
     /// @notice Gets the maximum amount of debt available to generate
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
+    /// @dev Substracts 10 wei to aviod rounding error later on
     function getMaxDebt(uint _cdpId, bytes32 _ilk) public view returns (uint) {
         uint price = getPrice(_ilk);
 
         (, uint mat) = spotter.ilks(_ilk);
         (uint collateral, uint debt) = getCdpInfo(manager, _cdpId, _ilk);
 
-        return sub(wdiv(wmul(collateral, price), mat), debt);
+        return sub(sub(div(mul(collateral, price), mat), debt), 10);
     }
 
     /// @notice Gets a price of the asset

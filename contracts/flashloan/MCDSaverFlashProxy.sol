@@ -88,6 +88,32 @@ contract MCDFlashLoanTaker is DSMath, ConstantAddresses, SaverProxyHelper {
         logger.logFlashLoan('Repay', loanAmount, _cdpId, msg.sender);
     }
 
+    function closeWithLoan(uint _cdpId) external {
+        bytes32 ilk = manager.ilks(_cdpId);
+
+        uint maxDebt = getMaxDebt(_cdpId, ilk);
+
+        (, uint wholeDebt) = getCdpInfo(manager, _cdpId, ilk);
+
+        uint loanAmount = sub(wholeDebt, maxDebt);
+
+        // convert to eth
+
+        // require(maxDebt >= wholeDebt, "No need for a flash loan");
+
+        // manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_PROXY, 1);
+
+        //  IDAI.flashBorrowToken(loanAmount, MCD_SAVER_FLASH_PROXY, MCD_SAVER_FLASH_PROXY, "",
+        //     abi.encodeWithSignature('actionWithLoan(uint256,address,uint256,uint256,uint256,uint256,uint256,bool)',
+        //     _cdpId, _joinAddr, _amount, loanAmount, _minPrice, _exchangeType, _gasCost, true)
+        // );
+
+        // manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_PROXY, 0);
+
+        // logger.logFlashLoan('Close', loanAmount, _cdpId, msg.sender);
+
+    }
+
     /// @notice Gets the maximum amount of debt available to generate
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
