@@ -13,6 +13,6 @@ module.exports = function(deployer, network, accounts) {
         // await deployer.deploy(KyberWrapper, {gas: 6720000, overwrite: deployAgain});
         // await deployer.deploy(UniswapWrapper, {gas: 6720000, overwrite: deployAgain});
 
-         await deployer.deploy(SaverExchange, {gas: 6720000, overwrite: deployAgain});
+        await deployer.deploy(SaverExchange, {gas: 6720000, overwrite: deployAgain});
     });
 };

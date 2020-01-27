@@ -9,13 +9,11 @@ contract SaverExchange is DSMath, ConstantAddresses {
 
     uint public constant SERVICE_FEE = 800; // 0.125% Fee
 
-    event Swap(address src, address dest, uint amountSold, uint amountBought);
+    event Swap(address src, address dest, uint amountSold, uint amountBought, address wrapper);
 
-    function swapTokenToToken(address _src, address _dest, uint _amount, uint _minPrice, uint _exchangeType) public payable {
+    function swapTokenToToken(address _src, address _dest, uint _amount, uint _minPrice, uint _exchangeType, address _exchangeAddress, bytes memory _callData, uint _0xPrice) public payable {
         if (_src == KYBER_ETH_ADDRESS) {
             require(msg.value >= _amount);
-            // return user if he sent too much
-            msg.sender.transfer(sub(msg.value, _amount));
         } else {
             require(ERC20(_src).transferFrom(msg.sender, address(this), _amount));
         }
@@ -23,83 +21,80 @@ contract SaverExchange is DSMath, ConstantAddresses {
         uint fee = takeFee(_amount, _src);
         _amount = sub(_amount, fee);
 
-        address wrapper;
-        uint price;
-        (wrapper, price) = getBestPrice(_amount, _src, _dest, _exchangeType);
-
-        require(price > _minPrice, "Slippage hit");
-
         uint tokensReturned;
-        if (_src == KYBER_ETH_ADDRESS) {
-            (tokensReturned,) = ExchangeInterface(wrapper).swapEtherToToken.value(_amount)(_amount, _dest, uint(-1));
-        } else {
-            ERC20(_src).transfer(wrapper, _amount);
-
-            if (_dest == KYBER_ETH_ADDRESS) {
-                tokensReturned = ExchangeInterface(wrapper).swapTokenToEther(_src, _amount, uint(-1));
-            } else {
-                tokensReturned = ExchangeInterface(wrapper).swapTokenToToken(_src, _dest, _amount);
+        address wrapper;
+        if (_exchangeType == 4) {
+            bool success;
+            (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, msg.value, _dest);
+            if (success) {
+                wrapper = address(0x0000000000000000000000000000000000000001);
             }
         }
 
-        if (_dest == KYBER_ETH_ADDRESS) {
-            msg.sender.transfer(tokensReturned);
-        } else {
-            ERC20(_dest).transfer(msg.sender, tokensReturned);
+        if (tokensReturned == 0) {
+            uint price;
+            (wrapper, price) = getBestPrice(_amount, _src, _dest, _exchangeType);
+
+            require(price > _minPrice || _0xPrice > _minPrice, "Slippage hit");
+
+            // handle 0x exchange
+            if (_0xPrice > price) {
+                bool success;
+                (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, msg.value, _dest);
+                if (success) {
+                    wrapper = address(0x0000000000000000000000000000000000000001);
+                }
+            }
+
+            if (tokensReturned == 0) {
+                if (_src == KYBER_ETH_ADDRESS) {
+                    (tokensReturned,) = ExchangeInterface(wrapper).swapEtherToToken.value(_amount)(_amount, _dest, uint(-1));
+                } else {
+                    ERC20(_src).transfer(wrapper, _amount);
+
+                    if (_dest == KYBER_ETH_ADDRESS) {
+                        tokensReturned = ExchangeInterface(wrapper).swapTokenToEther(_src, _amount, uint(-1));
+                    } else {
+                        tokensReturned = ExchangeInterface(wrapper).swapTokenToToken(_src, _dest, _amount);
+                    }
+                }
+            }
         }
 
-        emit Swap(_src, _dest, _amount, tokensReturned);
-    }
-
-
-    // legacy ------------------------------------------------------------
-
-    function swapDaiToEth(uint _amount, uint _minPrice, uint _exchangeType) public {
-        require(ERC20(MAKER_DAI_ADDRESS).transferFrom(msg.sender, address(this), _amount));
-
-        uint fee = takeFee(_amount, MAKER_DAI_ADDRESS);
-        _amount = sub(_amount, fee);
-
-        address exchangeWrapper;
-        uint daiEthPrice;
-        (exchangeWrapper, daiEthPrice) = getBestPrice(_amount, MAKER_DAI_ADDRESS, KYBER_ETH_ADDRESS, _exchangeType);
-
-        require(daiEthPrice > _minPrice, "Slippage hit");
-
-        ERC20(MAKER_DAI_ADDRESS).transfer(exchangeWrapper, _amount);
-        ExchangeInterface(exchangeWrapper).swapTokenToEther(MAKER_DAI_ADDRESS, _amount, uint(-1));
-
-        uint daiBalance = ERC20(MAKER_DAI_ADDRESS).balanceOf(address(this));
-        if (daiBalance > 0) {
-            ERC20(MAKER_DAI_ADDRESS).transfer(msg.sender, daiBalance);
+        // return whatever is left in contract
+        if (address(this).balance > 0) {
+            msg.sender.transfer(address(this).balance);
         }
 
-        msg.sender.transfer(address(this).balance);
-    }
-
-    function swapEthToDai(uint _amount, uint _minPrice, uint _exchangeType) public payable {
-        require(msg.value >= _amount);
-
-        address exchangeWrapper;
-        uint ethDaiPrice;
-        (exchangeWrapper, ethDaiPrice) = getBestPrice(_amount, KYBER_ETH_ADDRESS, MAKER_DAI_ADDRESS, _exchangeType);
-
-        require(ethDaiPrice > _minPrice, "Slippage hit");
-
-        uint ethReturned;
-        uint daiReturned;
-        (daiReturned, ethReturned) = ExchangeInterface(exchangeWrapper).swapEtherToToken.value(_amount)(_amount, MAKER_DAI_ADDRESS, uint(-1));
-
-        uint fee = takeFee(daiReturned, MAKER_DAI_ADDRESS);
-        daiReturned = sub(daiReturned, fee);
-
-        ERC20(MAKER_DAI_ADDRESS).transfer(msg.sender, daiReturned);
-
-        if (ethReturned > 0) {
-            msg.sender.transfer(ethReturned);
+        if (ERC20(_dest).balanceOf(address(this)) > 0) {
+            ERC20(_dest).transfer(msg.sender, ERC20(_dest).balanceOf(address(this)));
         }
+
+        emit Swap(_src, _dest, _amount, tokensReturned, wrapper);
     }
 
+    // @notice Takes order from 0x and returns bool indicating if it is successful
+    // @param _exchange Address of exchange to be called
+    // @param _data Data to send with call
+    // @param _value Value to send with call
+    // @param _dest Address of token/ETH returned
+    function takeOrder(address _exchange, bytes memory _data, uint _value, address _dest) private returns(bool, uint) {
+        bool success;
+        bytes memory result;
+
+        (success, result) = _exchange.call.value(_value)(_data);
+
+        uint tokensReturned = 0;
+        if (success){
+            if (_dest == KYBER_ETH_ADDRESS) {
+                tokensReturned = address(this).balance;
+            } else {
+                tokensReturned = ERC20(_dest).balanceOf(address(this));
+            }
+        }
+
+        return (success, tokensReturned);
+    }
 
     /// @notice Returns the best estimated price from 2 exchanges
     /// @param _amount Amount of source tokens you want to exchange
