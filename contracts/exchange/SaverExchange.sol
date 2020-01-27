@@ -20,27 +20,26 @@ contract SaverExchange is DSMath, ConstantAddresses {
 
         uint fee = takeFee(_amount, _src);
         _amount = sub(_amount, fee);
-
         uint tokensReturned;
         address wrapper;
+        uint price;
+        bool success;
+
         if (_exchangeType == 4) {
-            bool success;
-            (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, sub(msg.value, fee), _dest);
+            (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
             if (success) {
                 wrapper = address(0x0000000000000000000000000000000000000001);
             }
         }
 
         if (tokensReturned == 0) {
-            uint price;
             (wrapper, price) = getBestPrice(_amount, _src, _dest, _exchangeType);
 
             require(price > _minPrice || _0xPrice > _minPrice, "Slippage hit");
 
             // handle 0x exchange
             if (_0xPrice > price) {
-                bool success;
-                (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, sub(msg.value, fee), _dest);
+                (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
                 if (success) {
                     wrapper = address(0x0000000000000000000000000000000000000001);
                 }
@@ -66,8 +65,17 @@ contract SaverExchange is DSMath, ConstantAddresses {
             msg.sender.transfer(address(this).balance);
         }
 
-        if (ERC20(_dest).balanceOf(address(this)) > 0) {
-            ERC20(_dest).transfer(msg.sender, ERC20(_dest).balanceOf(address(this)));
+        // return if there is any tokens left
+        if (_dest != KYBER_ETH_ADDRESS) {
+            if (ERC20(_dest).balanceOf(address(this)) > 0) {
+                ERC20(_dest).transfer(msg.sender, ERC20(_dest).balanceOf(address(this)));
+            }
+        }
+
+        if (_src != KYBER_ETH_ADDRESS) {
+            if (ERC20(_src).balanceOf(address(this)) > 0) {
+                ERC20(_src).transfer(msg.sender, ERC20(_src).balanceOf(address(this)));
+            }
         }
 
         emit Swap(_src, _dest, _amount, tokensReturned, wrapper);
