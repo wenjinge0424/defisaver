@@ -25,7 +25,7 @@ contract SaverExchange is DSMath, ConstantAddresses {
         address wrapper;
         if (_exchangeType == 4) {
             bool success;
-            (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, msg.value, _dest);
+            (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, sub(msg.value, fee), _dest);
             if (success) {
                 wrapper = address(0x0000000000000000000000000000000000000001);
             }
@@ -40,7 +40,7 @@ contract SaverExchange is DSMath, ConstantAddresses {
             // handle 0x exchange
             if (_0xPrice > price) {
                 bool success;
-                (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, msg.value, _dest);
+                (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, sub(msg.value, fee), _dest);
                 if (success) {
                     wrapper = address(0x0000000000000000000000000000000000000001);
                 }
