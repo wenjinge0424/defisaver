@@ -31,7 +31,8 @@ contract SaverExchange is DSMath, ConstantAddresses {
             }
 
             (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
-            if (success) {
+            // either it reverts or order doesn't exist anymore
+            if (success && tokensReturned > 0) {
                 wrapper = address(_exchangeAddress);
             }
         }
@@ -47,7 +48,8 @@ contract SaverExchange is DSMath, ConstantAddresses {
                     ERC20(_src).approve(address(ERC20_PROXY_0X), _amount);
                 }
                 (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
-                if (success) {
+                // either it reverts or order doesn't exist anymore
+                if (success && tokensReturned > 0) {
                     wrapper = address(_exchangeAddress);
                 }
             }
