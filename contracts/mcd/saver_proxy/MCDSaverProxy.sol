@@ -56,62 +56,68 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
     /// @notice Repay - draws collateral, converts to Dai and repays the debt
     /// @dev Must be called by the DSProxy contract that owns the CDP
-    /// @param _cdpId Id of the CDP
+    /// @param _data Uint array [cdpId, amount, minPrice, exchangeType, gasCost, 0xPrice]
     /// @param _joinAddr Address of the join contract for the CDP collateral
-    /// @param _amount Amount of collateral to withdraw
-    /// @param _minPrice Minimum acceptable price for collateral -> Dai conversion
-    /// @param _exchangeType The type of exchange to be used for conversion
-    /// @param _gasCost Used for Monitor, estimated gas cost of tx
+    /// @param _exchangeAddress Address of 0x exchange that should be called
+    /// @param _callData data to call 0x exchange with
     function repay(
-        uint _cdpId,
+        // cdpId, amount, minPrice, exchangeType, gasCost, 0xPrice
+        uint[6] memory _data,
         address _joinAddr,
-        uint _amount,
-        uint _minPrice,
-        uint _exchangeType,
-        uint _gasCost
-    ) public repayCheck(_cdpId) {
+        address _exchangeAddress,
+        bytes memory _callData
+    ) public repayCheck(_data[0]) {
 
-        address owner = getOwner(manager, _cdpId);
-        bytes32 ilk = manager.ilks(_cdpId);
+        address owner = getOwner(manager, _data[0]);
+        bytes32 ilk = manager.ilks(_data[0]);
 
-        uint collDrawn = drawCollateral(_cdpId, ilk, _joinAddr, _amount);
+        // uint collDrawn;
+        // uint daiAmount;
+        // uint daiAfterFee;
+        uint[3] memory temp;
 
-        uint daiAmount = swap(getCollateralAddr(_joinAddr), DAI_ADDRESS, collDrawn, _minPrice, _exchangeType);
+        temp[0] = drawCollateral(_data[0], ilk, _joinAddr, _data[1]);
 
-        uint daiAfterFee = sub(daiAmount, getFee(daiAmount, _gasCost, owner));
+                                // collDrawn, minPrice, exchangeType, 0xPrice
+        uint[4] memory swapData = [temp[0], _data[2], _data[3], _data[5]];
+        temp[1] = swap(swapData, getCollateralAddr(_joinAddr), DAI_ADDRESS, _exchangeAddress, _callData);
+        temp[2] = sub(temp[1], getFee(temp[1], _data[4], owner));
 
-        paybackDebt(_cdpId, ilk, daiAfterFee, owner);
+        paybackDebt(_data[0], ilk, temp[2], owner);
 
-        SaverLogger(LOGGER_ADDRESS).LogRepay(_cdpId, owner, collDrawn, daiAmount);
+        SaverLogger(LOGGER_ADDRESS).LogRepay(_data[0], owner, temp[0], temp[1]);
     }
 
     /// @notice Boost - draws Dai, converts to collateral and adds to CDP
     /// @dev Must be called by the DSProxy contract that owns the CDP
-    /// @param _cdpId Id of the CDP
+    /// @param _data Uint array [cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice]
     /// @param _joinAddr Address of the join contract for the CDP collateral
-    /// @param _daiAmount Amount of Dai to withdraw
-    /// @param _minPrice Minimum acceptable price for collateral -> Dai conversion
-    /// @param _exchangeType The type of exchange to be used for conversion
-    /// @param _gasCost Used for Monitor, estimated gas cost of tx
+    /// @param _exchangeAddress Address of 0x exchange that should be called
+    /// @param _callData data to call 0x exchange with
     function boost(
-        uint _cdpId,
+        // cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
+        uint[6] memory _data,
         address _joinAddr,
-        uint _daiAmount,
-        uint _minPrice,
-        uint _exchangeType,
-        uint _gasCost
-    ) public boostCheck(_cdpId) {
-        address owner = getOwner(manager, _cdpId);
+        address _exchangeAddress,
+        bytes memory _callData
+    ) public boostCheck(_data[0]) {
+        address owner = getOwner(manager, _data[0]);
+        bytes32 ilk = manager.ilks(_data[0]);
 
-        uint daiDrawn = drawDai(_cdpId, manager.ilks(_cdpId), _daiAmount);
+        // uint daiDrawn;
+        // uint daiAfterFee;
+        // uint collateralAmount;
+        uint[3] memory temp;
 
-        uint daiAfterFee = sub(daiDrawn, getFee(daiDrawn, _gasCost, owner));
+        temp[0] = drawDai(_data[0], ilk, _data[1]);
+        temp[1] = sub(temp[0], getFee(temp[0], _data[4], owner));
+                                // daiAfterFee, minPrice, exchangeType, 0xPrice
+        uint[4] memory swapData = [temp[1], _data[2], _data[3], _data[5]];
+        temp[2] = swap(swapData, DAI_ADDRESS, getCollateralAddr(_joinAddr), _exchangeAddress, _callData);
 
-        uint collateralAmount = swap(DAI_ADDRESS, getCollateralAddr(_joinAddr), daiAfterFee, _minPrice, _exchangeType);
+        addCollateral(_data[0], _joinAddr, temp[2]);
 
-        addCollateral(_cdpId, _joinAddr, collateralAmount);
-
-        SaverLogger(LOGGER_ADDRESS).LogBoost(_cdpId, owner, daiDrawn, collateralAmount);
+        SaverLogger(LOGGER_ADDRESS).LogBoost(_data[0], owner, temp[0], temp[2]);
     }
 
     /// @notice Draws Dai from the CDP
