@@ -32,7 +32,7 @@ contract SaverExchange is DSMath, ConstantAddresses {
 
             (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
             if (success) {
-                wrapper = address(0x0000000000000000000000000000000000000001);
+                wrapper = address(_exchangeAddress);
             }
         }
 
@@ -48,7 +48,7 @@ contract SaverExchange is DSMath, ConstantAddresses {
                 }
                 (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
                 if (success) {
-                    wrapper = address(0x0000000000000000000000000000000000000001);
+                    wrapper = address(_exchangeAddress);
                 }
             }
 
