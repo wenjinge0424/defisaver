@@ -26,6 +26,10 @@ contract SaverExchange is DSMath, ConstantAddresses {
         bool success;
 
         if (_exchangeType == 4) {
+            if (_src != KYBER_ETH_ADDRESS) {
+                ERC20(_src).approve(address(ERC20_PROXY_0X), _amount);
+            }
+
             (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
             if (success) {
                 wrapper = address(0x0000000000000000000000000000000000000001);
@@ -39,6 +43,9 @@ contract SaverExchange is DSMath, ConstantAddresses {
 
             // handle 0x exchange
             if (_0xPrice > price) {
+                if (_src != KYBER_ETH_ADDRESS) {
+                    ERC20(_src).approve(address(ERC20_PROXY_0X), _amount);
+                }
                 (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
                 if (success) {
                     wrapper = address(0x0000000000000000000000000000000000000001);
