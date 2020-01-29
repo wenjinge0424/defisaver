@@ -1,7 +1,6 @@
 pragma solidity ^0.5.0;
 
 import "../../interfaces/ExchangeInterface.sol";
-import "../../constants/ConstantAddresses.sol";
 
 import "../../SaverLogger.sol";
 import "../../Discount.sol";

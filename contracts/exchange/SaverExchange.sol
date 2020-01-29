@@ -3,10 +3,10 @@ pragma solidity ^0.5.0;
 import "../interfaces/ExchangeInterface.sol";
 import "../interfaces/TokenInterface.sol";
 import "../DS/DSMath.sol";
-import "../constants/ConstantAddresses.sol";
+import "./SaverExchangeConstantAddresses.sol";
 import "../Discount.sol";
 
-contract SaverExchange is DSMath, ConstantAddresses {
+contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
 
     uint public constant SERVICE_FEE = 800; // 0.125% Fee
 
@@ -42,8 +42,8 @@ contract SaverExchange is DSMath, ConstantAddresses {
 
             require(price > _minPrice || _0xPrice > _minPrice, "Slippage hit");
 
-            // handle 0x exchange
-            if (_0xPrice > price) {
+            // handle 0x exchange, if equal price, try 0x to use less gas
+            if (_0xPrice >= price) {
                 if (_src != KYBER_ETH_ADDRESS) {
                     ERC20(_src).approve(address(ERC20_PROXY_0X), _amount);
                 }

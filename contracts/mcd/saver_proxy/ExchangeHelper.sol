@@ -4,11 +4,11 @@ import "../../interfaces/ExchangeInterface.sol";
 import "../../interfaces/TokenInterface.sol";
 import "../../interfaces/SaverExchangeInterface.sol";
 
-import "../../constants/ConstantAddresses.sol";
+import "./ConstantAddressesExchange.sol";
 
 
 /// @title Helper methods for integration with SaverExchange
-contract ExchangeHelper is ConstantAddresses {
+contract ExchangeHelper is ConstantAddressesExchange {
 
     /// @notice Swaps 2 tokens on the Saver Exchange
     /// @dev ETH is sent with Weth address
@@ -43,8 +43,8 @@ contract ExchangeHelper is ConstantAddresses {
 
             require(price > _data[1] || _data[3] > _data[1], "Slippage hit");
 
-            // handle 0x exchange
-            if (_data[3] > price) {
+            // handle 0x exchange, if equal price, try 0x to use less gas
+            if (_data[3] >= price) {
                 if (_src != KYBER_ETH_ADDRESS) {
                     ERC20(_src).approve(address(ERC20_PROXY_0X), _data[0]);
                 }
