@@ -1,6 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "../interfaces/ExchangeInterface.sol";
+import "../interfaces/TokenInterface.sol";
 import "../DS/DSMath.sol";
 import "../constants/ConstantAddresses.sol";
 import "../Discount.sol";
@@ -97,13 +98,13 @@ contract SaverExchange is DSMath, ConstantAddresses {
     // @param _dest Address of token/ETH returned
     function takeOrder(address _exchange, bytes memory _data, uint _value, address _dest) private returns(bool, uint) {
         bool success;
-        bytes memory result;
 
-        (success, result) = _exchange.call.value(_value)(_data);
+        (success, ) = _exchange.call.value(_value)(_data);
 
         uint tokensReturned = 0;
         if (success){
             if (_dest == KYBER_ETH_ADDRESS) {
+                TokenInterface(WETH_ADDRESS).withdraw(TokenInterface(WETH_ADDRESS).balanceOf(address(this)));
                 tokensReturned = address(this).balance;
             } else {
                 tokensReturned = ERC20(_dest).balanceOf(address(this));
