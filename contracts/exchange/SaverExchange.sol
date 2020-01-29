@@ -14,9 +14,9 @@ contract SaverExchange is DSMath, ConstantAddresses {
 
     function swapTokenToToken(address _src, address _dest, uint _amount, uint _minPrice, uint _exchangeType, address _exchangeAddress, bytes memory _callData, uint _0xPrice) public payable {
         if (_src == KYBER_ETH_ADDRESS) {
-            require(msg.value >= _amount);
+            require(msg.value >= _amount, "msg.value smaller than amount");
         } else {
-            require(ERC20(_src).transferFrom(msg.sender, address(this), _amount));
+            require(ERC20(_src).transferFrom(msg.sender, address(this), _amount), "Not able to withdraw wanted amount");
         }
 
         uint fee = takeFee(_amount, _src);
@@ -32,16 +32,15 @@ contract SaverExchange is DSMath, ConstantAddresses {
             }
 
             (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
-            // either it reverts or order doesn't exist anymore
-            if (success && tokensReturned > 0) {
-                wrapper = address(_exchangeAddress);
-            }
+            // either it reverts or order doesn't exist anymore, we reverts as it was explicitely asked for this exchange
+            require(success && tokensReturned > 0, "0x transaction failed");
+            wrapper = address(_exchangeAddress);
         }
 
         if (tokensReturned == 0) {
             (wrapper, price) = getBestPrice(_amount, _src, _dest, _exchangeType);
 
-            require(price > _minPrice || _0xPrice > _minPrice, "Slippage hit");
+            require(_0xPrice > _minPrice, "Slippage hit 0x");
 
             // handle 0x exchange
             if (_0xPrice > price) {
@@ -56,6 +55,8 @@ contract SaverExchange is DSMath, ConstantAddresses {
             }
 
             if (tokensReturned == 0) {
+                // in case 0x failed, price on other exchanges still needs to be higher than minPrice
+                require(price > _minPrice, "Slippage hit");
                 if (_src == KYBER_ETH_ADDRESS) {
                     (tokensReturned,) = ExchangeInterface(wrapper).swapEtherToToken.value(_amount)(_amount, _dest, uint(-1));
                 } else {
