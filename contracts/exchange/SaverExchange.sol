@@ -1,6 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "../interfaces/ExchangeInterface.sol";
+import "../interfaces/TokenInterface.sol";
 import "../DS/DSMath.sol";
 import "../constants/ConstantAddresses.sol";
 import "../Discount.sol";
@@ -13,9 +14,9 @@ contract SaverExchange is DSMath, ConstantAddresses {
 
     function swapTokenToToken(address _src, address _dest, uint _amount, uint _minPrice, uint _exchangeType, address _exchangeAddress, bytes memory _callData, uint _0xPrice) public payable {
         if (_src == KYBER_ETH_ADDRESS) {
-            require(msg.value >= _amount);
+            require(msg.value >= _amount, "msg.value smaller than amount");
         } else {
-            require(ERC20(_src).transferFrom(msg.sender, address(this), _amount));
+            require(ERC20(_src).transferFrom(msg.sender, address(this), _amount), "Not able to withdraw wanted amount");
         }
 
         uint fee = takeFee(_amount, _src);
@@ -31,15 +32,15 @@ contract SaverExchange is DSMath, ConstantAddresses {
             }
 
             (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
-            if (success) {
-                wrapper = address(_exchangeAddress);
-            }
+            // either it reverts or order doesn't exist anymore, we reverts as it was explicitely asked for this exchange
+            require(success && tokensReturned > 0, "0x transaction failed");
+            wrapper = address(_exchangeAddress);
         }
 
         if (tokensReturned == 0) {
             (wrapper, price) = getBestPrice(_amount, _src, _dest, _exchangeType);
 
-            require(price > _minPrice || _0xPrice > _minPrice, "Slippage hit");
+            require(_0xPrice > _minPrice, "Slippage hit 0x");
 
             // handle 0x exchange
             if (_0xPrice > price) {
@@ -47,12 +48,15 @@ contract SaverExchange is DSMath, ConstantAddresses {
                     ERC20(_src).approve(address(ERC20_PROXY_0X), _amount);
                 }
                 (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
-                if (success) {
+                // either it reverts or order doesn't exist anymore
+                if (success && tokensReturned > 0) {
                     wrapper = address(_exchangeAddress);
                 }
             }
 
             if (tokensReturned == 0) {
+                // in case 0x failed, price on other exchanges still needs to be higher than minPrice
+                require(price > _minPrice, "Slippage hit");
                 if (_src == KYBER_ETH_ADDRESS) {
                     (tokensReturned,) = ExchangeInterface(wrapper).swapEtherToToken.value(_amount)(_amount, _dest, uint(-1));
                 } else {
@@ -95,13 +99,13 @@ contract SaverExchange is DSMath, ConstantAddresses {
     // @param _dest Address of token/ETH returned
     function takeOrder(address _exchange, bytes memory _data, uint _value, address _dest) private returns(bool, uint) {
         bool success;
-        bytes memory result;
 
-        (success, result) = _exchange.call.value(_value)(_data);
+        (success, ) = _exchange.call.value(_value)(_data);
 
         uint tokensReturned = 0;
         if (success){
             if (_dest == KYBER_ETH_ADDRESS) {
+                TokenInterface(WETH_ADDRESS).withdraw(TokenInterface(WETH_ADDRESS).balanceOf(address(this)));
                 tokensReturned = address(this).balance;
             } else {
                 tokensReturned = ERC20(_dest).balanceOf(address(this));
