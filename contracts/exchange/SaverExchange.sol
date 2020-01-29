@@ -40,7 +40,7 @@ contract SaverExchange is DSMath, ConstantAddresses {
         if (tokensReturned == 0) {
             (wrapper, price) = getBestPrice(_amount, _src, _dest, _exchangeType);
 
-            require(_0xPrice > _minPrice, "Slippage hit 0x");
+            require(price > _minPrice || _0xPrice > _minPrice, "Slippage hit");
 
             // handle 0x exchange
             if (_0xPrice > price) {
@@ -56,7 +56,7 @@ contract SaverExchange is DSMath, ConstantAddresses {
 
             if (tokensReturned == 0) {
                 // in case 0x failed, price on other exchanges still needs to be higher than minPrice
-                require(price > _minPrice, "Slippage hit");
+                require(price > _minPrice, "Slippage hit onchain price");
                 if (_src == KYBER_ETH_ADDRESS) {
                     (tokensReturned,) = ExchangeInterface(wrapper).swapEtherToToken.value(_amount)(_amount, _dest, uint(-1));
                 } else {

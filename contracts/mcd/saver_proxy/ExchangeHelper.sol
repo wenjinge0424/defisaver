@@ -1,6 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "../../interfaces/ExchangeInterface.sol";
+import "../../interfaces/TokenInterface.sol";
 import "../../interfaces/SaverExchangeInterface.sol";
 
 import "../../constants/ConstantAddresses.sol";
@@ -34,10 +35,10 @@ contract ExchangeHelper is ConstantAddresses {
             (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
 
             // if specifically 4, then require it to be successfull
-            require(success);
+            require(success && tokensReturned > 0, "0x transaction failed");
         }
 
-        if (!success) {
+        if (tokensReturned == 0) {
             (wrapper, price) = SaverExchangeInterface(SAVER_EXCHANGE_ADDRESS).getBestPrice(_data[0], _src, _dest, _data[2]);
 
             require(price > _data[1] || _data[3] > _data[1], "Slippage hit");
@@ -50,7 +51,8 @@ contract ExchangeHelper is ConstantAddresses {
                 (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
             }
 
-            if (!success) {
+            if (tokensReturned == 0) {
+                require(price > _data[1], "Slippage hit onchain price");
                 if (_src == KYBER_ETH_ADDRESS) {
                     (tokensReturned,) = ExchangeInterface(wrapper).swapEtherToToken.value(_data[0])(_data[0], _dest, uint(-1));
                 } else {
@@ -68,20 +70,20 @@ contract ExchangeHelper is ConstantAddresses {
         return tokensReturned;
     }
 
-        // @notice Takes order from 0x and returns bool indicating if it is successful
+    // @notice Takes order from 0x and returns bool indicating if it is successful
     // @param _exchange Address of exchange to be called
     // @param _data Data to send with call
     // @param _value Value to send with call
     // @param _dest Address of token/ETH returned
     function takeOrder(address _exchange, bytes memory _data, uint _value, address _dest) private returns(bool, uint) {
         bool success;
-        bytes memory result;
 
-        (success, result) = _exchange.call.value(_value)(_data);
+        (success, ) = _exchange.call.value(_value)(_data);
 
         uint tokensReturned = 0;
         if (success){
             if (_dest == KYBER_ETH_ADDRESS) {
+                TokenInterface(WETH_ADDRESS).withdraw(TokenInterface(WETH_ADDRESS).balanceOf(address(this)));
                 tokensReturned = address(this).balance;
             } else {
                 tokensReturned = ERC20(_dest).balanceOf(address(this));
