@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 import "../../DS/DSGuard.sol";
 import "../../DS/DSProxy.sol";
 import "../migration/PayProxyActions.sol";
-import "../../Monitor.sol";
+import "../../scd/Monitor.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../maker/Manager.sol";
 import "../../interfaces/ERC20.sol";

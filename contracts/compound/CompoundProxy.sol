@@ -4,7 +4,7 @@ import "../DS/DSMath.sol";
 import "../interfaces/CTokenInterface.sol";
 import "../interfaces/TubInterface.sol";
 import "../interfaces/KyberNetworkProxyInterface.sol";
-import "../ActionLogger.sol";
+import "../loggers/ActionLogger.sol";
 import "./Exponential.sol";
 import "./StupidExchange.sol";
 import "../constants/ConstantAddresses.sol";

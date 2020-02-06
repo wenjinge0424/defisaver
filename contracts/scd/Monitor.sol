@@ -1,11 +1,11 @@
 pragma solidity ^0.5.0;
 
-import "./interfaces/TubInterface.sol";
-import "./interfaces/ProxyRegistryInterface.sol";
-import "./interfaces/GasTokenInterface.sol";
-import "./interfaces/ERC20.sol";
-import "./DS/DSMath.sol";
-import "./constants/ConstantAddresses.sol";
+import "../interfaces/TubInterface.sol";
+import "../interfaces/ProxyRegistryInterface.sol";
+import "../interfaces/GasTokenInterface.sol";
+import "../interfaces/ERC20.sol";
+import "../DS/DSMath.sol";
+import "../constants/ConstantAddresses.sol";
 
 contract Monitor is DSMath, ConstantAddresses {
 

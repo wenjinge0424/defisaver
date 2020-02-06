@@ -2,8 +2,8 @@ pragma solidity ^0.5.0;
 
 import "../../interfaces/ExchangeInterface.sol";
 
-import "../../SaverLogger.sol";
-import "../../Discount.sol";
+import "../../loggers/SaverLogger.sol";
+import "../Discount.sol";
 
 import "../maker/Spotter.sol";
 import "../maker/Jug.sol";

@@ -4,7 +4,7 @@ import "../interfaces/ExchangeInterface.sol";
 import "../interfaces/TokenInterface.sol";
 import "../DS/DSMath.sol";
 import "./SaverExchangeConstantAddresses.sol";
-import "../Discount.sol";
+import "../mcd/Discount.sol";
 
 contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
 

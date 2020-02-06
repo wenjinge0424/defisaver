@@ -1,11 +1,11 @@
 pragma solidity ^0.5.0;
 
-import "./interfaces/TubInterface.sol";
-import "./interfaces/ExchangeInterface.sol";
-import "./DS/DSMath.sol";
-import "./SaverLogger.sol";
-import "./constants/ConstantAddresses.sol";
-import "./Discount.sol";
+import "../interfaces/TubInterface.sol";
+import "../interfaces/ExchangeInterface.sol";
+import "../DS/DSMath.sol";
+import "../loggers/SaverLogger.sol";
+import "../constants/ConstantAddresses.sol";
+import "../mcd/Discount.sol";
 
 /// @title SaverProxy implements advanced dashboard features repay/boost
 contract SaverProxy is DSMath, ConstantAddresses {

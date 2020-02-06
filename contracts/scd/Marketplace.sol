@@ -1,10 +1,10 @@
 pragma solidity ^0.5.0;
 
-import "./DS/DSMath.sol";
-import "./DS/DSAuth.sol";
-import "./interfaces/TubInterface.sol";
-import "./interfaces/ProxyRegistryInterface.sol";
-import "./constants/ConstantAddresses.sol";
+import "../DS/DSMath.sol";
+import "../DS/DSAuth.sol";
+import "../interfaces/TubInterface.sol";
+import "../interfaces/ProxyRegistryInterface.sol";
+import "../constants/ConstantAddresses.sol";
 
 /// @title Marketplace keeps track of all the CDPs and implements the buy logic through MarketplaceProxy
 contract Marketplace is DSAuth, DSMath, ConstantAddresses {
