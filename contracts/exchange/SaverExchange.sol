@@ -3,10 +3,10 @@ pragma solidity ^0.5.0;
 import "../interfaces/ExchangeInterface.sol";
 import "../interfaces/TokenInterface.sol";
 import "../DS/DSMath.sol";
-import "../constants/ConstantAddresses.sol";
+import "./SaverExchangeConstantAddresses.sol";
 import "../Discount.sol";
 
-contract SaverExchange is DSMath, ConstantAddresses {
+contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
 
     uint public constant SERVICE_FEE = 800; // 0.125% Fee
 
@@ -40,10 +40,10 @@ contract SaverExchange is DSMath, ConstantAddresses {
         if (tokensReturned == 0) {
             (wrapper, price) = getBestPrice(_amount, _src, _dest, _exchangeType);
 
-            require(_0xPrice > _minPrice, "Slippage hit 0x");
+            require(price > _minPrice || _0xPrice > _minPrice, "Slippage hit");
 
-            // handle 0x exchange
-            if (_0xPrice > price) {
+            // handle 0x exchange, if equal price, try 0x to use less gas
+            if (_0xPrice >= price) {
                 if (_src != KYBER_ETH_ADDRESS) {
                     ERC20(_src).approve(address(ERC20_PROXY_0X), _amount);
                 }
@@ -56,7 +56,7 @@ contract SaverExchange is DSMath, ConstantAddresses {
 
             if (tokensReturned == 0) {
                 // in case 0x failed, price on other exchanges still needs to be higher than minPrice
-                require(price > _minPrice, "Slippage hit");
+                require(price > _minPrice, "Slippage hit onchain price");
                 if (_src == KYBER_ETH_ADDRESS) {
                     (tokensReturned,) = ExchangeInterface(wrapper).swapEtherToToken.value(_amount)(_amount, _dest, uint(-1));
                 } else {
