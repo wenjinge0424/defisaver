@@ -11,7 +11,7 @@ contract ConstantAddressesExchange {
     address public constant DISCOUNT_ADDRESS = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
 
     address public constant GAS_TOKEN_INTERFACE_ADDRESS = 0x0000000000b3F879cb30FE243b4Dfee438691c04;
-    address public constant SAVER_EXCHANGE_ADDRESS = 0x6eC6D98e2AF940436348883fAFD5646E9cdE2446;
+    address public constant SAVER_EXCHANGE_ADDRESS = 0x862F3dcF1104b8a9468fBb8B843C37C31B41eF09;
 
     // new MCD contracts
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
