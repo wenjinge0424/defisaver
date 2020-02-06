@@ -65,7 +65,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         address _joinAddr,
         address _exchangeAddress,
         bytes memory _callData
-    ) public repayCheck(_data[0]) {
+    ) public payable repayCheck(_data[0]) {
 
         address owner = getOwner(manager, _data[0]);
         bytes32 ilk = manager.ilks(_data[0]);
@@ -99,7 +99,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         address _joinAddr,
         address _exchangeAddress,
         bytes memory _callData
-    ) public boostCheck(_data[0]) {
+    ) public payable boostCheck(_data[0]) {
         address owner = getOwner(manager, _data[0]);
         bytes32 ilk = manager.ilks(_data[0]);
 
