@@ -1,31 +1,22 @@
-# cdpsaver-contracts
-Open source contracts that power defisaver.com
+# Defi Saver contracts
+
+Open source Solidity contracts that power defisaver.com
 
 Contract addresses on mainnet:
 
+## MCD Monitor
+ - MCDSaverProxy - https://etherscan.io/address/0x1637d405f61a6c6aa54d0a28fab85b7ea9e81932
+ - MCDMonitor - https://etherscan.io/address/0xdf0852e681f16ce1a03e9cae5b2c7f26f719d971
+ - MCDMonitorProxy - https://etherscan.io/address/0x93efcf86b6a7a33ae961a7ec6c741f49bce11da7
+ - Subscriptions - https://etherscan.io/address/0x83152caa0d344a2fd428769529e2d490a88f4393
 
-Marketplace Cdp - (0xC0986E9803a41542c5422dbe336F9B68C55E0a49)
+## Exchange
+ - Saver Exchange - https://etherscan.io/address/0x865b41584a22f8345fca4b71c42a1e7abcd67ecb
 
-DSGuardFactory - (0x5a15566417e6C1c9546523066500bDDBc53F88C7)
+## Smart Savings
+ - Savings Proxy - https://etherscan.io/address/0xc60410c217716d0ba4c32205d667a712572482d5
 
-SaverLogger - (0xeCf88e1ceC2D2894A0295DB3D86Fe7CE4991E6dF)
-
-CompoundProxy - (0xbA6B2EAa1DcCdA720a42DA8b1Fd1FDC2b8Bad38c)
-
-Activity Logger - (0x669e1AF3D294a47366F3796F0FA66Be751A23B0D)
-
-UniswapWrapper - (0x0aa70981311D60a9521C99cecFDD68C3E5a83B83)
-
-Eth2DaiWrapper - (0xd7BBB1777E13b6F535Dec414f575b858ed300baF)
-
-Exchange - (0x115C93B168020990F7b6D2f094A57fC5256B5bd1)
-
-Saver Proxy - (0xfDa65289b9e84B98c01d5c8B7B2fc6cbBc506a03)
-
-Smart Savings - (0x296420a79fe17b72eb4749ca26d4e53602f4edef)
-
-Monitor - (0x65114af041a921180220b300b3cb4aebad04601a)
-
-MonitorProxy - (0xeedc04af995c61e36265f2eae4d9ab9fbb2bfb6c)
-
-Savings Logger - (0x89b3635bd2bad145c6f92e82c9e83f06d5654984)
+## SCD Monitor
+ - Saver Proxy - https://etherscan.io/address/0x8B79d1A101E1E823CEEBd5f71895604785435e36
+ - Monitor - https://etherscan.io/address/0x65114af041a921180220b300b3cb4aebad04601a
+ - Monitor Proxy - https://etherscan.io/address/0xeedc04af995c61e36265f2eae4d9ab9fbb2bfb6c
