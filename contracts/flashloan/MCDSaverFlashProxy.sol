@@ -1,175 +1,178 @@
-// pragma solidity ^0.5.0;
+pragma solidity ^0.5.0;
 
-// import "../mcd/saver_proxy/MCDSaverProxy.sol";
+import "../mcd/saver_proxy/MCDSaverProxy.sol";
+import "../constants/ConstantAddresses.sol";
 
-// contract FlashLoanLogger {
-//     event FlashLoan(string, uint, uint, address);
+contract FlashLoanLogger {
+    event FlashLoan(string, uint, uint, address);
 
-//     function logFlashLoan(string calldata _actionType, uint _id, uint _loanAmount, address _sender) external {
-//         emit FlashLoan(_actionType, _loanAmount, _id, _sender);
-//     }
-// }
+    function logFlashLoan(string calldata _actionType, uint _id, uint _loanAmount, address _sender) external {
+        emit FlashLoan(_actionType, _loanAmount, _id, _sender);
+    }
+}
 
-// contract IDaiToken {
-//     function flashBorrowToken(
-//         uint256 borrowAmount,
-//         address borrower,
-//         address target,
-//         string calldata signature,
-//         bytes calldata data
-//     )
-//         external
-//         payable;
-// }
+contract IDaiToken {
+    function flashBorrowToken(
+        uint256 borrowAmount,
+        address borrower,
+        address target,
+        string calldata signature,
+        bytes calldata data
+    )
+        external
+        payable;
+}
 
-// contract MCDFlashLoanTaker is DSMath, ConstantAddresses, SaverProxyHelper {
-//     address public constant MCD_SAVER_FLASH_PROXY = 0xADe52ff4612B1654c6b8F4da30e1A7b853Bcac19;
+contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
+    address public constant MCD_SAVER_FLASH_PROXY = 0x513235a96263abc8eeB6e9CFEC9A6AEC49A06d83;
 
-//     Manager public constant manager = Manager(MANAGER_ADDRESS);
-//     IDaiToken public constant IDAI = IDaiToken(NEW_IDAI_ADDRESS);
-//     FlashLoanLogger public constant logger = FlashLoanLogger(0x6c4114b65f90392e78Ef7c1f2c1FD33832d7965e);
+    Manager public constant manager = Manager(MANAGER_ADDRESS);
+    IDaiToken public constant IDAI = IDaiToken(NEW_IDAI_ADDRESS);
+    FlashLoanLogger public constant logger = FlashLoanLogger(0x6c4114b65f90392e78Ef7c1f2c1FD33832d7965e);
 
-//     Vat public constant vat = Vat(VAT_ADDRESS);
-//     Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
+    Vat public constant vat = Vat(VAT_ADDRESS);
+    Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
 
-//     function boostWithLoan(
-//         uint _cdpId,
-//         address _joinAddr,
-//         uint _daiAmount,
-//         uint _minPrice,
-//         uint _exchangeType,
-//         uint _gasCost
-//     ) external {
-//         uint maxDebt = getMaxDebt(_cdpId, manager.ilks(_cdpId));
-//         uint debtAmount = _daiAmount;
+    // cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
+        // uint[6] memory _data,
+        // address _joinAddr,
+        // address _exchangeAddress,
+        // bytes memory _callData
 
-//         require(debtAmount >= maxDebt, "Amount to small for flash loan use CDP balance instead");
+    function boostWithLoan(
+        uint[6] memory _data,
+        address _joinAddr,
+        address _exchangeAddress,
+        bytes memory _callData
+    ) public {
 
-//         uint loanAmount = sub(debtAmount, maxDebt);
+        uint maxDebt = getMaxDebt(_data[0], manager.ilks(_data[0]));
+        uint debtAmount = _data[1];
 
-//         manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_PROXY, 1);
+        require(debtAmount >= maxDebt, "Amount to small for flash loan use CDP balance instead");
 
-//          IDAI.flashBorrowToken(loanAmount, MCD_SAVER_FLASH_PROXY, MCD_SAVER_FLASH_PROXY, "",
-//             abi.encodeWithSignature('actionWithLoan(uint256,address,uint256,uint256,uint256,uint256,uint256,bool)',
-//             _cdpId, _joinAddr, _daiAmount, loanAmount, _minPrice, _exchangeType, _gasCost, false)
-//         );
+        uint loanAmount = sub(debtAmount, maxDebt);
 
-//         manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_PROXY, 0);
+        manager.cdpAllow(_data[0], MCD_SAVER_FLASH_PROXY, 1);
 
-//         logger.logFlashLoan('Boost', loanAmount, _cdpId, msg.sender);
-//     }
+         IDAI.flashBorrowToken(loanAmount, MCD_SAVER_FLASH_PROXY, MCD_SAVER_FLASH_PROXY, "",
+            abi.encodeWithSignature('actionWithLoan(uint256[6],uint256,address,address,bytes,bool)',
+                _data, loanAmount, _joinAddr, _exchangeAddress, _callData, false)
+        );
 
-//     function repayWithLoan(
-//         uint _cdpId,
-//         address _joinAddr,
-//         uint _amount,
-//         uint _minPrice,
-//         uint _exchangeType,
-//         uint _gasCost
-//     ) external {
-//         uint maxDebt = getMaxDebt(_cdpId, manager.ilks(_cdpId));
+        manager.cdpAllow(_data[0], MCD_SAVER_FLASH_PROXY, 0);
 
-//         uint ethPrice = getPrice(manager.ilks(_cdpId));
-//         uint debtAmount = rmul(_amount, add(ethPrice, div(ethPrice, 10)));
+        logger.logFlashLoan('Boost', loanAmount, _data[0], msg.sender);
+    }
 
-//         require(debtAmount >= maxDebt, "Amount to small for flash loan use CDP balance instead");
+    function repayWithLoan(
+        uint[6] memory _data,
+        address _joinAddr,
+        address _exchangeAddress,
+        bytes memory _callData
+    ) public {
+        require(_data[0] > 0, "");
+        uint maxDebt = 1000000000; // getMaxDebt(_data[0], manager.ilks(_data[0]));
 
-//         uint loanAmount = sub(debtAmount, maxDebt);
+        uint ethPrice = getPrice(manager.ilks(_data[0]));
+        uint debtAmount = rmul(_data[1], add(ethPrice, div(ethPrice, 10)));
 
-//         manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_PROXY, 1);
+        require(debtAmount >= maxDebt, "Amount to small for flash loan use CDP balance instead");
 
-//          IDAI.flashBorrowToken(loanAmount, MCD_SAVER_FLASH_PROXY, MCD_SAVER_FLASH_PROXY, "",
-//             abi.encodeWithSignature('actionWithLoan(uint256,address,uint256,uint256,uint256,uint256,uint256,bool)',
-//             _cdpId, _joinAddr, _amount, loanAmount, _minPrice, _exchangeType, _gasCost, true)
-//         );
+        uint loanAmount = sub(debtAmount, maxDebt);
 
-//         manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_PROXY, 0);
+        manager.cdpAllow(_data[0], MCD_SAVER_FLASH_PROXY, 1);
 
-//         logger.logFlashLoan('Repay', loanAmount, _cdpId, msg.sender);
-//     }
+         IDAI.flashBorrowToken(loanAmount, MCD_SAVER_FLASH_PROXY, MCD_SAVER_FLASH_PROXY, "",
+            abi.encodeWithSignature('actionWithLoan(uint256[6],uint256,address,address,bytes,bool)',
+                _data, loanAmount, _joinAddr, _exchangeAddress, _callData, true)
+        );
 
-//     function closeWithLoan(uint _cdpId) external {
-//         bytes32 ilk = manager.ilks(_cdpId);
+        manager.cdpAllow(_data[0], MCD_SAVER_FLASH_PROXY, 0);
 
-//         uint maxDebt = getMaxDebt(_cdpId, ilk);
+        logger.logFlashLoan('Repay', loanAmount, _data[0], msg.sender);
+    }
 
-//         (, uint wholeDebt) = getCdpInfo(manager, _cdpId, ilk);
+    // function closeWithLoan(uint _cdpId) external {
+    //     bytes32 ilk = manager.ilks(_cdpId);
 
-//         uint loanAmount = sub(wholeDebt, maxDebt);
+    //     uint maxDebt = getMaxDebt(_cdpId, ilk);
 
-//         // convert to eth
+    //     (, uint wholeDebt) = getCdpInfo(manager, _cdpId, ilk);
 
-//         // require(maxDebt >= wholeDebt, "No need for a flash loan");
+    //     uint loanAmount = sub(wholeDebt, maxDebt);
 
-//         // manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_PROXY, 1);
+        // convert to eth
 
-//         //  IDAI.flashBorrowToken(loanAmount, MCD_SAVER_FLASH_PROXY, MCD_SAVER_FLASH_PROXY, "",
-//         //     abi.encodeWithSignature('actionWithLoan(uint256,address,uint256,uint256,uint256,uint256,uint256,bool)',
-//         //     _cdpId, _joinAddr, _amount, loanAmount, _minPrice, _exchangeType, _gasCost, true)
-//         // );
+        // require(maxDebt >= wholeDebt, "No need for a flash loan");
 
-//         // manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_PROXY, 0);
+        // manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_PROXY, 1);
 
-//         // logger.logFlashLoan('Close', loanAmount, _cdpId, msg.sender);
+        //  IDAI.flashBorrowToken(loanAmount, MCD_SAVER_FLASH_PROXY, MCD_SAVER_FLASH_PROXY, "",
+        //     abi.encodeWithSignature('actionWithLoan(uint256,address,uint256,uint256,uint256,uint256,uint256,bool)',
+        //     _cdpId, _joinAddr, _amount, loanAmount, _minPrice, _exchangeType, _gasCost, true)
+        // );
 
-//     }
+        // manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_PROXY, 0);
 
-//     /// @notice Gets the maximum amount of debt available to generate
-//     /// @param _cdpId Id of the CDP
-//     /// @param _ilk Ilk of the CDP
-//     function getMaxDebt(uint _cdpId, bytes32 _ilk) public view returns (uint) {
-//         uint price = getPrice(_ilk);
+        // logger.logFlashLoan('Close', loanAmount, _cdpId, msg.sender);
 
-//         (, uint mat) = spotter.ilks(_ilk);
-//         (uint collateral, uint debt) = getCdpInfo(manager, _cdpId, _ilk);
+    // }
 
-//         return sub(wdiv(wmul(collateral, price), mat), debt);
-//     }
+    /// @notice Gets the maximum amount of debt available to generate
+    /// @param _cdpId Id of the CDP
+    /// @param _ilk Ilk of the CDP
+    function getMaxDebt(uint _cdpId, bytes32 _ilk) public view returns (uint) {
+        uint price = getPrice(_ilk);
 
-//     /// @notice Gets a price of the asset
-//     /// @param _ilk Ilk of the CDP
-//     function getPrice(bytes32 _ilk) public view returns (uint) {
-//         (, uint mat) = spotter.ilks(_ilk);
-//         (,,uint spot,,) = vat.ilks(_ilk);
+        (, uint mat) = spotter.ilks(_ilk);
+        (uint collateral, uint debt) = getCdpInfo(manager, _cdpId, _ilk);
 
-//         return rmul(rmul(spot, spotter.par()), mat);
-//     }
-// }
+        return sub(wdiv(wmul(collateral, price), mat), debt);
+    }
 
-// contract MCDSaverFlashProxy is MCDSaverProxy {
+    /// @notice Gets a price of the asset
+    /// @param _ilk Ilk of the CDP
+    function getPrice(bytes32 _ilk) public view returns (uint) {
+        (, uint mat) = spotter.ilks(_ilk);
+        (,,uint spot,,) = vat.ilks(_ilk);
 
-//     IDaiToken public constant IDAI = IDaiToken(NEW_IDAI_ADDRESS);
-//     Manager public constant manager = Manager(MANAGER_ADDRESS);
+        return rmul(rmul(spot, spotter.par()), mat);
+    }
+}
 
-//     function actionWithLoan(
-//         uint _cdpId,
-//         address _joinAddr,
-//         uint _amount,
-//         uint _loanAmount,
-//         uint _minPrice,
-//         uint _exchangeType,
-//         uint _gasCost,
-//         bool isRepay
-//     ) public {
+contract MCDSaverFlashProxy is MCDSaverProxy {
 
-//         // payback the CDP debt with loan amount
-//         address owner = getOwner(manager, _cdpId);
-//         paybackDebt(_cdpId, manager.ilks(_cdpId), _loanAmount, owner);
+    IDaiToken public constant IDAI = IDaiToken(NEW_IDAI_ADDRESS);
+    Manager public constant manager = Manager(MANAGER_ADDRESS);
 
-//         if (isRepay) {
-//             repay(_cdpId, _joinAddr, _amount, _minPrice, _exchangeType, _gasCost);
-//         } else {
-//             boost(_cdpId, _joinAddr, _amount, _minPrice, _exchangeType, _gasCost);
-//         }
+    function actionWithLoan(
+        uint[6] memory _data,
+        uint _loanAmount,
+        address _joinAddr,
+        address _exchangeAddress,
+        bytes memory _callData,
+        bool isRepay
+    ) public {
 
-//         // repay the flash loan
-//         uint daiDrawn = drawDai(_cdpId, manager.ilks(_cdpId), _loanAmount);
+        // payback the CDP debt with loan amount
+        address owner = getOwner(manager, _data[0]);
+        paybackDebt(_data[0], manager.ilks(_data[0]), _loanAmount, owner);
 
-//         require(daiDrawn >= _loanAmount, "Loan debt to big for CDP");
+        if (isRepay) {
+            repay(_data, _joinAddr, _exchangeAddress, _callData);
+        } else {
+            boost(_data, _joinAddr, _exchangeAddress, _callData);
+        }
 
-//         ERC20(DAI_ADDRESS).transfer(address(IDAI), _loanAmount);
-//     }
+        // repay the flash loan
+        uint daiDrawn = drawDai(_data[0], manager.ilks(_data[0]), _loanAmount);
 
-//     function() external payable {}
+        require(daiDrawn >= _loanAmount, "Loan debt to big for CDP");
 
-// }
+        ERC20(DAI_ADDRESS).transfer(address(IDAI), _loanAmount);
+    }
+
+    function() external payable {}
+
+}
