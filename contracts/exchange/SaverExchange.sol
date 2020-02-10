@@ -13,61 +13,76 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
     event Swap(address src, address dest, uint amountSold, uint amountBought, address wrapper);
 
     function swapTokenToToken(address _src, address _dest, uint _amount, uint _minPrice, uint _exchangeType, address _exchangeAddress, bytes memory _callData, uint _0xPrice) public payable {
-        if (_src == KYBER_ETH_ADDRESS) {
+        // use this to avoid stack too deep error
+        address[3] memory orderAddresses = [_exchangeAddress, _src, _dest];
+
+        if (orderAddresses[1] == KYBER_ETH_ADDRESS) {
             require(msg.value >= _amount, "msg.value smaller than amount");
         } else {
-            require(ERC20(_src).transferFrom(msg.sender, address(this), _amount), "Not able to withdraw wanted amount");
+            require(ERC20(orderAddresses[1]).transferFrom(msg.sender, address(this), _amount), "Not able to withdraw wanted amount");
         }
 
-        uint fee = takeFee(_amount, _src);
+        uint fee = takeFee(_amount, orderAddresses[1]);
         _amount = sub(_amount, fee);
-        uint tokensReturned;
+        // [tokensReturned, tokensLeft]
+        uint[2] memory tokens;
         address wrapper;
         uint price;
         bool success;
 
+        // at the beggining tokensLeft equals _amount
+        tokens[1] = _amount;
+
         if (_exchangeType == 4) {
-            if (_src != KYBER_ETH_ADDRESS) {
-                ERC20(_src).approve(address(ERC20_PROXY_0X), _amount);
+            if (orderAddresses[1] != KYBER_ETH_ADDRESS) {
+                ERC20(orderAddresses[1]).approve(address(ERC20_PROXY_0X), _amount);
             }
 
-            (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
+            (success, tokens[0], ) = takeOrder(orderAddresses, _callData, address(this).balance);
             // either it reverts or order doesn't exist anymore, we reverts as it was explicitely asked for this exchange
-            require(success && tokensReturned > 0, "0x transaction failed");
+            require(success && tokens[0] > 0, "0x transaction failed");
             wrapper = address(_exchangeAddress);
         }
 
-        if (tokensReturned == 0) {
-            (wrapper, price) = getBestPrice(_amount, _src, _dest, _exchangeType);
+        if (tokens[0] == 0) {
+            (wrapper, price) = getBestPrice(_amount, orderAddresses[1], orderAddresses[2], _exchangeType);
 
             require(price > _minPrice || _0xPrice > _minPrice, "Slippage hit");
 
             // handle 0x exchange, if equal price, try 0x to use less gas
             if (_0xPrice >= price) {
-                if (_src != KYBER_ETH_ADDRESS) {
-                    ERC20(_src).approve(address(ERC20_PROXY_0X), _amount);
+                if (orderAddresses[1] != KYBER_ETH_ADDRESS) {
+                    ERC20(orderAddresses[1]).approve(address(ERC20_PROXY_0X), _amount);
                 }
-                (success, tokensReturned) = takeOrder(_exchangeAddress, _callData, address(this).balance, _dest);
+                (success, tokens[0], tokens[1]) = takeOrder(orderAddresses, _callData, address(this).balance);
                 // either it reverts or order doesn't exist anymore
-                if (success && tokensReturned > 0) {
+                if (success && tokens[0] > 0) {
                     wrapper = address(_exchangeAddress);
+                    emit Swap(orderAddresses[1], orderAddresses[2], _amount, tokens[0], wrapper);
                 }
             }
 
-            if (tokensReturned == 0) {
+            if (tokens[1] > 0) {
+                // in case 0x swapped just some amount of tokens and returned everything else
+                if (tokens[1] != _amount) {
+                    (wrapper, price) = getBestPrice(tokens[1], orderAddresses[1], orderAddresses[2], _exchangeType);
+                }
+
                 // in case 0x failed, price on other exchanges still needs to be higher than minPrice
                 require(price > _minPrice, "Slippage hit onchain price");
-                if (_src == KYBER_ETH_ADDRESS) {
-                    (tokensReturned,) = ExchangeInterface(wrapper).swapEtherToToken.value(_amount)(_amount, _dest, uint(-1));
+                if (orderAddresses[1] == KYBER_ETH_ADDRESS) {
+                    (tokens[0],) = ExchangeInterface(wrapper).swapEtherToToken.value(tokens[1])(tokens[1], orderAddresses[2], uint(-1));
                 } else {
-                    ERC20(_src).transfer(wrapper, _amount);
+                    ERC20(orderAddresses[1]).transfer(wrapper, tokens[1]);
 
-                    if (_dest == KYBER_ETH_ADDRESS) {
-                        tokensReturned = ExchangeInterface(wrapper).swapTokenToEther(_src, _amount, uint(-1));
+                    if (orderAddresses[2] == KYBER_ETH_ADDRESS) {
+                        tokens[0] = ExchangeInterface(wrapper).swapTokenToEther(orderAddresses[1], tokens[1], uint(-1));
                     } else {
-                        tokensReturned = ExchangeInterface(wrapper).swapTokenToToken(_src, _dest, _amount);
+                        tokens[0] = ExchangeInterface(wrapper).swapTokenToToken(orderAddresses[1], orderAddresses[2], tokens[1]);
                     }
                 }
+
+                emit Swap(orderAddresses[1], orderAddresses[2], _amount, tokens[0], wrapper);
             }
         }
 
@@ -77,42 +92,48 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
         }
 
         // return if there is any tokens left
-        if (_dest != KYBER_ETH_ADDRESS) {
-            if (ERC20(_dest).balanceOf(address(this)) > 0) {
-                ERC20(_dest).transfer(msg.sender, ERC20(_dest).balanceOf(address(this)));
+        if (orderAddresses[2] != KYBER_ETH_ADDRESS) {
+            if (ERC20(orderAddresses[2]).balanceOf(address(this)) > 0) {
+                ERC20(orderAddresses[2]).transfer(msg.sender, ERC20(orderAddresses[2]).balanceOf(address(this)));
             }
         }
 
-        if (_src != KYBER_ETH_ADDRESS) {
-            if (ERC20(_src).balanceOf(address(this)) > 0) {
-                ERC20(_src).transfer(msg.sender, ERC20(_src).balanceOf(address(this)));
+        if (orderAddresses[1] != KYBER_ETH_ADDRESS) {
+            if (ERC20(orderAddresses[1]).balanceOf(address(this)) > 0) {
+                ERC20(orderAddresses[1]).transfer(msg.sender, ERC20(orderAddresses[1]).balanceOf(address(this)));
             }
         }
-
-        emit Swap(_src, _dest, _amount, tokensReturned, wrapper);
     }
 
     // @notice Takes order from 0x and returns bool indicating if it is successful
-    // @param _exchange Address of exchange to be called
+    // @param _addresses [exchange, src, dst]
     // @param _data Data to send with call
     // @param _value Value to send with call
-    // @param _dest Address of token/ETH returned
-    function takeOrder(address _exchange, bytes memory _data, uint _value, address _dest) private returns(bool, uint) {
+    function takeOrder(address[3] memory _addresses, bytes memory _data, uint _value) private returns(bool, uint, uint) {
         bool success;
 
-        (success, ) = _exchange.call.value(_value)(_data);
+        (success, ) = _addresses[0].call.value(_value)(_data);
 
+        uint tokensLeft = _value;
         uint tokensReturned = 0;
         if (success){
-            if (_dest == KYBER_ETH_ADDRESS) {
+            // check how many tokens left from _src
+            if (_addresses[1] == KYBER_ETH_ADDRESS) {
+                tokensLeft = address(this).balance;
+            } else {
+                tokensLeft = ERC20(_addresses[1]).balanceOf(address(this));
+            }
+
+            // check how many tokens are returned
+            if (_addresses[2] == KYBER_ETH_ADDRESS) {
                 TokenInterface(WETH_ADDRESS).withdraw(TokenInterface(WETH_ADDRESS).balanceOf(address(this)));
                 tokensReturned = address(this).balance;
             } else {
-                tokensReturned = ERC20(_dest).balanceOf(address(this));
+                tokensReturned = ERC20(_addresses[2]).balanceOf(address(this));
             }
         }
 
-        return (success, tokensReturned);
+        return (success, tokensReturned, tokensLeft);
     }
 
     /// @notice Returns the best estimated price from 2 exchanges
