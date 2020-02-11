@@ -4,7 +4,7 @@ import "../../interfaces/ExchangeInterface.sol";
 import "../../interfaces/TokenInterface.sol";
 import "../../interfaces/SaverExchangeInterface.sol";
 
-import "./ConstantAddressesExchange.sol";
+import "../../constants/ConstantAddressesExchange.sol";
 
 
 /// @title Helper methods for integration with SaverExchange
@@ -63,10 +63,10 @@ contract ExchangeHelper is ConstantAddressesExchange {
         //         } else {
         //             tokens[0] += ExchangeInterface(wrapper).swapTokenToToken(orderAddresses[1], orderAddresses[2], tokens[1]);
         //         }
-        //     }      
+        //     }
 
-        //     return tokens[0]; 
-        // } 
+        //     return tokens[0];
+        // }
 
         if (tokens[0] == 0) {
             (wrapper, price) = SaverExchangeInterface(SAVER_EXCHANGE_ADDRESS).getBestPrice(_data[0], orderAddresses[1], orderAddresses[2], _data[2]);
@@ -85,7 +85,7 @@ contract ExchangeHelper is ConstantAddressesExchange {
 
             // if there are more tokens left, try to sell them on other exchanges
             if (tokens[1] > 0) {
-                // as it stands today, this can happend only when selling ETH 
+                // as it stands today, this can happend only when selling ETH
                 if (tokens[1] != _data[0]) {
                     (wrapper, price) = SaverExchangeInterface(SAVER_EXCHANGE_ADDRESS).getBestPrice(tokens[1], orderAddresses[1], orderAddresses[2], _data[2]);
                 }
@@ -115,7 +115,7 @@ contract ExchangeHelper is ConstantAddressesExchange {
     // @param _addresses [exchange, src, dst]
     // @param _data Data to send with call
     // @param _value Value to send with call
-    function takeOrder(address[3] memory _addresses, bytes memory _data, uint _value) private returns(bool, uint, uint) {
+    function takeOrder(address[3] memory _addresses, bytes memory _data, uint _value) internal returns(bool, uint, uint) {
         bool success;
 
         (success, ) = _addresses[0].call.value(_value)(_data);

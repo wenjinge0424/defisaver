@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
 
-contract ConstantAddressesExchange {
+contract ConstantAddressesExchangeMainnet {
     address public constant MAKER_DAI_ADDRESS = 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359;
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant MKR_ADDRESS = 0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2;

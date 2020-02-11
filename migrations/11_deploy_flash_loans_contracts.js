@@ -11,7 +11,7 @@ module.exports = function(deployer, network, accounts) {
         // NOTICE: deploy seperatly and swith the addresses in the contracts
 
         // await deployer.deploy(FlashLoanLogger, {gas: 6000000, overwrite: deployAgain});
-        // await deployer.deploy(MCDSaverFlashProxy, {gas: 6000000, overwrite: deployAgain});
-        await deployer.deploy(MCDFlashLoanTaker, {gas: 6000000, overwrite: deployAgain});
+        await deployer.deploy(MCDSaverFlashProxy, {gas: 10000000, overwrite: deployAgain});
+        // await deployer.deploy(MCDFlashLoanTaker, {gas: 6000000, overwrite: deployAgain});
     });
 };
