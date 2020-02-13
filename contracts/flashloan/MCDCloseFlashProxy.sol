@@ -16,7 +16,8 @@ contract MCDCloseFlashProxy is MCDSaverProxy {
         uint _collateral,
         address _joinAddr,
         address _exchangeAddress,
-        bytes memory _callData
+        bytes memory _callData,
+        uint _minEth
     ) public {
 
         // payback the CDP debt with loan amount
@@ -37,14 +38,16 @@ contract MCDCloseFlashProxy is MCDSaverProxy {
         require(daiSwaped >= _loanAmount, "We must exchange enough Dai tokens");
 
         if (daiSwaped > _loanAmount) {
-            // TODO: swith to Uniswap on MAINNET
+            // TODO: switch to Uniswap on MAINNET
             swap([sub(daiSwaped, _loanAmount), 0, 2, 1], DAI_ADDRESS, getCollateralAddr(_joinAddr), address(0), _callData);
 
         }
 
         ERC20(DAI_ADDRESS).transfer(address(NEW_IDAI_ADDRESS), _loanAmount);
-        owner.transfer(address(this).balance);
 
+        require(address(this).balance >= _minEth, "Below min. number of eth specified");
+
+        owner.transfer(address(this).balance);
     }
 
     function() external payable {}
