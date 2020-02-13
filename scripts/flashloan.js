@@ -10,7 +10,7 @@ const DSSProxyActions = require('../build/contracts/DSSProxyActions.json');
 const MCDFlashLoanTaker = require('../build/contracts/MCDFlashLoanTaker.json');
 
 const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
-const mcdFlashLoanTakerAddr = '0x2D14bC38FA22D9B8d58d6B51e883828c7e0C7e80';
+const mcdFlashLoanTakerAddr = '0x610488c1086752115EdE2e262DD6ca2f559F9aC7';
 
 const zeroAddr = '0x0000000000000000000000000000000000000000';
 
@@ -62,8 +62,8 @@ function getAbiFunction(contract, functionName) {
 (async () => {
     await initContracts();
 
-    // await boostWithLoan(222, getTokenJoinAddr('ETH'), '25');
-    await repayWithLoan(222, getTokenJoinAddr('ETH'), '0.2');
+    await boostWithLoan(222, getTokenJoinAddr('ETH'), '25');
+    // await repayWithLoan(222, getTokenJoinAddr('ETH'), '0.2');
 
 })();
 

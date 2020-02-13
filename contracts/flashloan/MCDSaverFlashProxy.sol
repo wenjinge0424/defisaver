@@ -1,4 +1,4 @@
-pragma solidity ^0.5.7;
+pragma solidity ^0.5.0;
 
 import "../mcd/saver_proxy/MCDSaverProxy.sol";
 
@@ -21,8 +21,7 @@ contract MCDSaverFlashProxy is MCDSaverProxy {
 
         // payback the CDP debt with loan amount
         address owner = getOwner(manager, _data[0]);
-        // bytes32 ilkk = ManagerLike(0x1476483dD8C35F25e568113C5f70249D3976ba21).ilks(277);
-        // paybackDebt(_data[0], manager.ilks(_data[0]), _loanAmount, owner);
+        paybackDebt(_data[0], manager.ilks(_data[0]), _loanAmount, owner);
 
         if (isRepay) {
             repay(_data, _joinAddr, _exchangeAddress, _callData);
@@ -30,14 +29,12 @@ contract MCDSaverFlashProxy is MCDSaverProxy {
             boost(_data, _joinAddr, _exchangeAddress, _callData);
         }
 
-        uint daiDrawn = 0;
-
         // repay the flash loan
-        // uint daiDrawn = drawDai(_data[0], manager.ilks(_data[0]), _loanAmount);
+        uint daiDrawn = drawDai(_data[0], manager.ilks(_data[0]), _loanAmount);
 
         require(daiDrawn >= _loanAmount, "Loan debt to big for CDP");
 
-        // ERC20(DAI_ADDRESS).transfer(address(NEW_IDAI_ADDRESS), _loanAmount);
+        ERC20(DAI_ADDRESS).transfer(address(NEW_IDAI_ADDRESS), _loanAmount);
     }
 
     function() external payable {}

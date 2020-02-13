@@ -24,7 +24,7 @@ contract IDaiToken {
 }
 
 contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
-    address public constant MCD_SAVER_FLASH_PROXY = 0x513235a96263abc8eeB6e9CFEC9A6AEC49A06d83;
+    address public constant MCD_SAVER_FLASH_PROXY = 0x93b575d02982B5Fb4d0716298210997f2ddEe9ec;
 
     Manager public constant manager = Manager(MANAGER_ADDRESS);
     IDaiToken public constant IDAI = IDaiToken(NEW_IDAI_ADDRESS);
