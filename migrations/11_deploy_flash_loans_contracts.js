@@ -1,6 +1,7 @@
 const MCDSaverFlashProxy = artifacts.require("./MCDSaverFlashProxy.sol");
 const MCDFlashLoanTaker = artifacts.require("./MCDFlashLoanTaker.sol");
 const FlashLoanLogger = artifacts.require("./FlashLoanLogger.sol");
+const MCDCloseFlashProxy = artifacts.require("./MCDCloseFlashProxy.sol");
 
 require('dotenv').config();
 
@@ -12,6 +13,8 @@ module.exports = function(deployer, network, accounts) {
 
         // await deployer.deploy(FlashLoanLogger, {gas: 6000000, overwrite: deployAgain});
         // await deployer.deploy(MCDSaverFlashProxy, {gas: 10000000, overwrite: deployAgain});
+
+        // await deployer.deploy(MCDCloseFlashProxy, {gas: 10000000, overwrite: deployAgain});
         await deployer.deploy(MCDFlashLoanTaker, {gas: 6000000, overwrite: deployAgain});
     });
 };
