@@ -21,7 +21,7 @@ contract IDaiToken {
 
 contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
     address public constant MCD_SAVER_FLASH_PROXY = 0x93b575d02982B5Fb4d0716298210997f2ddEe9ec;
-    address public constant MCD_CLOSE_FLASH_PROXY = 0x8FA4c4070FED6a85ba0BB746c98A0dC1419780C4;
+    address public constant MCD_CLOSE_FLASH_PROXY = 0xF6195D8d254bEF755fA8232D55Bb54B3b3eCf0Ce;
 
     Manager public constant manager = Manager(MANAGER_ADDRESS);
     IDaiToken public constant IDAI = IDaiToken(NEW_IDAI_ADDRESS);
@@ -95,7 +95,7 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         address _joinAddr,
         address _exchangeAddress,
         bytes memory _callData,
-        uint _minEth
+        uint _minCollateral
     ) public {
         bytes32 ilk = manager.ilks(_data[0]);
 
@@ -105,26 +105,28 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
         uint wholeDebt = getAllDebt(VAT_ADDRESS, manager.urns(_data[0]), manager.urns(_data[0]), ilk);
 
-        // convert to eth
-
         require(wholeDebt > maxDebt, "No need for a flash loan");
 
         manager.cdpAllow(_data[0], MCD_CLOSE_FLASH_PROXY, 1);
 
          IDAI.flashBorrowToken(wholeDebt, MCD_CLOSE_FLASH_PROXY, MCD_CLOSE_FLASH_PROXY, "",
             abi.encodeWithSignature('closeCDP(uint256[6],uint256,uint256,address,address,bytes,uint256)',
-                                    _data, wholeDebt, collateral, _joinAddr, _exchangeAddress, _callData, _minEth)
+                                    _data, wholeDebt, collateral, _joinAddr, _exchangeAddress, _callData, _minCollateral)
         );
 
         manager.cdpAllow(_data[0], MCD_CLOSE_FLASH_PROXY, 0);
 
+        // If sub. to automatic protection unsubscribe
         (, bool isSubscribed) = IMCDSubscriptions(SUBSCRIPTION_ADDRESS).subscribersPos(_data[0]);
-
         if (isSubscribed) {
             IMCDSubscriptions(SUBSCRIPTION_ADDRESS).unsubscribe(_data[0]);
         }
 
         logger.logFlashLoan('Close', wholeDebt, _data[0], msg.sender);
+
+    }
+
+    function openWithLoan() public payable {
 
     }
 
@@ -148,4 +150,5 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
         return rmul(rmul(spot, spotter.par()), mat);
     }
+
 }
