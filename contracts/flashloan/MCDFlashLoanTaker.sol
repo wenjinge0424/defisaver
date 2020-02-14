@@ -22,7 +22,7 @@ contract IDaiToken {
 contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
     address public constant MCD_SAVER_FLASH_PROXY = 0x93b575d02982B5Fb4d0716298210997f2ddEe9ec;
     address public constant MCD_CLOSE_FLASH_PROXY = 0xF6195D8d254bEF755fA8232D55Bb54B3b3eCf0Ce;
-    address payable public constant MCD_OPEN_FLASH_PROXY = 0x66dF572433aa8824AfA9540ED54B0B15AFf22BE5;
+    address payable public constant MCD_OPEN_FLASH_PROXY = 0x22e37Df56cAFc7f33e9438751dff42DbD5CB8Ed6;
 
     Manager public constant manager = Manager(MANAGER_ADDRESS);
     IDaiToken public constant IDAI = IDaiToken(NEW_IDAI_ADDRESS);
@@ -122,7 +122,7 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
     }
 
     function openWithLoan(
-        uint[5] memory _data, // daiAmount, minPrice, exchangeType, gasCost, 0xPrice
+        uint[6] memory _data, // collAmount, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
         bytes32 _ilk,
         address _collJoin,
         address _exchangeAddress,
@@ -134,15 +134,18 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         if (_isEth) {
             MCD_OPEN_FLASH_PROXY.transfer(msg.value);
         } else {
-            // TODO:
+            ERC20(getCollateralAddr(_collJoin)).transferFrom(msg.sender, address(this), _data[0]);
+            ERC20(getCollateralAddr(_collJoin)).transfer(MCD_OPEN_FLASH_PROXY, _data[0]);
         }
 
         address[3] memory addrData = [_collJoin, _exchangeAddress, _proxy];
 
-        IDAI.flashBorrowToken(_data[0], MCD_OPEN_FLASH_PROXY, MCD_OPEN_FLASH_PROXY, "",
-            abi.encodeWithSignature('openAndLeverage(uint256[5],bytes32,address[3],bytes,bool)',
+        IDAI.flashBorrowToken(_data[1], MCD_OPEN_FLASH_PROXY, MCD_OPEN_FLASH_PROXY, "",
+            abi.encodeWithSignature('openAndLeverage(uint256[6],bytes32,address[3],bytes,bool)',
                                     _data, _ilk, addrData, _callData, _isEth)
         );
+
+        logger.logFlashLoan('Open', manager.last(_proxy), _data[1], msg.sender);
 
     }
 
