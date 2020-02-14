@@ -22,6 +22,7 @@ contract IDaiToken {
 contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
     address public constant MCD_SAVER_FLASH_PROXY = 0x93b575d02982B5Fb4d0716298210997f2ddEe9ec;
     address public constant MCD_CLOSE_FLASH_PROXY = 0xF6195D8d254bEF755fA8232D55Bb54B3b3eCf0Ce;
+    address payable public constant MCD_OPEN_FLASH_PROXY = 0x66dF572433aa8824AfA9540ED54B0B15AFf22BE5;
 
     Manager public constant manager = Manager(MANAGER_ADDRESS);
     IDaiToken public constant IDAI = IDaiToken(NEW_IDAI_ADDRESS);
@@ -30,14 +31,8 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
     Vat public constant vat = Vat(VAT_ADDRESS);
     Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
 
-    // cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
-        // uint[6] memory _data,
-        // address _joinAddr,
-        // address _exchangeAddress,
-        // bytes memory _callData
-
     function boostWithLoan(
-        uint[6] memory _data,
+        uint[6] memory _data, // cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
         address _joinAddr,
         address _exchangeAddress,
         bytes memory _callData
@@ -109,7 +104,7 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
         manager.cdpAllow(_data[0], MCD_CLOSE_FLASH_PROXY, 1);
 
-         IDAI.flashBorrowToken(wholeDebt, MCD_CLOSE_FLASH_PROXY, MCD_CLOSE_FLASH_PROXY, "",
+        IDAI.flashBorrowToken(wholeDebt, MCD_CLOSE_FLASH_PROXY, MCD_CLOSE_FLASH_PROXY, "",
             abi.encodeWithSignature('closeCDP(uint256[6],uint256,uint256,address,address,bytes,uint256)',
                                     _data, wholeDebt, collateral, _joinAddr, _exchangeAddress, _callData, _minCollateral)
         );
@@ -126,7 +121,28 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
     }
 
-    function openWithLoan() public payable {
+    function openWithLoan(
+        uint[5] memory _data, // daiAmount, minPrice, exchangeType, gasCost, 0xPrice
+        bytes32 _ilk,
+        address _collJoin,
+        address _exchangeAddress,
+        bytes memory _callData,
+        address _proxy,
+        bool _isEth
+    ) public payable {
+
+        if (_isEth) {
+            MCD_OPEN_FLASH_PROXY.transfer(msg.value);
+        } else {
+            // TODO:
+        }
+
+        address[3] memory addrData = [_collJoin, _exchangeAddress, _proxy];
+
+        IDAI.flashBorrowToken(_data[0], MCD_OPEN_FLASH_PROXY, MCD_OPEN_FLASH_PROXY, "",
+            abi.encodeWithSignature('openAndLeverage(uint256[5],bytes32,address[3],bytes,bool)',
+                                    _data, _ilk, addrData, _callData, _isEth)
+        );
 
     }
 
