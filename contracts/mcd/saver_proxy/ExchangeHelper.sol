@@ -39,7 +39,7 @@ contract ExchangeHelper is ConstantAddressesExchange {
                 ERC20(orderAddresses[1]).approve(address(ERC20_PROXY_0X), _data[0]);
             }
 
-            (success, tokens[0], ) = takeOrder(orderAddresses, _callData, address(this).balance);
+            (success, tokens[0], ) = takeOrder(orderAddresses, _callData, address(this).balance, _data[0]);
 
             // if specifically 4, then require it to be successfull
             require(success && tokens[0] > 0, "0x transaction failed");
@@ -80,7 +80,7 @@ contract ExchangeHelper is ConstantAddressesExchange {
                 }
 
                 // when selling eth its possible that some eth isn't sold and it is returned back
-                (success, tokens[0], tokens[1]) = takeOrder(orderAddresses, _callData, address(this).balance);
+                (success, tokens[0], tokens[1]) = takeOrder(orderAddresses, _callData, address(this).balance, _data[0]);
             }
 
             // if there are more tokens left, try to sell them on other exchanges
@@ -115,12 +115,13 @@ contract ExchangeHelper is ConstantAddressesExchange {
     // @param _addresses [exchange, src, dst]
     // @param _data Data to send with call
     // @param _value Value to send with call
-    function takeOrder(address[3] memory _addresses, bytes memory _data, uint _value) private returns(bool, uint, uint) {
+    // @param _amount Amount to sell
+    function takeOrder(address[3] memory _addresses, bytes memory _data, uint _value, uint _amount) private returns(bool, uint, uint) {
         bool success;
 
         (success, ) = _addresses[0].call.value(_value)(_data);
 
-        uint tokensLeft = _value;
+        uint tokensLeft = _amount;
         uint tokensReturned = 0;
         if (success){
             // check how many tokens left from _src
