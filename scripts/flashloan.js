@@ -10,7 +10,12 @@ const DSSProxyActions = require('../build/contracts/DSSProxyActions.json');
 const MCDFlashLoanTaker = require('../build/contracts/MCDFlashLoanTaker.json');
 
 const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
-const mcdFlashLoanTakerAddr = '0xf603e0FAD2e985f31574E9aA2AED7BD8e41800F3';
+const mcdFlashLoanTakerAddr = '0xf0a689Cc0Ef16c2d787Fc5A2BA124b1c912A044F';
+
+const ETH_ILK = '0x4554482d41000000000000000000000000000000000000000000000000000000';
+const BAT_ILK = '0x4241542d41000000000000000000000000000000000000000000000000000000';
+
+const zeroAddr = '0x0000000000000000000000000000000000000000';
 
 const tokenJoinAddrData = {
     '1': {
@@ -43,8 +48,6 @@ const initContracts = async () => {
     account = web3.eth.accounts.privateKeyToAccount('0x'+process.env.PRIV_KEY)
     web3.eth.accounts.wallet.add(account)
 
-    console.log(account.address);
-
     registry = new web3.eth.Contract(ProxyRegistryInterface.abi, proxyRegistryAddr);
 
     proxyAddr = await registry.methods.proxies(account.address).call();
@@ -62,8 +65,12 @@ function getAbiFunction(contract, functionName) {
 (async () => {
     await initContracts();
 
-    await boostWithLoan(222, getTokenJoinAddr('ETH'), '25');
+    // await boostWithLoan(222, getTokenJoinAddr('ETH'), '25');
     // await repayWithLoan(222, getTokenJoinAddr('ETH'), '0.2');
+
+    // await closeWithLoan(104, getTokenJoinAddr('BAT'), '1000', '0.00002');
+
+    await openWithLeverage('200', '30', getTokenJoinAddr('BAT'));
 
 })();
 
@@ -71,8 +78,12 @@ const repayWithLoan = async (cdpId, joinAddr, daiAmount) => {
     try {
         daiAmount = web3.utils.toWei(daiAmount, 'ether');
 
+        // cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
+        // address _joinAddr,
+        // address _exchangeAddress,
+        // bytes memory _callData
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDFlashLoanTaker, 'repayWithLoan'),
-          [cdpId, joinAddr, daiAmount, 0, 4, 0]);
+          [[cdpId, daiAmount, 0, 2, 0, 0], joinAddr, zeroAddr, '0x0']);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdFlashLoanTakerAddr, data).send({
             from: account.address, gas: 2400000, gasPrice: 21100000000});
@@ -88,10 +99,45 @@ const boostWithLoan = async (cdpId, joinAddr, amount) => {
         amount = web3.utils.toWei(amount, 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDFlashLoanTaker, 'boostWithLoan'),
-          [cdpId, joinAddr, amount, 0, 4, 0]);
+        [[cdpId, amount, 0, 2, 0, 0], joinAddr, zeroAddr, '0x0']);
 
         const tx = await proxy.methods['execute(address,bytes)'](mcdFlashLoanTakerAddr, data).send({
             from: account.address, gas: 2400000, gasPrice: 21100000000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+const closeWithLoan = async (cdpId, joinAddr, amount, minEth) => {
+    try {
+        amount = web3.utils.toWei(amount, 'ether');
+        minEth = web3.utils.toWei(minEth, 'ether');
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDFlashLoanTaker, 'closeWithLoan'),
+        [[cdpId, amount, 0, 2, 0, 0], joinAddr, zeroAddr, '0x0', minEth]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](mcdFlashLoanTakerAddr, data).send({
+            from: account.address, gas: 4300000, gasPrice: 21100000000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+const openWithLeverage = async (ethAmount, daiAmount, joinAddr) => {
+    try {
+        ethAmount = web3.utils.toWei(ethAmount, 'ether');
+        daiAmount = web3.utils.toWei(daiAmount, 'ether');
+
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDFlashLoanTaker, 'openWithLoan'),
+        [[ethAmount, daiAmount, 0, 2, 0, 0], BAT_ILK, joinAddr, zeroAddr, '0x0', proxyAddr, false]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](mcdFlashLoanTakerAddr, data).send({
+            from: account.address, gas: 4300000, gasPrice: 21100000000});
 
         console.log(tx);
     } catch(err) {

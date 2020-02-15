@@ -26,6 +26,7 @@ module.exports = {
             return new HDWalletProvider(mnemonic, process.env.KOVAN_INFURA_ENDPOINT, 0, 15);
         },
         network_id: '42',
+        gas: 8000000,
         gasPrice: 3000000000,
         skipDryRun: true,
     },
@@ -50,6 +51,12 @@ module.exports = {
   compilers: {
     solc: {
       version: "0.5.7",
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 20000
+        },
+      }
     }
   },
   api_keys: {
