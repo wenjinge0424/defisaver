@@ -19,9 +19,9 @@ contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
 
     function deposit(SavingsProtocol _protocol, uint _amount) public {
         if (_protocol == SavingsProtocol.Dsr) {
-            dsrDeposit(_amount);
+            dsrDeposit(_amount, true);
         } else {
-            _deposit(_protocol, _amount);
+            _deposit(_protocol, _amount, true);
         }
 
         SavingsLogger(SAVINGS_LOGGER_ADDRESS).logDeposit(msg.sender, uint8(_protocol), _amount);
@@ -29,9 +29,9 @@ contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
 
     function withdraw(SavingsProtocol _protocol, uint _amount) public {
         if (_protocol == SavingsProtocol.Dsr) {
-            dsrWithdraw(_amount);
+            dsrWithdraw(_amount, true);
         } else {
-            _withdraw(_protocol, _amount);
+            _withdraw(_protocol, _amount, true);
         }
 
         SavingsLogger(SAVINGS_LOGGER_ADDRESS).logWithdraw(msg.sender, uint8(_protocol), _amount);
@@ -39,15 +39,19 @@ contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
 
     function swap(SavingsProtocol _from, SavingsProtocol _to, uint _amount) public {
         if (_from == SavingsProtocol.Dsr) {
-            dsrWithdraw(_amount);
+            dsrWithdraw(_amount, false);
         } else {
-            _withdraw(_from, _amount);
+            _withdraw(_from, _amount, false);
         }
 
+        // possible to withdraw 1-2 wei less than actual amount due to division precision
+        // so we deposit all amount on DSProxy
+        uint amountToDeposit = ERC20(DAI_ADDRESS).balanceOf(address(this));
+
         if (_to == SavingsProtocol.Dsr) {
-            dsrDeposit(_amount);
+            dsrDeposit(amountToDeposit, false);
         } else {
-            _deposit(_to, _amount);
+            _deposit(_to, amountToDeposit, false);
         }
 
         SavingsLogger(SAVINGS_LOGGER_ADDRESS).logSwap(msg.sender, uint8(_from), uint8(_to), _amount);
@@ -72,7 +76,11 @@ contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
         }
     }
 
-    function _deposit(SavingsProtocol _protocol, uint _amount) internal {
+    function _deposit(SavingsProtocol _protocol, uint _amount, bool _fromUser) internal {
+        if (_fromUser) {
+            ERC20(DAI_ADDRESS).transferFrom(msg.sender, address(this), _amount);
+        }
+
         approveDeposit(_protocol, _amount);
 
         ProtocolInterface(getAddress(_protocol)).deposit(address(this), _amount);
@@ -80,14 +88,16 @@ contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
         endAction(_protocol);
     }
 
-    function _withdraw(SavingsProtocol _protocol, uint _amount) public {
+    function _withdraw(SavingsProtocol _protocol, uint _amount, bool _toUser) public {
         approveWithdraw(_protocol, _amount);
 
         ProtocolInterface(getAddress(_protocol)).withdraw(address(this), _amount);
 
         endAction(_protocol);
 
-        withdrawDai();
+        if (_toUser) {
+            withdrawDai();
+        }
     }
 
     function endAction(SavingsProtocol _protocol) internal {
@@ -97,7 +107,6 @@ contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
     }
 
     function approveDeposit(SavingsProtocol _protocol, uint _amount) internal {
-        ERC20(DAI_ADDRESS).transferFrom(msg.sender, address(this), _amount);
 
         if (_protocol == SavingsProtocol.Compound || _protocol == SavingsProtocol.Fulcrum) {
             ERC20(DAI_ADDRESS).approve(getAddress(_protocol), uint(-1));

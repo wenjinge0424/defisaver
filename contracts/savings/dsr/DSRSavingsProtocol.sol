@@ -45,12 +45,12 @@ contract DSRSavingsProtocol is DSMath {
     address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
     address public constant POT_ADDRESS = 0x197E90f9FAD81970bA7976f33CbD77088E5D7cf7;
 
-    function dsrDeposit(uint _amount) internal {
+    function dsrDeposit(uint _amount, bool _fromUser) internal {
         VatLike vat = DaiJoinLike(DAI_JOIN_ADDRESS).vat();
 
         uint chi = PotLike(POT_ADDRESS).drip();
 
-        daiJoin_join(DAI_JOIN_ADDRESS, address(this), _amount);
+        daiJoin_join(DAI_JOIN_ADDRESS, address(this), _amount, _fromUser);
 
         if (vat.can(address(this), address(POT_ADDRESS)) == 0) {
             vat.hope(POT_ADDRESS);
@@ -59,7 +59,7 @@ contract DSRSavingsProtocol is DSMath {
         PotLike(POT_ADDRESS).join(mul(_amount, RAY) / chi);
     }
 
-    function dsrWithdraw(uint _amount) internal {
+    function dsrWithdraw(uint _amount, bool _toUser) internal {
         VatLike vat = DaiJoinLike(DAI_JOIN_ADDRESS).vat();
 
         uint chi = PotLike(POT_ADDRESS).drip();
@@ -72,18 +72,27 @@ contract DSRSavingsProtocol is DSMath {
             vat.hope(DAI_JOIN_ADDRESS);
         }
 
+        address to;
+        if (_toUser) {
+            to = msg.sender;
+        } else {
+            to = address(this);
+        }
+
         if (_amount == uint(-1)) {
-            DaiJoinLike(DAI_JOIN_ADDRESS).exit(msg.sender, mul(chi, pie) / RAY);
+            DaiJoinLike(DAI_JOIN_ADDRESS).exit(to, mul(chi, pie) / RAY);
         } else {
             DaiJoinLike(DAI_JOIN_ADDRESS).exit(
-                msg.sender,
+                to,
                 balance >= mul(_amount, RAY) ? _amount : balance / RAY
             );
         }
     }
 
-    function daiJoin_join(address apt, address urn, uint wad) internal {
-        DaiJoinLike(apt).dai().transferFrom(msg.sender, address(this), wad);
+    function daiJoin_join(address apt, address urn, uint wad, bool _fromUser) internal {
+        if (_fromUser) {
+            DaiJoinLike(apt).dai().transferFrom(msg.sender, address(this), wad);
+        }
 
         DaiJoinLike(apt).dai().approve(apt, wad);
 

@@ -38,7 +38,7 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
                 ERC20(orderAddresses[1]).approve(address(ERC20_PROXY_0X), _amount);
             }
 
-            (success, tokens[0], ) = takeOrder(orderAddresses, _callData, address(this).balance);
+            (success, tokens[0], ) = takeOrder(orderAddresses, _callData, address(this).balance, _amount);
             // either it reverts or order doesn't exist anymore, we reverts as it was explicitely asked for this exchange
             require(success && tokens[0] > 0, "0x transaction failed");
             wrapper = address(_exchangeAddress);
@@ -54,7 +54,7 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
                 if (orderAddresses[1] != KYBER_ETH_ADDRESS) {
                     ERC20(orderAddresses[1]).approve(address(ERC20_PROXY_0X), _amount);
                 }
-                (success, tokens[0], tokens[1]) = takeOrder(orderAddresses, _callData, address(this).balance);
+                (success, tokens[0], tokens[1]) = takeOrder(orderAddresses, _callData, address(this).balance, _amount);
                 // either it reverts or order doesn't exist anymore
                 if (success && tokens[0] > 0) {
                     wrapper = address(_exchangeAddress);
@@ -109,12 +109,13 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
     // @param _addresses [exchange, src, dst]
     // @param _data Data to send with call
     // @param _value Value to send with call
-    function takeOrder(address[3] memory _addresses, bytes memory _data, uint _value) private returns(bool, uint, uint) {
+    // @param _amount Amount being sold
+    function takeOrder(address[3] memory _addresses, bytes memory _data, uint _value, uint _amount) private returns(bool, uint, uint) {
         bool success;
 
         (success, ) = _addresses[0].call.value(_value)(_data);
 
-        uint tokensLeft = _value;
+        uint tokensLeft = _amount;
         uint tokensReturned = 0;
         if (success){
             // check how many tokens left from _src
