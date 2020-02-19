@@ -13,7 +13,7 @@ contract MCDCloseSubscribers {
     uint[] public subscribedCdps;
 
     function subscribe(uint _cdpId, uint _minProfit, uint _maxProfit) public {
-        require(isOwner(msg.sender, _cdpId), "Must be the owner of the CDP");
+        // require(isOwner(msg.sender, _cdpId), "Must be the owner of the CDP");
 
         closePositions[_cdpId] = ClosePosition({
             minProfit: _minProfit,
@@ -23,7 +23,7 @@ contract MCDCloseSubscribers {
     }
 
     function unsubscribe(uint _cdpId) public {
-        require(isOwner(msg.sender, _cdpId), "Must be the owner of the CDP");
+        // require(isOwner(msg.sender, _cdpId), "Must be the owner of the CDP");
     }
 
     function canCall() public returns (bool) {
@@ -31,7 +31,7 @@ contract MCDCloseSubscribers {
     }
 
     /// @dev Checks if the _owner is the owner of the CDP
-    function isOwner(address _owner, uint _cdpId) internal view returns (bool) {
-        return manager.owns(_cdpId) == _owner;
-    }
+    // function isOwner(address _owner, uint _cdpId) internal view returns (bool) {
+    //     return manager.owns(_cdpId) == _owner;
+    // }
 }

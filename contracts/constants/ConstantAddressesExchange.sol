@@ -5,5 +5,5 @@ import "./ConstantAddressesExchangeMainnet.sol";
 import "./ConstantAddressesExchangeKovan.sol";
 
 
-contract ConstantAddressesExchange is ConstantAddressesExchangeKovan {
+contract ConstantAddressesExchange is ConstantAddressesExchangeMainnet {
 }
