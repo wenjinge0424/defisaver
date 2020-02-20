@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "../mcd/saver_proxy/MCDSaverProxy.sol";
+import "../../mcd/saver_proxy/MCDSaverProxy.sol";
 
 
 contract ManagerLike {
@@ -8,7 +8,7 @@ contract ManagerLike {
 }
 
 
-contract MCDCloseFlashProxy is MCDSaverProxy {
+contract MCDCloseBZXFlashProxy is MCDSaverProxy {
     // solhint-disable-next-line const-name-snakecase
     Manager public constant manager = Manager(MANAGER_ADDRESS);
 

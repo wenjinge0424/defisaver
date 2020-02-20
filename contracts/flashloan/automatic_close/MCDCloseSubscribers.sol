@@ -20,7 +20,7 @@ contract MCDCloseSubscribers {
     //         maxProfit: _maxProfit,
     //         cdpId: _cdpId
     //     });
-    // }
+    }
 
     function unsubscribe(uint _cdpId) public {
         // require(isOwner(msg.sender, _cdpId), "Must be the owner of the CDP");

@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "../mcd/saver_proxy/MCDSaverProxy.sol";
+import "../../mcd/saver_proxy/MCDSaverProxy.sol";
 
 
 contract ManagerLike {
@@ -8,7 +8,7 @@ contract ManagerLike {
 }
 
 
-contract MCDSaverFlashProxy is MCDSaverProxy {
+contract MCDSaverBZXFlashProxy is MCDSaverProxy {
     Manager public constant MANAGER = Manager(MANAGER_ADDRESS);
 
     function actionWithLoan(

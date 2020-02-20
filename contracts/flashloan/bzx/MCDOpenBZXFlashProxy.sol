@@ -1,10 +1,10 @@
 pragma solidity ^0.5.0;
 
-import "../mcd/saver_proxy/MCDSaverProxy.sol";
-import "./MCDOpenProxyActions.sol";
+import "../../mcd/saver_proxy/MCDSaverProxy.sol";
+import "../MCDOpenProxyActions.sol";
 
 
-contract MCDOpenFlashProxy is MCDSaverProxy {
+contract MCDOpenBZXFlashProxy is MCDSaverProxy {
     // solhint-disable-next-line const-name-snakecase
     Manager public constant manager = Manager(MANAGER_ADDRESS);
 
