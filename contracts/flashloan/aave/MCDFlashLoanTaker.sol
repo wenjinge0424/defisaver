@@ -8,19 +8,13 @@ contract ILendingPool {
     function flashLoan( address payable _receiver, address _reserve, uint _amount, bytes calldata _params) external;
 }
 
-contract LoanTaker is ConstantAddresses, SaverProxyHelper {
+contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
-    address public constant MCD_SAVER_FLASH_PROXY = 0x93b575d02982B5Fb4d0716298210997f2ddEe9ec;
-    address public constant MCD_CLOSE_FLASH_PROXY = 0xF6195D8d254bEF755fA8232D55Bb54B3b3eCf0Ce;
-    address payable public constant MCD_OPEN_FLASH_PROXY = 0x22e37Df56cAFc7f33e9438751dff42DbD5CB8Ed6;
+    address payable public constant MCD_SAVER_FLASH_PROXY = 0x93b575d02982B5Fb4d0716298210997f2ddEe9ec;
+    // address public constant MCD_CLOSE_FLASH_PROXY = 0xF6195D8d254bEF755fA8232D55Bb54B3b3eCf0Ce;
+    // address payable public constant MCD_OPEN_FLASH_PROXY = 0x22e37Df56cAFc7f33e9438751dff42DbD5CB8Ed6;
 
-    ILendingPool lendingPool = ILendingPool(0x580D4Fdc4BF8f9b5ae2fb9225D584fED4AD5375c);
-
-    address payable public LOAN_RECEIVER = 0x2A4E1507Ef1cc9057bA6837d7d61Ca9546120DD2;
-
-    function flashBorrow(uint _amount) public {
-        lendingPool.flashLoan(LOAN_RECEIVER, DAI_ADDRESS, _amount,"");
-    }
+    ILendingPool public constant lendingPool = ILendingPool(0x580D4Fdc4BF8f9b5ae2fb9225D584fED4AD5375c);
 
     // solhint-disable-next-line const-name-snakecase
     Manager public constant manager = Manager(MANAGER_ADDRESS);
@@ -48,6 +42,10 @@ contract LoanTaker is ConstantAddresses, SaverProxyHelper {
         uint256 loanAmount = sub(debtAmount, maxDebt);
 
         manager.cdpAllow(_data[0], MCD_SAVER_FLASH_PROXY, 1);
+
+        bytes memory paramsData = abi.encode(_data, _joinAddr, _exchangeAddress, _callData, false);
+
+        lendingPool.flashLoan(MCD_SAVER_FLASH_PROXY, DAI_ADDRESS, loanAmount, paramsData);
 
         // IDAI.flashBorrowToken(
         //     loanAmount,
