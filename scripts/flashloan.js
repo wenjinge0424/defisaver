@@ -8,9 +8,11 @@ const DSProxy = require('../build/contracts/DSProxy.json');
 const ProxyRegistryInterface = require('../build/contracts/ProxyRegistryInterface.json');
 const DSSProxyActions = require('../build/contracts/DSSProxyActions.json');
 const MCDFlashLoanTaker = require('../build/contracts/MCDFlashLoanTaker.json');
+const TestLoan = require('../build/contracts/TestLoan.json');
 
 const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
 const mcdFlashLoanTakerAddr = '0xf0a689Cc0Ef16c2d787Fc5A2BA124b1c912A044F';
+const testLoanAddr = '0xc50f13fEf45EfA33B70483FF16381B9E4003b80C';
 
 const ETH_ILK = '0x4554482d41000000000000000000000000000000000000000000000000000000';
 const BAT_ILK = '0x4241542d41000000000000000000000000000000000000000000000000000000';
@@ -54,6 +56,7 @@ const initContracts = async () => {
     proxy = new web3.eth.Contract(DSProxy.abi, proxyAddr);
 
     mcdFlashLoanTaker = new web3.eth.Contract(MCDFlashLoanTaker.abi, mcdFlashLoanTakerAddr);
+    testLoan = new web3.eth.Contract(TestLoan.abi, testLoanAddr);
 };
 
 function getAbiFunction(contract, functionName) {
@@ -70,7 +73,9 @@ function getAbiFunction(contract, functionName) {
 
     // await closeWithLoan(104, getTokenJoinAddr('BAT'), '1000', '0.00002');
 
-    await openWithLeverage('200', '30', getTokenJoinAddr('BAT'));
+    // await openWithLeverage('200', '30', getTokenJoinAddr('BAT'));
+
+    await callTestLoan('1');
 
 })();
 
@@ -144,3 +149,22 @@ const openWithLeverage = async (ethAmount, daiAmount, joinAddr) => {
         console.log(err);
     }
 };
+
+const callTestLoan = async (daiAmount) => {
+    try {
+
+        const daiAddr = '0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa';
+
+        daiAmount = web3.utils.toWei(daiAmount, 'ether');
+
+        const tx = await testLoan.methods.takeLoan(daiAddr, daiAmount).send({
+                from: account.address, gas: 4300000, gasPrice: 21100000000
+        });
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+
