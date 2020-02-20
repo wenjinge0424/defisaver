@@ -5,6 +5,9 @@ const MCDCloseFlashProxy = artifacts.require("./MCDCloseFlashProxy.sol");
 const MCDOpenFlashProxy = artifacts.require("./MCDOpenFlashProxy.sol");
 const MCDOpenProxyActions = artifacts.require("./MCDOpenProxyActions.sol");
 
+const FlashTokenDyDx = artifacts.require("./FlashTokenDyDx.sol");
+const TestLoan = artifacts.require("./TestLoan.sol");
+
 require('dotenv').config();
 
 module.exports = function(deployer, network, accounts) {
@@ -21,7 +24,13 @@ module.exports = function(deployer, network, accounts) {
         // await deployer.deploy(MCDOpenFlashProxy, {gas: 10000000, overwrite: deployAgain});
 
         // await deployer.deploy(MCDCloseFlashProxy, {gas: 10000000, overwrite: deployAgain});
-        await deployer.deploy(MCDFlashLoanTaker, {gas: 6000000, overwrite: deployAgain});
+        // await deployer.deploy(MCDFlashLoanTaker, {gas: 6000000, overwrite: deployAgain});
+
+
+        // Flash Token stuff
+
+        // await deployer.deploy(FlashTokenDyDx, {gas: 6000000, overwrite: deployAgain});
+        await deployer.deploy(TestLoan, {gas: 6000000, overwrite: deployAgain});
 
     });
 };
