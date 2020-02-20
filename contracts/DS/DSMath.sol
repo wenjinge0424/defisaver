@@ -1,45 +1,55 @@
 pragma solidity ^0.5.0;
 
+
 contract DSMath {
-    function add(uint x, uint y) internal pure returns (uint z) {
+    function add(uint256 x, uint256 y) internal pure returns (uint256 z) {
         require((z = x + y) >= x);
     }
-    function sub(uint x, uint y) internal pure returns (uint z) {
+
+    function sub(uint256 x, uint256 y) internal pure returns (uint256 z) {
         require((z = x - y) <= x);
     }
-    function mul(uint x, uint y) internal pure returns (uint z) {
+
+    function mul(uint256 x, uint256 y) internal pure returns (uint256 z) {
         require(y == 0 || (z = x * y) / y == x);
     }
-    function div(uint x, uint y) internal pure returns (uint z) {
+
+    function div(uint256 x, uint256 y) internal pure returns (uint256 z) {
         return x / y;
     }
 
-    function min(uint x, uint y) internal pure returns (uint z) {
+    function min(uint256 x, uint256 y) internal pure returns (uint256 z) {
         return x <= y ? x : y;
     }
-    function max(uint x, uint y) internal pure returns (uint z) {
-        return x >= y ? x : y;
-    }
-    function imin(int x, int y) internal pure returns (int z) {
-        return x <= y ? x : y;
-    }
-    function imax(int x, int y) internal pure returns (int z) {
+
+    function max(uint256 x, uint256 y) internal pure returns (uint256 z) {
         return x >= y ? x : y;
     }
 
-    uint constant WAD = 10 ** 18;
-    uint constant RAY = 10 ** 27;
+    function imin(int256 x, int256 y) internal pure returns (int256 z) {
+        return x <= y ? x : y;
+    }
 
-    function wmul(uint x, uint y) internal pure returns (uint z) {
+    function imax(int256 x, int256 y) internal pure returns (int256 z) {
+        return x >= y ? x : y;
+    }
+
+    uint256 constant WAD = 10**18;
+    uint256 constant RAY = 10**27;
+
+    function wmul(uint256 x, uint256 y) internal pure returns (uint256 z) {
         z = add(mul(x, y), WAD / 2) / WAD;
     }
-    function rmul(uint x, uint y) internal pure returns (uint z) {
+
+    function rmul(uint256 x, uint256 y) internal pure returns (uint256 z) {
         z = add(mul(x, y), RAY / 2) / RAY;
     }
-    function wdiv(uint x, uint y) internal pure returns (uint z) {
+
+    function wdiv(uint256 x, uint256 y) internal pure returns (uint256 z) {
         z = add(mul(x, WAD), y / 2) / y;
     }
-    function rdiv(uint x, uint y) internal pure returns (uint z) {
+
+    function rdiv(uint256 x, uint256 y) internal pure returns (uint256 z) {
         z = add(mul(x, RAY), y / 2) / y;
     }
 
@@ -58,7 +68,7 @@ contract DSMath {
     //  Also, EVM division is flooring and
     //    floor[(n-1) / 2] = floor[n / 2].
     //
-    function rpow(uint x, uint n) internal pure returns (uint z) {
+    function rpow(uint256 x, uint256 n) internal pure returns (uint256 z) {
         z = n % 2 != 0 ? x : RAY;
 
         for (n /= 2; n != 0; n /= 2) {

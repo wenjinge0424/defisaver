@@ -1,14 +1,31 @@
 pragma solidity ^0.5.0;
 
-contract SaverLogger {
-    event Repay(uint indexed cdpId, address indexed owner, uint collateralAmount, uint daiAmount);
-    event Boost(uint indexed cdpId, address indexed owner, uint daiAmount, uint collateralAmount);
 
-    function LogRepay(uint _cdpId, address _owner, uint _collateralAmount, uint _daiAmount) public {
+contract SaverLogger {
+    event Repay(
+        uint256 indexed cdpId,
+        address indexed owner,
+        uint256 collateralAmount,
+        uint256 daiAmount
+    );
+    event Boost(
+        uint256 indexed cdpId,
+        address indexed owner,
+        uint256 daiAmount,
+        uint256 collateralAmount
+    );
+
+    // solhint-disable-next-line func-name-mixedcase
+    function LogRepay(uint256 _cdpId, address _owner, uint256 _collateralAmount, uint256 _daiAmount)
+        public
+    {
         emit Repay(_cdpId, _owner, _collateralAmount, _daiAmount);
     }
 
-    function LogBoost(uint _cdpId, address _owner, uint _daiAmount, uint _collateralAmount) public {
+    // solhint-disable-next-line func-name-mixedcase
+    function LogBoost(uint256 _cdpId, address _owner, uint256 _daiAmount, uint256 _collateralAmount)
+        public
+    {
         emit Boost(_cdpId, _owner, _daiAmount, _collateralAmount);
     }
 }

@@ -5,9 +5,9 @@ import "../DS/DSGuard.sol";
 import "./Marketplace.sol";
 import "../constants/ConstantAddresses.sol";
 
+
 /// @title MarketplaceProxy handles authorization and interaction with the Marketplace contract
 contract MarketplaceProxy is ConstantAddresses {
-
     ///@dev Called by the Marketplace contract, will give CDP only if you're authorized or CDP owner
     ///@param _cup CDP Id
     ///@param _newOwner Transfer the CDP to this address
@@ -21,7 +21,12 @@ contract MarketplaceProxy is ConstantAddresses {
     ///@param _cup CDP Id
     ///@param _discount 4 digit number representing a discount of CDP value (0-9999)
     ///@param _marketplace Address of the marketplace contract
-    function createAuthorizeAndSell(bytes32 _cup, uint _discount, address _marketplace, address _proxy) public {
+    function createAuthorizeAndSell(
+        bytes32 _cup,
+        uint256 _discount,
+        address _marketplace,
+        address _proxy
+    ) public {
         DSGuard guard = DSGuardFactory(FACTORY_ADDRESS).newGuard();
         DSAuth(_proxy).setAuthority(DSAuthority(address(guard)));
 
@@ -34,7 +39,9 @@ contract MarketplaceProxy is ConstantAddresses {
     ///@param _cup CDP Id
     ///@param _discount 4 digit number representing a discount of CDP value (0-9999)
     ///@param _marketplace Address of the marketplace contract
-    function authorizeAndSell(bytes32 _cup, uint _discount, address _marketplace, address _proxy) public {
+    function authorizeAndSell(bytes32 _cup, uint256 _discount, address _marketplace, address _proxy)
+        public
+    {
         DSGuard guard = DSGuard(address(DSAuth(_proxy).authority()));
         guard.permit(_marketplace, _proxy, bytes4(keccak256("execute(address,bytes)")));
 
@@ -45,7 +52,7 @@ contract MarketplaceProxy is ConstantAddresses {
     ///@param _cup CDP Id
     ///@param _discount 4 digit number representing a discount of CDP value (0-9999)
     ///@param _marketplace Address of the marketplace contract
-    function sell(bytes32 _cup, uint _discount, address _marketplace) public {
+    function sell(bytes32 _cup, uint256 _discount, address _marketplace) public {
         Marketplace(_marketplace).putOnSale(_cup, _discount);
     }
 

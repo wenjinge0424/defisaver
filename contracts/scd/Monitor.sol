@@ -7,31 +7,31 @@ import "../interfaces/ERC20.sol";
 import "../DS/DSMath.sol";
 import "../constants/ConstantAddresses.sol";
 
-contract Monitor is DSMath, ConstantAddresses {
 
+contract Monitor is DSMath, ConstantAddresses {
     // KOVAN
     PipInterface pip = PipInterface(PIP_INTERFACE_ADDRESS);
     TubInterface tub = TubInterface(TUB_ADDRESS);
     ProxyRegistryInterface registry = ProxyRegistryInterface(PROXY_REGISTRY_INTERFACE_ADDRESS);
     GasTokenInterface gasToken = GasTokenInterface(GAS_TOKEN_INTERFACE_ADDRESS);
 
-    uint constant public REPAY_GAS_TOKEN = 30;
-    uint constant public BOOST_GAS_TOKEN = 19;
+    uint256 public constant REPAY_GAS_TOKEN = 30;
+    uint256 public constant BOOST_GAS_TOKEN = 19;
 
-    uint constant public MAX_GAS_PRICE = 40000000000; // 40 gwei
+    uint256 public constant MAX_GAS_PRICE = 40000000000; // 40 gwei
 
-    uint constant public REPAY_GAS_COST = 1500000;
-    uint constant public BOOST_GAS_COST = 750000;
+    uint256 public constant REPAY_GAS_COST = 1500000;
+    uint256 public constant BOOST_GAS_COST = 750000;
 
     address public saverProxy;
     address public owner;
-    uint public changeIndex;
+    uint256 public changeIndex;
 
     struct CdpHolder {
-        uint minRatio;
-        uint maxRatio;
-        uint optimalRatioBoost;
-        uint optimalRatioRepay;
+        uint256 minRatio;
+        uint256 maxRatio;
+        uint256 optimalRatioBoost;
+        uint256 optimalRatioRepay;
         address owner;
     }
 
@@ -44,8 +44,20 @@ contract Monitor is DSMath, ConstantAddresses {
     event Unsubscribed(address indexed owner, bytes32 cdpId);
     event Updated(address indexed owner, bytes32 cdpId);
 
-    event CdpRepay(bytes32 indexed cdpId, address caller, uint _amount, uint _ratioBefore, uint _ratioAfter);
-    event CdpBoost(bytes32 indexed cdpId, address caller, uint _amount, uint _ratioBefore, uint _ratioAfter);
+    event CdpRepay(
+        bytes32 indexed cdpId,
+        address caller,
+        uint256 _amount,
+        uint256 _ratioBefore,
+        uint256 _ratioAfter
+    );
+    event CdpBoost(
+        bytes32 indexed cdpId,
+        address caller,
+        uint256 _amount,
+        uint256 _ratioBefore,
+        uint256 _ratioAfter
+    );
 
     modifier onlyApproved() {
         require(approvedCallers[msg.sender]);
@@ -71,7 +83,13 @@ contract Monitor is DSMath, ConstantAddresses {
     /// @param _maxRatio Maximum ratio that the Cdp can be
     /// @param _optimalRatioBoost Optimal ratio for the user after boost is performed
     /// @param _optimalRatioRepay Optimal ratio for the user after repay is performed
-    function subscribe(bytes32 _cdpId, uint _minRatio, uint _maxRatio, uint _optimalRatioBoost, uint _optimalRatioRepay) public {
+    function subscribe(
+        bytes32 _cdpId,
+        uint256 _minRatio,
+        uint256 _maxRatio,
+        uint256 _optimalRatioBoost,
+        uint256 _optimalRatioRepay
+    ) public {
         require(isOwner(msg.sender, _cdpId));
 
         bool isCreated = holders[_cdpId].owner == address(0) ? true : false;
@@ -109,22 +127,25 @@ contract Monitor is DSMath, ConstantAddresses {
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     /// @param _cdpId Id of the cdp
     /// @param _amount Amount of Eth to convert to Dai
-    function repayFor(bytes32 _cdpId, uint _amount) public onlyApproved {
+    function repayFor(bytes32 _cdpId, uint256 _amount) public onlyApproved {
         if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
             gasToken.free(BOOST_GAS_TOKEN);
         }
 
         CdpHolder memory holder = holders[_cdpId];
-        uint ratioBefore = getRatio(_cdpId);
+        uint256 ratioBefore = getRatio(_cdpId);
 
         require(holder.owner != address(0));
         require(ratioBefore <= holders[_cdpId].minRatio);
 
-        uint gasCost = calcGasCost(REPAY_GAS_COST);
+        uint256 gasCost = calcGasCost(REPAY_GAS_COST);
 
-        DSProxyInterface(holder.owner).execute(saverProxy, abi.encodeWithSignature("repay(bytes32,uint256,uint256)", _cdpId, _amount, gasCost));
+        DSProxyInterface(holder.owner).execute(
+            saverProxy,
+            abi.encodeWithSignature("repay(bytes32,uint256,uint256)", _cdpId, _amount, gasCost)
+        );
 
-        uint ratioAfter = getRatio(_cdpId);
+        uint256 ratioAfter = getRatio(_cdpId);
 
         require(ratioAfter > holders[_cdpId].minRatio);
         require(ratioAfter < holders[_cdpId].maxRatio);
@@ -136,23 +157,26 @@ contract Monitor is DSMath, ConstantAddresses {
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     /// @param _cdpId Id of the cdp
     /// @param _amount Amount of Dai to convert to Eth
-    function boostFor(bytes32 _cdpId, uint _amount) public onlyApproved {
+    function boostFor(bytes32 _cdpId, uint256 _amount) public onlyApproved {
         if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
             gasToken.free(REPAY_GAS_TOKEN);
         }
 
         CdpHolder memory holder = holders[_cdpId];
-        uint ratioBefore = getRatio(_cdpId);
+        uint256 ratioBefore = getRatio(_cdpId);
 
         require(holder.owner != address(0));
 
         require(ratioBefore >= holders[_cdpId].maxRatio);
 
-        uint gasCost = calcGasCost(BOOST_GAS_COST);
+        uint256 gasCost = calcGasCost(BOOST_GAS_COST);
 
-        DSProxyInterface(holder.owner).execute(saverProxy, abi.encodeWithSignature("boost(bytes32,uint256,uint256)", _cdpId, _amount, gasCost));
+        DSProxyInterface(holder.owner).execute(
+            saverProxy,
+            abi.encodeWithSignature("boost(bytes32,uint256,uint256)", _cdpId, _amount, gasCost)
+        );
 
-        uint ratioAfter = getRatio(_cdpId);
+        uint256 ratioAfter = getRatio(_cdpId);
 
         require(ratioAfter > holders[_cdpId].minRatio);
         require(ratioAfter < holders[_cdpId].maxRatio);
@@ -160,17 +184,16 @@ contract Monitor is DSMath, ConstantAddresses {
         emit CdpBoost(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
     }
 
-
     /// @notice Calculates the ratio of a given cdp
     /// @param _cdpId The id od the cdp
-    function getRatio(bytes32 _cdpId) public returns(uint) {
+    function getRatio(bytes32 _cdpId) public returns (uint256) {
         return (rdiv(rmul(rmul(tub.ink(_cdpId), tub.tag()), WAD), tub.tab(_cdpId)));
     }
 
     /// @notice Check if the owner is the cup owner
     /// @param _owner Address which is the owner of the cup
     /// @param _cdpId Id of the cdp
-    function isOwner(address _owner, bytes32 _cdpId) internal view returns(bool) {
+    function isOwner(address _owner, bytes32 _cdpId) internal view returns (bool) {
         require(tub.lad(_cdpId) == _owner);
 
         return true;
@@ -179,12 +202,11 @@ contract Monitor is DSMath, ConstantAddresses {
     /// @notice Calculates gas cost (in Eth) of tx
     /// @dev Gas price is limited to MAX_GAS_PRICE to prevent attack of draining user CDP
     /// @param _gasAmount Amount of gas used for the tx
-    function calcGasCost(uint _gasAmount) internal view returns (uint) {
-        uint gasPrice = tx.gasprice <= MAX_GAS_PRICE ? tx.gasprice : MAX_GAS_PRICE;
+    function calcGasCost(uint256 _gasAmount) internal view returns (uint256) {
+        uint256 gasPrice = tx.gasprice <= MAX_GAS_PRICE ? tx.gasprice : MAX_GAS_PRICE;
 
         return mul(gasPrice, _gasAmount);
     }
-
 
     /******************* OWNER ONLY OPERATIONS ********************************/
 
@@ -204,14 +226,14 @@ contract Monitor is DSMath, ConstantAddresses {
     /// @param _tokenAddress Address of the ERC20 token
     /// @param _to Address of the receiver
     /// @param _amount The amount to be sent
-    function transferERC20(address _tokenAddress, address _to, uint _amount) public onlyOwner {
+    function transferERC20(address _tokenAddress, address _to, uint256 _amount) public onlyOwner {
         ERC20(_tokenAddress).transfer(_to, _amount);
     }
 
     /// @notice If any Eth gets stuck in the contract
     /// @param _to Address of the receiver
     /// @param _amount The amount to be sent
-    function transferEth(address payable _to, uint _amount) public onlyOwner {
+    function transferEth(address payable _to, uint256 _amount) public onlyOwner {
         _to.transfer(_amount);
     }
- }
+}

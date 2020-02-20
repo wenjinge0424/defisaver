@@ -2,26 +2,47 @@ pragma solidity ^0.5.0;
 
 import "./ERC20.sol";
 
+
 contract CTokenInterface is ERC20 {
-    function mint(uint mintAmount) external returns (uint);
+    function mint(uint256 mintAmount) external returns (uint256);
+
     function mint() external payable;
-    function redeem(uint redeemTokens) external returns (uint);
-    function redeemUnderlying(uint redeemAmount) external returns (uint);
-    function borrow(uint borrowAmount) external returns (uint);
-    function repayBorrow(uint repayAmount) external returns (uint);
+
+    function redeem(uint256 redeemTokens) external returns (uint256);
+
+    function redeemUnderlying(uint256 redeemAmount) external returns (uint256);
+
+    function borrow(uint256 borrowAmount) external returns (uint256);
+
+    function repayBorrow(uint256 repayAmount) external returns (uint256);
+
     function repayBorrow() external payable;
-    function repayBorrowBehalf(address borrower, uint repayAmount) external returns (uint);
+
+    function repayBorrowBehalf(address borrower, uint256 repayAmount) external returns (uint256);
+
     function repayBorrowBehalf(address borrower) external payable;
-    function liquidateBorrow(address borrower, uint repayAmount, address cTokenCollateral) external returns (uint);
+
+    function liquidateBorrow(address borrower, uint256 repayAmount, address cTokenCollateral)
+        external
+        returns (uint256);
+
     function liquidateBorrow(address borrower, address cTokenCollateral) external payable;
 
-    function exchangeRateCurrent() external returns (uint);
-    function supplyRatePerBlock() external returns (uint);
-    function borrowRatePerBlock() external returns (uint);
-    function totalReserves() external returns (uint);
-    function reserveFactorMantissa() external returns (uint);
-    function borrowBalanceCurrent(address account) external returns (uint);
-    function totalBorrowsCurrent() external returns (uint);
-    function getCash() external returns (uint);
-    function balanceOfUnderlying(address owner) external returns (uint);
+    function exchangeRateCurrent() external returns (uint256);
+
+    function supplyRatePerBlock() external returns (uint256);
+
+    function borrowRatePerBlock() external returns (uint256);
+
+    function totalReserves() external returns (uint256);
+
+    function reserveFactorMantissa() external returns (uint256);
+
+    function borrowBalanceCurrent(address account) external returns (uint256);
+
+    function totalBorrowsCurrent() external returns (uint256);
+
+    function getCash() external returns (uint256);
+
+    function balanceOfUnderlying(address owner) external returns (uint256);
 }

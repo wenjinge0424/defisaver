@@ -1,8 +1,12 @@
 pragma solidity ^0.5.0;
 
+
 contract ComptrollerInterface {
-    function enterMarkets(address[] calldata cTokens) external returns (uint[] memory);
-    function exitMarket(address cToken) external returns (uint);
+    function enterMarkets(address[] calldata cTokens) external returns (uint256[] memory);
+
+    function exitMarket(address cToken) external returns (uint256);
+
     function getAssetsIn(address account) external view returns (address[] memory);
-    function getAccountLiquidity(address account) external view returns (uint, uint, uint);
+
+    function getAccountLiquidity(address account) external view returns (uint256, uint256, uint256);
 }

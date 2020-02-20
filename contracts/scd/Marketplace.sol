@@ -6,33 +6,40 @@ import "../interfaces/TubInterface.sol";
 import "../interfaces/ProxyRegistryInterface.sol";
 import "../constants/ConstantAddresses.sol";
 
+
 /// @title Marketplace keeps track of all the CDPs and implements the buy logic through MarketplaceProxy
 contract Marketplace is DSAuth, DSMath, ConstantAddresses {
-
     struct SaleItem {
         address payable owner;
         address payable proxy;
-        uint discount;
+        uint256 discount;
         bool active;
     }
 
-    mapping (bytes32 => SaleItem) public items;
-    mapping (bytes32 => uint) public itemPos;
+    mapping(bytes32 => SaleItem) public items;
+    mapping(bytes32 => uint256) public itemPos;
     bytes32[] public itemsArr;
 
     address public marketplaceProxy;
 
     // 2 decimal percision when defining the disocunt value
-    uint public fee = 100; //1% fee
+    uint256 public fee = 100; //1% fee
 
     // KOVAN
-    ProxyRegistryInterface public registry = ProxyRegistryInterface(PROXY_REGISTRY_INTERFACE_ADDRESS);
+    ProxyRegistryInterface public registry = ProxyRegistryInterface(
+        PROXY_REGISTRY_INTERFACE_ADDRESS
+    );
     TubInterface public tub = TubInterface(TUB_ADDRESS);
 
-    event OnSale(bytes32 indexed cup, address indexed proxy, address owner, uint discount);
+    event OnSale(bytes32 indexed cup, address indexed proxy, address owner, uint256 discount);
 
-    event Bought(bytes32 indexed cup, address indexed newLad, address indexed oldProxy,
-                address oldOwner, uint discount);
+    event Bought(
+        bytes32 indexed cup,
+        address indexed newLad,
+        address indexed oldProxy,
+        address oldOwner,
+        uint256 discount
+    );
 
     constructor(address _marketplaceProxy) public {
         marketplaceProxy = _marketplaceProxy;
@@ -42,10 +49,16 @@ contract Marketplace is DSAuth, DSMath, ConstantAddresses {
     /// @dev Must be called by DSProxy contract in order to authorize for sale
     /// @param _cup Id of the CDP that is being put on sale
     /// @param _discount Discount of the original value, goes from 0 - 99% with 2 decimal percision
-    function putOnSale(bytes32 _cup, uint _discount) public {
+    function putOnSale(bytes32 _cup, uint256 _discount) public {
         require(isOwner(msg.sender, _cup), "msg.sender must be proxy which owns the cup");
-        require(_discount < 10000 && _discount > 100, "can't have 100% discount and must be over 1%");
-        require(tub.ink(_cup) > 0 && tub.tab(_cup) > 0, "must have collateral and debt to put on sale");
+        require(
+            _discount < 10000 && _discount > 100,
+            "can't have 100% discount and must be over 1%"
+        );
+        require(
+            tub.ink(_cup) > 0 && tub.tab(_cup) > 0,
+            "must have collateral and debt to put on sale"
+        );
         require(!isOnSale(_cup), "can't put a cdp on sale twice");
 
         address payable owner = address(uint160(DSProxyInterface(msg.sender).owner()));
@@ -72,8 +85,8 @@ contract Marketplace is DSAuth, DSMath, ConstantAddresses {
         require(item.active == true, "Check if cup is on sale");
         require(item.proxy == tub.lad(_cup), "The owner must stay the same");
 
-        uint cdpPrice;
-        uint feeAmount;
+        uint256 cdpPrice;
+        uint256 feeAmount;
 
         (cdpPrice, feeAmount) = getCdpPrice(_cup);
 
@@ -82,8 +95,10 @@ contract Marketplace is DSAuth, DSMath, ConstantAddresses {
         item.active = false;
 
         // give the cup to the buyer, him becoming the lad that owns the cup
-        DSProxyInterface(item.proxy).execute(marketplaceProxy,
-            abi.encodeWithSignature("give(bytes32,address)", _cup, _newOwner));
+        DSProxyInterface(item.proxy).execute(
+            marketplaceProxy,
+            abi.encodeWithSignature("give(bytes32,address)", _cup, _newOwner)
+        );
 
         item.owner.transfer(sub(cdpPrice, feeAmount)); // transfer money to the seller
 
@@ -92,7 +107,6 @@ contract Marketplace is DSAuth, DSMath, ConstantAddresses {
         emit Bought(_cup, msg.sender, item.proxy, item.owner, item.discount);
 
         removeItem(_cup);
-
     }
 
     /// @notice Remove the CDP from the marketplace
@@ -112,14 +126,17 @@ contract Marketplace is DSAuth, DSMath, ConstantAddresses {
     /// @notice Calculates the price of the CDP given the discount and the fee
     /// @param _cup Id of the CDP
     /// @return It returns the price of the CDP and the amount needed for the contracts fee
-    function getCdpPrice(bytes32 _cup) public returns(uint, uint) {
+    function getCdpPrice(bytes32 _cup) public returns (uint256, uint256) {
         SaleItem memory item = items[_cup];
 
-        uint collateral = rmul(tub.ink(_cup), tub.per()); // collateral in Eth
-        uint govFee = wdiv(rmul(tub.tab(_cup), rdiv(tub.rap(_cup), tub.tab(_cup))), uint(tub.pip().read()));
-        uint debt = add(govFee, wdiv(tub.tab(_cup), uint(tub.pip().read()))); // debt in Eth
+        uint256 collateral = rmul(tub.ink(_cup), tub.per()); // collateral in Eth
+        uint256 govFee = wdiv(
+            rmul(tub.tab(_cup), rdiv(tub.rap(_cup), tub.tab(_cup))),
+            uint256(tub.pip().read())
+        );
+        uint256 debt = add(govFee, wdiv(tub.tab(_cup), uint256(tub.pip().read()))); // debt in Eth
 
-        uint difference = 0;
+        uint256 difference = 0;
 
         if (item.discount > fee) {
             difference = sub(item.discount, fee);
@@ -127,25 +144,24 @@ contract Marketplace is DSAuth, DSMath, ConstantAddresses {
             difference = item.discount;
         }
 
-        uint cdpPrice = mul(sub(collateral, debt), (sub(10000, difference))) / 10000;
-        uint feeAmount = mul(sub(collateral, debt), fee) / 10000;
+        uint256 cdpPrice = mul(sub(collateral, debt), (sub(10000, difference))) / 10000;
+        uint256 feeAmount = mul(sub(collateral, debt), fee) / 10000;
 
         return (cdpPrice, feeAmount);
     }
 
     /// @notice Used by front to fetch what is on sale
     /// @return Returns all CDP ids that are on sale and are not closed
-    function getItemsOnSale() public view returns(bytes32[] memory arr) {
-        uint n = 0;
+    function getItemsOnSale() public view returns (bytes32[] memory arr) {
+        uint256 n = 0;
 
         arr = new bytes32[](itemsArr.length);
-        for (uint i = 0; i < itemsArr.length; ++i) {
+        for (uint256 i = 0; i < itemsArr.length; ++i) {
             if (tub.lad(itemsArr[i]) != address(0)) {
                 arr[n] = itemsArr[i];
                 n++;
             }
         }
-
     }
 
     /// @notice Helper method to check if a CDP is on sale
@@ -157,7 +173,7 @@ contract Marketplace is DSAuth, DSMath, ConstantAddresses {
     function removeItem(bytes32 _cup) internal {
         delete items[_cup];
 
-        uint index = itemPos[_cup];
+        uint256 index = itemPos[_cup];
         itemsArr[index] = itemsArr[itemsArr.length - 1];
 
         itemPos[_cup] = 0;
@@ -166,10 +182,9 @@ contract Marketplace is DSAuth, DSMath, ConstantAddresses {
         itemsArr.length--;
     }
 
-    function isOwner(address _owner, bytes32 _cup) internal view returns(bool) {
+    function isOwner(address _owner, bytes32 _cup) internal view returns (bool) {
         require(tub.lad(_cup) == _owner);
 
         return true;
     }
-
 }

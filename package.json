@@ -6,7 +6,9 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prettify": "./node_modules/.bin/prettier --write contracts/**/*.sol",
+    "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol"
   },
   "repository": {
     "type": "git",
@@ -27,5 +29,17 @@
     "openzeppelin-test-helpers": "^0.4.2",
     "truffle-hdwallet-provider": "^1.0.2",
     "truffle-plugin-verify": "^0.3.6"
+  },
+  "devDependencies": {
+    "husky": "^4.2.3",
+    "prettier": "^1.19.1",
+    "prettier-plugin-solidity": "^1.0.0-alpha.39",
+    "solhint": "^2.3.0",
+    "solhint-plugin-prettier": "0.0.4"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "truffle compile && npm run lint"
+    }
   }
 }

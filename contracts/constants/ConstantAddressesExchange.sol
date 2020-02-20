@@ -1,9 +1,7 @@
 pragma solidity ^0.5.0;
 
-
 import "./ConstantAddressesExchangeMainnet.sol";
 import "./ConstantAddressesExchangeKovan.sol";
 
-
-contract ConstantAddressesExchange is ConstantAddressesExchangeMainnet {
-}
+// solhint-disable-next-line no-empty-blocks
+contract ConstantAddressesExchange is ConstantAddressesExchangeMainnet {}

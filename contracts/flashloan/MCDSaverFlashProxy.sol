@@ -2,26 +2,26 @@ pragma solidity ^0.5.0;
 
 import "../mcd/saver_proxy/MCDSaverProxy.sol";
 
+
 contract ManagerLike {
-    function ilks(uint) public view returns (bytes32);
+    function ilks(uint256) public view returns (bytes32);
 }
 
-contract MCDSaverFlashProxy is MCDSaverProxy {
 
-    Manager public constant manager = Manager(MANAGER_ADDRESS);
+contract MCDSaverFlashProxy is MCDSaverProxy {
+    Manager public constant MANAGER = Manager(MANAGER_ADDRESS);
 
     function actionWithLoan(
-        uint[6] memory _data,
-        uint _loanAmount,
+        uint256[6] memory _data,
+        uint256 _loanAmount,
         address _joinAddr,
         address _exchangeAddress,
         bytes memory _callData,
         bool isRepay
     ) public {
-
         // payback the CDP debt with loan amount
-        address owner = getOwner(manager, _data[0]);
-        paybackDebt(_data[0], manager.ilks(_data[0]), _loanAmount, owner);
+        address owner = getOwner(MANAGER, _data[0]);
+        paybackDebt(_data[0], MANAGER.ilks(_data[0]), _loanAmount, owner);
 
         if (isRepay) {
             repay(_data, _joinAddr, _exchangeAddress, _callData);
@@ -30,7 +30,7 @@ contract MCDSaverFlashProxy is MCDSaverProxy {
         }
 
         // repay the flash loan
-        uint daiDrawn = drawDai(_data[0], manager.ilks(_data[0]), _loanAmount);
+        uint256 daiDrawn = drawDai(_data[0], MANAGER.ilks(_data[0]), _loanAmount);
 
         require(daiDrawn >= _loanAmount, "Loan debt to big for CDP");
 
@@ -38,5 +38,4 @@ contract MCDSaverFlashProxy is MCDSaverProxy {
     }
 
     function() external payable {}
-
 }
