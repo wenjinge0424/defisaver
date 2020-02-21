@@ -4,13 +4,23 @@ import "../../mcd/saver_proxy/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../FlashLoanLogger.sol";
 
+contract IMCDSubscriptions {
+    function unsubscribe(uint256 _cdpId) external;
+
+    function subscribersPos(uint256 _cdpId) external returns (uint256, bool);
+}
+
 contract ILendingPool {
     function flashLoan( address payable _receiver, address _reserve, uint _amount, bytes calldata _params) external;
 }
 
 contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
-    address payable public constant MCD_SAVER_FLASH_PROXY = 0x93b575d02982B5Fb4d0716298210997f2ddEe9ec;
+    address payable public constant MCD_SAVER_FLASH_LOAN = 0xb029791d7494A7620558779f8bEF51040Da9F3bf;
+    address payable public constant MCD_CLOSE_FLASH_LOAN = 0x7fc75Bd4De48c53C3DC0d122f1b9909ee36e53A4;
+    address payable public constant MCD_OPEN_FLASH_LOAN = 0x7fc75Bd4De48c53C3DC0d122f1b9909ee36e53A4;
+
+    address public constant AAVE_DAI_ADDRESS = 0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD;
     // address public constant MCD_CLOSE_FLASH_PROXY = 0xF6195D8d254bEF755fA8232D55Bb54B3b3eCf0Ce;
     // address payable public constant MCD_OPEN_FLASH_PROXY = 0x22e37Df56cAFc7f33e9438751dff42DbD5CB8Ed6;
 
@@ -29,7 +39,7 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
     Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
 
     function boostWithLoan(
-        uint256[6] memory _data, // cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
+        uint[6] memory _data, // cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
         address _joinAddr,
         address _exchangeAddress,
         bytes memory _callData
@@ -41,29 +51,13 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
         uint256 loanAmount = sub(debtAmount, maxDebt);
 
-        manager.cdpAllow(_data[0], MCD_SAVER_FLASH_PROXY, 1);
+        manager.cdpAllow(_data[0], MCD_SAVER_FLASH_LOAN, 1);
 
-        bytes memory paramsData = abi.encode(_data, _joinAddr, _exchangeAddress, _callData, false);
+        bytes memory paramsData = abi.encode(_data, loanAmount, _joinAddr, _exchangeAddress, _callData, false);
 
-        lendingPool.flashLoan(MCD_SAVER_FLASH_PROXY, DAI_ADDRESS, loanAmount, paramsData);
+        lendingPool.flashLoan(MCD_SAVER_FLASH_LOAN, AAVE_DAI_ADDRESS, loanAmount, paramsData);
 
-        // IDAI.flashBorrowToken(
-        //     loanAmount,
-        //     MCD_SAVER_FLASH_PROXY,
-        //     MCD_SAVER_FLASH_PROXY,
-        //     "",
-        //     abi.encodeWithSignature(
-        //         "actionWithLoan(uint256[6],uint256,address,address,bytes,bool)",
-        //         _data,
-        //         loanAmount,
-        //         _joinAddr,
-        //         _exchangeAddress,
-        //         _callData,
-        //         false
-        //     )
-        // );
-
-        manager.cdpAllow(_data[0], MCD_SAVER_FLASH_PROXY, 0);
+        manager.cdpAllow(_data[0], MCD_SAVER_FLASH_LOAN, 0);
 
         logger.logFlashLoan("Boost", loanAmount, _data[0], msg.sender);
     }
@@ -83,30 +77,84 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
         uint256 loanAmount = sub(debtAmount, maxDebt);
 
-        manager.cdpAllow(_data[0], MCD_SAVER_FLASH_PROXY, 1);
+        manager.cdpAllow(_data[0], MCD_SAVER_FLASH_LOAN, 1);
 
-        // IDAI.flashBorrowToken(
-        //     loanAmount,
-        //     MCD_SAVER_FLASH_PROXY,
-        //     MCD_SAVER_FLASH_PROXY,
-        //     "",
-        //     abi.encodeWithSignature(
-        //         "actionWithLoan(uint256[6],uint256,address,address,bytes,bool)",
-        //         _data,
-        //         loanAmount,
-        //         _joinAddr,
-        //         _exchangeAddress,
-        //         _callData,
-        //         true
-        //     )
-        // );
+        bytes memory paramsData = abi.encode(_data, loanAmount, _joinAddr, _exchangeAddress, _callData, true);
 
-        manager.cdpAllow(_data[0], MCD_SAVER_FLASH_PROXY, 0);
+        lendingPool.flashLoan(MCD_SAVER_FLASH_LOAN, AAVE_DAI_ADDRESS, loanAmount, paramsData);
+
+        manager.cdpAllow(_data[0], MCD_SAVER_FLASH_LOAN, 0);
 
         logger.logFlashLoan("Repay", loanAmount, _data[0], msg.sender);
     }
 
-     /// @notice Gets the maximum amount of debt available to generate
+    function closeWithLoan(
+        uint256[6] memory _data,
+        address _joinAddr,
+        address _exchangeAddress,
+        bytes memory _callData,
+        uint256 _minCollateral
+    ) public {
+        bytes32 ilk = manager.ilks(_data[0]);
+
+        uint256 maxDebt = getMaxDebt(_data[0], ilk);
+
+        (uint256 collateral, ) = getCdpInfo(manager, _data[0], ilk);
+
+        uint256 wholeDebt = getAllDebt(
+            VAT_ADDRESS,
+            manager.urns(_data[0]),
+            manager.urns(_data[0]),
+            ilk
+        );
+
+        require(wholeDebt > maxDebt, "No need for a flash loan");
+
+        manager.cdpAllow(_data[0], MCD_CLOSE_FLASH_LOAN, 1);
+
+        uint[4] memory debtData = [wholeDebt, maxDebt, collateral, _minCollateral];
+        bytes memory paramsData = abi.encode(_data, debtData, _joinAddr, _exchangeAddress, _callData);
+
+        lendingPool.flashLoan(MCD_CLOSE_FLASH_LOAN, AAVE_DAI_ADDRESS, (wholeDebt - maxDebt), paramsData);
+
+        manager.cdpAllow(_data[0], MCD_CLOSE_FLASH_LOAN, 0);
+
+        // If sub. to automatic protection unsubscribe
+        (, bool isSubscribed) = IMCDSubscriptions(SUBSCRIPTION_ADDRESS).subscribersPos(_data[0]);
+        if (isSubscribed) {
+            IMCDSubscriptions(SUBSCRIPTION_ADDRESS).unsubscribe(_data[0]);
+        }
+
+        logger.logFlashLoan("Close", wholeDebt, _data[0], msg.sender);
+    }
+
+    function openWithLoan(
+        uint256[6] memory _data, // collAmount, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
+        bytes32 _ilk,
+        address _collJoin,
+        address _exchangeAddress,
+        bytes memory _callData,
+        address _proxy,
+        bool _isEth
+    ) public payable {
+        if (_isEth) {
+            MCD_OPEN_FLASH_LOAN.transfer(msg.value);
+        } else {
+            ERC20(getCollateralAddr(_collJoin)).transferFrom(msg.sender, address(this), _data[0]);
+            ERC20(getCollateralAddr(_collJoin)).transfer(MCD_OPEN_FLASH_LOAN, _data[0]);
+        }
+
+        address[3] memory addrData = [_collJoin, _exchangeAddress, _proxy];
+
+        bytes memory paramsData = abi.encode(_data, _ilk, addrData, _callData, _isEth);
+
+        lendingPool.flashLoan(MCD_OPEN_FLASH_LOAN, AAVE_DAI_ADDRESS, _data[1], paramsData);
+
+        logger.logFlashLoan("Open", manager.last(_proxy), _data[1], msg.sender);
+    }
+
+
+    /// @notice Gets the maximum amount of debt available to generate
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
     function getMaxDebt(uint256 _cdpId, bytes32 _ilk) public view returns (uint256) {

@@ -4,4 +4,4 @@ import "./ConstantAddressesExchangeMainnet.sol";
 import "./ConstantAddressesExchangeKovan.sol";
 
 // solhint-disable-next-line no-empty-blocks
-contract ConstantAddressesExchange is ConstantAddressesExchangeMainnet {}
+contract ConstantAddressesExchange is ConstantAddressesExchangeKovan {}

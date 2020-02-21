@@ -7,8 +7,14 @@ contract ManagerLike {
     function ilks(uint256) public view returns (bytes32);
 }
 
-contract MCDSaverFlashProxy is MCDSaverProxy, FlashLoanReceiverBase {
+contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
     Manager public constant MANAGER = Manager(MANAGER_ADDRESS);
+
+    ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x506B0B2CF20FAA8f38a4E2B524EE43e1f4458Cc5);
+
+    constructor()
+        FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
+        public {}
 
     function executeOperation(
         address _reserve,
