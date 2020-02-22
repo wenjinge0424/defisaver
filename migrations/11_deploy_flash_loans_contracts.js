@@ -21,10 +21,10 @@ module.exports = function(deployer, network, accounts) {
         // await deployer.deploy(FlashLoanLogger, {gas: 6000000, overwrite: deployAgain});
         // await deployer.deploy(MCDSaverFlashLoan, {gas: 10000000, overwrite: deployAgain});
 
-        await deployer.deploy(MCDOpenFlashLoan, {gas: 10000000, overwrite: deployAgain});
+        // await deployer.deploy(MCDOpenFlashLoan, {gas: 10000000, overwrite: deployAgain});
 
         // await deployer.deploy(MCDCloseFlashLoan, {gas: 10000000, overwrite: deployAgain});
-        // await deployer.deploy(MCDFlashLoanTaker, {gas: 6000000, overwrite: deployAgain});
+        await deployer.deploy(MCDFlashLoanTaker, {gas: 6000000, overwrite: deployAgain});
 
 
     });

@@ -11,7 +11,7 @@ const MCDFlashLoanTaker = require('../build/contracts/MCDFlashLoanTaker.json');
 const TestLoan = require('../build/contracts/TestLoan.json');
 
 const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
-const mcdFlashLoanTakerAddr = '0x13D67957E8D75502cd7c143F70eb659F5200F5c6';
+const mcdFlashLoanTakerAddr = '0xEB908297Ef56Df208338055E76FB44289F7B3C5C';
 const testLoanAddr = '0xc50f13fEf45EfA33B70483FF16381B9E4003b80C';
 
 const ETH_ILK = '0x4554482d41000000000000000000000000000000000000000000000000000000';
@@ -71,7 +71,7 @@ function getAbiFunction(contract, functionName) {
     // await boostWithLoan(222, getTokenJoinAddr('ETH'), '52');
     // await repayWithLoan(222, getTokenJoinAddr('ETH'), '0.4');
 
-    await closeWithLoan(223, getTokenJoinAddr('ETH'), '1', '0.00002');
+    await closeWithLoan(975, getTokenJoinAddr('BAT'), '100', '0.00002');
 
     // await openWithLeverage('200', '30', getTokenJoinAddr('BAT'));
 

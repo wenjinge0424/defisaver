@@ -17,8 +17,8 @@ contract ILendingPool {
 contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
     address payable public constant MCD_SAVER_FLASH_LOAN = 0xb029791d7494A7620558779f8bEF51040Da9F3bf;
-    address payable public constant MCD_CLOSE_FLASH_LOAN = 0x7fc75Bd4De48c53C3DC0d122f1b9909ee36e53A4;
-    address payable public constant MCD_OPEN_FLASH_LOAN = 0x7fc75Bd4De48c53C3DC0d122f1b9909ee36e53A4;
+    address payable public constant MCD_CLOSE_FLASH_LOAN = 0x81E94a7727ee17dd95F4118e0a60cD15b022cA7b;
+    address payable public constant MCD_OPEN_FLASH_LOAN = 0x2432316d1581b546490AbF73a81503D370846963;
 
     address public constant AAVE_DAI_ADDRESS = 0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD;
     // address public constant MCD_CLOSE_FLASH_PROXY = 0xF6195D8d254bEF755fA8232D55Bb54B3b3eCf0Ce;
@@ -115,7 +115,7 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         uint[4] memory debtData = [wholeDebt, maxDebt, collateral, _minCollateral];
         bytes memory paramsData = abi.encode(_data, debtData, _joinAddr, _exchangeAddress, _callData);
 
-        lendingPool.flashLoan(MCD_CLOSE_FLASH_LOAN, AAVE_DAI_ADDRESS, (wholeDebt - maxDebt), paramsData);
+        lendingPool.flashLoan(MCD_CLOSE_FLASH_LOAN, AAVE_DAI_ADDRESS, wholeDebt, paramsData);
 
         manager.cdpAllow(_data[0], MCD_CLOSE_FLASH_LOAN, 0);
 

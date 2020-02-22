@@ -50,9 +50,8 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         address payable owner = address(uint160(getOwner(manager, _data[0])));
         address collateralAddr = getCollateralAddr(_joinAddr);
 
-        uint loanAmount = debtData[0] - debtData[1]; // wholeDebt - maxDebt
+        uint loanAmount = debtData[0];
 
-        drawDai(_data[0], manager.ilks(_data[0]), debtData[1]); // draw maxDai
         paybackDebt(_data[0], manager.ilks(_data[0]), debtData[0], owner); // payback whole debt
         drawCollateral(_data[0], manager.ilks(_data[0]), _joinAddr, debtData[2]);
 
