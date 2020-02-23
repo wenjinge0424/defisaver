@@ -43,7 +43,9 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         address _joinAddr,
         address _exchangeAddress,
         bytes memory _callData
-    ) public {
+    ) public payable {
+        MCD_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
+
         uint256 maxDebt = getMaxDebt(_data[0], manager.ilks(_data[0]));
         uint256 debtAmount = _data[1];
 
@@ -67,7 +69,9 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         address _joinAddr,
         address _exchangeAddress,
         bytes memory _callData
-    ) public {
+    ) public payable {
+        MCD_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
+
         uint256 maxDebt = getMaxDebt(_data[0], manager.ilks(_data[0]));
 
         uint256 ethPrice = getPrice(manager.ilks(_data[0]));
@@ -94,7 +98,9 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         address _exchangeAddress,
         bytes memory _callData,
         uint256 _minCollateral
-    ) public {
+    ) public payable {
+        MCD_CLOSE_FLASH_LOAN.transfer(msg.value); // 0x fee
+
         bytes32 ilk = manager.ilks(_data[0]);
 
         uint256 maxDebt = getMaxDebt(_data[0], ilk);
@@ -140,6 +146,8 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         if (_isEth) {
             MCD_OPEN_FLASH_LOAN.transfer(msg.value);
         } else {
+            MCD_OPEN_FLASH_LOAN.transfer(msg.value); // 0x fee
+
             ERC20(getCollateralAddr(_collJoin)).transferFrom(msg.sender, address(this), _data[0]);
             ERC20(getCollateralAddr(_collJoin)).transfer(MCD_OPEN_FLASH_LOAN, _data[0]);
         }
