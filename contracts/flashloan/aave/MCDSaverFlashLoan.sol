@@ -3,18 +3,18 @@ pragma solidity ^0.5.0;
 import "../../mcd/saver_proxy/MCDSaverProxy.sol";
 import "./FlashLoanReceiverBase.sol";
 
-contract ManagerLike {
-    function ilks(uint256) public view returns (bytes32);
-}
-
 contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
     Manager public constant MANAGER = Manager(MANAGER_ADDRESS);
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x506B0B2CF20FAA8f38a4E2B524EE43e1f4458Cc5);
 
+    address payable public owner;
+
     constructor()
         FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
-        public {}
+        public {
+            owner = msg.sender;
+        }
 
     function executeOperation(
         address _reserve,
@@ -66,4 +66,15 @@ contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
     }
 
     function() external payable {}
+
+    // ADMIN ONLY FAIL SAFE FUNCTION IF FUNDS GET STUCK
+    function withdrawStuckFunds(address _tokenAddr, uint _amount) public {
+        require(msg.sender == owner, "Only owner");
+
+        if (_tokenAddr == KYBER_ETH_ADDRESS) {
+            owner.transfer(_amount);
+        } else {
+            ERC20(_tokenAddr).transfer(owner, _amount);
+        }
+    }
 }

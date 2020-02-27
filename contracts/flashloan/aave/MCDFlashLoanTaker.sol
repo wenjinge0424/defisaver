@@ -16,8 +16,8 @@ contract ILendingPool {
 
 contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
-    address payable public constant MCD_SAVER_FLASH_LOAN = 0xb029791d7494A7620558779f8bEF51040Da9F3bf;
-    address payable public constant MCD_CLOSE_FLASH_LOAN = 0x81E94a7727ee17dd95F4118e0a60cD15b022cA7b;
+    address payable public constant MCD_SAVER_FLASH_LOAN = 0xe1a37F3234F9C726Dd8716418805Deb90286E67a;
+    address payable public constant MCD_CLOSE_FLASH_LOAN = 0x0F9402781d671BAd9Ed4e7cc8Dac005e6C32dBb5;
     address payable public constant MCD_OPEN_FLASH_LOAN = 0x2432316d1581b546490AbF73a81503D370846963;
 
     address public constant AAVE_DAI_ADDRESS = 0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD;
@@ -52,6 +52,7 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         require(debtAmount >= maxDebt, "Amount to small for flash loan use CDP balance instead");
 
         uint256 loanAmount = sub(debtAmount, maxDebt);
+        loanAmount = limitLoanAmount(_data[0], manager.ilks(_data[0]), loanAmount);
 
         manager.cdpAllow(_data[0], MCD_SAVER_FLASH_LOAN, 1);
 
@@ -80,6 +81,7 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         require(debtAmount >= maxDebt, "Amount to small for flash loan use CDP balance instead");
 
         uint256 loanAmount = sub(debtAmount, maxDebt);
+        loanAmount = limitLoanAmount(_data[0], manager.ilks(_data[0]), loanAmount);
 
         manager.cdpAllow(_data[0], MCD_SAVER_FLASH_LOAN, 1);
 
@@ -181,6 +183,22 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         (, , uint256 spot, , ) = vat.ilks(_ilk);
 
         return rmul(rmul(spot, spotter.par()), mat);
+    }
+
+    /// @notice Handles that the amount is not bigger than cdp debt and not dust
+    function limitLoanAmount(uint _cdpId, bytes32 _ilk, uint _loanAmount) internal returns (uint256) {
+        (, uint debt) = getCdpInfo(manager, _cdpId, _ilk);
+
+        if (_loanAmount > debt) {
+            return debt;
+        }
+
+        // Less than dust value
+        if ((debt - _loanAmount) < 20 ether) {
+            return debt;
+        }
+
+        return _loanAmount;
     }
 
 }

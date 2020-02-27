@@ -86,7 +86,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
         // if there is some eth left (0x fee), return it to user
         if (address(this).balance > 0) {
-            msg.sender.transfer(address(this).balance);
+            tx.origin.transfer(address(this).balance);
         }
 
         SaverLogger(LOGGER_ADDRESS).LogRepay(_data[0], owner, temp[0], temp[1]);
@@ -123,7 +123,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
         // if there is some eth left (0x fee), return it to user
         if (address(this).balance > 0) {
-            msg.sender.transfer(address(this).balance);
+            tx.origin.transfer(address(this).balance);
         }
 
         SaverLogger(LOGGER_ADDRESS).LogBoost(_data[0], owner, temp[0], temp[2]);

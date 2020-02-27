@@ -13,9 +13,13 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x506B0B2CF20FAA8f38a4E2B524EE43e1f4458Cc5);
 
+    address payable public owner;
+
     constructor()
         FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
-        public {}
+        public {
+            owner = msg.sender;
+        }
 
     function executeOperation(
         address _reserve,
@@ -88,4 +92,15 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
     }
 
     function() external payable {}
+
+    // ADMIN ONLY FAIL SAFE FUNCTION IF FUNDS GET STUCK
+    function withdrawStuckFunds(address _tokenAddr, uint _amount) public {
+        require(msg.sender == owner, "Only owner");
+
+        if (_tokenAddr == KYBER_ETH_ADDRESS) {
+            owner.transfer(_amount);
+        } else {
+            ERC20(_tokenAddr).transfer(owner, _amount);
+        }
+    }
 }

@@ -9,9 +9,13 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x506B0B2CF20FAA8f38a4E2B524EE43e1f4458Cc5);
 
+    address payable public owner;
+
     constructor()
         FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
-        public {}
+        public {
+            owner = msg.sender;
+        }
 
     function executeOperation(
         address _reserve,
@@ -53,7 +57,7 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         uint loanAmount = debtData[0];
 
         paybackDebt(_data[0], manager.ilks(_data[0]), debtData[0], owner); // payback whole debt
-        drawCollateral(_data[0], manager.ilks(_data[0]), _joinAddr, debtData[2]);
+        drawMaxCollateral(_data[0], manager.ilks(_data[0]), _joinAddr, debtData[2]);
 
         uint256 collAmount = getCollAmount(_data, loanAmount, collateralAddr);
 
@@ -108,5 +112,29 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         collAmount = wdiv(_loanAmount, collPrice);
     }
 
+    function drawMaxCollateral(uint _cdpId, bytes32 _ilk, address _joinAddr, uint _amount) internal returns (uint) {
+        manager.frob(_cdpId, -toPositiveInt(_amount), 0);
+        manager.flux(_cdpId, address(this), _amount);
+
+        Join(_joinAddr).exit(address(this), _amount);
+
+        if (_joinAddr == ETH_JOIN_ADDRESS) {
+            Join(_joinAddr).gem().withdraw(_amount); // Weth -> Eth
+        }
+
+        return _amount;
+    }
+
     function() external payable {}
+
+    // ADMIN ONLY FAIL SAFE FUNCTION IF FUNDS GET STUCK
+    function withdrawStuckFunds(address _tokenAddr, uint _amount) public {
+        require(msg.sender == owner, "Only owner");
+
+        if (_tokenAddr == KYBER_ETH_ADDRESS) {
+            owner.transfer(_amount);
+        } else {
+            ERC20(_tokenAddr).transfer(owner, _amount);
+        }
+    }
 }
