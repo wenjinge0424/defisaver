@@ -187,7 +187,7 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
     /// @notice Handles that the amount is not bigger than cdp debt and not dust
     function limitLoanAmount(uint _cdpId, bytes32 _ilk, uint _loanAmount) internal returns (uint256) {
-        (, uint debt) = getCdpInfo(manager, _cdpId, _ilk);
+        uint debt = getAllDebt(address(vat), manager.urns(_cdpId), manager.urns(_cdpId), _ilk);
 
         if (_loanAmount > debt) {
             return debt;
