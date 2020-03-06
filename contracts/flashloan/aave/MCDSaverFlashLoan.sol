@@ -29,18 +29,17 @@ contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
 
         (
             uint[6] memory data,
-            uint loanAmount,
             address joinAddr,
             address exchangeAddress,
             bytes memory callData,
             bool isRepay
         ) 
-         = abi.decode(_params, (uint256[6],uint256,address,address,bytes,bool));
+         = abi.decode(_params, (uint256[6],address,address,bytes,bool));
 
         if (isRepay) {
-            repayWithLoan(data, loanAmount, joinAddr, exchangeAddress, callData, _fee);
+            repayWithLoan(data, _amount, joinAddr, exchangeAddress, callData, _fee);
         } else {
-            boostWithLoan(data, loanAmount, joinAddr, exchangeAddress, callData, _fee);
+            boostWithLoan(data, _amount, joinAddr, exchangeAddress, callData, _fee);
         }
 
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
@@ -121,7 +120,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         // Get our fee
         amounts[3] = getFee(amounts[2], 0, owner);
 
-        uint paybackAmount = (amounts[2] - (amounts[3] + _fee));
+        uint paybackAmount = (amounts[2] - amounts[3]);
         paybackAmount = limitLoanAmount(_data[0], manager.ilks(_data[0]), paybackAmount, owner);
 
         // Payback the debt
