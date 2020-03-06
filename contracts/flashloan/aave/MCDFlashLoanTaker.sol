@@ -16,7 +16,7 @@ contract ILendingPool {
 
 contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
-    address payable public constant MCD_SAVER_FLASH_LOAN = 0xe1a37F3234F9C726Dd8716418805Deb90286E67a;
+    address payable public constant MCD_SAVER_FLASH_LOAN = 0xeb48aeF2295eCF6157A06B04bFB0aA1a7b5F4C41;
     address payable public constant MCD_CLOSE_FLASH_LOAN = 0x0F9402781d671BAd9Ed4e7cc8Dac005e6C32dBb5;
     address payable public constant MCD_OPEN_FLASH_LOAN = 0x2432316d1581b546490AbF73a81503D370846963;
 
@@ -73,21 +73,14 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
     ) public payable {
         MCD_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
 
-        uint256 maxDebt = getMaxDebt(_data[0], manager.ilks(_data[0]));
+        uint256 maxColl = getMaxCollateral(_data[0], manager.ilks(_data[0]));
 
-        uint256 ethPrice = getPrice(manager.ilks(_data[0]));
-        uint256 debtAmount = rmul(_data[1], add(ethPrice, div(ethPrice, 10)));
-
-        require(debtAmount >= maxDebt, "Amount to small for flash loan use CDP balance instead");
-
-        uint256 loanAmount = sub(debtAmount, maxDebt);
-        loanAmount = limitLoanAmount(_data[0], manager.ilks(_data[0]), loanAmount);
+        uint256 loanAmount = sub(_data[1], maxColl);
 
         manager.cdpAllow(_data[0], MCD_SAVER_FLASH_LOAN, 1);
 
         bytes memory paramsData = abi.encode(_data, loanAmount, _joinAddr, _exchangeAddress, _callData, true);
-
-        lendingPool.flashLoan(MCD_SAVER_FLASH_LOAN, AAVE_DAI_ADDRESS, loanAmount, paramsData);
+        lendingPool.flashLoan(MCD_SAVER_FLASH_LOAN, getAaveCollAddr(_joinAddr), loanAmount, paramsData);
 
         manager.cdpAllow(_data[0], MCD_SAVER_FLASH_LOAN, 0);
 
@@ -176,6 +169,20 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         return sub(wdiv(wmul(collateral, price), mat), debt);
     }
 
+    /// @notice Gets the maximum amount of collateral available to draw
+    /// @param _cdpId Id of the CDP
+    /// @param _ilk Ilk of the CDP
+    /// @dev Substracts 10 wei to aviod rounding error later on
+    function getMaxCollateral(uint _cdpId, bytes32 _ilk) public view returns (uint) {
+        uint price = getPrice(_ilk);
+
+        (uint collateral, uint debt) = getCdpInfo(manager, _cdpId, _ilk);
+
+        (, uint mat) = Spotter(SPOTTER_ADDRESS).ilks(_ilk);
+
+        return sub(sub(collateral, (div(mul(mat, debt), price))), 10);
+    }
+
     /// @notice Gets a price of the asset
     /// @param _ilk Ilk of the CDP
     function getPrice(bytes32 _ilk) public view returns (uint256) {
@@ -186,7 +193,7 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
     }
 
     /// @notice Handles that the amount is not bigger than cdp debt and not dust
-    function limitLoanAmount(uint _cdpId, bytes32 _ilk, uint _loanAmount) internal returns (uint256) {
+    function limitLoanAmount(uint _cdpId, bytes32 _ilk, uint _loanAmount) internal view returns (uint256) {
         uint debt = getAllDebt(address(vat), manager.urns(_cdpId), manager.urns(_cdpId), _ilk);
 
         if (_loanAmount > debt) {
@@ -199,6 +206,15 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         }
 
         return _loanAmount;
+    }
+
+    function getAaveCollAddr(address _joinAddr) internal returns (address) {
+        if (_joinAddr == 0x2F0b23f53734252Bda2277357e97e1517d6B042A
+            || _joinAddr == 0x775787933e92b709f2a3C70aa87999696e74A9F8) {
+            return KYBER_ETH_ADDRESS;
+        } else {
+            return getCollateralAddr(_joinAddr);
+        }
     }
 
 }

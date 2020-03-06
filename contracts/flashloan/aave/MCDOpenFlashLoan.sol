@@ -71,7 +71,7 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
                 ETH_JOIN_ADDRESS,
                 DAI_JOIN_ADDRESS,
                 _ilk,
-                _data[1],
+                (_data[1] + _fee),
                 addrData[2]
             );
         } else {

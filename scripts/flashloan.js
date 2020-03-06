@@ -11,7 +11,7 @@ const MCDFlashLoanTaker = require('../build/contracts/MCDFlashLoanTaker.json');
 const TestLoan = require('../build/contracts/TestLoan.json');
 
 const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
-const mcdFlashLoanTakerAddr = '0x92cf0b1cb9C57833475fFc8B75D5D8e675Ba4d34';
+const mcdFlashLoanTakerAddr = '0xaF75B2B65Fd6341Cc850F2af3cd96E63De4EA31f';
 const testLoanAddr = '0xc50f13fEf45EfA33B70483FF16381B9E4003b80C';
 
 const ETH_ILK = '0x4554482d41000000000000000000000000000000000000000000000000000000';
