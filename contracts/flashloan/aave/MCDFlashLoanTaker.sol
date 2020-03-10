@@ -52,7 +52,6 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         require(debtAmount >= maxDebt, "Amount to small for flash loan use CDP balance instead");
 
         uint256 loanAmount = sub(debtAmount, maxDebt);
-        loanAmount = limitLoanAmount(_data[0], manager.ilks(_data[0]), loanAmount);
 
         manager.cdpAllow(_data[0], MCD_SAVER_FLASH_LOAN, 1);
 
@@ -190,22 +189,6 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         (, , uint256 spot, , ) = vat.ilks(_ilk);
 
         return rmul(rmul(spot, spotter.par()), mat);
-    }
-
-    /// @notice Handles that the amount is not bigger than cdp debt and not dust
-    function limitLoanAmount(uint _cdpId, bytes32 _ilk, uint _loanAmount) internal view returns (uint256) {
-        uint debt = getAllDebt(address(vat), manager.urns(_cdpId), manager.urns(_cdpId), _ilk);
-
-        if (_loanAmount > debt) {
-            return debt;
-        }
-
-        // Less than dust value
-        if ((debt - _loanAmount) < 20 ether) {
-            return debt;
-        }
-
-        return _loanAmount;
     }
 
     function getAaveCollAddr(address _joinAddr) internal returns (address) {
