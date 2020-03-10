@@ -12,6 +12,9 @@ Contract addresses on mainnet:
 
 ## Exchange
  - Saver Exchange - https://etherscan.io/address/0x865b41584a22f8345fca4b71c42a1e7abcd67ecb
+ 
+## Flash loans
+ - MCDFlashLoanTaker - https://etherscan.io/address/0xcf95703378d8ab3618a2d010a3a03b5df3ff631f
 
 ## Smart Savings
  - Savings Proxy - https://etherscan.io/address/0xc60410c217716d0ba4c32205d667a712572482d5
