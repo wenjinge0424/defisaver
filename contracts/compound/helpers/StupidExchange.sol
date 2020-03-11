@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
-import "../interfaces/ERC20.sol";
-import "../constants/ConstantAddresses.sol";
+import "../../interfaces/ERC20.sol";
+import "../../constants/ConstantAddresses.sol";
 
 
 /// @title Used only on kovan as a helper because different Dai tokens are used in Maker | Compound

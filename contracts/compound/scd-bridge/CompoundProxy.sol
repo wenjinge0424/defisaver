@@ -1,13 +1,13 @@
 pragma solidity ^0.5.0;
 
-import "../DS/DSMath.sol";
-import "../interfaces/CTokenInterface.sol";
-import "../interfaces/TubInterface.sol";
-import "../interfaces/KyberNetworkProxyInterface.sol";
-import "../loggers/ActionLogger.sol";
-import "./Exponential.sol";
-import "./StupidExchange.sol";
-import "../constants/ConstantAddresses.sol";
+import "../../DS/DSMath.sol";
+import "../../interfaces/CTokenInterface.sol";
+import "../../interfaces/TubInterface.sol";
+import "../../interfaces/KyberNetworkProxyInterface.sol";
+import "../../loggers/ActionLogger.sol";
+import "../helpers/Exponential.sol";
+import "../helpers/StupidExchange.sol";
+import "../../constants/ConstantAddresses.sol";
 
 
 /// @title CompoundProxy implements CDP and Compound direct interactions

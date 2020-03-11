@@ -3,8 +3,8 @@ pragma experimental ABIEncoderV2;
 
 import "../ProtocolInterface.sol";
 import "../../interfaces/CTokenInterface.sol";
-import "../../compound/Exponential.sol";
-import "../../compound/StupidExchange.sol";
+import "../../compound/helpers/Exponential.sol";
+import "../../compound/helpers/StupidExchange.sol";
 import "../../interfaces/ERC20.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../../DS/DSAuth.sol";

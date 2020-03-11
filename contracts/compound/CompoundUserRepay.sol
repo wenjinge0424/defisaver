@@ -2,12 +2,14 @@ pragma solidity ^0.5.0;
 
 import "../interfaces/CTokenInterface.sol";
 import "../interfaces/KyberNetworkProxyInterface.sol";
-import "./Exponential.sol";
+import "./helpers/Exponential.sol";
 import "../DS/DSMath.sol";
 import "../constants/ConstantAddresses.sol";
 
 
-contract CompoundAdvanced is Exponential, DSMath, ConstantAddresses {
+// PROTOTYPE OF NO PROXY REPAY
+
+contract CompoundUserRepay is Exponential, DSMath, ConstantAddresses {
     /// @notice Takes out an asset which a user supplies, converts and pays the debt
     function repay(
         address _suppliedAsset,
