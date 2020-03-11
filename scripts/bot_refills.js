@@ -3,6 +3,7 @@ const Web3 = require('web3');
 require('dotenv').config();
 
 const Slack = require('node-slack');
+// Deprecated slack hook
 const slack = new Slack('https://hooks.slack.com/services/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',{});
 
 const contractAddr = '0xAc79b9E2A0Fc3DeD1fbf2Baf5F4AdA0d5a6E74cD';
