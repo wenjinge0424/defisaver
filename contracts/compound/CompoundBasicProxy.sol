@@ -24,12 +24,8 @@ contract CompoundBasicProxy {
         }
     }
 
-    /// @dev Needs to approve DSProxy
     /// @param _isCAmount If true _amount is cTokens if falls _amount is underlying tokens
     function withdraw(address _tokenAddr, address _cTokenAddr, uint _amount, bool _isCAmount) external {
-        if (_tokenAddr != ETH_ADDRESS) {
-            ERC20(_tokenAddr).approve(_cTokenAddr, uint(-1));
-        }
 
         if (_isCAmount) {
             require(CTokenInterface(_cTokenAddr).redeem(_amount) == 0);
@@ -57,7 +53,8 @@ contract CompoundBasicProxy {
         }
     }
 
-    function payback() external {
+
+    function payback(address _tokenAddr, address _cTokenAddr, uint _amount) external {
 
     }
 
