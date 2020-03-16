@@ -109,4 +109,11 @@ contract MCDMonitorProxyV2 {
     function removeAllowed(address _user) public onlyAllowed {
         allowed[_user] = false;
     }
+
+    function setChangePeriod(uint _periodInDays) public onlyAllowed {
+        require(_periodInDays * 1 days > CHANGE_PERIOD);
+
+        CHANGE_PERIOD = _periodInDays * 1 days;
+    }
+
 }
