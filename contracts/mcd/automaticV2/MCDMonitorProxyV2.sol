@@ -9,9 +9,15 @@ contract MCDMonitorProxyV2 {
     address public monitor;
     address public owner;
     address public newMonitor;
+    address public lastMonitor;
     uint public changeRequestedTimestamp;
 
     mapping(address => bool) public allowed;
+
+    event MonitorChangeInitiated(address oldMonitor, address newMonitor);
+    event MonitorChangeCanceled();
+    event MonitorChangeFinished(address monitor);
+    event MonitorChangeReverted(address monitor);
 
     // if someone who is allowed become malicious, owner can't be changed
     modifier onlyAllowed() {
@@ -49,14 +55,23 @@ contract MCDMonitorProxyV2 {
     /// @dev after CHANGE_PERIOD needs to call confirmNewMonitor to actually make a change
     /// @param _newMonitor address of new monitor
     function changeMonitor(address _newMonitor) public onlyAllowed {
+        require(changeRequestedTimestamp == 0);
+
         changeRequestedTimestamp = now;
+        lastMonitor = monitor;
         newMonitor = _newMonitor;
+
+        emit MonitorChangeInitiated(lastMonitor, newMonitor);
     }
 
     /// @notice At any point allowed users are able to cancel monitor change
     function cancelMonitorChange() public onlyAllowed {
+        require(changeRequestedTimestamp > 0);
+
         changeRequestedTimestamp = 0;
         newMonitor = address(0);
+
+        emit MonitorChangeCanceled();
     }
 
     /// @notice Anyone is able to confirm new monitor after CHANGE_PERIOD if process is started
@@ -68,7 +83,19 @@ contract MCDMonitorProxyV2 {
         monitor = newMonitor;
         newMonitor = address(0);
         changeRequestedTimestamp = 0;
+
+        emit MonitorChangeFinished(monitor);
     }
+
+    /// @notice Its possible to revert monitor to last used monitor
+    function revertMonitor() public onlyAllowed {
+        require(lastMonitor != address(0));
+
+        monitor = lastMonitor;
+
+        emit MonitorChangeReverted(monitor);
+    }
+
 
     /// @notice Allowed users are able to add new allowed user
     /// @param _user Address of user that will be allowed
