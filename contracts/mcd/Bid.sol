@@ -55,13 +55,13 @@ contract Bid {
     function close(uint _bidId, bool _isEth) public {
         if (_isEth) {
             Flipper(ETH_FLIPPER).deal(_bidId);
-            uint amount = Vat(VAT_ADDRESS).gem(ETH_ILK, address(this));
+            uint amount = Vat(VAT_ADDRESS).gem(ETH_ILK, address(this)) / (10**27);
 
             Vat(VAT_ADDRESS).hope(ETH_JOIN);
             Gem(ETH_JOIN).exit(msg.sender, amount);
         } else {
             Flipper(BAT_FLIPPER).deal(_bidId);
-            uint amount = Vat(VAT_ADDRESS).gem(BAT_ILK, address(this));
+            uint amount = Vat(VAT_ADDRESS).gem(BAT_ILK, address(this)) / (10**27);
 
             Vat(VAT_ADDRESS).hope(BAT_JOIN);
             Gem(BAT_JOIN).exit(msg.sender, amount);
@@ -69,7 +69,7 @@ contract Bid {
     }
 
     function exitDai() public {
-        uint amount = Vat(VAT_ADDRESS).dai(address(this));
+        uint amount = Vat(VAT_ADDRESS).dai(address(this)) / (10**27);
 
         Vat(VAT_ADDRESS).hope(DAI_JOIN);
         Gem(DAI_JOIN).exit(msg.sender, amount);
