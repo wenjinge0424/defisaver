@@ -35,10 +35,10 @@ contract BidProxy {
     function collateralBid(uint _bidId, bool _isEth, uint _amount) public {
         address flipper = _isEth ? ETH_FLIPPER : BAT_FLIPPER;
 
-        joinDai(_amount);
-
         uint bid;
         (bid, , , , , , , ) = Flipper(flipper).bids(_bidId);
+
+        joinDai(bid / (10**27));
 
         Vat(VAT_ADDRESS).hope(flipper);
 
@@ -88,7 +88,7 @@ contract BidProxy {
         uint amountInVat = Vat(VAT_ADDRESS).dai(address(this)) / (10**27);
 
         if (_amount > amountInVat) {
-            uint amountDiff = amountInVat - _amount;
+            uint amountDiff = (_amount - amountInVat) + 1;
 
             ERC20(DAI_ADDRESS).transferFrom(msg.sender, address(this), amountDiff);
             ERC20(DAI_ADDRESS).approve(DAI_JOIN, amountDiff);
