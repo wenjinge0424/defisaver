@@ -122,6 +122,7 @@ contract SubscriptionsV2 is ISubscriptionsV2, ConstantAddresses {
 
         return true;
     }
+
     /// @dev Internal method to remove a subscriber from the list
     function _unsubscribe(uint _cdpId) internal {
         require(subscribers.length > 0, "Must have subscribers in the list");
@@ -192,7 +193,6 @@ contract SubscriptionsV2 is ISubscriptionsV2, ConstantAddresses {
         return subscribers;
     }
 
-
     ////////////// ADMIN METHODS ///////////////////
 
     /// @notice Admin function to change a min. limit for an asset
@@ -202,17 +202,14 @@ contract SubscriptionsV2 is ISubscriptionsV2, ConstantAddresses {
         minLimits[_ilk] = _newRatio;
     }
 
-    /// @notice Admin function to unsubscribe a CDP if it's owner transfered to a different addr
-    function unsubscribeIfMoved(uint _cdpId) public {
+    /// @notice Admin function to unsubscribe a CDP
+    function unsubscribeByAdmin(uint _cdpId) public {
         require(msg.sender == owner, "Must be owner");
 
         SubPosition storage subInfo = subscribersPos[_cdpId];
 
         if (subInfo.subscribed) {
-            if (getOwner(_cdpId) != subscribers[subInfo.arrPos].owner) {
-                _unsubscribe(_cdpId);
-            }
+            _unsubscribe(_cdpId);
         }
-
     }
 }

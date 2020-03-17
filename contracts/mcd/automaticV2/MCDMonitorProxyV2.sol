@@ -115,5 +115,4 @@ contract MCDMonitorProxyV2 {
 
         CHANGE_PERIOD = _periodInDays * 1 days;
     }
-
 }

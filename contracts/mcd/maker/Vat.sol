@@ -17,6 +17,7 @@ contract Vat {
 
     mapping (bytes32 => mapping (address => Urn )) public urns;
     mapping (bytes32 => Ilk)                       public ilks;
+    mapping (bytes32 => mapping (address => uint)) public gem;  // [wad]
 
     function can(address, address) public view returns (uint);
     function dai(address) public view returns (uint);
