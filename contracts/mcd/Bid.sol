@@ -24,9 +24,9 @@ contract Bid {
 
         uint lot;
         if (_isEth) {
-            (,lot,,,,,,) = Flipper(ETH_FLIPPER).bids(_bidId);
+            (, lot, , , , , , ) = Flipper(ETH_FLIPPER).bids(_bidId);
         } else {
-            (,lot,,,,,,) = Flipper(BAT_FLIPPER).bids(_bidId);
+            (, lot, , , , , , ) = Flipper(BAT_FLIPPER).bids(_bidId);
         }
 
         ERC20(DAI_ADDRESS).transferFrom(msg.sender, address(this), _amount);
@@ -47,7 +47,7 @@ contract Bid {
         address flipper = _isEth ? ETH_FLIPPER : BAT_FLIPPER;
 
         uint bid;
-        (bid,,,,,,,) = Flipper(flipper).bids(_bidId);
+        (bid, , , , , , , ) = Flipper(flipper).bids(_bidId);
 
         Flipper(flipper).dent(_bidId, _amount, bid);
     }
