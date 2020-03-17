@@ -40,6 +40,8 @@ contract BidProxy {
         uint bid;
         (bid, , , , , , , ) = Flipper(flipper).bids(_bidId);
 
+        Vat(VAT_ADDRESS).hope(flipper);
+
         Flipper(flipper).dent(_bidId, _amount, bid);
     }
 
