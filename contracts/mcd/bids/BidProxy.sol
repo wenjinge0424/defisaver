@@ -61,7 +61,7 @@ contract BidProxy {
         address join = _isEth ? ETH_JOIN : BAT_JOIN;
         bytes32 ilk = _isEth ? ETH_ILK : BAT_ILK;
 
-        uint amount = Vat(VAT_ADDRESS).gem(ilk, address(this)) / (10**27);
+        uint amount = Vat(VAT_ADDRESS).gem(ilk, address(this));
 
         Vat(VAT_ADDRESS).hope(join);
         Gem(join).exit(msg.sender, amount);
