@@ -16,21 +16,21 @@ contract ILendingPool {
 
 contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
-    address payable public constant MCD_SAVER_FLASH_LOAN = 0xE3941df5382f4b380f5DB8deAA2AcbA0adeC30F8;
-    address payable public constant MCD_CLOSE_FLASH_LOAN = 0x0F9402781d671BAd9Ed4e7cc8Dac005e6C32dBb5;
-    address payable public constant MCD_OPEN_FLASH_LOAN = 0x2432316d1581b546490AbF73a81503D370846963;
+    address payable public constant MCD_SAVER_FLASH_LOAN = 0xDc88f28ba7198041D66eb2ECB1b43339E65fBb92;
+    address payable public constant MCD_CLOSE_FLASH_LOAN = 0xcd3427f90834a0Ddc0de376100451F61e569E4A9;
+    address payable public constant MCD_OPEN_FLASH_LOAN = 0x7D8Aa1e702A60B33CfCFC0C6b58cc01ff97F7B06;
 
-    address public constant AAVE_DAI_ADDRESS = 0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD;
+    address public constant AAVE_DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     // address public constant MCD_CLOSE_FLASH_PROXY = 0xF6195D8d254bEF755fA8232D55Bb54B3b3eCf0Ce;
     // address payable public constant MCD_OPEN_FLASH_PROXY = 0x22e37Df56cAFc7f33e9438751dff42DbD5CB8Ed6;
 
-    ILendingPool public constant lendingPool = ILendingPool(0x580D4Fdc4BF8f9b5ae2fb9225D584fED4AD5375c);
+    ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
     // solhint-disable-next-line const-name-snakecase
     Manager public constant manager = Manager(MANAGER_ADDRESS);
     // solhint-disable-next-line const-name-snakecase
     FlashLoanLogger public constant logger = FlashLoanLogger(
-        0x6c4114b65f90392e78Ef7c1f2c1FD33832d7965e
+        0xb9303686B0EE92F92f63973EF85f3105329D345c
     );
 
     // solhint-disable-next-line const-name-snakecase

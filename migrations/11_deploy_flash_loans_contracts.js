@@ -1,12 +1,9 @@
 const MCDSaverFlashLoan = artifacts.require("./MCDSaverFlashLoan.sol");
 const MCDFlashLoanTaker = artifacts.require("./MCDFlashLoanTaker.sol");
-// const FlashLoanLogger = artifacts.require("./FlashLoanLogger.sol");
+const FlashLoanLogger = artifacts.require("./FlashLoanLogger.sol");
 const MCDCloseFlashLoan = artifacts.require("./MCDCloseFlashLoan.sol");
 const MCDOpenFlashLoan = artifacts.require("./MCDOpenFlashLoan.sol");
-// const MCDOpenProxyActions = artifacts.require("./MCDOpenProxyActions.sol");
-
-// const FlashTokenDyDx = artifacts.require("./FlashTokenDyDx.sol");
-// const TestLoan = artifacts.require("./TestLoan.sol");
+const MCDOpenProxyActions = artifacts.require("./MCDOpenProxyActions.sol");
 
 require('dotenv').config();
 
@@ -16,14 +13,14 @@ module.exports = function(deployer, network, accounts) {
     deployer.then(async () => {
         // NOTICE: deploy seperatly and swith the addresses in the contracts
 
-        // await deployer.deploy(MCDOpenProxyActions, {gas: 10000000, overwrite: deployAgain});
+        // await deployer.deploy(MCDOpenProxyActions, {gas: 8000000, overwrite: deployAgain});
 
         // await deployer.deploy(FlashLoanLogger, {gas: 6000000, overwrite: deployAgain});
-        // await deployer.deploy(MCDSaverFlashLoan, {gas: 10000000, overwrite: deployAgain});
+        // await deployer.deploy(MCDSaverFlashLoan, {gas: 6000000, overwrite: deployAgain});
 
-        // await deployer.deploy(MCDOpenFlashLoan, {gas: 10000000, overwrite: deployAgain});
+        // await deployer.deploy(MCDOpenFlashLoan, {gas: 6500000, overwrite: deployAgain});
 
-        // await deployer.deploy(MCDCloseFlashLoan, {gas: 10000000, overwrite: deployAgain});
+        // await deployer.deploy(MCDCloseFlashLoan, {gas: 6500000, overwrite: deployAgain});
         await deployer.deploy(MCDFlashLoanTaker, {gas: 6000000, overwrite: deployAgain});
 
 

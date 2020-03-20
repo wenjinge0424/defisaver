@@ -2,14 +2,14 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
 import "../maker/Manager.sol";
-import "./ISubscriptionsV2.sol";
+import "./StaticV2.sol";
 import "../saver_proxy/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../maker/Vat.sol";
 import "../maker/Spotter.sol";
 
 /// @title Handles subscriptions for automatic monitoring
-contract SubscriptionsV2 is ISubscriptionsV2, ConstantAddresses {
+contract SubscriptionsV2 is StaticV2, ConstantAddresses {
 
     bytes32 internal constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
     bytes32 internal constant BAT_ILK = 0x4241542d41000000000000000000000000000000000000000000000000000000;

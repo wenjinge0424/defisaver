@@ -7,7 +7,7 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
     // solhint-disable-next-line const-name-snakecase
     Manager public constant manager = Manager(MANAGER_ADDRESS);
 
-    ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x506B0B2CF20FAA8f38a4E2B524EE43e1f4458Cc5);
+    ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
     address payable public owner;
 
@@ -21,11 +21,11 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         address _reserve,
         uint256 _amount,
         uint256 _fee,
-        bytes calldata _params) 
+        bytes calldata _params)
     external {
 
         //check the contract has the specified balance
-        require(_amount <= getBalanceInternal(address(this), _reserve), 
+        require(_amount <= getBalanceInternal(address(this), _reserve),
             "Invalid balance for the contract");
 
         (
@@ -34,7 +34,7 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
             address joinAddr,
             address exchangeAddress,
             bytes memory callData
-        ) 
+        )
          = abi.decode(_params, (uint256[6],uint256[4],address,address,bytes));
 
         closeCDP(data, debtData, joinAddr, exchangeAddress, callData, _fee);
