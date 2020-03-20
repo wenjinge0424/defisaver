@@ -1,4 +1,4 @@
-const Bid = artifacts.require("./Bid.sol");
+const BidProxy = artifacts.require("./BidProxy.sol");
 
 require('dotenv').config();
 
@@ -7,7 +7,7 @@ module.exports = function(deployer, network, accounts) {
 
     deployer.then(async () => {
 
-        await deployer.deploy(Bid, {gas: 2000000, overwrite: deployAgain});
+        await deployer.deploy(BidProxy, {gas: 2000000, overwrite: deployAgain});
 
     });
 };
