@@ -6,6 +6,10 @@ import "./MCDMonitorProxyV2.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../../interfaces/GasTokenInterface.sol";
 import "../../DS/DSMath.sol";
+import "../maker/Manager.sol";
+import "../maker/Vat.sol";
+import "../maker/Spotter.sol";
+
 
 /// @title Implements logic that allows bots to call Boost and Repay
 contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
@@ -23,6 +27,10 @@ contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
     GasTokenInterface gasToken = GasTokenInterface(GAS_TOKEN_INTERFACE_ADDRESS);
     address public owner;
     address public mcdSaverProxyAddress;
+
+    Manager public manager = Manager(MANAGER_ADDRESS);
+    Vat public vat = Vat(VAT_ADDRESS);
+    Spotter public spotter = Spotter(SPOTTER_ADDRESS);
 
     /// @dev Addresses that are able to call methods for repay and boost
     mapping(address => bool) public approvedCallers;
@@ -55,26 +63,27 @@ contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
     /// @param _amount Amount of Eth to convert to Dai
     /// @param _exchangeType Which exchange to use, 0 is to select best one
     /// @param _collateralJoin Address of collateral join for specific CDP
-    function repayFor(uint _cdpId, uint _amount, address _collateralJoin, uint _exchangeType) public onlyApproved {
+    /// @param _nextPrice Next price in Maker protocol
+    /// @param _minPrice Minimum price for exchange
+    function repayFor(uint _cdpId, uint _amount, address _collateralJoin, uint _exchangeType, uint _nextPrice, uint _minPrice) public onlyApproved {
         if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
             gasToken.free(BOOST_GAS_TOKEN);
         }
 
-
         uint ratioBefore;
-        bool canCall;
-        (canCall, ratioBefore) = subscriptionsContract.canCall(Method.Repay, _cdpId);
-        require(canCall);
+        bool isAllowed;
+        (isAllowed, ratioBefore) = canCall(Method.Repay, _cdpId, _nextPrice);
+        require(isAllowed);
 
         uint gasCost = calcGasCost(REPAY_GAS_COST);
 
-        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("repay(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, _exchangeType, gasCost));
+        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("repay(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, _minPrice, _exchangeType, gasCost));
 
         uint ratioAfter;
-        bool ratioGoodAfter;
-        (ratioGoodAfter, ratioAfter) = subscriptionsContract.ratioGoodAfter(Method.Repay, _cdpId);
+        bool isGoodRatio;
+        (isGoodRatio, ratioAfter) = ratioGoodAfter(Method.Repay, _cdpId, _nextPrice);
         // doesn't allow user to repay too much
-        require(ratioGoodAfter);
+        require(isGoodRatio);
 
         emit CdpRepay(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
     }
@@ -85,27 +94,112 @@ contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
     /// @param _amount Amount of Dai to convert to Eth
     /// @param _exchangeType Which exchange to use, 0 is to select best one
     /// @param _collateralJoin Address of collateral join for specific CDP
-    function boostFor(uint _cdpId, uint _amount, address _collateralJoin, uint _exchangeType) public onlyApproved {
+    /// @param _nextPrice Next price in Maker protocol
+    /// @param _minPrice Minimum price for exchange
+    function boostFor(uint _cdpId, uint _amount, address _collateralJoin, uint _exchangeType, uint _nextPrice, uint _minPrice) public onlyApproved {
         if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
             gasToken.free(REPAY_GAS_TOKEN);
         }
 
         uint ratioBefore;
-        bool canCall;
-        (canCall, ratioBefore) = subscriptionsContract.canCall(Method.Boost, _cdpId);
-        require(canCall);
+        bool isAllowed;
+        (isAllowed, ratioBefore) = canCall(Method.Boost, _cdpId, _nextPrice);
+        require(isAllowed);
 
         uint gasCost = calcGasCost(BOOST_GAS_COST);
 
-        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("boost(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, _exchangeType, gasCost));
+        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("boost(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, _minPrice, _exchangeType, gasCost));
 
         uint ratioAfter;
-        bool ratioGoodAfter;
-        (ratioGoodAfter, ratioAfter) = subscriptionsContract.ratioGoodAfter(Method.Boost, _cdpId);
+        bool isGoodRatio;
+        (isGoodRatio, ratioAfter) = ratioGoodAfter(Method.Boost, _cdpId, _nextPrice);
         // doesn't allow user to boost too much
-        require(ratioGoodAfter);
+        require(isGoodRatio);
 
         emit CdpBoost(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
+    }
+
+/******************* INTERNAL METHODS ********************************/
+    /// @notice Returns an address that owns the CDP
+    /// @param _cdpId Id of the CDP
+    function getOwner(uint _cdpId) public view returns(address) {
+        return manager.owns(_cdpId);
+    }
+
+    /// @notice Gets CDP info (collateral, debt)
+    /// @param _cdpId Id of the CDP
+    /// @param _ilk Ilk of the CDP
+    function getCdpInfo(uint _cdpId, bytes32 _ilk) public view returns (uint, uint) {
+        address urn = manager.urns(_cdpId);
+
+        (uint collateral, uint debt) = vat.urns(_ilk, urn);
+        (,uint rate,,,) = vat.ilks(_ilk);
+
+        return (collateral, rmul(debt, rate));
+    }
+
+    /// @notice Gets a price of the asset
+    /// @param _ilk Ilk of the CDP
+    function getPrice(bytes32 _ilk) public view returns (uint) {
+        (, uint mat) = spotter.ilks(_ilk);
+        (,,uint spot,,) = vat.ilks(_ilk);
+
+        return rmul(rmul(spot, spotter.par()), mat);
+    }
+
+    /// @notice Gets CDP ratio
+    /// @param _cdpId Id of the CDP
+    /// @param _nextPrice Next price for user
+    function getRatio(uint _cdpId, uint _nextPrice) public view returns (uint) {
+        bytes32 ilk = manager.ilks(_cdpId);
+        uint price = (_nextPrice == 0) ? getPrice(ilk) : _nextPrice;
+
+        (uint collateral, uint debt) = getCdpInfo(_cdpId, ilk);
+
+        if (debt == 0) return 0;
+
+        return rdiv(wmul(collateral, price), debt) / (10 ** 18);
+    }
+
+    /// @notice Checks if Boost/Repay could be triggered for the CDP
+    /// @dev Called by MCDMonitor to enforce the min/max check
+    function canCall(Method _method, uint _cdpId, uint _nextPrice) public view returns(bool, uint) {
+        uint128 minRatio;
+        uint128 maxRatio;
+        bool boost;
+        address cdpOwner;
+
+        (boost, minRatio, maxRatio, , , cdpOwner, , ) = subscriptionsContract.getSubscribedInfo(_cdpId);
+
+        // check if boost and boost allowed
+        if (_method == Method.Boost && !boost) return (false, 0);
+
+        // check if owner is still owner
+        if (getOwner(_cdpId) != cdpOwner) return (false, 0);
+
+        uint currRatio = getRatio(_cdpId, _nextPrice);
+
+        if (_method == Method.Repay) {
+            return (currRatio < minRatio, currRatio);
+        } else if (_method == Method.Boost) {
+            return (currRatio > maxRatio, currRatio);
+        }
+    }
+
+    /// @dev After the Boost/Repay check if the ratio doesn't trigger another call
+    function ratioGoodAfter(Method _method, uint _cdpId, uint _nextPrice) public view returns(bool, uint) {
+        uint128 minRatio;
+        uint128 maxRatio;
+        
+        (, minRatio, maxRatio, , , , , ) = subscriptionsContract.getSubscribedInfo(_cdpId);
+
+        uint currRatio = getRatio(_cdpId, _nextPrice);
+
+        if (_method == Method.Repay) {
+            return (currRatio < maxRatio, currRatio);
+        } else if (_method == Method.Boost) {
+            return (currRatio > minRatio, currRatio);
+        }
     }
 
     /// @notice Calculates gas cost (in Eth) of tx
