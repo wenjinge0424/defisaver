@@ -5,8 +5,10 @@ import "../../interfaces/ERC20.sol";
 import "../maker/Vat.sol";
 import "../maker/Flipper.sol";
 import "../maker/Gem.sol";
+import "../saver_proxy/ExchangeHelper.sol";
 
-contract BidProxy {
+
+contract BidProxy is ExchangeHelper {
 
     address public constant ETH_FLIPPER = 0xd8a04F5412223F513DC55F839574430f5EC15531;
     address public constant BAT_FLIPPER = 0xaA745404d55f88C108A28c86abE7b5A1E7817c07;
@@ -18,6 +20,8 @@ contract BidProxy {
 
     bytes32 public constant BAT_ILK = 0x4241542d41000000000000000000000000000000000000000000000000000000;
     bytes32 public constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
+
+    address public constant SAVER_EXCHANGE = 0x606e9758a39d2d7fA7e70BC68E6E7D9b02948962;
 
     function daiBid(uint _bidId, bool _isEth, uint _amount) public {
         uint tendAmount = _amount * (10 ** 27);
@@ -55,6 +59,38 @@ contract BidProxy {
 
         Vat(VAT_ADDRESS).hope(join);
         Gem(join).exit(msg.sender, amount);
+    }
+
+    function closeBidAndExchange(
+        uint _bidId,
+        bool _isEth,
+        uint256[4] memory _data,
+        address _exchangeAddress,
+        bytes memory _callData
+    )
+    public {
+        address flipper = _isEth ? ETH_FLIPPER : BAT_FLIPPER;
+        address join = _isEth ? ETH_JOIN : BAT_JOIN;
+        bytes32 ilk = _isEth ? ETH_ILK : BAT_ILK;
+
+        (uint bidAmount, , , , , , , ) = Flipper(flipper).bids(_bidId);
+
+        Flipper(flipper).deal(_bidId);
+
+        Vat(VAT_ADDRESS).hope(join);
+        Gem(join).exit(address(this), bidAmount);
+
+        address srcToken = _isEth ? KYBER_ETH_ADDRESS : address(Gem(join).gem());
+
+        uint daiAmount = swap(
+            _data,
+            srcToken,
+            DAI_ADDRESS,
+            _exchangeAddress,
+            _callData
+        );
+
+        ERC20(DAI_ADDRESS).transfer(msg.sender, daiAmount);
     }
 
     function exitCollateral(bool _isEth) public {
