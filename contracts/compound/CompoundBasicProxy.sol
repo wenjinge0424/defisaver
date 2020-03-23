@@ -88,6 +88,8 @@ contract CompoundBasicProxy {
 
     function enterMarket(address _cTokenAddr) public {
         address[] memory markets = new address[](1);
+        markets[0] = _cTokenAddr;
+
         ComptrollerInterface(COMPTROLLER).enterMarkets(markets);
     }
 
