@@ -77,7 +77,7 @@ contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
 
         uint gasCost = calcGasCost(REPAY_GAS_COST);
 
-        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("repay(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, _minPrice, _exchangeType, gasCost));
+        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("automaticRepay(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, _minPrice, _exchangeType, gasCost));
 
         uint ratioAfter;
         bool isGoodRatio;
@@ -108,7 +108,7 @@ contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
 
         uint gasCost = calcGasCost(BOOST_GAS_COST);
 
-        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("boost(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, _minPrice, _exchangeType, gasCost));
+        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("automaticBoost(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, _minPrice, _exchangeType, gasCost));
 
         uint ratioAfter;
         bool isGoodRatio;
