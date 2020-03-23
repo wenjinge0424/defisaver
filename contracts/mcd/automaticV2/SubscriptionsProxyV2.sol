@@ -13,6 +13,13 @@ contract SubscriptionsInterfaceV2 {
 contract SubscriptionsProxyV2 is ConstantAddresses {
 
     address public constant MONITOR_PROXY_ADDRESS = 0x93Efcf86b6a7a33aE961A7Ec6C741F49bce11DA7;
+    address public constant OLD_SUBSCRIPTION = 0x83152CAA0d344a2Fd428769529e2d490A88f4393;
+
+    function migrate(uint _cdpId, uint128 _minRatio, uint128 _maxRatio, uint128 _optimalRatioBoost, uint128 _optimalRatioRepay, bool _boostEnabled, address _subscriptions) public {
+        SubscriptionsInterfaceV2(OLD_SUBSCRIPTION).unsubscribe(_cdpId);
+
+        subscribe(_cdpId, _minRatio, _maxRatio, _optimalRatioBoost, _optimalRatioRepay, _boostEnabled, _subscriptions);
+    }
 
     function subscribe(uint _cdpId, uint128 _minRatio, uint128 _maxRatio, uint128 _optimalRatioBoost, uint128 _optimalRatioRepay, bool _boostEnabled, address _subscriptions) public {
 
