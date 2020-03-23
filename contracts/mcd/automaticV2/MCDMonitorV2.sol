@@ -26,7 +26,7 @@ contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
     ISubscriptionsV2 public subscriptionsContract;
     GasTokenInterface gasToken = GasTokenInterface(GAS_TOKEN_INTERFACE_ADDRESS);
     address public owner;
-    address public mcdSaverProxyAddress;
+    address public automaticSaverProxyAddress;
 
     Manager public manager = Manager(MANAGER_ADDRESS);
     Vat public vat = Vat(VAT_ADDRESS);
@@ -48,75 +48,91 @@ contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
         _;
     }
 
-    constructor(address _monitorProxy, address _subscriptions, address _mcdSaverProxyAddress) public {
+    constructor(address _monitorProxy, address _subscriptions, address _automaticSaverProxyAddress) public {
         approvedCallers[msg.sender] = true;
         owner = msg.sender;
 
         monitorProxyContract = MCDMonitorProxyV2(_monitorProxy);
         subscriptionsContract = ISubscriptionsV2(_subscriptions);
-        mcdSaverProxyAddress = _mcdSaverProxyAddress;
+        automaticSaverProxyAddress = _automaticSaverProxyAddress;
     }
 
     /// @notice Bots call this method to repay for user when conditions are met
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
-    /// @param _cdpId Id of the cdp
-    /// @param _amount Amount of Eth to convert to Dai
-    /// @param _exchangeType Which exchange to use, 0 is to select best one
-    /// @param _collateralJoin Address of collateral join for specific CDP
+    /// @param _data Array of uints representing [cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice]
     /// @param _nextPrice Next price in Maker protocol
-    /// @param _minPrice Minimum price for exchange
-    function repayFor(uint _cdpId, uint _amount, address _collateralJoin, uint _exchangeType, uint _nextPrice, uint _minPrice) public onlyApproved {
+    /// @param _joinAddr Address of collateral join for specific CDP
+    /// @param _exchangeAddress Address to call 0x exchange
+    /// @param _callData Bytes representing call data for 0x exchange
+    function repayFor(
+        uint[6] memory _data, // cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
+        uint256 _nextPrice,
+        address _joinAddr,
+        address _exchangeAddress,
+        bytes memory _callData
+    ) public onlyApproved {
         if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
             gasToken.free(BOOST_GAS_TOKEN);
         }
 
         uint ratioBefore;
         bool isAllowed;
-        (isAllowed, ratioBefore) = canCall(Method.Repay, _cdpId, _nextPrice);
+        (isAllowed, ratioBefore) = canCall(Method.Repay, _data[0], _nextPrice);
         require(isAllowed);
 
         uint gasCost = calcGasCost(REPAY_GAS_COST);
 
-        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("automaticRepay(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, _minPrice, _exchangeType, gasCost));
+        // calculated gas cost must be higher or equal with sent gasCost
+        require(gasCost >= _data[4]);
+
+        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_data[0]), automaticSaverProxyAddress, abi.encodeWithSignature("automaticRepay(uint256[6],address,address,bytes)", _data, _joinAddr, _exchangeAddress, _callData));
 
         uint ratioAfter;
         bool isGoodRatio;
-        (isGoodRatio, ratioAfter) = ratioGoodAfter(Method.Repay, _cdpId, _nextPrice);
+        (isGoodRatio, ratioAfter) = ratioGoodAfter(Method.Repay, _data[0], _nextPrice);
         // doesn't allow user to repay too much
         require(isGoodRatio);
 
-        emit CdpRepay(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
+        emit CdpRepay(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
     }
 
     /// @notice Bots call this method to boost for user when conditions are met
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
-    /// @param _cdpId Id of the cdp
-    /// @param _amount Amount of Dai to convert to Eth
-    /// @param _exchangeType Which exchange to use, 0 is to select best one
-    /// @param _collateralJoin Address of collateral join for specific CDP
+    /// @param _data Array of uints representing [cdpId, collateralAmount, minPrice, exchangeType, gasCost, 0xPrice]
     /// @param _nextPrice Next price in Maker protocol
-    /// @param _minPrice Minimum price for exchange
-    function boostFor(uint _cdpId, uint _amount, address _collateralJoin, uint _exchangeType, uint _nextPrice, uint _minPrice) public onlyApproved {
+    /// @param _joinAddr Address of collateral join for specific CDP
+    /// @param _exchangeAddress Address to call 0x exchange
+    /// @param _callData Bytes representing call data for 0x exchange
+    function boostFor(
+        uint[6] memory _data, // cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
+        uint256 _nextPrice,
+        address _joinAddr,
+        address _exchangeAddress,
+        bytes memory _callData
+    ) public onlyApproved {
         if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
             gasToken.free(REPAY_GAS_TOKEN);
         }
 
         uint ratioBefore;
         bool isAllowed;
-        (isAllowed, ratioBefore) = canCall(Method.Boost, _cdpId, _nextPrice);
+        (isAllowed, ratioBefore) = canCall(Method.Boost, _data[0], _nextPrice);
         require(isAllowed);
 
         uint gasCost = calcGasCost(BOOST_GAS_COST);
 
-        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("automaticBoost(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, _minPrice, _exchangeType, gasCost));
+        // calculated gas cost must be higher or equal with sent gasCost
+        require(gasCost >= _data[4]);
+
+        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_data[0]), automaticSaverProxyAddress, abi.encodeWithSignature("automaticBoost(uint256[6],address,address,bytes)", _data, _joinAddr, _exchangeAddress, _callData));
 
         uint ratioAfter;
         bool isGoodRatio;
-        (isGoodRatio, ratioAfter) = ratioGoodAfter(Method.Boost, _cdpId, _nextPrice);
+        (isGoodRatio, ratioAfter) = ratioGoodAfter(Method.Boost, _data[0], _nextPrice);
         // doesn't allow user to boost too much
         require(isGoodRatio);
 
-        emit CdpBoost(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
+        emit CdpBoost(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
     }
 
 /******************* INTERNAL METHODS ********************************/
