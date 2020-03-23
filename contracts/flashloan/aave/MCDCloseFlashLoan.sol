@@ -116,13 +116,15 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         manager.frob(_cdpId, -toPositiveInt(_amount), 0);
         manager.flux(_cdpId, address(this), _amount);
 
-        Join(_joinAddr).exit(address(this), _amount);
+        uint joinAmount = _ilk == USDC_ILK ? _amount / (10 ** 12) : _amount;
+
+        Join(_joinAddr).exit(address(this), joinAmount);
 
         if (_joinAddr == ETH_JOIN_ADDRESS) {
-            Join(_joinAddr).gem().withdraw(_amount); // Weth -> Eth
+            Join(_joinAddr).gem().withdraw(joinAmount); // Weth -> Eth
         }
 
-        return _amount;
+        return joinAmount;
     }
 
     function() external payable {}

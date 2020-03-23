@@ -22,7 +22,5 @@ module.exports = function(deployer, network, accounts) {
 
         // await deployer.deploy(MCDCloseFlashLoan, {gas: 6500000, overwrite: deployAgain});
         await deployer.deploy(MCDFlashLoanTaker, {gas: 6000000, overwrite: deployAgain});
-
-
     });
 };

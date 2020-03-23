@@ -16,9 +16,10 @@ contract ILendingPool {
 
 contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
-    address payable public constant MCD_SAVER_FLASH_LOAN = 0xDc88f28ba7198041D66eb2ECB1b43339E65fBb92;
-    address payable public constant MCD_CLOSE_FLASH_LOAN = 0xcd3427f90834a0Ddc0de376100451F61e569E4A9;
+    address payable public constant MCD_SAVER_FLASH_LOAN = 0x0308ACc5Edf725Dc6ba65EaDF24cbC8353a3b37B;
+    address payable public constant MCD_CLOSE_FLASH_LOAN = 0x991be34139F9f3980c45332cDe070Bf87DC9c3b6;
     address payable public constant MCD_OPEN_FLASH_LOAN = 0x7D8Aa1e702A60B33CfCFC0C6b58cc01ff97F7B06;
+    bytes32 public constant USDC_ILK = 0x555344432d410000000000000000000000000000000000000000000000000000;
 
     address public constant AAVE_DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     // address public constant MCD_CLOSE_FLASH_PROXY = 0xF6195D8d254bEF755fA8232D55Bb54B3b3eCf0Ce;
@@ -179,7 +180,11 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
         (, uint mat) = Spotter(SPOTTER_ADDRESS).ilks(_ilk);
 
-        return sub(sub(collateral, (div(mul(mat, debt), price))), 10);
+        uint maxCollateral = sub(sub(collateral, (div(mul(mat, debt), price))), 10);
+
+        uint normalizeMaxCollateral = _ilk == USDC_ILK ? maxCollateral / (10 ** 12) : maxCollateral;
+
+        return normalizeMaxCollateral;
     }
 
     /// @notice Gets a price of the asset
