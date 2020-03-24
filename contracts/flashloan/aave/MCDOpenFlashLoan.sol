@@ -63,7 +63,7 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         // Exchange the Dai loaned to Eth
         // solhint-disable-next-line no-unused-vars
         uint256 collSwaped = swap(
-            [(_data[0] - getFee(_data[1], 0, tx.origin)), _data[2], _data[3], _data[4]],
+            [(_data[1] - getFee(_data[1], 0, tx.origin)), _data[2], _data[3], _data[4]],
             DAI_ADDRESS,
             getCollateralAddr(addrData[0]),
             addrData[1],
