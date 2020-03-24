@@ -18,7 +18,7 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
     address payable public constant MCD_SAVER_FLASH_LOAN = 0x0308ACc5Edf725Dc6ba65EaDF24cbC8353a3b37B;
     address payable public constant MCD_CLOSE_FLASH_LOAN = 0xc8f1d54D68CB83B353D80DB5CCF174dBb1a3C96a;
-    address payable public constant MCD_OPEN_FLASH_LOAN = 0x9a7EF4d62fA1df7A6eE6Bf6730fFA6cA544a2c0d;
+    address payable public constant MCD_OPEN_FLASH_LOAN = 0x86E132932566fb7030eeF19B997C8797De13CFBD;
 
     bytes32 public constant USDC_ILK = 0x555344432d410000000000000000000000000000000000000000000000000000;
 
