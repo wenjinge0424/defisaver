@@ -193,6 +193,22 @@ contract SubscriptionsV2 is StaticV2, ConstantAddresses {
         return subscribers;
     }
 
+    /// @notice Helper method to return all the subscribed CDPs
+    function getSubscribersByPage(uint _page, uint _perPage) public view returns (CdpHolder[] memory) {
+        CdpHolder[] memory holders = new CdpHolder[](_perPage);
+
+        uint start = _page * _perPage;
+        uint end = start + _perPage;
+
+        uint count = 0;
+        for (uint i=start; i<end; i++) {
+            holders[count] = subscribers[i];
+            count++;
+        }
+
+        return holders;
+    }
+
     ////////////// ADMIN METHODS ///////////////////
 
     /// @notice Admin function to change a min. limit for an asset
