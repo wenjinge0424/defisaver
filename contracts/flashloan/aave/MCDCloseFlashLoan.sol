@@ -40,6 +40,11 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         closeCDP(data, debtData, joinAddr, exchangeAddress, callData, _fee);
 
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
+
+        // if there is some eth left (0x fee), return it to user
+        if (address(this).balance > 0) {
+            tx.origin.transfer(address(this).balance);
+        }
     }
 
 
@@ -71,13 +76,14 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
             _callData
         );
 
+        daiSwaped = daiSwaped - getFee(daiSwaped, 0, owner);
+
         require(daiSwaped >= (loanAmount + _fee), "We must exchange enough Dai tokens to repay loan");
 
         // If we swapped to much and have extra Dai
         if (daiSwaped > (loanAmount + _fee)) {
-            // TODO: switch to Uniswap on MAINNET
             swap(
-                [sub(daiSwaped, (loanAmount + _fee)), 0, 2, 1],
+                [sub(daiSwaped, (loanAmount + _fee)), 0, 3, 1],
                 DAI_ADDRESS,
                 collateralAddr,
                 address(0),
@@ -107,7 +113,7 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
             DAI_ADDRESS,
             _data[2]
         );
-        collPrice = sub(collPrice, collPrice / 100); // offset the price by 1%
+        collPrice = sub(collPrice, collPrice / 50); // offset the price by 2%
 
         collAmount = wdiv(_loanAmount, collPrice);
     }

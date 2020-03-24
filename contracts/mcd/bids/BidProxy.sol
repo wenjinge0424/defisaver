@@ -78,7 +78,7 @@ contract BidProxy is ExchangeHelper {
         Flipper(flipper).deal(_bidId);
 
         Vat(VAT_ADDRESS).hope(join);
-        Gem(join).exit(address(this), bidAmount);
+        Gem(join).exit(address(this), (bidAmount / 10**27));
 
         address srcToken = _isEth ? KYBER_ETH_ADDRESS : address(Gem(join).gem());
 

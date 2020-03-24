@@ -44,6 +44,11 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         openAndLeverage(data, ilk, addrData, callData, isEth, _fee);
 
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
+
+        // if there is some eth left (0x fee), return it to user
+        if (address(this).balance > 0) {
+            tx.origin.transfer(address(this).balance);
+        }
     }
 
     function openAndLeverage(
@@ -54,10 +59,11 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         bool _isEth,
         uint _fee
     ) public {
+
         // Exchange the Dai loaned to Eth
         // solhint-disable-next-line no-unused-vars
         uint256 collSwaped = swap(
-            [_data[1], _data[2], _data[3], _data[4]],
+            [(_data[0] - getFee(_data[1], 0, tx.origin)), _data[2], _data[3], _data[4]],
             DAI_ADDRESS,
             getCollateralAddr(addrData[0]),
             addrData[1],
