@@ -10,6 +10,7 @@ contract MCDMonitorProxyV2 {
     address public owner;
     address public newMonitor;
     address public lastMonitor;
+    address public admin;
     uint public changeRequestedTimestamp;
 
     mapping(address => bool) public allowed;
@@ -33,6 +34,39 @@ contract MCDMonitorProxyV2 {
     constructor(uint _changePeriod) public {
         owner = msg.sender;
         CHANGE_PERIOD = _changePeriod * 1 days;
+    }
+
+    /// @notice Admin is set by owner first time, after that admin is super role and has permission to change owner
+    /// @param _admin Address of multisig that becomes admin
+    function setAdminByOwner(address _admin) public {
+        require(msg.sender == owner);
+        require(_admin == address(0));
+
+        admin = _admin;
+    }
+
+    /// @notice Admin is able to set new admin
+    /// @param _admin Address of multisig that becomes new admin
+    function setAdminByAdmin(address _admin) public {
+        require(msg.sender == admin);
+
+        admin = _admin;
+    }
+
+    /// @notice Admin is able to change owner
+    /// @param _owner Address of new owner
+    function setOwnerByAdmin(address _owner) public {
+        require(msg.sender == admin);
+
+        owner = _owner;
+    }
+
+    /// @notice Admin is able to set change period to any value
+    /// @param _periodInDays Period in representing days needed to complete change of new monitor
+    function setChangePeriodByAdmin(uint _periodInDays) public {
+        require(msg.sender == admin);
+
+        CHANGE_PERIOD = _periodInDays * 1 days;
     }
 
     /// @notice Allowed users are able to set Monitor contract without any waiting period first time
