@@ -17,8 +17,9 @@ contract ILendingPool {
 contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
     address payable public constant MCD_SAVER_FLASH_LOAN = 0x0308ACc5Edf725Dc6ba65EaDF24cbC8353a3b37B;
-    address payable public constant MCD_CLOSE_FLASH_LOAN = 0x991be34139F9f3980c45332cDe070Bf87DC9c3b6;
-    address payable public constant MCD_OPEN_FLASH_LOAN = 0x7D8Aa1e702A60B33CfCFC0C6b58cc01ff97F7B06;
+    address payable public constant MCD_CLOSE_FLASH_LOAN = 0xc8f1d54D68CB83B353D80DB5CCF174dBb1a3C96a;
+    address payable public constant MCD_OPEN_FLASH_LOAN = 0x9a7EF4d62fA1df7A6eE6Bf6730fFA6cA544a2c0d;
+
     bytes32 public constant USDC_ILK = 0x555344432d410000000000000000000000000000000000000000000000000000;
 
     address public constant AAVE_DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
