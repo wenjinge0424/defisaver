@@ -16,13 +16,13 @@ import "../../auth/AdminAuth.sol";
 /// @title Implements logic that allows bots to call Boost and Repay
 contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
 
-    uint constant public REPAY_GAS_TOKEN = 30;
-    uint constant public BOOST_GAS_TOKEN = 19;
+    uint public REPAY_GAS_TOKEN = 30;
+    uint public BOOST_GAS_TOKEN = 19;
 
-    uint constant public MAX_GAS_PRICE = 40000000000; // 40 gwei
+    uint constant public MAX_GAS_PRICE = 80000000000; // 80 gwei
 
-    uint public REPAY_GAS_COST = 1800000;
-    uint public BOOST_GAS_COST = 1250000;
+    uint public REPAY_GAS_COST = 2200000;
+    uint public BOOST_GAS_COST = 1500000;
 
     MCDMonitorProxyV2 public monitorProxyContract;
     ISubscriptionsV2 public subscriptionsContract;
@@ -238,6 +238,17 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
         require(_gasCost < 3000000);
 
         REPAY_GAS_COST = _gasCost;
+    }
+
+    /// @notice Allows owner to change the amount of gas token burned per function call
+    /// @param _gasAmount Amount of gas token
+    /// @param _isRepay Flag to know for which function we are setting the gas token amount
+    function changeGasTokenAmount(uint _gasAmount, bool _isRepay) public onlyOwner {
+        if (_isRepay) {
+            REPAY_GAS_TOKEN = _gasAmount;
+        } else {
+            BOOST_GAS_TOKEN = _gasAmount;
+        }
     }
 
     /// @notice Adds a new bot address which will be able to call repay/boost
