@@ -7,7 +7,7 @@ module.exports = function(deployer, network, accounts) {
 
     deployer.then(async () => {
 
-        await deployer.deploy(BidProxy, {gas: 2000000, overwrite: deployAgain});
+        await deployer.deploy(BidProxy, {gas: 5000000, overwrite: deployAgain});
 
     });
 };

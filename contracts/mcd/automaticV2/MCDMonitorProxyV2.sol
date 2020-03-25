@@ -61,14 +61,6 @@ contract MCDMonitorProxyV2 {
         owner = _owner;
     }
 
-    /// @notice Admin is able to set change period to any value
-    /// @param _periodInDays Period in representing days needed to complete change of new monitor
-    function setChangePeriodByAdmin(uint _periodInDays) public {
-        require(msg.sender == admin);
-
-        CHANGE_PERIOD = _periodInDays * 1 days;
-    }
-
     /// @notice Allowed users are able to set Monitor contract without any waiting period first time
     /// @param _monitor Address of Monitor contract
     function setMonitor(address _monitor) public onlyAllowed {
