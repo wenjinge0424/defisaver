@@ -7,9 +7,10 @@ import "../saver_proxy/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../maker/Vat.sol";
 import "../maker/Spotter.sol";
+import "../../auth/AdminAuth.sol";
 
 /// @title Handles subscriptions for automatic monitoring
-contract SubscriptionsV2 is StaticV2, ConstantAddresses {
+contract SubscriptionsV2 is AdminAuth, StaticV2, ConstantAddresses {
 
     bytes32 internal constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
     bytes32 internal constant BAT_ILK = 0x4241542d41000000000000000000000000000000000000000000000000000000;
@@ -34,7 +35,6 @@ contract SubscriptionsV2 is StaticV2, ConstantAddresses {
 
     mapping (bytes32 => uint) public minLimits;
 
-    address public owner;
     uint public changeIndex;
 
     Manager public manager = Manager(MANAGER_ADDRESS);
@@ -49,8 +49,6 @@ contract SubscriptionsV2 is StaticV2, ConstantAddresses {
 
     /// @param _saverProxy Address of the MCDSaverProxy contract
     constructor(address _saverProxy) public {
-        owner = msg.sender;
-
         saverProxy = MCDSaverProxy(_saverProxy);
 
         minLimits[ETH_ILK] = 1700000000000000000;
@@ -212,16 +210,12 @@ contract SubscriptionsV2 is StaticV2, ConstantAddresses {
     ////////////// ADMIN METHODS ///////////////////
 
     /// @notice Admin function to change a min. limit for an asset
-    function changeMinRatios(bytes32 _ilk, uint _newRatio) public {
-        require(msg.sender == owner, "Must be owner");
-
+    function changeMinRatios(bytes32 _ilk, uint _newRatio) public onlyOwner {
         minLimits[_ilk] = _newRatio;
     }
 
     /// @notice Admin function to unsubscribe a CDP
-    function unsubscribeByAdmin(uint _cdpId) public {
-        require(msg.sender == owner, "Must be owner");
-
+    function unsubscribeByAdmin(uint _cdpId) public onlyOwner {
         SubPosition storage subInfo = subscribersPos[_cdpId];
 
         if (subInfo.subscribed) {

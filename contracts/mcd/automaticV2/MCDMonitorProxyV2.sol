@@ -1,16 +1,15 @@
 pragma solidity ^0.5.0;
 
 import "../../interfaces/DSProxyInterface.sol";
+import "../../auth/AdminAuth.sol";
 
 /// @title Implements logic for calling MCDSaverProxy always from same contract
-contract MCDMonitorProxyV2 {
+contract MCDMonitorProxyV2 is AdminAuth {
 
     uint public CHANGE_PERIOD;
     address public monitor;
-    address public owner;
     address public newMonitor;
     address public lastMonitor;
-    address public admin;
     uint public changeRequestedTimestamp;
 
     mapping(address => bool) public allowed;
@@ -32,40 +31,7 @@ contract MCDMonitorProxyV2 {
     }
 
     constructor(uint _changePeriod) public {
-        owner = msg.sender;
         CHANGE_PERIOD = _changePeriod * 1 days;
-    }
-
-    /// @notice Admin is set by owner first time, after that admin is super role and has permission to change owner
-    /// @param _admin Address of multisig that becomes admin
-    function setAdminByOwner(address _admin) public {
-        require(msg.sender == owner);
-        require(_admin == address(0));
-
-        admin = _admin;
-    }
-
-    /// @notice Admin is able to set new admin
-    /// @param _admin Address of multisig that becomes new admin
-    function setAdminByAdmin(address _admin) public {
-        require(msg.sender == admin);
-
-        admin = _admin;
-    }
-
-    /// @notice Admin is able to change owner
-    /// @param _owner Address of new owner
-    function setOwnerByAdmin(address _owner) public {
-        require(msg.sender == admin);
-
-        owner = _owner;
-    }
-
-    /// @notice Allowed users are able to set Monitor contract without any waiting period first time
-    /// @param _monitor Address of Monitor contract
-    function setMonitor(address _monitor) public onlyAllowed {
-        require(monitor == address(0));
-        monitor = _monitor;
     }
 
     /// @notice Only monitor contract is able to call execute on users proxy
@@ -75,6 +41,13 @@ contract MCDMonitorProxyV2 {
     function callExecute(address _owner, address _saverProxy, bytes memory _data) public onlyMonitor {
         // execute reverts if calling specific method fails
         DSProxyInterface(_owner).execute(_saverProxy, _data);
+    }
+
+    /// @notice Allowed users are able to set Monitor contract without any waiting period first time
+    /// @param _monitor Address of Monitor contract
+    function setMonitor(address _monitor) public onlyAllowed {
+        require(monitor == address(0));
+        monitor = _monitor;
     }
 
     /// @notice Allowed users are able to start procedure for changing monitor

@@ -9,10 +9,12 @@ import "../../DS/DSMath.sol";
 import "../maker/Manager.sol";
 import "../maker/Vat.sol";
 import "../maker/Spotter.sol";
+import "../../auth/AdminAuth.sol";
+
 
 
 /// @title Implements logic that allows bots to call Boost and Repay
-contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
+contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
 
     uint constant public REPAY_GAS_TOKEN = 30;
     uint constant public BOOST_GAS_TOKEN = 19;
@@ -25,7 +27,6 @@ contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
     MCDMonitorProxyV2 public monitorProxyContract;
     ISubscriptionsV2 public subscriptionsContract;
     GasTokenInterface gasToken = GasTokenInterface(GAS_TOKEN_INTERFACE_ADDRESS);
-    address public owner;
     address public automaticSaverProxyAddress;
 
     Manager public manager = Manager(MANAGER_ADDRESS);
@@ -50,7 +51,6 @@ contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
 
     constructor(address _monitorProxy, address _subscriptions, address _automaticSaverProxyAddress) public {
         approvedCallers[msg.sender] = true;
-        owner = msg.sender;
 
         monitorProxyContract = MCDMonitorProxyV2(_monitorProxy);
         subscriptionsContract = ISubscriptionsV2(_subscriptions);
@@ -206,7 +206,7 @@ contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
     function ratioGoodAfter(Method _method, uint _cdpId, uint _nextPrice) public view returns(bool, uint) {
         uint128 minRatio;
         uint128 maxRatio;
-        
+
         (, minRatio, maxRatio, , , , , ) = subscriptionsContract.getSubscribedInfo(_cdpId);
 
         uint currRatio = getRatio(_cdpId, _nextPrice);
