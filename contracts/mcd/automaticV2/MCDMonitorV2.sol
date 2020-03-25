@@ -44,11 +44,6 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
         _;
     }
 
-    modifier onlyOwner() {
-        require(owner == msg.sender);
-        _;
-    }
-
     constructor(address _monitorProxy, address _subscriptions, address _automaticSaverProxyAddress) public {
         approvedCallers[msg.sender] = true;
 

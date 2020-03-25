@@ -13,8 +13,6 @@ contract AutomaticProxyV2 is ConstantAddresses, MCDSaverProxy {
 
     address payable public constant MCD_SAVER_FLASH_LOAN = 0xDc88f28ba7198041D66eb2ECB1b43339E65fBb92;
 
-    address public constant AAVE_DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
     // solhint-disable-next-line const-name-snakecase
@@ -51,7 +49,7 @@ contract AutomaticProxyV2 is ConstantAddresses, MCDSaverProxy {
 
         bytes memory paramsData = abi.encode(_data, _joinAddr, _exchangeAddress, _callData, false);
 
-        lendingPool.flashLoan(MCD_SAVER_FLASH_LOAN, AAVE_DAI_ADDRESS, loanAmount, paramsData);
+        lendingPool.flashLoan(MCD_SAVER_FLASH_LOAN, DAI_ADDRESS, loanAmount, paramsData);
 
         manager.cdpAllow(_data[0], MCD_SAVER_FLASH_LOAN, 0);
 
