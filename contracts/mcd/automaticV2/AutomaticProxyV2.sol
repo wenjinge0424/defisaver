@@ -12,6 +12,7 @@ contract ILendingPool {
 contract AutomaticProxyV2 is ConstantAddresses, MCDSaverProxy {
 
     address payable public constant MCD_SAVER_FLASH_LOAN = 0xDc88f28ba7198041D66eb2ECB1b43339E65fBb92;
+    address public constant AAVE_POOL_CORE = 0x3dfd23A6c5E8BbcFc9581d2E864a68feb6a076d3;
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
@@ -44,6 +45,9 @@ contract AutomaticProxyV2 is ConstantAddresses, MCDSaverProxy {
         }
 
         uint256 loanAmount = sub(debtAmount, maxDebt);
+        uint maxLiq = getAvailableLiquidity(_joinAddr);
+
+        loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
 
         manager.cdpAllow(_data[0], MCD_SAVER_FLASH_LOAN, 1);
 
@@ -73,6 +77,9 @@ contract AutomaticProxyV2 is ConstantAddresses, MCDSaverProxy {
         MCD_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
 
         uint256 loanAmount = sub(_data[1], maxColl);
+        uint maxLiq = getAvailableLiquidity(_joinAddr);
+
+        loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
 
         manager.cdpAllow(_data[0], MCD_SAVER_FLASH_LOAN, 1);
 
@@ -126,6 +133,16 @@ contract AutomaticProxyV2 is ConstantAddresses, MCDSaverProxy {
             return KYBER_ETH_ADDRESS;
         } else {
             return getCollateralAddr(_joinAddr);
+        }
+    }
+
+    function getAvailableLiquidity(address _joinAddr) internal returns (uint liquidity) {
+        address tokenAddr = getAaveCollAddr(_joinAddr);
+
+        if (tokenAddr == KYBER_ETH_ADDRESS) {
+            liquidity = AAVE_POOL_CORE.balance;
+        } else {
+            liquidity = ERC20(tokenAddr).balanceOf(AAVE_POOL_CORE);
         }
     }
 
