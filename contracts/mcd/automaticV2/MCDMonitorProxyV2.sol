@@ -1,6 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "../../interfaces/DSProxyInterface.sol";
+import "../../interfaces/ERC20.sol";
 import "../../auth/AdminAuth.sol";
 
 /// @title Implements logic for calling MCDSaverProxy always from same contract
@@ -38,9 +39,14 @@ contract MCDMonitorProxyV2 is AdminAuth {
     /// @param _owner Address of cdp owner (users DSProxy address)
     /// @param _saverProxy Address of MCDSaverProxy
     /// @param _data Data to send to MCDSaverProxy
-    function callExecute(address _owner, address _saverProxy, bytes memory _data) public onlyMonitor {
+    function callExecute(address _owner, address _saverProxy, bytes memory _data) public payable onlyMonitor {
         // execute reverts if calling specific method fails
-        DSProxyInterface(_owner).execute(_saverProxy, _data);
+        DSProxyInterface(_owner).execute.value(msg.value)(_saverProxy, _data);
+
+        // return if anything left
+        if (address(this).balance > 0) {
+            msg.sender.transfer(address(this).balance);
+        }
     }
 
     /// @notice Allowed users are able to set Monitor contract without any waiting period first time
@@ -113,5 +119,18 @@ contract MCDMonitorProxyV2 is AdminAuth {
         require(_periodInDays * 1 days > CHANGE_PERIOD);
 
         CHANGE_PERIOD = _periodInDays * 1 days;
+    }
+
+    /// @notice In case something is left in contract, owner is able to withdraw it
+    /// @param _token address of token to withdraw balance
+    function withdrawToken(address _token) public onlyOwner {
+        uint balance = ERC20(_token).balanceOf(address(this));
+        ERC20(_token).transfer(msg.sender, balance);
+    }
+
+    /// @notice In case something is left in contract, owner is able to withdraw it
+    function withdrawEth() public onlyOwner {
+        uint balance = address(this).balance;
+        msg.sender.transfer(balance);
     }
 }

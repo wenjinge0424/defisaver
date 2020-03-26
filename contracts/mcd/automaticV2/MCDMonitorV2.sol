@@ -65,7 +65,7 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
         address _joinAddr,
         address _exchangeAddress,
         bytes memory _callData
-    ) public onlyApproved {
+    ) public payable onlyApproved {
         if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
             gasToken.free(BOOST_GAS_TOKEN);
         }
@@ -80,13 +80,15 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
         // calculated gas cost must be higher or equal with sent gasCost
         require(gasCost >= _data[4]);
 
-        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_data[0]), automaticSaverProxyAddress, abi.encodeWithSignature("automaticRepay(uint256[6],address,address,bytes)", _data, _joinAddr, _exchangeAddress, _callData));
+        monitorProxyContract.callExecute.value(msg.value)(subscriptionsContract.getOwner(_data[0]), automaticSaverProxyAddress, abi.encodeWithSignature("automaticRepay(uint256[6],address,address,bytes)", _data, _joinAddr, _exchangeAddress, _callData));
 
         uint ratioAfter;
         bool isGoodRatio;
         (isGoodRatio, ratioAfter) = ratioGoodAfter(Method.Repay, _data[0], _nextPrice);
         // doesn't allow user to repay too much
         require(isGoodRatio);
+
+        returnEth();        
 
         emit CdpRepay(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
     }
@@ -104,7 +106,7 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
         address _joinAddr,
         address _exchangeAddress,
         bytes memory _callData
-    ) public onlyApproved {
+    ) public payable onlyApproved {
         if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
             gasToken.free(REPAY_GAS_TOKEN);
         }
@@ -119,7 +121,7 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
         // calculated gas cost must be higher or equal with sent gasCost
         require(gasCost >= _data[4]);
 
-        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_data[0]), automaticSaverProxyAddress, abi.encodeWithSignature("automaticBoost(uint256[6],address,address,bytes)", _data, _joinAddr, _exchangeAddress, _callData));
+        monitorProxyContract.callExecute.value(msg.value)(subscriptionsContract.getOwner(_data[0]), automaticSaverProxyAddress, abi.encodeWithSignature("automaticBoost(uint256[6],address,address,bytes)", _data, _joinAddr, _exchangeAddress, _callData));
 
         uint ratioAfter;
         bool isGoodRatio;
@@ -127,10 +129,21 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
         // doesn't allow user to boost too much
         require(isGoodRatio);
 
+        returnEth();
+
         emit CdpBoost(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
     }
 
 /******************* INTERNAL METHODS ********************************/
+    function returnEth() internal {
+        // return if some eth left
+        if (address(this).balance > 0) {
+            msg.sender.transfer(address(this).balance);
+        }
+    }
+
+/******************* STATIC METHODS ********************************/
+
     /// @notice Returns an address that owns the CDP
     /// @param _cdpId Id of the CDP
     function getOwner(uint _cdpId) public view returns(address) {
@@ -216,7 +229,7 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
     /// @notice Calculates gas cost (in Eth) of tx
     /// @dev Gas price is limited to MAX_GAS_PRICE to prevent attack of draining user CDP
     /// @param _gasAmount Amount of gas used for the tx
-    function calcGasCost(uint _gasAmount) internal view returns (uint) {
+    function calcGasCost(uint _gasAmount) public view returns (uint) {
         uint gasPrice = tx.gasprice <= MAX_GAS_PRICE ? tx.gasprice : MAX_GAS_PRICE;
 
         return mul(gasPrice, _gasAmount);
