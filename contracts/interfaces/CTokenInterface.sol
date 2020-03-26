@@ -45,4 +45,6 @@ contract CTokenInterface is ERC20 {
     function getCash() external returns (uint256);
 
     function balanceOfUnderlying(address owner) external returns (uint256);
+
+    function underlying() external returns (address);
 }

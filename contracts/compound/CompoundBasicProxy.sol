@@ -2,11 +2,7 @@ pragma solidity ^0.5.0;
 
 import "../interfaces/CTokenInterface.sol";
 import "../interfaces/ERC20.sol";
-
-contract CEtherInterface {
-    function mint() external payable;
-    function repayBorrow() external payable;
-}
+import "./helpers/CEtherInterface.sol";
 
 contract ComptrollerInterface {
     function enterMarkets(address[] calldata cTokens) external returns (uint[] memory);
