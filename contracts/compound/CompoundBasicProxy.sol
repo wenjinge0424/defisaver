@@ -15,7 +15,7 @@ contract CompoundBasicProxy {
     address public constant COMPTROLLER = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
 
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
-    function deposit(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) external payable {
+    function deposit(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) public payable {
         approveCToken(_tokenAddr, _cTokenAddr);
 
         if (!_inMarket) {
@@ -30,7 +30,7 @@ contract CompoundBasicProxy {
     }
 
     /// @param _isCAmount If true _amount is cTokens if falls _amount is underlying tokens
-    function withdraw(address _tokenAddr, address _cTokenAddr, uint _amount, bool _isCAmount) external {
+    function withdraw(address _tokenAddr, address _cTokenAddr, uint _amount, bool _isCAmount) public {
 
         if (_isCAmount) {
             require(CTokenInterface(_cTokenAddr).redeem(_amount) == 0);
@@ -47,7 +47,7 @@ contract CompoundBasicProxy {
 
     }
 
-    function borrow(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) external {
+    function borrow(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) public {
         if (!_inMarket) {
             enterMarket(_cTokenAddr);
         }
@@ -63,7 +63,7 @@ contract CompoundBasicProxy {
     }
 
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
-    function payback(address _tokenAddr, address _cTokenAddr, uint _amount) external payable {
+    function payback(address _tokenAddr, address _cTokenAddr, uint _amount) public payable {
         approveCToken(_tokenAddr, _cTokenAddr);
 
         if (_tokenAddr != ETH_ADDRESS) {
@@ -74,7 +74,7 @@ contract CompoundBasicProxy {
         }
     }
 
-    function withdrawTokens(address _tokenAddr) external {
+    function withdrawTokens(address _tokenAddr) public {
         if (_tokenAddr != ETH_ADDRESS) {
             ERC20(_tokenAddr).transfer(msg.sender, ERC20(_tokenAddr).balanceOf(address(this)));
         } else {
@@ -89,7 +89,7 @@ contract CompoundBasicProxy {
         ComptrollerInterface(COMPTROLLER).enterMarkets(markets);
     }
 
-    function exitMarket(address _cTokenAddr) external {
+    function exitMarket(address _cTokenAddr) public {
         ComptrollerInterface(COMPTROLLER).exitMarket(_cTokenAddr);
     }
 
