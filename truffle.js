@@ -18,7 +18,7 @@ module.exports = {
             return new HDWalletProvider(mnemonic, process.env.INFURA_ENDPOINT);
         },
         network_id: '1',
-        gasPrice: 4100000000, // 4.1 gwei
+        gasPrice: 8100000000, // 8.1 gwei
         skipDryRun: true,
     },
     kovan: {
@@ -58,11 +58,5 @@ module.exports = {
         },
       }
     }
-  },
-  api_keys: {
-    etherscan: process.env.ETHERSCAN_API_KEY
-  },
-  plugins: [
-    'truffle-plugin-verify'
-  ]
+  }
 }

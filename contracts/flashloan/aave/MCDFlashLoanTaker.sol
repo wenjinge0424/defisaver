@@ -3,6 +3,7 @@ pragma solidity ^0.5.0;
 import "../../mcd/saver_proxy/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../FlashLoanLogger.sol";
+import "./ILendingPool.sol";
 
 contract IMCDSubscriptions {
     function unsubscribe(uint256 _cdpId) external;
@@ -10,27 +11,26 @@ contract IMCDSubscriptions {
     function subscribersPos(uint256 _cdpId) external returns (uint256, bool);
 }
 
-contract ILendingPool {
-    function flashLoan( address payable _receiver, address _reserve, uint _amount, bytes calldata _params) external;
-}
 
 contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
-    address payable public constant MCD_SAVER_FLASH_LOAN = 0xE3941df5382f4b380f5DB8deAA2AcbA0adeC30F8;
-    address payable public constant MCD_CLOSE_FLASH_LOAN = 0x0F9402781d671BAd9Ed4e7cc8Dac005e6C32dBb5;
-    address payable public constant MCD_OPEN_FLASH_LOAN = 0x2432316d1581b546490AbF73a81503D370846963;
+    address payable public constant MCD_SAVER_FLASH_LOAN = 0x0308ACc5Edf725Dc6ba65EaDF24cbC8353a3b37B;
+    address payable public constant MCD_CLOSE_FLASH_LOAN = 0xc8f1d54D68CB83B353D80DB5CCF174dBb1a3C96a;
+    address payable public constant MCD_OPEN_FLASH_LOAN = 0x86E132932566fb7030eeF19B997C8797De13CFBD;
 
-    address public constant AAVE_DAI_ADDRESS = 0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD;
+    bytes32 public constant USDC_ILK = 0x555344432d410000000000000000000000000000000000000000000000000000;
+
+    address public constant AAVE_DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     // address public constant MCD_CLOSE_FLASH_PROXY = 0xF6195D8d254bEF755fA8232D55Bb54B3b3eCf0Ce;
     // address payable public constant MCD_OPEN_FLASH_PROXY = 0x22e37Df56cAFc7f33e9438751dff42DbD5CB8Ed6;
 
-    ILendingPool public constant lendingPool = ILendingPool(0x580D4Fdc4BF8f9b5ae2fb9225D584fED4AD5375c);
+    ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
     // solhint-disable-next-line const-name-snakecase
     Manager public constant manager = Manager(MANAGER_ADDRESS);
     // solhint-disable-next-line const-name-snakecase
     FlashLoanLogger public constant logger = FlashLoanLogger(
-        0x6c4114b65f90392e78Ef7c1f2c1FD33832d7965e
+        0xb9303686B0EE92F92f63973EF85f3105329D345c
     );
 
     // solhint-disable-next-line const-name-snakecase
@@ -179,7 +179,11 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
         (, uint mat) = Spotter(SPOTTER_ADDRESS).ilks(_ilk);
 
-        return sub(sub(collateral, (div(mul(mat, debt), price))), 10);
+        uint maxCollateral = sub(sub(collateral, (div(mul(mat, debt), price))), 10);
+
+        uint normalizeMaxCollateral = _ilk == USDC_ILK ? maxCollateral / (10 ** 12) : maxCollateral;
+
+        return normalizeMaxCollateral;
     }
 
     /// @notice Gets a price of the asset

@@ -9,9 +9,9 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
     // solhint-disable-next-line const-name-snakecase
     Manager public constant manager = Manager(MANAGER_ADDRESS);
 
-    address public constant OPEN_PROXY_ACTIONS = 0x9F579EA6250304f1256C7b2A54a2910B653E8C26;
+    address public constant OPEN_PROXY_ACTIONS = 0x6d0984E80a86f26c0dd564ca0CF74a8E9Da03305;
 
-    ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x506B0B2CF20FAA8f38a4E2B524EE43e1f4458Cc5);
+    ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
     address payable public owner;
 
@@ -25,11 +25,11 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         address _reserve,
         uint256 _amount,
         uint256 _fee,
-        bytes calldata _params) 
+        bytes calldata _params)
     external {
 
         //check the contract has the specified balance
-        require(_amount <= getBalanceInternal(address(this), _reserve), 
+        require(_amount <= getBalanceInternal(address(this), _reserve),
             "Invalid balance for the contract");
 
         (
@@ -38,12 +38,17 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
             address[3] memory addrData,
             bytes memory callData,
             bool isEth
-        ) 
+        )
          = abi.decode(_params, (uint256[6],bytes32,address[3],bytes,bool));
 
         openAndLeverage(data, ilk, addrData, callData, isEth, _fee);
 
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
+
+        // if there is some eth left (0x fee), return it to user
+        if (address(this).balance > 0) {
+            tx.origin.transfer(address(this).balance);
+        }
     }
 
     function openAndLeverage(
@@ -54,10 +59,11 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         bool _isEth,
         uint _fee
     ) public {
+
         // Exchange the Dai loaned to Eth
         // solhint-disable-next-line no-unused-vars
         uint256 collSwaped = swap(
-            [_data[1], _data[2], _data[3], _data[4]],
+            [(_data[1] - getFee(_data[1], 0, tx.origin)), _data[2], _data[3], _data[4]],
             DAI_ADDRESS,
             getCollateralAddr(addrData[0]),
             addrData[1],

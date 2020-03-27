@@ -2,14 +2,15 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
 import "../maker/Manager.sol";
-import "./ISubscriptionsV2.sol";
+import "./StaticV2.sol";
 import "../saver_proxy/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../maker/Vat.sol";
 import "../maker/Spotter.sol";
+import "../../auth/AdminAuth.sol";
 
 /// @title Handles subscriptions for automatic monitoring
-contract SubscriptionsV2 is ISubscriptionsV2, ConstantAddresses {
+contract SubscriptionsV2 is AdminAuth, StaticV2, ConstantAddresses {
 
     bytes32 internal constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
     bytes32 internal constant BAT_ILK = 0x4241542d41000000000000000000000000000000000000000000000000000000;
@@ -34,7 +35,6 @@ contract SubscriptionsV2 is ISubscriptionsV2, ConstantAddresses {
 
     mapping (bytes32 => uint) public minLimits;
 
-    address public owner;
     uint public changeIndex;
 
     Manager public manager = Manager(MANAGER_ADDRESS);
@@ -49,8 +49,6 @@ contract SubscriptionsV2 is ISubscriptionsV2, ConstantAddresses {
 
     /// @param _saverProxy Address of the MCDSaverProxy contract
     constructor(address _saverProxy) public {
-        owner = msg.sender;
-
         saverProxy = MCDSaverProxy(_saverProxy);
 
         minLimits[ETH_ILK] = 1700000000000000000;
@@ -122,6 +120,7 @@ contract SubscriptionsV2 is ISubscriptionsV2, ConstantAddresses {
 
         return true;
     }
+
     /// @dev Internal method to remove a subscriber from the list
     function _unsubscribe(uint _cdpId) internal {
         require(subscribers.length > 0, "Must have subscribers in the list");
@@ -192,27 +191,35 @@ contract SubscriptionsV2 is ISubscriptionsV2, ConstantAddresses {
         return subscribers;
     }
 
+    /// @notice Helper method to return all the subscribed CDPs
+    function getSubscribersByPage(uint _page, uint _perPage) public view returns (CdpHolder[] memory) {
+        CdpHolder[] memory holders = new CdpHolder[](_perPage);
+
+        uint start = _page * _perPage;
+        uint end = start + _perPage;
+
+        uint count = 0;
+        for (uint i=start; i<end; i++) {
+            holders[count] = subscribers[i];
+            count++;
+        }
+
+        return holders;
+    }
 
     ////////////// ADMIN METHODS ///////////////////
 
     /// @notice Admin function to change a min. limit for an asset
-    function changeMinRatios(bytes32 _ilk, uint _newRatio) public {
-        require(msg.sender == owner, "Must be owner");
-
+    function changeMinRatios(bytes32 _ilk, uint _newRatio) public onlyOwner {
         minLimits[_ilk] = _newRatio;
     }
 
-    /// @notice Admin function to unsubscribe a CDP if it's owner transfered to a different addr
-    function unsubscribeIfMoved(uint _cdpId) public {
-        require(msg.sender == owner, "Must be owner");
-
+    /// @notice Admin function to unsubscribe a CDP
+    function unsubscribeByAdmin(uint _cdpId) public onlyOwner {
         SubPosition storage subInfo = subscribersPos[_cdpId];
 
         if (subInfo.subscribed) {
-            if (getOwner(_cdpId) != subscribers[subInfo.arrPos].owner) {
-                _unsubscribe(_cdpId);
-            }
+            _unsubscribe(_cdpId);
         }
-
     }
 }

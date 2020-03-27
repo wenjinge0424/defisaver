@@ -18,6 +18,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
     bytes32 public constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
+    bytes32 public constant USDC_ILK = 0x555344432d410000000000000000000000000000000000000000000000000000;
 
     Manager public constant manager = Manager(MANAGER_ADDRESS);
     Vat public constant vat = Vat(VAT_ADDRESS);
@@ -197,8 +198,10 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
             _amount = sub(maxCollateral, 1);
         }
 
-        manager.frob(_cdpId, -toPositiveInt(_amount), 0);
-        manager.flux(_cdpId, address(this), _amount);
+        uint frobAmount = _ilk == USDC_ILK ? _amount * (10 ** 12) : _amount;
+
+        manager.frob(_cdpId, -toPositiveInt(frobAmount), 0);
+        manager.flux(_cdpId, address(this), frobAmount);
 
         Join(_joinAddr).exit(address(this), _amount);
 
@@ -270,7 +273,11 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
         (, uint mat) = Spotter(SPOTTER_ADDRESS).ilks(_ilk);
 
-        return sub(sub(collateral, (div(mul(mat, debt), price))), 10);
+        uint maxCollateral = sub(sub(collateral, (div(mul(mat, debt), price))), 10);
+
+        uint normalizeMaxCollateral = _ilk == USDC_ILK ? maxCollateral / (10 ** 12) : maxCollateral;
+
+        return normalizeMaxCollateral;
     }
 
     /// @notice Gets the maximum amount of debt available to generate

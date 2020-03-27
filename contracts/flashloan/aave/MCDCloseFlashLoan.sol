@@ -7,7 +7,7 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
     // solhint-disable-next-line const-name-snakecase
     Manager public constant manager = Manager(MANAGER_ADDRESS);
 
-    ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x506B0B2CF20FAA8f38a4E2B524EE43e1f4458Cc5);
+    ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
     address payable public owner;
 
@@ -21,11 +21,11 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         address _reserve,
         uint256 _amount,
         uint256 _fee,
-        bytes calldata _params) 
+        bytes calldata _params)
     external {
 
         //check the contract has the specified balance
-        require(_amount <= getBalanceInternal(address(this), _reserve), 
+        require(_amount <= getBalanceInternal(address(this), _reserve),
             "Invalid balance for the contract");
 
         (
@@ -34,12 +34,17 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
             address joinAddr,
             address exchangeAddress,
             bytes memory callData
-        ) 
+        )
          = abi.decode(_params, (uint256[6],uint256[4],address,address,bytes));
 
         closeCDP(data, debtData, joinAddr, exchangeAddress, callData, _fee);
 
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
+
+        // if there is some eth left (0x fee), return it to user
+        if (address(this).balance > 0) {
+            tx.origin.transfer(address(this).balance);
+        }
     }
 
 
@@ -71,13 +76,14 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
             _callData
         );
 
+        daiSwaped = daiSwaped - getFee(daiSwaped, 0, owner);
+
         require(daiSwaped >= (loanAmount + _fee), "We must exchange enough Dai tokens to repay loan");
 
         // If we swapped to much and have extra Dai
         if (daiSwaped > (loanAmount + _fee)) {
-            // TODO: switch to Uniswap on MAINNET
             swap(
-                [sub(daiSwaped, (loanAmount + _fee)), 0, 2, 1],
+                [sub(daiSwaped, (loanAmount + _fee)), 0, 3, 1],
                 DAI_ADDRESS,
                 collateralAddr,
                 address(0),
@@ -107,7 +113,7 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
             DAI_ADDRESS,
             _data[2]
         );
-        collPrice = sub(collPrice, collPrice / 100); // offset the price by 1%
+        collPrice = sub(collPrice, collPrice / 50); // offset the price by 2%
 
         collAmount = wdiv(_loanAmount, collPrice);
     }
@@ -116,13 +122,15 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         manager.frob(_cdpId, -toPositiveInt(_amount), 0);
         manager.flux(_cdpId, address(this), _amount);
 
-        Join(_joinAddr).exit(address(this), _amount);
+        uint joinAmount = _ilk == USDC_ILK ? _amount / (10 ** 12) : _amount;
+
+        Join(_joinAddr).exit(address(this), joinAmount);
 
         if (_joinAddr == ETH_JOIN_ADDRESS) {
-            Join(_joinAddr).gem().withdraw(_amount); // Weth -> Eth
+            Join(_joinAddr).gem().withdraw(joinAmount); // Weth -> Eth
         }
 
-        return _amount;
+        return joinAmount;
     }
 
     function() external payable {}

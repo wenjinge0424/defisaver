@@ -6,23 +6,32 @@ import "./MCDMonitorProxyV2.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../../interfaces/GasTokenInterface.sol";
 import "../../DS/DSMath.sol";
+import "../maker/Manager.sol";
+import "../maker/Vat.sol";
+import "../maker/Spotter.sol";
+import "../../auth/AdminAuth.sol";
+
+
 
 /// @title Implements logic that allows bots to call Boost and Repay
-contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
+contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
 
-    uint constant public REPAY_GAS_TOKEN = 30;
-    uint constant public BOOST_GAS_TOKEN = 19;
+    uint public REPAY_GAS_TOKEN = 30;
+    uint public BOOST_GAS_TOKEN = 19;
 
-    uint constant public MAX_GAS_PRICE = 40000000000; // 40 gwei
+    uint constant public MAX_GAS_PRICE = 80000000000; // 80 gwei
 
-    uint public REPAY_GAS_COST = 1800000;
-    uint public BOOST_GAS_COST = 1250000;
+    uint public REPAY_GAS_COST = 2200000;
+    uint public BOOST_GAS_COST = 1500000;
 
     MCDMonitorProxyV2 public monitorProxyContract;
     ISubscriptionsV2 public subscriptionsContract;
     GasTokenInterface gasToken = GasTokenInterface(GAS_TOKEN_INTERFACE_ADDRESS);
-    address public owner;
-    address public mcdSaverProxyAddress;
+    address public automaticSaverProxyAddress;
+
+    Manager public manager = Manager(MANAGER_ADDRESS);
+    Vat public vat = Vat(VAT_ADDRESS);
+    Spotter public spotter = Spotter(SPOTTER_ADDRESS);
 
     /// @dev Addresses that are able to call methods for repay and boost
     mapping(address => bool) public approvedCallers;
@@ -35,83 +44,192 @@ contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
         _;
     }
 
-    modifier onlyOwner() {
-        require(owner == msg.sender);
-        _;
-    }
-
-    constructor(address _monitorProxy, address _subscriptions, address _mcdSaverProxyAddress) public {
+    constructor(address _monitorProxy, address _subscriptions, address _automaticSaverProxyAddress) public {
         approvedCallers[msg.sender] = true;
-        owner = msg.sender;
 
         monitorProxyContract = MCDMonitorProxyV2(_monitorProxy);
         subscriptionsContract = ISubscriptionsV2(_subscriptions);
-        mcdSaverProxyAddress = _mcdSaverProxyAddress;
+        automaticSaverProxyAddress = _automaticSaverProxyAddress;
     }
 
     /// @notice Bots call this method to repay for user when conditions are met
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
-    /// @param _cdpId Id of the cdp
-    /// @param _amount Amount of Eth to convert to Dai
-    /// @param _exchangeType Which exchange to use, 0 is to select best one
-    /// @param _collateralJoin Address of collateral join for specific CDP
-    function repayFor(uint _cdpId, uint _amount, address _collateralJoin, uint _exchangeType) public onlyApproved {
+    /// @param _data Array of uints representing [cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice]
+    /// @param _nextPrice Next price in Maker protocol
+    /// @param _joinAddr Address of collateral join for specific CDP
+    /// @param _exchangeAddress Address to call 0x exchange
+    /// @param _callData Bytes representing call data for 0x exchange
+    function repayFor(
+        uint[6] memory _data, // cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
+        uint256 _nextPrice,
+        address _joinAddr,
+        address _exchangeAddress,
+        bytes memory _callData
+    ) public payable onlyApproved {
         if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
             gasToken.free(BOOST_GAS_TOKEN);
         }
 
-
         uint ratioBefore;
-        bool canCall;
-        (canCall, ratioBefore) = subscriptionsContract.canCall(Method.Repay, _cdpId);
-        require(canCall);
+        bool isAllowed;
+        (isAllowed, ratioBefore) = canCall(Method.Repay, _data[0], _nextPrice);
+        require(isAllowed);
 
         uint gasCost = calcGasCost(REPAY_GAS_COST);
 
-        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("repay(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, _exchangeType, gasCost));
+        // calculated gas cost must be higher or equal with sent gasCost
+        require(gasCost >= _data[4]);
+
+        monitorProxyContract.callExecute.value(msg.value)(subscriptionsContract.getOwner(_data[0]), automaticSaverProxyAddress, abi.encodeWithSignature("automaticRepay(uint256[6],address,address,bytes)", _data, _joinAddr, _exchangeAddress, _callData));
 
         uint ratioAfter;
-        bool ratioGoodAfter;
-        (ratioGoodAfter, ratioAfter) = subscriptionsContract.ratioGoodAfter(Method.Repay, _cdpId);
+        bool isGoodRatio;
+        (isGoodRatio, ratioAfter) = ratioGoodAfter(Method.Repay, _data[0], _nextPrice);
         // doesn't allow user to repay too much
-        require(ratioGoodAfter);
+        require(isGoodRatio);
 
-        emit CdpRepay(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
+        returnEth();        
+
+        emit CdpRepay(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
     }
 
     /// @notice Bots call this method to boost for user when conditions are met
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
-    /// @param _cdpId Id of the cdp
-    /// @param _amount Amount of Dai to convert to Eth
-    /// @param _exchangeType Which exchange to use, 0 is to select best one
-    /// @param _collateralJoin Address of collateral join for specific CDP
-    function boostFor(uint _cdpId, uint _amount, address _collateralJoin, uint _exchangeType) public onlyApproved {
+    /// @param _data Array of uints representing [cdpId, collateralAmount, minPrice, exchangeType, gasCost, 0xPrice]
+    /// @param _nextPrice Next price in Maker protocol
+    /// @param _joinAddr Address of collateral join for specific CDP
+    /// @param _exchangeAddress Address to call 0x exchange
+    /// @param _callData Bytes representing call data for 0x exchange
+    function boostFor(
+        uint[6] memory _data, // cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
+        uint256 _nextPrice,
+        address _joinAddr,
+        address _exchangeAddress,
+        bytes memory _callData
+    ) public payable onlyApproved {
         if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
             gasToken.free(REPAY_GAS_TOKEN);
         }
 
         uint ratioBefore;
-        bool canCall;
-        (canCall, ratioBefore) = subscriptionsContract.canCall(Method.Boost, _cdpId);
-        require(canCall);
+        bool isAllowed;
+        (isAllowed, ratioBefore) = canCall(Method.Boost, _data[0], _nextPrice);
+        require(isAllowed);
 
         uint gasCost = calcGasCost(BOOST_GAS_COST);
 
-        monitorProxyContract.callExecute(subscriptionsContract.getOwner(_cdpId), mcdSaverProxyAddress, abi.encodeWithSignature("boost(uint256,address,uint256,uint256,uint256,uint256)", _cdpId, _collateralJoin, _amount, 0, _exchangeType, gasCost));
+        // calculated gas cost must be higher or equal with sent gasCost
+        require(gasCost >= _data[4]);
+
+        monitorProxyContract.callExecute.value(msg.value)(subscriptionsContract.getOwner(_data[0]), automaticSaverProxyAddress, abi.encodeWithSignature("automaticBoost(uint256[6],address,address,bytes)", _data, _joinAddr, _exchangeAddress, _callData));
 
         uint ratioAfter;
-        bool ratioGoodAfter;
-        (ratioGoodAfter, ratioAfter) = subscriptionsContract.ratioGoodAfter(Method.Boost, _cdpId);
+        bool isGoodRatio;
+        (isGoodRatio, ratioAfter) = ratioGoodAfter(Method.Boost, _data[0], _nextPrice);
         // doesn't allow user to boost too much
-        require(ratioGoodAfter);
+        require(isGoodRatio);
 
-        emit CdpBoost(_cdpId, msg.sender, _amount, ratioBefore, ratioAfter);
+        returnEth();
+
+        emit CdpBoost(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
+    }
+
+/******************* INTERNAL METHODS ********************************/
+    function returnEth() internal {
+        // return if some eth left
+        if (address(this).balance > 0) {
+            msg.sender.transfer(address(this).balance);
+        }
+    }
+
+/******************* STATIC METHODS ********************************/
+
+    /// @notice Returns an address that owns the CDP
+    /// @param _cdpId Id of the CDP
+    function getOwner(uint _cdpId) public view returns(address) {
+        return manager.owns(_cdpId);
+    }
+
+    /// @notice Gets CDP info (collateral, debt)
+    /// @param _cdpId Id of the CDP
+    /// @param _ilk Ilk of the CDP
+    function getCdpInfo(uint _cdpId, bytes32 _ilk) public view returns (uint, uint) {
+        address urn = manager.urns(_cdpId);
+
+        (uint collateral, uint debt) = vat.urns(_ilk, urn);
+        (,uint rate,,,) = vat.ilks(_ilk);
+
+        return (collateral, rmul(debt, rate));
+    }
+
+    /// @notice Gets a price of the asset
+    /// @param _ilk Ilk of the CDP
+    function getPrice(bytes32 _ilk) public view returns (uint) {
+        (, uint mat) = spotter.ilks(_ilk);
+        (,,uint spot,,) = vat.ilks(_ilk);
+
+        return rmul(rmul(spot, spotter.par()), mat);
+    }
+
+    /// @notice Gets CDP ratio
+    /// @param _cdpId Id of the CDP
+    /// @param _nextPrice Next price for user
+    function getRatio(uint _cdpId, uint _nextPrice) public view returns (uint) {
+        bytes32 ilk = manager.ilks(_cdpId);
+        uint price = (_nextPrice == 0) ? getPrice(ilk) : _nextPrice;
+
+        (uint collateral, uint debt) = getCdpInfo(_cdpId, ilk);
+
+        if (debt == 0) return 0;
+
+        return rdiv(wmul(collateral, price), debt) / (10 ** 18);
+    }
+
+    /// @notice Checks if Boost/Repay could be triggered for the CDP
+    /// @dev Called by MCDMonitor to enforce the min/max check
+    function canCall(Method _method, uint _cdpId, uint _nextPrice) public view returns(bool, uint) {
+        uint128 minRatio;
+        uint128 maxRatio;
+        bool boost;
+        address cdpOwner;
+
+        (boost, minRatio, maxRatio, , , cdpOwner, , ) = subscriptionsContract.getSubscribedInfo(_cdpId);
+
+        // check if boost and boost allowed
+        if (_method == Method.Boost && !boost) return (false, 0);
+
+        // check if owner is still owner
+        if (getOwner(_cdpId) != cdpOwner) return (false, 0);
+
+        uint currRatio = getRatio(_cdpId, _nextPrice);
+
+        if (_method == Method.Repay) {
+            return (currRatio < minRatio, currRatio);
+        } else if (_method == Method.Boost) {
+            return (currRatio > maxRatio, currRatio);
+        }
+    }
+
+    /// @dev After the Boost/Repay check if the ratio doesn't trigger another call
+    function ratioGoodAfter(Method _method, uint _cdpId, uint _nextPrice) public view returns(bool, uint) {
+        uint128 minRatio;
+        uint128 maxRatio;
+
+        (, minRatio, maxRatio, , , , , ) = subscriptionsContract.getSubscribedInfo(_cdpId);
+
+        uint currRatio = getRatio(_cdpId, _nextPrice);
+
+        if (_method == Method.Repay) {
+            return (currRatio < maxRatio, currRatio);
+        } else if (_method == Method.Boost) {
+            return (currRatio > minRatio, currRatio);
+        }
     }
 
     /// @notice Calculates gas cost (in Eth) of tx
     /// @dev Gas price is limited to MAX_GAS_PRICE to prevent attack of draining user CDP
     /// @param _gasAmount Amount of gas used for the tx
-    function calcGasCost(uint _gasAmount) internal view returns (uint) {
+    function calcGasCost(uint _gasAmount) public view returns (uint) {
         uint gasPrice = tx.gasprice <= MAX_GAS_PRICE ? tx.gasprice : MAX_GAS_PRICE;
 
         return mul(gasPrice, _gasAmount);
@@ -133,6 +251,17 @@ contract MCDMonitorV2 is ConstantAddresses, DSMath, StaticV2 {
         require(_gasCost < 3000000);
 
         REPAY_GAS_COST = _gasCost;
+    }
+
+    /// @notice Allows owner to change the amount of gas token burned per function call
+    /// @param _gasAmount Amount of gas token
+    /// @param _isRepay Flag to know for which function we are setting the gas token amount
+    function changeGasTokenAmount(uint _gasAmount, bool _isRepay) public onlyOwner {
+        if (_isRepay) {
+            REPAY_GAS_TOKEN = _gasAmount;
+        } else {
+            BOOST_GAS_TOKEN = _gasAmount;
+        }
     }
 
     /// @notice Adds a new bot address which will be able to call repay/boost
