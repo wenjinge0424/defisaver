@@ -3,6 +3,7 @@ pragma solidity ^0.5.0;
 import "../../mcd/saver_proxy/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../FlashLoanLogger.sol";
+import "./ILendingPool.sol";
 
 contract IMCDSubscriptions {
     function unsubscribe(uint256 _cdpId) external;
@@ -10,9 +11,6 @@ contract IMCDSubscriptions {
     function subscribersPos(uint256 _cdpId) external returns (uint256, bool);
 }
 
-contract ILendingPool {
-    function flashLoan( address payable _receiver, address _reserve, uint _amount, bytes calldata _params) external;
-}
 
 contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
