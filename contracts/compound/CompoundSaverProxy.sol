@@ -39,8 +39,8 @@ contract CompoundSaverProxy is ExchangeHelper {
             [collAmount, _data[1], _data[2], _data[4]], // collAmount, minPrice, exchangeType, 0xPrice
             collToken,
             borrowToken,
-             _addrData[2],
-             _callData
+            _addrData[2],
+            _callData
         );
 
         swapAmount -= getFee(swapAmount, user, borrowToken);
@@ -60,7 +60,6 @@ contract CompoundSaverProxy is ExchangeHelper {
         bytes calldata _callData
     ) external {
         enterMarket(_addrData[0], _addrData[1]);
-        //TODO: proxy approval and market enter
 
         address payable user = address(uint160(getUserAddress()));
         uint borrowAmount = _data[0]; // TODO: check max
@@ -76,8 +75,8 @@ contract CompoundSaverProxy is ExchangeHelper {
             [borrowAmount, _data[1], _data[2], _data[4]], // collAmount, minPrice, exchangeType, 0xPrice
             borrowToken,
             collToken,
-             _addrData[2],
-             _callData
+            _addrData[2],
+            _callData
         );
 
         approveCToken(collToken, _addrData[0]);
