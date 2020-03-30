@@ -45,7 +45,9 @@ module.exports = function(deployer, network, accounts) {
         let monitorAddress = (await MCDMonitorV2.deployed()).address;
 
         let monitorProxyV2 = await MCDMonitorProxyV2.deployed();
-        await monitorProxyV2.setMonitor(monitorAddress);
+        await monitorProxyV2.changeMonitor(monitorAddress);
+        await monitorProxyV2.confirmNewMonitor();
+
 
         console.log({automaticProxyAddress});
         console.log({subscriptionsAddress});
