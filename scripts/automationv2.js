@@ -192,14 +192,14 @@ const canCall = async (method, cdpId, nextPrice) => {
 
     // ----------------------starters-------------------------------------
     // subscribe vault
-    // await subscribeVault(cdp.cdpId, '18000000000000000000', '22200000000000000000', '20000000000000000000', '20000000000000000000');
-    
+    // await subscribeVault(cdp.cdpId, '1710000000000000000', '2220000000000000000', '2000000000000000000', '2000000000000000000');
+                                     
     // await addCaller(bot.address);
     // -------------------------------------------------------------------
 
     // ----------------------getters-------------------------------------
-    let subscriptions = await getSubscriptions();
-    console.log(subscriptions);
+    // let subscriptions = await getSubscriptions();
+    // console.log(subscriptions);
 
     // let canCallBoost = await canCall(MethodEnum.Boost, cdp.cdpId, 0);
     // console.log('canCallBoost', canCallBoost);
@@ -209,7 +209,7 @@ const canCall = async (method, cdpId, nextPrice) => {
     // ------------------------------------------------------------------
 
     // await repayFor(cdp.cdpId, web3.utils.toWei('0.1', 'ether'), joinAddr, '0');
-    // await boostFor(cdp.cdpId, web3.utils.toWei('10', 'ether'), joinAddr, '0');
+    // await boostFor(cdp.cdpId, web3.utils.toWei('20', 'ether'), joinAddr, '0');
 })();
 
 
