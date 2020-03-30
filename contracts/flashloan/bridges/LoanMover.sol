@@ -49,6 +49,8 @@ contract LoanMover is FlashLoanReceiverBase, MCDSaverProxy, CompoundBasicProxy {
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
     }
 
+    // TODO: problem no permission for Compound access
+
     function compound2Mcd(
         uint _cdpId,
         address _joinAddr,
@@ -57,15 +59,16 @@ contract LoanMover is FlashLoanReceiverBase, MCDSaverProxy, CompoundBasicProxy {
         bytes32 _ilk
     ) internal {
         // repay Compound debt
-        payback(DAI_ADDRESS, cDAI_ADDRESS, _loanAmount);
+        // payback(DAI_ADDRESS, cDAI_ADDRESS, _loanAmount);
 
-        // CTokenInterface(_cTokenAddr).redeem(_amount);
-        uint redeemAmount = 0; //TODO: figure out redeem amount
+        // uint cTokenBalance = CTokenInterface(_cTokenAddr).balanceOf(_proxy);
+        // require(CTokenInterface(_cTokenAddr).redeem(cTokenBalance) == 0);
+        // uint redeemAmount = ERC20(getUnderlyingAddr(_cTokenAddr)).balanceOf(address(this));
 
-        // add money and withdraw debt
-        addCollateral(_cdpId, _joinAddr, redeemAmount);
+        // // add money and withdraw debt
+        // addCollateral(_cdpId, _joinAddr, redeemAmount);
 
-        drawDai(_cdpId, _ilk, _loanAmount);
+        // drawDai(_cdpId, _ilk, _loanAmount);
     }
 
     function mcd2Compound(
@@ -75,20 +78,20 @@ contract LoanMover is FlashLoanReceiverBase, MCDSaverProxy, CompoundBasicProxy {
         address _cCollateralAddr,
         bytes32 _ilk
     ) internal {
-        address owner = getOwner(manager, _cdpId);
-        (uint collateral, ) = getCdpInfo(manager, _cdpId, _ilk);
+        // address owner = getOwner(manager, _cdpId);
+        // (uint collateral, ) = getCdpInfo(manager, _cdpId, _ilk);
 
-        // repay dai debt cdp
-        paybackDebt(_cdpId, _ilk, _loanAmount, owner);
+        // // repay dai debt cdp
+        // paybackDebt(_cdpId, _ilk, _loanAmount, owner);
 
-        // withdraw collateral from cdp
-        uint collDrawn = drawCollateral(_cdpId, _ilk, _joinAddr, collateral);
+        // // withdraw collateral from cdp
+        // uint collDrawn = drawCollateral(_cdpId, _ilk, _joinAddr, collateral);
 
-        // deposit in Compound
-        deposit(getUnderlyingAddr(_cCollateralAddr), _cCollateralAddr, collDrawn, true);
+        // // deposit in Compound
+        // deposit(getUnderlyingAddr(_cCollateralAddr), _cCollateralAddr, collDrawn, true);
 
-        // borrow dai debt
-        borrow(DAI_ADDRESS, cDAI_ADDRESS, _loanAmount, true); // TODO: will send to msg.sender
+        // // borrow dai debt
+        // borrow(DAI_ADDRESS, cDAI_ADDRESS, _loanAmount, true); // TODO: will send to msg.sender
     }
 
 
