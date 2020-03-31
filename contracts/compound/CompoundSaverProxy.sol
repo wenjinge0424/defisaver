@@ -96,7 +96,7 @@ contract CompoundSaverProxy is ExchangeHelper {
 
     function repayDebt(uint _amount, address _cBorrowToken, address _borrowToken, address _user) internal {
         // check borrow balance
-        uint wholeDebt = CTokenInterface(_cBorrowToken).borrowBalanceCurrent(_user);
+        uint wholeDebt = CTokenInterface(_cBorrowToken).borrowBalanceCurrent(address(this));
 
         if (_amount > wholeDebt) {
             ERC20(_borrowToken).transfer(_user, (_amount - wholeDebt));

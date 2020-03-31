@@ -7,9 +7,12 @@ require('dotenv').config();
 const DSProxy = require('../build/contracts/DSProxy.json');
 const ProxyRegistryInterface = require('../build/contracts/ProxyRegistryInterface.json');
 const CompoundBasicProxy = require('../build/contracts/CompoundBasicProxy.json');
+const CompoundSaverProxy = require('../build/contracts/CompoundSaverProxy.json');
+const CTokenInterface = require('../build/contracts/CTokenInterface.json');
 
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
 const compoundBasicProxyAddr = '0x12f8551a516085E4cEf5e2451D54ede7d24983cC';
+const compoundSaverProxyAddr = '0x6EdB679e04CE7D8246E905a7cf2C0Be3DF0034c1';
 
 const zeroAddr = '0x0000000000000000000000000000000000000000';
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -32,6 +35,8 @@ const initContracts = async () => {
     proxyAddr = await registry.methods.proxies(account.address).call();
     proxy = new web3.eth.Contract(DSProxy.abi, proxyAddr);
 
+    cDai = new web3.eth.Contract(CTokenInterface.abi, CDAI_ADDRESS);
+    cEth = new web3.eth.Contract(CTokenInterface.abi, CETH_ADDRESS);
 };
 
 function getAbiFunction(contract, functionName) {
@@ -45,8 +50,13 @@ function getAbiFunction(contract, functionName) {
 
     // await deposit(ETH_ADDRESS, CETH_ADDRESS, '0.01', false);
     // await withdraw(ETH_ADDRESS, CETH_ADDRESS, '0.02498541', true);
-    // await borrow(DAI_ADDRESS, CDAI_ADDRESS, '0.1', false);
-    await payback(DAI_ADDRESS, CDAI_ADDRESS, '0.5', true);
+    // await borrow(DAI_ADDRESS, CDAI_ADDRESS, '0.3', false);
+    // await payback(DAI_ADDRESS, CDAI_ADDRESS, '0.5', true);
+
+    // await repay('0.001', CETH_ADDRESS, CDAI_ADDRESS);
+
+    await boost('0.5', CETH_ADDRESS, CDAI_ADDRESS);
+
 
 })();
 
@@ -130,6 +140,46 @@ const payback = async (tokenAddr, cTokenAddr, amount, wholeDebt) => {
 
         const tx = await proxy.methods['execute(address,bytes)'](compoundBasicProxyAddr, data).send({
             from: account.address, value, gas: 500000, gasPrice: 5100000000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+// function repay(
+//     uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
+//     address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
+//     bytes calldata _callData
+const repay = async (amount, cCollAddress, cBorrowAddress) => {
+    try {
+        amount = web3.utils.toWei(amount, 'ether');
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundSaverProxy, 'repay'),
+        [[amount, 0, 3, 0, 0], [cCollAddress, cBorrowAddress, zeroAddr], "0x0"]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](compoundSaverProxyAddr, data).send({
+            from: account.address, gas: 1300000, gasPrice: 4100000000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+// function boost(
+//     uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
+//     address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
+//     bytes calldata _callData
+const boost = async (amount, cCollAddress, cBorrowAddress) => {
+    try {
+        amount = web3.utils.toWei(amount, 'ether');
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundSaverProxy, 'boost'),
+        [[amount, 0, 3, 0, 0], [cCollAddress, cBorrowAddress, zeroAddr], "0x0"]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](compoundSaverProxyAddr, data).send({
+            from: account.address, gas: 1300000, gasPrice: 4100000000});
 
         console.log(tx);
     } catch(err) {
