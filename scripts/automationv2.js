@@ -36,10 +36,10 @@ const SubscriptionsV2 = require("../build/contracts/SubscriptionsV2.json");
 const SubscriptionsProxyV2 = require("../build/contracts/SubscriptionsProxyV2.json");
 
 
-const automaticProxyAddress = '0xdef4676c058589911647a21156E6f473b02c0754';
-const subscriptionsAddress = '0x5ee1F547977Fd7078599E052678644A19ABd6FEE';
-const subscriptionsProxyAddress = '0x088EC01EDA8997C5F06CC3a7793DF6f84D64302c';
-const monitorAddress = '0x372ED3028D68b039E0b56a3e03cF061Bf8425bC7';
+const automaticProxyAddress = '0xbF257420b448E734F70713502619b704735cCD97';
+const subscriptionsAddress = '0xbE2aA62c8eA4779375569592b2Db530E83232A8A';
+const subscriptionsProxyAddress = '0x603B08D577A6686eF2F62f79B122d73376df86Fb';
+const monitorAddress = '0xAC2300F5598726DAe614636a116a5097F3453F74';
 const monitorProxyAddress = '0xD4A0bf445d28ecaa7551875497CFD78E15ceAF1D';
 
 
@@ -82,7 +82,7 @@ function getAbiFunction(contract, functionName) {
 const subscribeVault = async (cdpId, minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay) => {
     try {
         data = web3.eth.abi.encodeFunctionCall(getAbiFunction(SubscriptionsProxyV2, 'subscribe'),
-            [cdpId, minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, true, subscriptionsAddress]);
+            [cdpId, minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, true, true, subscriptionsAddress]);
 
         const tx = await proxy.methods['execute(address,bytes)'](subscriptionsProxyAddress, data).send({
             from: account.address, gas: 500000, gasPrice: gasPrice
@@ -166,11 +166,28 @@ const getSubscriptions = async () => {
             minRatio: cdp.minRatio,
             maxRatio: cdp.maxRatio,
             boostEnabled: cdp.boostEnabled,
+            nextPriceEnabled: cdp.nextPriceEnabled,
             owner: cdp.owner
         });
     }
 
     return usersCdps;
+}
+
+const getCdpHolder = async (cdpId) => {
+    const cdp = await subscriptions.methods.getCdpHolder(cdpId).call();
+
+    return {
+        subscribed: cdp.subscribed,
+        cdpId: cdp['1'].cdpId,
+        optimalRatioRepay: cdp['1'].optimalRatioRepay,
+        optimalRatioBoost: cdp['1'].optimalRatioBoost,
+        minRatio: cdp['1'].minRatio,
+        maxRatio: cdp['1'].maxRatio,
+        boostEnabled: cdp['1'].boostEnabled,
+        nextPriceEnabled: cdp['1'].nextPriceEnabled,
+        owner: cdp['1'].owner
+    };
 }
 
 const canCall = async (method, cdpId, nextPrice) => {
@@ -200,6 +217,9 @@ const canCall = async (method, cdpId, nextPrice) => {
     // ----------------------getters-------------------------------------
     // let subscriptions = await getSubscriptions();
     // console.log(subscriptions);
+
+    let cdpHolder = await getCdpHolder(cdp.cdpId);
+    console.log(cdpHolder);
 
     // let canCallBoost = await canCall(MethodEnum.Boost, cdp.cdpId, 0);
     // console.log('canCallBoost', canCallBoost);
