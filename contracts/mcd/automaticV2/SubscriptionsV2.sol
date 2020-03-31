@@ -161,12 +161,14 @@ contract SubscriptionsV2 is AdminAuth, StaticV2, ConstantAddresses {
         );
     }
 
-    function getCdpHolder(uint _cdpId) public view returns (CdpHolder memory) {
+    function getCdpHolder(uint _cdpId) public view returns (bool subsribed, CdpHolder memory) {
         SubPosition memory subInfo = subscribersPos[_cdpId];
+
+        if (!subInfo.subscribed) return (false, CdpHolder(0, 0, 0, 0, address(0), 0, false, false));
 
         CdpHolder memory subscriber = subscribers[subInfo.arrPos];
     
-        return subscriber;
+        return (true, subscriber);
     }
 
     /// @notice Helper method for the front to get the information about the ilk of a CDP

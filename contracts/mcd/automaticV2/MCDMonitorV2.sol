@@ -189,7 +189,12 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
     /// @notice Checks if Boost/Repay could be triggered for the CDP
     /// @dev Called by MCDMonitor to enforce the min/max check
     function canCall(Method _method, uint _cdpId, uint _nextPrice) public view returns(bool, uint) {
-        CdpHolder memory holder = subscriptionsContract.getCdpHolder(_cdpId);
+        bool subscribed;
+        CdpHolder memory holder;
+        (subscribed, holder) = subscriptionsContract.getCdpHolder(_cdpId);
+
+        // check if cdp is subscribed
+        if (!subscribed) return (false, 0);
 
         // check if using next price is allowed
         if (_nextPrice > 0 && !holder.nextPriceEnabled) return (false, 0);
@@ -211,7 +216,9 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
 
     /// @dev After the Boost/Repay check if the ratio doesn't trigger another call
     function ratioGoodAfter(Method _method, uint _cdpId, uint _nextPrice) public view returns(bool, uint) {
-        CdpHolder memory holder = subscriptionsContract.getCdpHolder(_cdpId);
+        CdpHolder memory holder;
+
+        (, holder) = subscriptionsContract.getCdpHolder(_cdpId);
 
         uint currRatio = getRatio(_cdpId, _nextPrice);
 
