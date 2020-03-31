@@ -9,7 +9,7 @@ const ProxyRegistryInterface = require('../build/contracts/ProxyRegistryInterfac
 const CompoundBasicProxy = require('../build/contracts/CompoundBasicProxy.json');
 
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
-const compoundBasicProxyAddr = '0x7ca5a868eF08D97DC2Ad5D9adDaFeF10125d1a37';
+const compoundBasicProxyAddr = '0x12f8551a516085E4cEf5e2451D54ede7d24983cC';
 
 const zeroAddr = '0x0000000000000000000000000000000000000000';
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -46,7 +46,7 @@ function getAbiFunction(contract, functionName) {
     // await deposit(ETH_ADDRESS, CETH_ADDRESS, '0.01', false);
     // await withdraw(ETH_ADDRESS, CETH_ADDRESS, '0.02498541', true);
     // await borrow(DAI_ADDRESS, CDAI_ADDRESS, '0.1', false);
-    await payback(DAI_ADDRESS, CDAI_ADDRESS, '0.11', true);
+    await payback(DAI_ADDRESS, CDAI_ADDRESS, '0.5', true);
 
 })();
 

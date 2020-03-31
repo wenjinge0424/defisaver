@@ -62,15 +62,18 @@ contract CompoundBasicProxy {
         }
     }
 
+    /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     function payback(address _tokenAddr, address _cTokenAddr, uint _amount, bool _wholeDebt) public payable {
         approveCToken(_tokenAddr, _cTokenAddr);
+
+        if (_wholeDebt) {
+            _amount = CTokenInterface(_cTokenAddr).borrowBalanceCurrent(address(this));
+        }
 
         if (_tokenAddr != ETH_ADDRESS) {
             ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount);
 
-            uint payAmount = _wholeDebt ? uint(-1) : _amount;
-            require(CTokenInterface(_cTokenAddr).repayBorrow(payAmount) == 0);
-            ERC20(_tokenAddr).transfer(msg.sender, ERC20(_tokenAddr).balanceOf(address(this)));
+            require(CTokenInterface(_cTokenAddr).repayBorrow(_amount) == 0);
         } else {
             CEtherInterface(_cTokenAddr).repayBorrow.value(msg.value)();
             msg.sender.transfer(address(this).balance); // send back the extra eth
