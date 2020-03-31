@@ -1,4 +1,5 @@
 pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
 
 import "./ISubscriptionsV2.sol";
 import "./StaticV2.sol";
@@ -188,41 +189,36 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
     /// @notice Checks if Boost/Repay could be triggered for the CDP
     /// @dev Called by MCDMonitor to enforce the min/max check
     function canCall(Method _method, uint _cdpId, uint _nextPrice) public view returns(bool, uint) {
-        uint128 minRatio;
-        uint128 maxRatio;
-        bool boost;
-        address cdpOwner;
+        CdpHolder memory holder = subscriptionsContract.getCdpHolder(_cdpId);
 
-        (boost, minRatio, maxRatio, , , cdpOwner, , ) = subscriptionsContract.getSubscribedInfo(_cdpId);
+        // check if using next price is allowed
+        if (_nextPrice > 0 && !holder.nextPriceEnabled) return (false, 0);
 
         // check if boost and boost allowed
-        if (_method == Method.Boost && !boost) return (false, 0);
+        if (_method == Method.Boost && !holder.boostEnabled) return (false, 0);
 
         // check if owner is still owner
-        if (getOwner(_cdpId) != cdpOwner) return (false, 0);
+        if (getOwner(_cdpId) != holder.owner) return (false, 0);
 
         uint currRatio = getRatio(_cdpId, _nextPrice);
 
         if (_method == Method.Repay) {
-            return (currRatio < minRatio, currRatio);
+            return (currRatio < holder.minRatio, currRatio);
         } else if (_method == Method.Boost) {
-            return (currRatio > maxRatio, currRatio);
+            return (currRatio > holder.maxRatio, currRatio);
         }
     }
 
     /// @dev After the Boost/Repay check if the ratio doesn't trigger another call
     function ratioGoodAfter(Method _method, uint _cdpId, uint _nextPrice) public view returns(bool, uint) {
-        uint128 minRatio;
-        uint128 maxRatio;
-
-        (, minRatio, maxRatio, , , , , ) = subscriptionsContract.getSubscribedInfo(_cdpId);
+        CdpHolder memory holder = subscriptionsContract.getCdpHolder(_cdpId);
 
         uint currRatio = getRatio(_cdpId, _nextPrice);
 
         if (_method == Method.Repay) {
-            return (currRatio < maxRatio, currRatio);
+            return (currRatio < holder.maxRatio, currRatio);
         } else if (_method == Method.Boost) {
-            return (currRatio > minRatio, currRatio);
+            return (currRatio > holder.minRatio, currRatio);
         }
     }
 

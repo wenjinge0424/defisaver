@@ -15,21 +15,6 @@ contract SubscriptionsV2 is AdminAuth, StaticV2, ConstantAddresses {
     bytes32 internal constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
     bytes32 internal constant BAT_ILK = 0x4241542d41000000000000000000000000000000000000000000000000000000;
 
-    struct CdpHolder {
-        uint128 minRatio;
-        uint128 maxRatio;
-        uint128 optimalRatioBoost;
-        uint128 optimalRatioRepay;
-        address owner;
-        uint cdpId;
-        bool boostEnabled;
-    }
-
-    struct SubPosition {
-        uint arrPos;
-        bool subscribed;
-    }
-
     CdpHolder[] public subscribers;
     mapping (uint => SubPosition) public subscribersPos;
 
@@ -62,7 +47,9 @@ contract SubscriptionsV2 is AdminAuth, StaticV2, ConstantAddresses {
     /// @param _maxRatio Maximum ratio after which boost is triggered
     /// @param _optimalBoost Ratio amount which boost should target
     /// @param _optimalRepay Ratio amount which repay should target
-    function subscribe(uint _cdpId, uint128 _minRatio, uint128 _maxRatio, uint128 _optimalBoost, uint128 _optimalRepay, bool _boostEnabled) external {
+    /// @param _boostEnabled Boolean determing if boost is enabled
+    /// @param _nextPriceEnabled Boolean determing if we can use nextPrice for this cdp
+    function subscribe(uint _cdpId, uint128 _minRatio, uint128 _maxRatio, uint128 _optimalBoost, uint128 _optimalRepay, bool _boostEnabled, bool _nextPriceEnabled) external {
         require(isOwner(msg.sender, _cdpId), "Must be called by Cdp owner");
         require(checkParams(manager.ilks(_cdpId), _minRatio, _maxRatio), "Must be correct params");
 
@@ -75,7 +62,8 @@ contract SubscriptionsV2 is AdminAuth, StaticV2, ConstantAddresses {
                 optimalRatioRepay: _optimalRepay,
                 owner: msg.sender,
                 cdpId: _cdpId,
-                boostEnabled: _boostEnabled
+                boostEnabled: _boostEnabled,
+                nextPriceEnabled: _nextPriceEnabled
             });
 
         changeIndex++;
@@ -171,6 +159,14 @@ contract SubscriptionsV2 is AdminAuth, StaticV2, ConstantAddresses {
             coll,
             debt
         );
+    }
+
+    function getCdpHolder(uint _cdpId) public view returns (CdpHolder memory) {
+        SubPosition memory subInfo = subscribersPos[_cdpId];
+
+        CdpHolder memory subscriber = subscribers[subInfo.arrPos];
+    
+        return subscriber;
     }
 
     /// @notice Helper method for the front to get the information about the ilk of a CDP
