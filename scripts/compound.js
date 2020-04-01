@@ -12,7 +12,7 @@ const CTokenInterface = require('../build/contracts/CTokenInterface.json');
 
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
 const compoundBasicProxyAddr = '0x12f8551a516085E4cEf5e2451D54ede7d24983cC';
-const compoundSaverProxyAddr = '0x6EdB679e04CE7D8246E905a7cf2C0Be3DF0034c1';
+const compoundSaverProxyAddr = '0x8be2701357A39B0ce77a27F38c951b0Aa4810996';
 
 const zeroAddr = '0x0000000000000000000000000000000000000000';
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -53,9 +53,9 @@ function getAbiFunction(contract, functionName) {
     // await borrow(DAI_ADDRESS, CDAI_ADDRESS, '0.3', false);
     // await payback(DAI_ADDRESS, CDAI_ADDRESS, '0.5', true);
 
-    // await repay('0.001', CETH_ADDRESS, CDAI_ADDRESS);
+    await repay('0.003', CETH_ADDRESS, CDAI_ADDRESS);
 
-    await boost('0.5', CETH_ADDRESS, CDAI_ADDRESS);
+    // await boost('15.5', CETH_ADDRESS, CDAI_ADDRESS);
 
 
 })();
@@ -159,7 +159,7 @@ const repay = async (amount, cCollAddress, cBorrowAddress) => {
         [[amount, 0, 3, 0, 0], [cCollAddress, cBorrowAddress, zeroAddr], "0x0"]);
 
         const tx = await proxy.methods['execute(address,bytes)'](compoundSaverProxyAddr, data).send({
-            from: account.address, gas: 1300000, gasPrice: 4100000000});
+            from: account.address, gas: 1300000, gasPrice: 5100000000});
 
         console.log(tx);
     } catch(err) {
@@ -179,7 +179,7 @@ const boost = async (amount, cCollAddress, cBorrowAddress) => {
         [[amount, 0, 3, 0, 0], [cCollAddress, cBorrowAddress, zeroAddr], "0x0"]);
 
         const tx = await proxy.methods['execute(address,bytes)'](compoundSaverProxyAddr, data).send({
-            from: account.address, gas: 1300000, gasPrice: 4100000000});
+            from: account.address, gas: 1300000, gasPrice: 5100000000});
 
         console.log(tx);
     } catch(err) {

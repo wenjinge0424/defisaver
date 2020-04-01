@@ -7,8 +7,13 @@ import "../mcd/Discount.sol";
 import "../DS/DSProxy.sol";
 import "../loggers/CompoundLogger.sol";
 import "./helpers/ComptrollerInterface.sol";
+import "../DS/DSMath.sol";
 
-contract CompoundSaverProxy is ExchangeHelper {
+contract CompoundOracle {
+    function getUnderlyingPrice(address cToken) external view returns (uint);
+}
+
+contract CompoundSaverProxy is ExchangeHelper, DSMath {
 
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
 
@@ -16,7 +21,8 @@ contract CompoundSaverProxy is ExchangeHelper {
     address public constant CETH_ADDRESS = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
     address public constant COMPTROLLER = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
 
-    address public constant COMPOUND_LOGGER = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
+    address public constant COMPOUND_LOGGER = 0x3DD0CDf5fFA28C6847B4B276e2fD256046a44bb7;
+    address public constant COMPOUND_ORACLE = 0x1D8aEdc9E924730DD3f9641CDb4D1B92B848b4bd;
 
     /// @notice Withdraws collateral, converts to borrowed token and repays debt
     function repay(
@@ -28,7 +34,9 @@ contract CompoundSaverProxy is ExchangeHelper {
 
         address payable user = address(uint160(getUserAddress()));
 
-        uint collAmount = _data[0]; // TODO: check max coll
+        uint maxColl = getMaxCollateral(_addrData[0]);
+
+        uint collAmount = (_data[0] > maxColl) ? maxColl : _data[0];
 
         require(CTokenInterface(_addrData[0]).redeemUnderlying(collAmount) == 0);
 
@@ -45,7 +53,7 @@ contract CompoundSaverProxy is ExchangeHelper {
 
         swapAmount -= getFee(swapAmount, user, borrowToken);
 
-        repayDebt(swapAmount, _addrData[1], borrowToken, user);
+        paybackDebt(swapAmount, _addrData[1], borrowToken, user);
 
         // handle 0x fee
         user.transfer(address(this).balance);
@@ -53,7 +61,7 @@ contract CompoundSaverProxy is ExchangeHelper {
         CompoundLogger(COMPOUND_LOGGER).LogRepay(user, _data[0], swapAmount, collToken, borrowToken);
     }
 
-    /// @notice Borrows more, converts to collateral, and adds to position
+    /// @notice Borrows token, converts to collateral, and adds to position
     function boost(
         uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
@@ -62,7 +70,9 @@ contract CompoundSaverProxy is ExchangeHelper {
         enterMarket(_addrData[0], _addrData[1]);
 
         address payable user = address(uint160(getUserAddress()));
-        uint borrowAmount = _data[0]; // TODO: check max
+
+        uint maxBorrow = getMaxBorrow(_addrData[1]);
+        uint borrowAmount = (_data[0] > maxBorrow) ? maxBorrow : _data[0];
 
         require(CTokenInterface(_addrData[1]).borrow(borrowAmount) == 0);
 
@@ -94,8 +104,8 @@ contract CompoundSaverProxy is ExchangeHelper {
 
     }
 
-    function repayDebt(uint _amount, address _cBorrowToken, address _borrowToken, address _user) internal {
-        // check borrow balance
+    /// @notice Helper method to payback the Compound debt
+    function paybackDebt(uint _amount, address _cBorrowToken, address _borrowToken, address _user) internal {
         uint wholeDebt = CTokenInterface(_cBorrowToken).borrowBalanceCurrent(address(this));
 
         if (_amount > wholeDebt) {
@@ -131,6 +141,7 @@ contract CompoundSaverProxy is ExchangeHelper {
         ERC20(_tokenAddr).transfer(WALLET_ID, feeAmount);
     }
 
+    /// @notice Enters the market for the collatera and borrow tokens
     function enterMarket(address _cTokenAddrColl, address _cTokenAddrBorrow) internal {
         address[] memory markets = new address[](2);
         markets[0] = _cTokenAddrColl;
@@ -139,12 +150,14 @@ contract CompoundSaverProxy is ExchangeHelper {
         ComptrollerInterface(COMPTROLLER).enterMarkets(markets);
     }
 
+    /// @notice Approves CToken contract to pull underlying tokens from the DSProxy
     function approveCToken(address _tokenAddr, address _cTokenAddr) internal {
         if (_tokenAddr != ETH_ADDRESS) {
             ERC20(_tokenAddr).approve(_cTokenAddr, uint(-1));
         }
     }
 
+    /// @notice Returns the underlying address of the cToken asset
     function getUnderlyingAddr(address _cTokenAddress) internal returns (address) {
         if (_cTokenAddress == CETH_ADDRESS) {
             return ETH_ADDRESS;
@@ -153,10 +166,46 @@ contract CompoundSaverProxy is ExchangeHelper {
         }
     }
 
-    function getUserAddress() internal returns (address) {
+    /// @notice Returns the owner of the DSProxy that called the contract
+    function getUserAddress() internal view returns (address) {
         DSProxy proxy = DSProxy(uint160(address(this)));
 
         return proxy.owner();
+    }
+
+    /// @notice Returns the maximum amount of collateral available to withdraw
+    /// @dev Due to rounding errors the result is - 100 wei from the exact amount
+    function getMaxCollateral(address _cCollAddress) public returns (uint) {
+        (, uint liquidityInEth, ) = ComptrollerInterface(COMPTROLLER).getAccountLiquidity(address(this));
+        uint usersBalance = CTokenInterface(_cCollAddress).balanceOfUnderlying(address(this));
+
+        if (liquidityInEth == 0) return usersBalance;
+
+        if (_cCollAddress == CETH_ADDRESS) {
+            if (liquidityInEth > usersBalance) return usersBalance;
+
+            return liquidityInEth;
+        }
+
+        uint ethPrice = CompoundOracle(COMPOUND_ORACLE).getUnderlyingPrice(_cCollAddress);
+        uint liquidityInToken = wdiv(liquidityInEth, ethPrice);
+
+        if (liquidityInToken > usersBalance) return usersBalance;
+
+        return sub(liquidityInToken, 100); // cut off 100 wei to handle rounding issues
+    }
+
+    /// @notice Returns the maximum amount of borrow amount available
+    /// @dev Due to rounding errors the result is - 100 wei from the exact amount
+    function getMaxBorrow(address _cBorrowAddress) public returns (uint) {
+        (, uint liquidityInEth, ) = ComptrollerInterface(COMPTROLLER).getAccountLiquidity(address(this));
+
+        if (_cBorrowAddress == CETH_ADDRESS) return liquidityInEth;
+
+        uint ethPrice = CompoundOracle(COMPOUND_ORACLE).getUnderlyingPrice(_cBorrowAddress);
+        uint liquidityInToken = wdiv(liquidityInEth, ethPrice);
+
+        return sub(liquidityInToken, 100); // cut off 100 wei to handle rounding issues
     }
 
 }
