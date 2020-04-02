@@ -209,7 +209,7 @@ const canCall = async (method, cdpId, nextPrice) => {
 
     // ----------------------starters-------------------------------------
     // subscribe vault
-    // await subscribeVault(cdp.cdpId, '1710000000000000000', '2220000000000000000', '2000000000000000000', '2000000000000000000');
+    await subscribeVault(cdp.cdpId, '1710000000000000000', '2000000000000000000', '1800000000000000000', '1900000000000000000');
                                      
     // await addCaller(bot.address);
     // -------------------------------------------------------------------
@@ -218,8 +218,8 @@ const canCall = async (method, cdpId, nextPrice) => {
     // let subscriptions = await getSubscriptions();
     // console.log(subscriptions);
 
-    let cdpHolder = await getCdpHolder(cdp.cdpId);
-    console.log(cdpHolder);
+    // let cdpHolder = await getCdpHolder(cdp.cdpId);
+    // console.log(cdpHolder);
 
     // let canCallBoost = await canCall(MethodEnum.Boost, cdp.cdpId, 0);
     // console.log('canCallBoost', canCallBoost);

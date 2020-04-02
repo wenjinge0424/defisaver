@@ -34,8 +34,6 @@ contract AutomaticProxyV2 is ConstantAddresses, MCDSaverProxy {
         address _exchangeAddress,
         bytes memory _callData
     ) public payable {
-        MCD_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
-
         uint256 maxDebt = getMaxDebt(_data[0], manager.ilks(_data[0]));
         uint256 debtAmount = _data[1];
 
@@ -43,6 +41,8 @@ contract AutomaticProxyV2 is ConstantAddresses, MCDSaverProxy {
             boost(_data, _joinAddr, _exchangeAddress, _callData);
             return;
         }
+
+        MCD_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
 
         uint256 loanAmount = sub(debtAmount, maxDebt);
         uint maxLiq = getAvailableLiquidity(_joinAddr);
