@@ -26,10 +26,10 @@ contract CompoundSaverProxy is ExchangeHelper, DSMath {
 
     /// @notice Withdraws collateral, converts to borrowed token and repays debt
     function repay(
-        uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
-        address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
-        bytes calldata _callData
-    ) external {
+        uint[5] memory _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
+        address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
+        bytes memory _callData
+    ) public {
         enterMarket(_addrData[0], _addrData[1]);
 
         address payable user = address(uint160(getUserAddress()));
@@ -63,10 +63,10 @@ contract CompoundSaverProxy is ExchangeHelper, DSMath {
 
     /// @notice Borrows token, converts to collateral, and adds to position
     function boost(
-        uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
-        address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
-        bytes calldata _callData
-    ) external {
+        uint[5] memory _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
+        address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
+        bytes memory _callData
+    ) public {
         enterMarket(_addrData[0], _addrData[1]);
 
         address payable user = address(uint160(getUserAddress()));
