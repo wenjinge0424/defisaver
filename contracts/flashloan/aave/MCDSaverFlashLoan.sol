@@ -14,7 +14,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
         public {
             owner = msg.sender;
-        }
+    }
 
     function executeOperation(
         address _reserve,
