@@ -7,12 +7,15 @@ import "../../interfaces/ERC20.sol";
 contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
-    address payable public constant COMPOUND_SAVER_FLASH_PROXY = 0x86E132932566fb7030eeF19B997C8797De13CFBD;
+    address payable public COMPOUND_SAVER_FLASH_PROXY;
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
+    address public owner;
 
     constructor()
         FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
         public {
+            owner = msg.sender;
     }
 
    function executeOperation(
@@ -56,11 +59,17 @@ contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
     }
 
     function sendLoanToProxy(address payable _proxy, address _reserve, uint _amount) internal {
-        if (_reserve == ETH_ADDRESS) {
-            _proxy.transfer(_amount);
-        } else {
+        if (_reserve != ETH_ADDRESS) {
             ERC20(_reserve).transfer(_proxy, _amount);
         }
+
+        _proxy.transfer(address(this).balance);
+    }
+
+    function setSaverFlashProxy(address payable _saverFlashProxy) public {
+        require(msg.sender == owner);
+
+        COMPOUND_SAVER_FLASH_PROXY = _saverFlashProxy;
     }
 
     function() external payable {}
