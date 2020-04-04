@@ -36,11 +36,11 @@ const SubscriptionsV2 = require("../build/contracts/SubscriptionsV2.json");
 const SubscriptionsProxyV2 = require("../build/contracts/SubscriptionsProxyV2.json");
 
 
-const automaticProxyAddress = '0xbF257420b448E734F70713502619b704735cCD97';
-const subscriptionsAddress = '0xbE2aA62c8eA4779375569592b2Db530E83232A8A';
-const subscriptionsProxyAddress = '0x603B08D577A6686eF2F62f79B122d73376df86Fb';
-const monitorAddress = '0xAC2300F5598726DAe614636a116a5097F3453F74';
-const monitorProxyAddress = '0xD4A0bf445d28ecaa7551875497CFD78E15ceAF1D';
+const automaticProxyAddress = '0xC563aCE6FACD385cB1F34fA723f412Cc64E63D47';
+const subscriptionsAddress = '0x0BF6775727d067b1f1E00FFA0e76A07e4F7D4628';
+const subscriptionsProxyAddress = '0x71CaF103520e083E344e8BdA5D14Ae52F1B14444';
+const monitorAddress = '0x11c052de8061a9173231b9162cdAFF52843Ca533';
+const monitorProxyAddress = '0x47d9f61bADEc4378842d809077A5e87B9c996898';
 
 
 const initContracts = async () => {
@@ -209,7 +209,7 @@ const canCall = async (method, cdpId, nextPrice) => {
 
     // ----------------------starters-------------------------------------
     // subscribe vault
-    await subscribeVault(cdp.cdpId, '1710000000000000000', '2000000000000000000', '1800000000000000000', '1900000000000000000');
+    await subscribeVault(cdp.cdpId, '1710000000000000000', '1900000000000000000', '1800000000000000000', '1850000000000000000');
                                      
     // await addCaller(bot.address);
     // -------------------------------------------------------------------
