@@ -9,7 +9,7 @@ import "../../DS/DSAuth.sol";
 contract CompoundFlashLoanTaker is CompoundSaverProxy {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
-    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0x86E132932566fb7030eeF19B997C8797De13CFBD;
+    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0x0D5Ec207D7B29525Cc25963347903958C98a66d3;
 
     address public constant FACTORY_ADDRESS = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
 
@@ -32,7 +32,7 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy {
             COMPOUND_SAVER_FLASH_LOAN.transfer(msg.value);
 
             uint loanAmount = (_data[0] - maxColl);
-            bytes memory paramsData = abi.encode(_data, _addrData, _callData, false, address(this));
+            bytes memory paramsData = abi.encode(_data, _addrData, _callData, true, address(this));
 
             givePermission(COMPOUND_SAVER_FLASH_LOAN);
 
@@ -58,7 +58,7 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy {
             COMPOUND_SAVER_FLASH_LOAN.transfer(msg.value);
 
             uint loanAmount = (_data[0] - maxBorrow);
-            bytes memory paramsData = abi.encode(_data, _addrData, _callData, true);
+            bytes memory paramsData = abi.encode(_data, _addrData, _callData, false, address(this));
 
             givePermission(COMPOUND_SAVER_FLASH_LOAN);
 

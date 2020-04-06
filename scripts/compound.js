@@ -9,10 +9,12 @@ const ProxyRegistryInterface = require('../build/contracts/ProxyRegistryInterfac
 const CompoundBasicProxy = require('../build/contracts/CompoundBasicProxy.json');
 const CompoundSaverProxy = require('../build/contracts/CompoundSaverProxy.json');
 const CTokenInterface = require('../build/contracts/CTokenInterface.json');
+const CompoundFlashLoanTaker = require('../build/contracts/CompoundFlashLoanTaker.json');
 
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
 const compoundBasicProxyAddr = '0x12f8551a516085E4cEf5e2451D54ede7d24983cC';
 const compoundSaverProxyAddr = '0x8be2701357A39B0ce77a27F38c951b0Aa4810996';
+const compoundFlashLoanTakerAddr = '0x2f59bf2779c9AB965ca6BF63F5Eb1504C5B36D38';
 
 const zeroAddr = '0x0000000000000000000000000000000000000000';
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -53,9 +55,11 @@ function getAbiFunction(contract, functionName) {
     // await borrow(DAI_ADDRESS, CDAI_ADDRESS, '0.3', false);
     // await payback(DAI_ADDRESS, CDAI_ADDRESS, '0.5', true);
 
-    await repay('0.003', CETH_ADDRESS, CDAI_ADDRESS);
+    // await repayWithLoan('0.015', CETH_ADDRESS, CDAI_ADDRESS);
 
-    // await boost('15.5', CETH_ADDRESS, CDAI_ADDRESS);
+    // await boostWithLoan('0.5', CETH_ADDRESS, CDAI_ADDRESS);
+
+    await boost('5', CETH_ADDRESS, CDAI_ADDRESS);
 
 
 })();
@@ -186,5 +190,46 @@ const boost = async (amount, cCollAddress, cBorrowAddress) => {
         console.log(err);
     }
 };
+
+// function repayWithLoan(
+//     uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
+//     address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
+//     bytes calldata _callData
+const repayWithLoan = async (amount, cCollAddress, cBorrowAddress) => {
+    try {
+        amount = web3.utils.toWei(amount, 'ether');
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundFlashLoanTaker, 'repayWithLoan'),
+        [[amount, 0, 3, 0, 0], [cCollAddress, cBorrowAddress, zeroAddr], "0x0"]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](compoundFlashLoanTakerAddr, data).send({
+            from: account.address, gas: 1900000, gasPrice: 5100000000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+// function boostWithLoan(
+//     uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
+//     address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
+//     bytes calldata _callData
+const boostWithLoan = async (amount, cCollAddress, cBorrowAddress) => {
+    try {
+        amount = web3.utils.toWei(amount, 'ether');
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundFlashLoanTaker, 'boostWithLoan'),
+        [[amount, 0, 3, 0, 0], [cCollAddress, cBorrowAddress, zeroAddr], "0x0"]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](compoundFlashLoanTakerAddr, data).send({
+            from: account.address, gas: 1900000, gasPrice: 5100000000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
 
 
