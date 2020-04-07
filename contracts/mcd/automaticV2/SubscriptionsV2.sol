@@ -51,13 +51,16 @@ contract SubscriptionsV2 is AdminAuth, StaticV2, ConstantAddresses {
     /// @param _nextPriceEnabled Boolean determing if we can use nextPrice for this cdp
     function subscribe(uint _cdpId, uint128 _minRatio, uint128 _maxRatio, uint128 _optimalBoost, uint128 _optimalRepay, bool _boostEnabled, bool _nextPriceEnabled) external {
         require(isOwner(msg.sender, _cdpId), "Must be called by Cdp owner");
-        require(checkParams(manager.ilks(_cdpId), _minRatio, _maxRatio), "Must be correct params");
+
+        // if boost is not enabled, set max ratio to max uint
+        uint128 localMaxRatio = _boostEnabled ? _maxRatio : uint128(-1);
+        require(checkParams(manager.ilks(_cdpId), _minRatio, localMaxRatio), "Must be correct params");
 
         SubPosition storage subInfo = subscribersPos[_cdpId];
 
         CdpHolder memory subscription = CdpHolder({
                 minRatio: _minRatio,
-                maxRatio: _maxRatio,
+                maxRatio: localMaxRatio,
                 optimalRatioBoost: _optimalBoost,
                 optimalRatioRepay: _optimalRepay,
                 owner: msg.sender,
@@ -72,7 +75,7 @@ contract SubscriptionsV2 is AdminAuth, StaticV2, ConstantAddresses {
             subscribers[subInfo.arrPos] = subscription;
 
             emit Updated(msg.sender, _cdpId);
-            emit ParamUpdates(msg.sender, _cdpId, _minRatio, _maxRatio, _optimalBoost, _optimalRepay, _boostEnabled);
+            emit ParamUpdates(msg.sender, _cdpId, _minRatio, localMaxRatio, _optimalBoost, _optimalRepay, _boostEnabled);
         } else {
             subscribers.push(subscription);
 
