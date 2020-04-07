@@ -13,7 +13,7 @@ const CompoundFlashLoanTaker = require('../build/contracts/CompoundFlashLoanTake
 
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
 const compoundBasicProxyAddr = '0x12f8551a516085E4cEf5e2451D54ede7d24983cC';
-const compoundSaverProxyAddr = '0x8be2701357A39B0ce77a27F38c951b0Aa4810996';
+const compoundSaverProxyAddr = '0xff97C79d207FC3D7a51531d0fa93581cf8E0105D';
 const compoundFlashLoanTakerAddr = '0x2f59bf2779c9AB965ca6BF63F5Eb1504C5B36D38';
 
 const zeroAddr = '0x0000000000000000000000000000000000000000';
@@ -59,7 +59,7 @@ function getAbiFunction(contract, functionName) {
 
     // await boostWithLoan('0.5', CETH_ADDRESS, CDAI_ADDRESS);
 
-    await boost('5', CETH_ADDRESS, CDAI_ADDRESS);
+    // await boost('5', CETH_ADDRESS, CDAI_ADDRESS);
 
 
 })();

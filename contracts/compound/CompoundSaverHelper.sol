@@ -94,7 +94,7 @@ contract CompoundSaverHelper is DSMath {
     }
 
     /// @notice Returns the maximum amount of collateral available to withdraw
-    /// @dev Due to rounding errors the result is - 100 wei from the exact amount
+    /// @dev Due to rounding errors the result is - 1% wei from the exact amount
     function getMaxCollateral(address _cCollAddress) public returns (uint) {
         (, uint liquidityInEth, ) = ComptrollerInterface(COMPTROLLER).getAccountLiquidity(address(this));
         uint usersBalance = CTokenInterface(_cCollAddress).balanceOfUnderlying(address(this));
@@ -112,11 +112,11 @@ contract CompoundSaverHelper is DSMath {
 
         if (liquidityInToken > usersBalance) return usersBalance;
 
-        return sub(liquidityInToken, 100); // cut off 100 wei to handle rounding issues
+        return sub(liquidityInToken, (liquidityInToken / 100)); // cut off 1% due to rounding issues
     }
 
     /// @notice Returns the maximum amount of borrow amount available
-    /// @dev Due to rounding errors the result is - 100 wei from the exact amount
+    /// @dev Due to rounding errors the result is - 1% wei from the exact amount
     function getMaxBorrow(address _cBorrowAddress) public returns (uint) {
         (, uint liquidityInEth, ) = ComptrollerInterface(COMPTROLLER).getAccountLiquidity(address(this));
 
@@ -125,6 +125,6 @@ contract CompoundSaverHelper is DSMath {
         uint ethPrice = CompoundOracle(COMPOUND_ORACLE).getUnderlyingPrice(_cBorrowAddress);
         uint liquidityInToken = wdiv(liquidityInEth, ethPrice);
 
-        return sub(liquidityInToken, 100); // cut off 100 wei to handle rounding issues
+        return sub(liquidityInToken, (liquidityInToken / 100)); // cut off 1% due to rounding issues
     }
 }
