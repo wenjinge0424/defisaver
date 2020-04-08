@@ -11,7 +11,7 @@ import "../maker/Manager.sol";
 import "../maker/Vat.sol";
 import "../maker/Spotter.sol";
 import "../../auth/AdminAuth.sol";
-
+import "../../loggers/AutomaticLogger.sol";
 
 
 /// @title Implements logic that allows bots to call Boost and Repay
@@ -33,12 +33,10 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
     Manager public manager = Manager(MANAGER_ADDRESS);
     Vat public vat = Vat(VAT_ADDRESS);
     Spotter public spotter = Spotter(SPOTTER_ADDRESS);
+    AutomaticLogger public logger = AutomaticLogger(AUTOMATIC_LOGGER_ADDRESS);
 
     /// @dev Addresses that are able to call methods for repay and boost
     mapping(address => bool) public approvedCallers;
-
-    event CdpRepay(uint indexed cdpId, address indexed caller, uint amount, uint beforeRatio, uint afterRatio);
-    event CdpBoost(uint indexed cdpId, address indexed caller, uint amount, uint beforeRatio, uint afterRatio);
 
     modifier onlyApproved() {
         require(approvedCallers[msg.sender]);
@@ -91,7 +89,7 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
 
         returnEth();        
 
-        emit CdpRepay(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
+        logger.logRepay(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
     }
 
     /// @notice Bots call this method to boost for user when conditions are met
@@ -132,7 +130,7 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
 
         returnEth();
 
-        emit CdpBoost(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
+        logger.logBoost(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
     }
 
 /******************* INTERNAL METHODS ********************************/
