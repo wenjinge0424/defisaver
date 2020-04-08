@@ -3,15 +3,12 @@ pragma solidity ^0.5.0;
 import "../../flashloan/aave/ILendingPool.sol";
 import "../CompoundSaverProxy.sol";
 import "../../flashloan/FlashLoanLogger.sol";
-import "../../DS/DSGuard.sol";
-import "../../DS/DSAuth.sol";
+import "../../auth/ProxyPermission.sol";
 
-contract CompoundFlashLoanTaker is CompoundSaverProxy {
+contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
     address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0x0D5Ec207D7B29525Cc25963347903958C98a66d3;
-
-    address public constant FACTORY_ADDRESS = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
 
     // solhint-disable-next-line const-name-snakecase
     FlashLoanLogger public constant logger = FlashLoanLogger(
@@ -69,25 +66,6 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy {
             logger.logFlashLoan("CompoundFlashBoost", loanAmount, _data[0], _addrData[1]);
         }
 
-    }
-
-    function givePermission(address _contractAddr) internal {
-        address currAuthority = address(DSAuth(address(this)).authority());
-        DSGuard guard = DSGuard(currAuthority);
-
-        if (currAuthority == address(0)) {
-            guard = DSGuardFactory(FACTORY_ADDRESS).newGuard();
-            DSAuth(address(this)).setAuthority(DSAuthority(address(guard)));
-        }
-
-        guard.permit(_contractAddr, address(this), bytes4(keccak256("execute(address,bytes)")));
-    }
-
-    function removePermission(address _contractAddr) internal {
-        address currAuthority = address(DSAuth(address(this)).authority());
-        DSGuard guard = DSGuard(currAuthority);
-
-        guard.forbid(_contractAddr, address(this), bytes4(keccak256("execute(address,bytes)")));
     }
 
 }
