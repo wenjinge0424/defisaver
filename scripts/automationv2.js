@@ -37,9 +37,9 @@ const SubscriptionsProxyV2 = require("../build/contracts/SubscriptionsProxyV2.js
 
 
 const automaticProxyAddress = '0xC563aCE6FACD385cB1F34fA723f412Cc64E63D47';
-const subscriptionsAddress = '0x0BF6775727d067b1f1E00FFA0e76A07e4F7D4628';
-const subscriptionsProxyAddress = '0x12524ffBBEE795693446F1558FBD7dDC5Ed609Db';
-const monitorAddress = '0xdf15387a98a09ED22fbdC78eC187FFeb521B4027';
+const subscriptionsAddress = '0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a';
+const subscriptionsProxyAddress = '0xd6f2125bF7FE2bc793dE7685EA7DEd8bff3917DD';
+const monitorAddress = '0x86E29E91989be4491F9cF14c8c8030136487b5cd';
 const monitorProxyAddress = '0x47d9f61bADEc4378842d809077A5e87B9c996898';
 
 

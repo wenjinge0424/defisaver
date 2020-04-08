@@ -35,7 +35,7 @@ module.exports = function(deployer, network, accounts) {
         // await deployer.deploy(AutomaticProxyV2, {gas: 5000000, overwrite: deployAgain});
         let automaticProxyAddress = (await AutomaticProxyV2.deployed()).address;
         
-        // await deployer.deploy(SubscriptionsV2, automaticProxyAddress, {gas: 5000000, overwrite: deployAgain});
+        await deployer.deploy(SubscriptionsV2, automaticProxyAddress, {gas: 5000000, overwrite: deployAgain});
         let subscriptionsAddress = (await SubscriptionsV2.deployed()).address;
 
         await deployer.deploy(SubscriptionsProxyV2, {gas: 5000000, overwrite: deployAgain});
