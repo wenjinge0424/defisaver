@@ -38,8 +38,8 @@ const SubscriptionsProxyV2 = require("../build/contracts/SubscriptionsProxyV2.js
 
 const automaticProxyAddress = '0xC563aCE6FACD385cB1F34fA723f412Cc64E63D47';
 const subscriptionsAddress = '0x0BF6775727d067b1f1E00FFA0e76A07e4F7D4628';
-const subscriptionsProxyAddress = '0x71CaF103520e083E344e8BdA5D14Ae52F1B14444';
-const monitorAddress = '0x11c052de8061a9173231b9162cdAFF52843Ca533';
+const subscriptionsProxyAddress = '0x12524ffBBEE795693446F1558FBD7dDC5Ed609Db';
+const monitorAddress = '0xdf15387a98a09ED22fbdC78eC187FFeb521B4027';
 const monitorProxyAddress = '0x47d9f61bADEc4378842d809077A5e87B9c996898';
 
 
@@ -209,7 +209,7 @@ const canCall = async (method, cdpId, nextPrice) => {
 
     // ----------------------starters-------------------------------------
     // subscribe vault
-    await subscribeVault(cdp.cdpId, '2000000000000000000', '25000000000000000000', '2400000000000000000', '2350000000000000000');
+    // await subscribeVault(cdp.cdpId, '2000000000000000000', '25000000000000000000', '2400000000000000000', '2350000000000000000');
                                      
     // await addCaller(bot.address);
     // -------------------------------------------------------------------

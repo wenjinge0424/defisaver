@@ -19,7 +19,6 @@ module.exports = {
         },
         network_id: '1',
         gasPrice: 8100000000, // 8.1 gwei
-        skipDryRun: true,
     },
     kovan: {
         provider: function() {
@@ -30,23 +29,6 @@ module.exports = {
         gasPrice: 3000000000,
         // skipDryRun: true,
     },
-    rinkeby: {
-        provider: function() {
-            return new HDWalletProvider(mnemonic, process.env.RINKEBY_INFURA_ENDPOINT, 0, 10);
-        },
-        network_id: '4',
-    },
-    test: {
-        provider: function() {
-            return new HDWalletProvider(mnemonic, 'http://127.0.0.1:8545/');
-        },
-        network_id: '*',
-    },
-    development: {
-        host: "127.0.0.1",     // Localhost (default: none)
-        port: 8545,            // Standard Ethereum port (default: none)
-        network_id: "*",       // Any network (default: none)
-    }
   },
   compilers: {
     solc: {
