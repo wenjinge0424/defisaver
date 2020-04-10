@@ -18,6 +18,8 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
     address payable public constant MCD_CLOSE_FLASH_LOAN = 0xc8f1d54D68CB83B353D80DB5CCF174dBb1a3C96a;
     address payable public constant MCD_OPEN_FLASH_LOAN = 0x86E132932566fb7030eeF19B997C8797De13CFBD;
 
+    address public constant SUBSCRIPTION_ADDRESS_NEW = 0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a;
+
     bytes32 public constant USDC_ILK = 0x555344432d410000000000000000000000000000000000000000000000000000;
 
     address public constant AAVE_DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
@@ -120,10 +122,8 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
         manager.cdpAllow(_data[0], MCD_CLOSE_FLASH_LOAN, 0);
 
         // If sub. to automatic protection unsubscribe
-        (, bool isSubscribed) = IMCDSubscriptions(SUBSCRIPTION_ADDRESS).subscribersPos(_data[0]);
-        if (isSubscribed) {
-            IMCDSubscriptions(SUBSCRIPTION_ADDRESS).unsubscribe(_data[0]);
-        }
+        unsubscribe(SUBSCRIPTION_ADDRESS, _data[0]);
+        unsubscribe(SUBSCRIPTION_ADDRESS_NEW, _data[0]);
 
         logger.logFlashLoan("Close", wholeDebt, _data[0], msg.sender);
     }
@@ -201,6 +201,14 @@ contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
             return KYBER_ETH_ADDRESS;
         } else {
             return getCollateralAddr(_joinAddr);
+        }
+    }
+
+    function unsubscribe(address _subContract, uint _cdpId) internal {
+        (, bool isSubscribed) = IMCDSubscriptions(_subContract).subscribersPos(_cdpId);
+
+        if (isSubscribed) {
+            IMCDSubscriptions(_subContract).unsubscribe(_cdpId);
         }
     }
 
