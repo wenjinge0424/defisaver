@@ -1,4 +1,5 @@
 pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
 
 import "./ISubscriptionsV2.sol";
 import "./StaticV2.sol";
@@ -10,7 +11,7 @@ import "../maker/Manager.sol";
 import "../maker/Vat.sol";
 import "../maker/Spotter.sol";
 import "../../auth/AdminAuth.sol";
-
+import "../../loggers/AutomaticLogger.sol";
 
 
 /// @title Implements logic that allows bots to call Boost and Repay
@@ -32,12 +33,10 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
     Manager public manager = Manager(MANAGER_ADDRESS);
     Vat public vat = Vat(VAT_ADDRESS);
     Spotter public spotter = Spotter(SPOTTER_ADDRESS);
+    AutomaticLogger public logger = AutomaticLogger(AUTOMATIC_LOGGER_ADDRESS);
 
     /// @dev Addresses that are able to call methods for repay and boost
     mapping(address => bool) public approvedCallers;
-
-    event CdpRepay(uint indexed cdpId, address indexed caller, uint amount, uint beforeRatio, uint afterRatio);
-    event CdpBoost(uint indexed cdpId, address indexed caller, uint amount, uint beforeRatio, uint afterRatio);
 
     modifier onlyApproved() {
         require(approvedCallers[msg.sender]);
@@ -90,7 +89,7 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
 
         returnEth();        
 
-        emit CdpRepay(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
+        logger.logRepay(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
     }
 
     /// @notice Bots call this method to boost for user when conditions are met
@@ -131,7 +130,7 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
 
         returnEth();
 
-        emit CdpBoost(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
+        logger.logBoost(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
     }
 
 /******************* INTERNAL METHODS ********************************/
@@ -188,41 +187,43 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
     /// @notice Checks if Boost/Repay could be triggered for the CDP
     /// @dev Called by MCDMonitor to enforce the min/max check
     function canCall(Method _method, uint _cdpId, uint _nextPrice) public view returns(bool, uint) {
-        uint128 minRatio;
-        uint128 maxRatio;
-        bool boost;
-        address cdpOwner;
+        bool subscribed;
+        CdpHolder memory holder;
+        (subscribed, holder) = subscriptionsContract.getCdpHolder(_cdpId);
 
-        (boost, minRatio, maxRatio, , , cdpOwner, , ) = subscriptionsContract.getSubscribedInfo(_cdpId);
+        // check if cdp is subscribed
+        if (!subscribed) return (false, 0);
+
+        // check if using next price is allowed
+        if (_nextPrice > 0 && !holder.nextPriceEnabled) return (false, 0);
 
         // check if boost and boost allowed
-        if (_method == Method.Boost && !boost) return (false, 0);
+        if (_method == Method.Boost && !holder.boostEnabled) return (false, 0);
 
         // check if owner is still owner
-        if (getOwner(_cdpId) != cdpOwner) return (false, 0);
+        if (getOwner(_cdpId) != holder.owner) return (false, 0);
 
         uint currRatio = getRatio(_cdpId, _nextPrice);
 
         if (_method == Method.Repay) {
-            return (currRatio < minRatio, currRatio);
+            return (currRatio < holder.minRatio, currRatio);
         } else if (_method == Method.Boost) {
-            return (currRatio > maxRatio, currRatio);
+            return (currRatio > holder.maxRatio, currRatio);
         }
     }
 
     /// @dev After the Boost/Repay check if the ratio doesn't trigger another call
     function ratioGoodAfter(Method _method, uint _cdpId, uint _nextPrice) public view returns(bool, uint) {
-        uint128 minRatio;
-        uint128 maxRatio;
+        CdpHolder memory holder;
 
-        (, minRatio, maxRatio, , , , , ) = subscriptionsContract.getSubscribedInfo(_cdpId);
+        (, holder) = subscriptionsContract.getCdpHolder(_cdpId);
 
         uint currRatio = getRatio(_cdpId, _nextPrice);
 
         if (_method == Method.Repay) {
-            return (currRatio < maxRatio, currRatio);
+            return (currRatio < holder.maxRatio, currRatio);
         } else if (_method == Method.Boost) {
-            return (currRatio > minRatio, currRatio);
+            return (currRatio > holder.minRatio, currRatio);
         }
     }
 
