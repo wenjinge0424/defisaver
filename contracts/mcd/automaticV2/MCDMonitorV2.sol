@@ -75,9 +75,7 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
         require(isAllowed);
 
         uint gasCost = calcGasCost(REPAY_GAS_COST);
-
-        // calculated gas cost must be higher or equal with sent gasCost
-        require(gasCost >= _data[4]);
+        _data[4] = gasCost;
 
         monitorProxyContract.callExecute.value(msg.value)(subscriptionsContract.getOwner(_data[0]), automaticSaverProxyAddress, abi.encodeWithSignature("automaticRepay(uint256[6],address,address,bytes)", _data, _joinAddr, _exchangeAddress, _callData));
 
@@ -116,9 +114,7 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
         require(isAllowed);
 
         uint gasCost = calcGasCost(BOOST_GAS_COST);
-
-        // calculated gas cost must be higher or equal with sent gasCost
-        require(gasCost >= _data[4]);
+        _data[4] = gasCost;
 
         monitorProxyContract.callExecute.value(msg.value)(subscriptionsContract.getOwner(_data[0]), automaticSaverProxyAddress, abi.encodeWithSignature("automaticBoost(uint256[6],address,address,bytes)", _data, _joinAddr, _exchangeAddress, _callData));
 
