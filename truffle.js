@@ -10,7 +10,8 @@ module.exports = {
     etherscan: process.env.ETHERSCAN_API_KEY
   },
   plugins: [
-    'truffle-plugin-verify'
+    'truffle-plugin-verify',
+    '@chainsafe/truffle-plugin-abigen'
   ],
   networks: {
     mainnet: {
