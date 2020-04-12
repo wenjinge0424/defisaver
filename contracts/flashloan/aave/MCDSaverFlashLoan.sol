@@ -69,7 +69,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         amounts[1] = drawDai(_data[0], MANAGER.ilks(_data[0]), amounts[0]);
 
         // Calc. fees
-        amounts[2] = getFee((amounts[1] + _loanAmount), 0, owner);
+        amounts[2] = getFee((amounts[1] + _loanAmount), _data[4], owner);
         amounts[3] = (amounts[1] + _loanAmount) - amounts[2];
 
         // Swap Dai to collateral
@@ -118,7 +118,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         );
 
         // Get our fee
-        amounts[3] = getFee(amounts[2], 0, owner);
+        amounts[3] = getFee(amounts[2], _data[4], owner);
 
         uint paybackAmount = (amounts[2] - amounts[3]);
         paybackAmount = limitLoanAmount(_data[0], manager.ilks(_data[0]), paybackAmount, owner);
