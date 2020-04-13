@@ -36,10 +36,10 @@ const SubscriptionsV2 = require("../build/contracts/SubscriptionsV2.json");
 const SubscriptionsProxyV2 = require("../build/contracts/SubscriptionsProxyV2.json");
 
 
-const automaticProxyAddress = '0xC563aCE6FACD385cB1F34fA723f412Cc64E63D47';
+const automaticProxyAddress = '0x4f786528A17EC756e05b198c1f7102103eeBe900';
 const subscriptionsAddress = '0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a';
 const subscriptionsProxyAddress = '0xd6f2125bF7FE2bc793dE7685EA7DEd8bff3917DD';
-const monitorAddress = '0x882540c04F82C0727E8c2b7A7a80238E085DE2ae';
+const monitorAddress = '0xa59d5E94BFE605A9a4aC7e02f5380e02061c8dd2';
 const monitorProxyAddress = '0x47d9f61bADEc4378842d809077A5e87B9c996898';
 
 
@@ -131,6 +131,18 @@ const addCaller = async (callerAddress) => {
     }
 }
 
+const updateChangePeriod = async (timeInDays) => {
+    try {
+        const tx = await monitorProxy.methods.setChangePeriod(timeInDays).send({
+            from: owner.address, gas: 100000, gasPrice: gasPrice
+        });
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+}
+
 
 
 // getters
@@ -200,12 +212,14 @@ const canCall = async (method, cdpId, nextPrice) => {
 (async () => {
     await initContracts();
 
-    let cdps = await getCDPsForAddress(proxyAddr);
-    console.log(cdps);
+    // let cdps = await getCDPsForAddress(proxyAddr);
+    // console.log(cdps);
 
     // select cdp to use
-    let cdp = cdps[3];
-    let joinAddr = tokenJoinAddrData['1'][cdp.ilk];
+    // let cdp = cdps[3];
+    // let joinAddr = tokenJoinAddrData['1'][cdp.ilk];
+
+    await updateChangePeriod(1);
 
     // ----------------------starters-------------------------------------
     // subscribe vault
