@@ -25,7 +25,7 @@ contract LoanMoverProxy is MCDSaverProxy {
         bytes32 _ilk,
         uint _loanAmount,
         uint _fee
-    ) internal {
+    ) public {
         paybackCompound(DAI_ADDRESS, cDAI_ADDRESS, _loanAmount);
 
         uint redeemAmount = withdrawCompound(_cCollateralAddr);
@@ -44,7 +44,7 @@ contract LoanMoverProxy is MCDSaverProxy {
         bytes32 _ilk,
         uint _loanAmount,
         uint _fee
-    ) internal {
+    ) public {
         address owner = getOwner(manager, _cdpId);
         (uint collateral, ) = getCdpInfo(manager, _cdpId, _ilk);
 
@@ -52,7 +52,7 @@ contract LoanMoverProxy is MCDSaverProxy {
         paybackDebt(_cdpId, _ilk, _loanAmount, owner);
 
         // withdraw collateral from cdp
-        uint collDrawn = drawCollateral(_cdpId, _ilk, _joinAddr, collateral);
+        uint collDrawn = drawMaxCollateral(_cdpId, _ilk, _joinAddr, collateral);
 
         // deposit in Compound
         depositCompound(getUnderlyingAddr(_cCollateralAddr), _cCollateralAddr, collDrawn);
@@ -69,6 +69,21 @@ contract LoanMoverProxy is MCDSaverProxy {
         }
 
         msg.sender.transfer(address(this).balance);
+    }
+
+    function drawMaxCollateral(uint _cdpId, bytes32 _ilk, address _joinAddr, uint _amount) internal returns (uint) {
+        manager.frob(_cdpId, -toPositiveInt(_amount), 0);
+        manager.flux(_cdpId, address(this), _amount);
+
+        uint joinAmount = _ilk == USDC_ILK ? _amount / (10 ** 12) : _amount;
+
+        Join(_joinAddr).exit(address(this), joinAmount);
+
+        if (_joinAddr == ETH_JOIN_ADDRESS) {
+            Join(_joinAddr).gem().withdraw(joinAmount); // Weth -> Eth
+        }
+
+        return joinAmount;
     }
 
     function paybackCompound(address _tokenAddr, address _cTokenAddr, uint _amount) internal {

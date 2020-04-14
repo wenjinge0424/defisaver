@@ -10,11 +10,13 @@ const CompoundBasicProxy = require('../build/contracts/CompoundBasicProxy.json')
 const CompoundSaverProxy = require('../build/contracts/CompoundSaverProxy.json');
 const CTokenInterface = require('../build/contracts/CTokenInterface.json');
 const CompoundFlashLoanTaker = require('../build/contracts/CompoundFlashLoanTaker.json');
+const BridgeFlashLoanTaker = require('../build/contracts/BridgeFlashLoanTaker.json');
 
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
 const compoundBasicProxyAddr = '0x12f8551a516085E4cEf5e2451D54ede7d24983cC';
 const compoundSaverProxyAddr = '0xff97C79d207FC3D7a51531d0fa93581cf8E0105D';
 const compoundFlashLoanTakerAddr = '0x2f59bf2779c9AB965ca6BF63F5Eb1504C5B36D38';
+const bridgeFlashLoanTakerAddr = '0x5fceb5ba339080918440c6f0ad2908659160ca33';
 
 const zeroAddr = '0x0000000000000000000000000000000000000000';
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -25,6 +27,30 @@ const CDAI_ADDRESS = '0x5d3a536e4d6dbd6114cc1ead35777bab948e3643';
 
 const MAX_UINT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
+const tokenJoinAddrData = {
+    '1': {
+        'ETH': '0x2F0b23f53734252Bda2277357e97e1517d6B042A',
+        'BAT': '0x3D0B1912B66114d4096F48A8CEe3A56C231772cA',
+        'GNT': '0xc667ac878fd8eb4412dcad07988fea80008b65ee',
+        'OMG': '0x2ebb31f1160c7027987a03482ab0fec130e98251',
+        'ZRX': '0x1f4150647b4aa5eb36287d06d757a5247700c521',
+        'REP': '0xd40163ea845abbe53a12564395e33fe108f90cd3',
+        'DGD': '0xd5f63712af0d62597ad6bf8d357f163bc699e18c',
+    },
+    '42': {
+        'ETH': '0x775787933e92b709f2a3c70aa87999696e74a9f8',
+        'BAT': '0x2a4c485b1b8dfb46accfbecaf75b6188a59dbd0a',
+        'GNT': '0xc667ac878fd8eb4412dcad07988fea80008b65ee',
+        'OMG': '0x2ebb31f1160c7027987a03482ab0fec130e98251',
+        'ZRX': '0x1f4150647b4aa5eb36287d06d757a5247700c521',
+        'REP': '0xd40163ea845abbe53a12564395e33fe108f90cd3',
+        'DGD': '0xd5f63712af0d62597ad6bf8d357f163bc699e18c',
+    }
+};
+
+const getTokenJoinAddr = (type) => {
+    return tokenJoinAddrData['1'][type];
+}
 
 const initContracts = async () => {
     web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_ENDPOINT));
@@ -60,6 +86,8 @@ function getAbiFunction(contract, functionName) {
     // await boostWithLoan('0.5', CETH_ADDRESS, CDAI_ADDRESS);
 
     // await boost('5', CETH_ADDRESS, CDAI_ADDRESS);
+
+    await bridgeMaker2Compound('6770', getTokenJoinAddr('ETH'), CETH_ADDRESS);
 
 
 })();
@@ -224,6 +252,21 @@ const boostWithLoan = async (amount, cCollAddress, cBorrowAddress) => {
 
         const tx = await proxy.methods['execute(address,bytes)'](compoundFlashLoanTakerAddr, data).send({
             from: account.address, gas: 1900000, gasPrice: 5100000000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+
+const bridgeMaker2Compound = async (cdpId, joinAddr, cAddr) => {
+    try {
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(BridgeFlashLoanTaker, 'maker2Compound'),
+            [cdpId, joinAddr, cAddr]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](bridgeFlashLoanTakerAddr, data).send({
+            from: account.address, gas: 1500000, gasPrice: 7100000000});
 
         console.log(tx);
     } catch(err) {

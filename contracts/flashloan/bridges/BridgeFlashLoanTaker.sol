@@ -18,7 +18,7 @@ contract BridgeFlashLoanTaker is DSMath, ProxyPermission {
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address public constant cDAI_ADDRESS = 0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643;
 
-    address payable public constant LOAN_MOVER = 0x3D7318a6038a0A4C09CD8A74198c7ffF91402824;
+    address payable public constant LOAN_MOVER = 0xaB96730D3ceA1685DBf7451022826a2A5bD306FF;
 
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
@@ -38,7 +38,7 @@ contract BridgeFlashLoanTaker is DSMath, ProxyPermission {
         bytes32 ilk = manager.ilks(_cdpId);
         uint debtAmount = getAllDebtCompound();
 
-        bytes memory paramsData = abi.encode(_cdpId, _joinAddr, _cCollateralAddr, ilk, 1, address(this));
+        bytes memory paramsData = abi.encode(_cdpId, _joinAddr, _cCollateralAddr, ilk, uint8(1), address(this));
 
         givePermission(LOAN_MOVER);
 
@@ -57,7 +57,7 @@ contract BridgeFlashLoanTaker is DSMath, ProxyPermission {
         bytes32 ilk = manager.ilks(_cdpId);
         uint debtAmount = getAllDebtCDP(VAT_ADDRESS, manager.urns(_cdpId), manager.urns(_cdpId), ilk);
 
-        bytes memory paramsData = abi.encode(_cdpId, _joinAddr, _cCollateralAddr, ilk, 2, address(this));
+        bytes memory paramsData = abi.encode(_cdpId, _joinAddr, _cCollateralAddr, ilk, uint8(2), address(this));
 
         givePermission(LOAN_MOVER);
 
