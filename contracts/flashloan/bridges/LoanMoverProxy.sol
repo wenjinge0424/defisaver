@@ -1,6 +1,5 @@
 pragma solidity ^0.5.0;
 
-import "../aave/FlashLoanReceiverBase.sol";
 import "../../mcd/saver_proxy/MCDSaverProxy.sol";
 
 import "../../interfaces/CTokenInterface.sol";

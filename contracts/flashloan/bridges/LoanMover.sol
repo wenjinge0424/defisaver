@@ -1,19 +1,19 @@
 pragma solidity ^0.5.0;
 
 import "../aave/FlashLoanReceiverBase.sol";
-import "../../mcd/saver_proxy/MCDSaverProxy.sol";
-import "../../compound/CompoundBasicProxy.sol";
 import "../../interfaces/DSProxyInterface.sol";
+import "../../interfaces/ERC20.sol";
 
-
-contract LoanMover is FlashLoanReceiverBase, MCDSaverProxy, CompoundBasicProxy {
+contract LoanMover is FlashLoanReceiverBase {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
     address public constant cDAI_ADDRESS = 0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643;
     address public constant CETH_ADDRESS = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
 
-    address public constant LOAN_MOVER_PROXY = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
+    address public constant LOAN_MOVER_PROXY = 0x757EAA988a94519432D394B8E6FaaF69F731b9A7;
+
+    address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address payable public owner;
 
