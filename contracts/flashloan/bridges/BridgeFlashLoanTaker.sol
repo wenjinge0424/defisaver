@@ -5,8 +5,9 @@ import "../../interfaces/CTokenInterface.sol";
 import "../../mcd/maker/Vat.sol";
 import "../../mcd/maker/Manager.sol";
 import "../../DS/DSMath.sol";
+import "../../auth/ProxyPermission.sol";
 
-contract BridgeFlashLoanTaker is DSMath {
+contract BridgeFlashLoanTaker is DSMath, ProxyPermission {
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
@@ -22,7 +23,6 @@ contract BridgeFlashLoanTaker is DSMath {
 
     Manager public constant manager = Manager(MANAGER_ADDRESS);
 
-
     function compound2Maker(
         uint _cdpId,
         address _joinAddr,
@@ -31,13 +31,13 @@ contract BridgeFlashLoanTaker is DSMath {
         bytes32 ilk = manager.ilks(_cdpId);
         uint debtAmount = getAllDebtCompound();
 
-        bytes memory paramsData = abi.encode(_cdpId, _joinAddr, _cCollateralAddr, ilk, 1);
+        bytes memory paramsData = abi.encode(_cdpId, _joinAddr, _cCollateralAddr, ilk, 1, address(this));
 
-        manager.cdpAllow(_cdpId, LOAN_MOVER, 1);
+        givePermission(LOAN_MOVER);
 
         lendingPool.flashLoan(LOAN_MOVER, DAI_ADDRESS, debtAmount, paramsData);
 
-        manager.cdpAllow(_cdpId, LOAN_MOVER, 0);
+        removePermission(LOAN_MOVER);
     }
 
     function maker2Compound(
@@ -48,13 +48,13 @@ contract BridgeFlashLoanTaker is DSMath {
         bytes32 ilk = manager.ilks(_cdpId);
         uint debtAmount = getAllDebtCDP(VAT_ADDRESS, manager.urns(_cdpId), manager.urns(_cdpId), ilk);
 
-        bytes memory paramsData = abi.encode(_cdpId, _joinAddr, _cCollateralAddr, ilk, 2);
+        bytes memory paramsData = abi.encode(_cdpId, _joinAddr, _cCollateralAddr, ilk, 2, address(this));
 
-        manager.cdpAllow(_cdpId, LOAN_MOVER, 1);
+        givePermission(LOAN_MOVER);
 
         lendingPool.flashLoan(LOAN_MOVER, DAI_ADDRESS, debtAmount, paramsData);
 
-        manager.cdpAllow(_cdpId, LOAN_MOVER, 0);
+        removePermission(LOAN_MOVER);
     }
 
     function getAllDebtCDP(address _vat, address _usr, address _urn, bytes32 _ilk) internal view returns (uint daiAmount) {

@@ -3,6 +3,8 @@ pragma solidity ^0.5.0;
 import "../aave/FlashLoanReceiverBase.sol";
 import "../../mcd/saver_proxy/MCDSaverProxy.sol";
 import "../../compound/CompoundBasicProxy.sol";
+import "../../interfaces/DSProxyInterface.sol";
+
 
 contract LoanMover is FlashLoanReceiverBase, MCDSaverProxy, CompoundBasicProxy {
 
@@ -10,6 +12,8 @@ contract LoanMover is FlashLoanReceiverBase, MCDSaverProxy, CompoundBasicProxy {
 
     address public constant cDAI_ADDRESS = 0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643;
     address public constant CETH_ADDRESS = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
+
+    address public constant LOAN_MOVER_PROXY = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
 
     address payable public owner;
 
@@ -25,82 +29,49 @@ contract LoanMover is FlashLoanReceiverBase, MCDSaverProxy, CompoundBasicProxy {
         uint256 _fee,
         bytes calldata _params)
     external {
+        // Format the call data for DSProxy
+        (bytes memory proxyData, address payable proxyAddr) = packFunctionCall(_amount, _fee, _params);
 
-        //check the contract has the specified balance
-        require(_amount <= getBalanceInternal(address(this), _reserve),
-            "Invalid balance for the contract");
+        // Send Flash loan amount to DSProxy
+        sendLoanToProxy(proxyAddr, _reserve, _amount);
 
+        // Execute the DSProxy call
+        DSProxyInterface(proxyAddr).execute(LOAN_MOVER_PROXY, proxyData);
+
+        // Repay FL
+        transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
+    }
+
+    function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal returns (bytes memory proxyData, address payable) {
         (
             uint cdpId,
             address joinAddr,
             address cCollateralAddr,
             bytes32 ilk,
-            uint8 functionType
+            uint8 functionType,
+            address payable proxyAddr
         )
-         = abi.decode(_params, (uint256,address,address,bytes32,uint8));
+        = abi.decode(_params, (uint256,address,address,bytes32,uint8,address));
 
         if (functionType == 1) {
-            compound2Mcd(cdpId, joinAddr, _amount, cCollateralAddr, ilk);
-        } else {
-            mcd2Compound(cdpId, joinAddr, _amount, cCollateralAddr, ilk);
-
+            proxyData = abi.encodeWithSignature(
+                "flashCompound2Maker(uint256,address,address,bytes32,uint256,uint256)",
+                                    cdpId, joinAddr, cCollateralAddr, ilk, _amount, _fee);
+        } else if(functionType == 2) {
+            proxyData = abi.encodeWithSignature(
+                "flashMaker2Compound(uint256,address,address,bytes32,uint256,uint256)",
+                                    cdpId, joinAddr, cCollateralAddr, ilk, _amount, _fee);
         }
 
-        transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
+        return (proxyData, proxyAddr);
     }
 
-    // TODO: problem no permission for Compound access
-
-    function compound2Mcd(
-        uint _cdpId,
-        address _joinAddr,
-        uint _loanAmount,
-        address _cCollateralAddr,
-        bytes32 _ilk
-    ) internal {
-        // repay Compound debt
-        // payback(DAI_ADDRESS, cDAI_ADDRESS, _loanAmount);
-
-        // uint cTokenBalance = CTokenInterface(_cTokenAddr).balanceOf(_proxy);
-        // require(CTokenInterface(_cTokenAddr).redeem(cTokenBalance) == 0);
-        // uint redeemAmount = ERC20(getUnderlyingAddr(_cTokenAddr)).balanceOf(address(this));
-
-        // // add money and withdraw debt
-        // addCollateral(_cdpId, _joinAddr, redeemAmount);
-
-        // drawDai(_cdpId, _ilk, _loanAmount);
-    }
-
-    function mcd2Compound(
-        uint _cdpId,
-        address _joinAddr,
-        uint _loanAmount,
-        address _cCollateralAddr,
-        bytes32 _ilk
-    ) internal {
-        // address owner = getOwner(manager, _cdpId);
-        // (uint collateral, ) = getCdpInfo(manager, _cdpId, _ilk);
-
-        // // repay dai debt cdp
-        // paybackDebt(_cdpId, _ilk, _loanAmount, owner);
-
-        // // withdraw collateral from cdp
-        // uint collDrawn = drawCollateral(_cdpId, _ilk, _joinAddr, collateral);
-
-        // // deposit in Compound
-        // deposit(getUnderlyingAddr(_cCollateralAddr), _cCollateralAddr, collDrawn, true);
-
-        // // borrow dai debt
-        // borrow(DAI_ADDRESS, cDAI_ADDRESS, _loanAmount, true); // TODO: will send to msg.sender
-    }
-
-
-    function getUnderlyingAddr(address _cTokenAddress) internal returns (address) {
-        if (_cTokenAddress == CETH_ADDRESS) {
-            return ETH_ADDRESS;
-        } else {
-            return CTokenInterface(_cTokenAddress).underlying();
+    function sendLoanToProxy(address payable _proxy, address _reserve, uint _amount) internal {
+        if (_reserve != ETH_ADDRESS) {
+            ERC20(_reserve).transfer(_proxy, _amount);
         }
+
+        _proxy.transfer(address(this).balance);
     }
 
 }
