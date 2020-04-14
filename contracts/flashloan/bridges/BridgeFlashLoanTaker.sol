@@ -6,6 +6,8 @@ import "../../mcd/maker/Vat.sol";
 import "../../mcd/maker/Manager.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/ProxyPermission.sol";
+import "../FlashLoanLogger.sol";
+
 
 contract BridgeFlashLoanTaker is DSMath, ProxyPermission {
 
@@ -23,6 +25,11 @@ contract BridgeFlashLoanTaker is DSMath, ProxyPermission {
 
     Manager public constant manager = Manager(MANAGER_ADDRESS);
 
+    // solhint-disable-next-line const-name-snakecase
+    FlashLoanLogger public constant logger = FlashLoanLogger(
+        0xb9303686B0EE92F92f63973EF85f3105329D345c
+    );
+
     function compound2Maker(
         uint _cdpId,
         address _joinAddr,
@@ -38,6 +45,8 @@ contract BridgeFlashLoanTaker is DSMath, ProxyPermission {
         lendingPool.flashLoan(LOAN_MOVER, DAI_ADDRESS, debtAmount, paramsData);
 
         removePermission(LOAN_MOVER);
+
+        logger.logFlashLoan("compound2Maker", debtAmount, _cdpId, DAI_ADDRESS);
     }
 
     function maker2Compound(
@@ -55,6 +64,8 @@ contract BridgeFlashLoanTaker is DSMath, ProxyPermission {
         lendingPool.flashLoan(LOAN_MOVER, DAI_ADDRESS, debtAmount, paramsData);
 
         removePermission(LOAN_MOVER);
+
+        logger.logFlashLoan("maker2Compound", debtAmount, _cdpId, DAI_ADDRESS);
     }
 
     function getAllDebtCDP(address _vat, address _usr, address _urn, bytes32 _ilk) internal view returns (uint daiAmount) {
