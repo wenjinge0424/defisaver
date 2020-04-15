@@ -101,7 +101,11 @@ contract LoanMoverProxy is MCDSaverProxy {
 
         require(CTokenInterface(_cTokenAddr).redeem(cTokenBalance) == 0);
 
-        redeemAmount = ERC20(getUnderlyingAddr(_cTokenAddr)).balanceOf(address(this));
+        if (_cTokenAddr == CETH_ADDRESS) {
+            redeemAmount = address(this).balance;
+        } else {
+            redeemAmount = ERC20(getUnderlyingAddr(_cTokenAddr)).balanceOf(address(this));
+        }
     }
 
      function depositCompound(address _tokenAddr, address _cTokenAddr, uint _amount) internal {

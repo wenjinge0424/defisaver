@@ -16,7 +16,7 @@ const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
 const compoundBasicProxyAddr = '0x12f8551a516085E4cEf5e2451D54ede7d24983cC';
 const compoundSaverProxyAddr = '0xff97C79d207FC3D7a51531d0fa93581cf8E0105D';
 const compoundFlashLoanTakerAddr = '0x2f59bf2779c9AB965ca6BF63F5Eb1504C5B36D38';
-const bridgeFlashLoanTakerAddr = '0x5fceb5ba339080918440c6f0ad2908659160ca33';
+const bridgeFlashLoanTakerAddr = '0x4b922507b808d3895c2213a2b4c4720756b4d9e0';
 
 const zeroAddr = '0x0000000000000000000000000000000000000000';
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -87,9 +87,9 @@ function getAbiFunction(contract, functionName) {
 
     // await boost('5', CETH_ADDRESS, CDAI_ADDRESS);
 
-    await bridgeMaker2Compound('6770', getTokenJoinAddr('ETH'), CETH_ADDRESS);
+    // await bridgeMaker2Compound('6770', getTokenJoinAddr('ETH'), CETH_ADDRESS);
 
-
+    await bridgeCompound2Maker('6770', getTokenJoinAddr('ETH'), CETH_ADDRESS);
 })();
 
 // User needs to approve the DSProxy to pull the _tokenAddr tokens
@@ -263,6 +263,20 @@ const boostWithLoan = async (amount, cCollAddress, cBorrowAddress) => {
 const bridgeMaker2Compound = async (cdpId, joinAddr, cAddr) => {
     try {
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(BridgeFlashLoanTaker, 'maker2Compound'),
+            [cdpId, joinAddr, cAddr]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](bridgeFlashLoanTakerAddr, data).send({
+            from: account.address, gas: 1500000, gasPrice: 7100000000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+const bridgeCompound2Maker = async (cdpId, joinAddr, cAddr) => {
+    try {
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(BridgeFlashLoanTaker, 'compound2Maker'),
             [cdpId, joinAddr, cAddr]);
 
         const tx = await proxy.methods['execute(address,bytes)'](bridgeFlashLoanTakerAddr, data).send({

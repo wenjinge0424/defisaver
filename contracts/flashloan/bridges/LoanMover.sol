@@ -11,7 +11,7 @@ contract LoanMover is FlashLoanReceiverBase {
     address public constant cDAI_ADDRESS = 0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643;
     address public constant CETH_ADDRESS = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
 
-    address public constant LOAN_MOVER_PROXY = 0x6e7ab7845726719d3E38D5fef2c5780e05afe4a6;
+    address public constant LOAN_MOVER_PROXY = 0x2e28E2673777d9B35424A9a4f88502b5A1538D9E;
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
