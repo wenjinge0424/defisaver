@@ -3,11 +3,7 @@ pragma solidity ^0.5.0;
 import "../interfaces/CTokenInterface.sol";
 import "../interfaces/ERC20.sol";
 import "./helpers/CEtherInterface.sol";
-
-contract ComptrollerInterface {
-    function enterMarkets(address[] calldata cTokens) external returns (uint[] memory);
-    function exitMarket(address cToken) external returns (uint);
-}
+import "./helpers/ComptrollerInterface.sol";
 
 contract CompoundBasicProxy {
 
@@ -16,7 +12,9 @@ contract CompoundBasicProxy {
 
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     function deposit(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) public payable {
-        ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount);
+        if (_tokenAddr != ETH_ADDRESS) {
+            ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount);
+        }
 
         approveCToken(_tokenAddr, _cTokenAddr);
 
