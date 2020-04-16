@@ -11,11 +11,14 @@ import "./dsr/DSRSavingsProtocol.sol";
 
 
 contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
+    address public constant ADAI_ADDRESS = 0xfC1E690f61EFd961294b3e1Ce3313fBD8aa4f85d;
+    
     address public constant SAVINGS_COMPOUND_ADDRESS = 0x72c5a18D651DA5568EFfE731a98484dE62C9F347;
     address public constant SAVINGS_DYDX_ADDRESS = 0x03b1565e070df392e48e7a8e01798C4B00E534A5;
     address public constant SAVINGS_FULCRUM_ADDRESS = 0xe9ea575d2d8Ca26b0E026a2146994592e0Ee1Dd9;
+    address public constant SAVINGS_AAVE_ADDRESS = 0x535B9035E9bA8D7efe0FeAEac885fb65b303E37C;
 
-    enum SavingsProtocol {Compound, Dydx, Fulcrum, Dsr}
+    enum SavingsProtocol {Compound, Dydx, Fulcrum, Dsr, Aave}
 
     function deposit(SavingsProtocol _protocol, uint256 _amount) public {
         if (_protocol == SavingsProtocol.Dsr) {
@@ -78,6 +81,10 @@ contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
         if (_protocol == SavingsProtocol.Fulcrum) {
             return SAVINGS_FULCRUM_ADDRESS;
         }
+
+        if (_protocol == SavingsProtocol.Aave) {
+            return SAVINGS_AAVE_ADDRESS;
+        }
     }
 
     function _deposit(SavingsProtocol _protocol, uint256 _amount, bool _fromUser) internal {
@@ -111,7 +118,7 @@ contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
     }
 
     function approveDeposit(SavingsProtocol _protocol) internal {
-        if (_protocol == SavingsProtocol.Compound || _protocol == SavingsProtocol.Fulcrum) {
+        if (_protocol == SavingsProtocol.Compound || _protocol == SavingsProtocol.Fulcrum || _protocol == SavingsProtocol.Aave) {
             ERC20(DAI_ADDRESS).approve(getAddress(_protocol), uint256(-1));
         }
 
@@ -132,6 +139,10 @@ contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
 
         if (_protocol == SavingsProtocol.Fulcrum) {
             ERC20(NEW_IDAI_ADDRESS).approve(getAddress(_protocol), uint256(-1));
+        }
+
+        if (_protocol == SavingsProtocol.Aave) {
+            ERC20(ADAI_ADDRESS).approve(getAddress(_protocol), uint256(-1));
         }
     }
 
