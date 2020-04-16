@@ -16,6 +16,8 @@ contract CompoundBasicProxy {
 
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     function deposit(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) public payable {
+        ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount);
+
         approveCToken(_tokenAddr, _cTokenAddr);
 
         if (!_inMarket) {
