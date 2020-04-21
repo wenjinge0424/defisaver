@@ -29,8 +29,8 @@ contract CompoundSubscriptions is AdminAuth {
     event Updated(address indexed user);
     event ParamUpdates(address indexed user, uint128, uint128, uint128, uint128, bool);
 
-    /// @dev Called by the DSProxy contract which owns the CDP
-    /// @notice Adds the users CDP in the list of subscriptions so it can be monitored
+    /// @dev Called by the DSProxy contract which owns the Compound position
+    /// @notice Adds the users Compound poistion in the list of subscriptions so it can be monitored
     /// @param _minRatio Minimum ratio below which repay is triggered
     /// @param _maxRatio Maximum ratio after which boost is triggered
     /// @param _optimalBoost Ratio amount which boost should target
@@ -109,29 +109,6 @@ contract CompoundSubscriptions is AdminAuth {
 
         emit Unsubscribed(msg.sender);
     }
-
-
-    // /// @notice Helper method for the front to get all the info about the subscribed CDP
-    // function getSubscribedInfo(uint _cdpId) public view returns(bool, uint128, uint128, uint128, uint128, address, uint coll, uint debt) {
-    //     SubPosition memory subInfo = subscribersPos[_cdpId];
-
-    //     if (!subInfo.subscribed) return (false, 0, 0, 0, 0, address(0), 0, 0);
-
-    //     (coll, debt) = saverProxy.getCdpInfo(manager, _cdpId, manager.ilks(_cdpId));
-
-    //     CdpHolder memory subscriber = subscribers[subInfo.arrPos];
-
-    //     return (
-    //         true,
-    //         subscriber.minRatio,
-    //         subscriber.maxRatio,
-    //         subscriber.optimalRatioRepay,
-    //         subscriber.optimalRatioBoost,
-    //         subscriber.owner,
-    //         coll,
-    //         debt
-    //     );
-    // }
 
     function isSubscribed(address _user) public view returns (bool) {
         SubPosition storage subInfo = subscribersPos[_user];

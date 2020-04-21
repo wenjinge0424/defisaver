@@ -12,8 +12,8 @@ contract ICompoundSubscription {
 /// @title SubscriptionsProxy handles authorization and interaction with the Subscriptions contract
 contract CompoundSubscriptionsProxy is ConstantAddresses {
 
-    address public constant MONITOR_PROXY_ADDRESS = 0x47d9f61bADEc4378842d809077A5e87B9c996898;
-    address public constant COMPOUND_SUBSCRIPTION_ADDRESS = 0x47d9f61bADEc4378842d809077A5e87B9c996898;
+    address public constant MONITOR_PROXY_ADDRESS = 0x3Dfa84cF5856e01bc4E12355cAF7a61738509f53;
+    address public constant COMPOUND_SUBSCRIPTION_ADDRESS = 0xAc1fd75FEf38c854CF86611Bc66e102981c264A1;
 
     function subscribe(uint128 _minRatio, uint128 _maxRatio, uint128 _optimalRatioBoost, uint128 _optimalRatioRepay, bool _boostEnabled) public {
 
