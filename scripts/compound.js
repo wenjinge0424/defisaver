@@ -11,12 +11,14 @@ const CompoundSaverProxy = require('../build/contracts/CompoundSaverProxy.json')
 const CTokenInterface = require('../build/contracts/CTokenInterface.json');
 const CompoundFlashLoanTaker = require('../build/contracts/CompoundFlashLoanTaker.json');
 const BridgeFlashLoanTaker = require('../build/contracts/BridgeFlashLoanTaker.json');
+const CompoundLoanInfo = require('../build/contracts/CompoundLoanInfo.json');
 
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
 const compoundBasicProxyAddr = '0x12f8551a516085E4cEf5e2451D54ede7d24983cC';
 const compoundSaverProxyAddr = '0xff97C79d207FC3D7a51531d0fa93581cf8E0105D';
 const compoundFlashLoanTakerAddr = '0x2f59bf2779c9AB965ca6BF63F5Eb1504C5B36D38';
 const bridgeFlashLoanTakerAddr = '0x4b922507b808d3895c2213a2b4c4720756b4d9e0';
+const compoundLoanInfoAddr = '0x9d16742a47490A47d3f85E06fcfD52aCA3E5A88d';
 
 const zeroAddr = '0x0000000000000000000000000000000000000000';
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -65,6 +67,8 @@ const initContracts = async () => {
 
     cDai = new web3.eth.Contract(CTokenInterface.abi, CDAI_ADDRESS);
     cEth = new web3.eth.Contract(CTokenInterface.abi, CETH_ADDRESS);
+
+    compoundLoanInfo = new web3.eth.Contract(CompoundLoanInfo.abi, compoundLoanInfoAddr);
 };
 
 function getAbiFunction(contract, functionName) {
@@ -75,6 +79,10 @@ function getAbiFunction(contract, functionName) {
 
 (async () => {
     await initContracts();
+
+    await compoundLoanInfo.methods.getRatio('0x0a80C3C540eEF99811f4579fa7b1A0617294e06f').send({
+        from: account.address, gas: 550000, gasPrice: 9100000000
+    })
 
     // await deposit(ETH_ADDRESS, CETH_ADDRESS, '0.01', false);
     // await withdraw(ETH_ADDRESS, CETH_ADDRESS, '0.02498541', true);
@@ -89,7 +97,7 @@ function getAbiFunction(contract, functionName) {
 
     // await bridgeMaker2Compound('6770', getTokenJoinAddr('ETH'), CETH_ADDRESS);
 
-    await bridgeCompound2Maker('6770', getTokenJoinAddr('ETH'), CETH_ADDRESS);
+    // await bridgeCompound2Maker('6770', getTokenJoinAddr('ETH'), CETH_ADDRESS);
 })();
 
 // User needs to approve the DSProxy to pull the _tokenAddr tokens

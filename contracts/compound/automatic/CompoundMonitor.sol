@@ -7,8 +7,9 @@ import "../../interfaces/GasTokenInterface.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 import "../../loggers/AutomaticLogger.sol";
+import "../CompoundLoanInfo.sol";
 
-contract CompoundMonitor is AdminAuth, DSMath {
+contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
 
     enum Method { Boost, Repay }
 
@@ -19,14 +20,14 @@ contract CompoundMonitor is AdminAuth, DSMath {
 
     uint public REPAY_GAS_COST = 2200000;
     uint public BOOST_GAS_COST = 1500000;
-    
+
     address public constant GAS_TOKEN_INTERFACE_ADDRESS = 0x0000000000b3F879cb30FE243b4Dfee438691c04;
     address public constant AUTOMATIC_LOGGER_ADDRESS = 0xAD32Ce09DE65971fFA8356d7eF0B783B82Fd1a9A;
 
     CompoundMonitorProxy public compoundMonitorProxy;
     CompoundSubscriptions public subscriptionsContract;
     GasTokenInterface gasToken = GasTokenInterface(GAS_TOKEN_INTERFACE_ADDRESS);
-    address public compoundSaverProxyAddress;
+    address public compoundFlashLoanTakerAddress;
 
     AutomaticLogger public logger = AutomaticLogger(AUTOMATIC_LOGGER_ADDRESS);
 
@@ -38,12 +39,12 @@ contract CompoundMonitor is AdminAuth, DSMath {
         _;
     }
 
-    constructor(address _compoundMonitorProxy, address _subscriptions, address _compoundSaverProxyAddress) public {
+    constructor(address _compoundMonitorProxy, address _subscriptions, address _compoundFlashLoanTaker) public {
         approvedCallers[msg.sender] = true;
 
         compoundMonitorProxy = CompoundMonitorProxy(_compoundMonitorProxy);
         subscriptionsContract = CompoundSubscriptions(_subscriptions);
-        compoundSaverProxyAddress = _compoundSaverProxyAddress;
+        compoundFlashLoanTakerAddress = _compoundFlashLoanTaker;
     }
 
     /// @notice Bots call this method to repay for user when conditions are met
@@ -67,8 +68,8 @@ contract CompoundMonitor is AdminAuth, DSMath {
 
         compoundMonitorProxy.callExecute.value(msg.value)(
             _user,
-            compoundSaverProxyAddress,
-            abi.encodeWithSignature("repay(uint256[5],address[3],bytes)",
+            compoundFlashLoanTakerAddress,
+            abi.encodeWithSignature("repayWithLoan(uint256[5],address[3],bytes)",
             _data, _addrData, _callData));
 
         uint ratioAfter;
@@ -104,8 +105,8 @@ contract CompoundMonitor is AdminAuth, DSMath {
 
         compoundMonitorProxy.callExecute.value(msg.value)(
             _user,
-            compoundSaverProxyAddress,
-            abi.encodeWithSignature("boost(uint256[5],address[3],bytes)",
+            compoundFlashLoanTakerAddress,
+            abi.encodeWithSignature("boostWithLoan(uint256[5],address[3],bytes)",
             _data, _addrData, _callData));
 
         uint ratioAfter;
