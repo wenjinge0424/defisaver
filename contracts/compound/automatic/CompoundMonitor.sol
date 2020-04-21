@@ -130,12 +130,6 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
 
 /******************* STATIC METHODS ********************************/
 
-    /// @notice Gets Compound ratio
-    /// @param _user Address of user
-    function getRatio(address _user) public view returns (uint) {
-        return 0;
-    }
-
     /// @notice Checks if Boost/Repay could be triggered for the CDP
     /// @dev Called by MCDMonitor to enforce the min/max check
     function canCall(Method _method, address _user) public view returns(bool, uint) {

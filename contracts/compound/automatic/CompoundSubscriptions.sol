@@ -72,9 +72,8 @@ contract CompoundSubscriptions is AdminAuth {
 
     /// @notice Called by the users DSProxy
     /// @dev Owner who subscribed cancels his subscription
-    function unsubscribe(address _user) external {
-
-        _unsubscribe(_user);
+    function unsubscribe() external {
+        _unsubscribe(msg.sender);
     }
 
     /// @dev Checks limit if minRatio is bigger than max
