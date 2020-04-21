@@ -12,8 +12,10 @@ contract CompoundOracle {
 }
 
 contract CompoundLoanInfo is Exponential {
-
+    // solhint-disable-next-line const-name-snakecase
     ComptrollerInterface public constant comp = ComptrollerInterface(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
+
+    // solhint-disable-next-line const-name-snakecase
     CompoundOracle public constant oracle = CompoundOracle(0x1D8aEdc9E924730DD3f9641CDb4D1B92B848b4bd);
 
     function getRatio(address _user) public view returns (uint) {
