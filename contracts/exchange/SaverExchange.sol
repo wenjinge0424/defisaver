@@ -234,6 +234,7 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
         expectedRateUniswap = getExpectedRate(UNISWAP_WRAPPER, _srcToken, _destToken, _amount);
         expectedRateUniswap = expectedRateUniswap * (10**(18 - getDecimals(_destToken)));
         expectedRateOasis = getExpectedRate(OASIS_WRAPPER, _srcToken, _destToken, _amount);
+        expectedRateOasis = expectedRateOasis * (10**(18 - getDecimals(_destToken)));
 
         if (
             (expectedRateKyber >= expectedRateUniswap) && (expectedRateKyber >= expectedRateOasis)
