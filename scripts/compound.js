@@ -80,13 +80,9 @@ function getAbiFunction(contract, functionName) {
 (async () => {
     await initContracts();
 
-    await compoundLoanInfo.methods.getRatio('0x0a80C3C540eEF99811f4579fa7b1A0617294e06f').send({
-        from: account.address, gas: 550000, gasPrice: 9100000000
-    })
-
-    // await deposit(ETH_ADDRESS, CETH_ADDRESS, '0.01', false);
+    // await deposit(ETH_ADDRESS, CETH_ADDRESS, '0.05', false);
     // await withdraw(ETH_ADDRESS, CETH_ADDRESS, '0.02498541', true);
-    // await borrow(DAI_ADDRESS, CDAI_ADDRESS, '0.3', false);
+    // await borrow(DAI_ADDRESS, CDAI_ADDRESS, '2.6', false);
     // await payback(DAI_ADDRESS, CDAI_ADDRESS, '0.5', true);
 
     // await repayWithLoan('0.015', CETH_ADDRESS, CDAI_ADDRESS);
@@ -116,7 +112,7 @@ const deposit = async (tokenAddr, cTokenAddr, amount, alreadyInMarket) => {
         }
 
         const tx = await proxy.methods['execute(address,bytes)'](compoundBasicProxyAddr, data).send({
-            from: account.address, value, gas: 400000, gasPrice: 5100000000});
+            from: account.address, value, gas: 400000, gasPrice: 8100000000});
 
         console.log(tx);
     } catch(err) {
@@ -137,7 +133,7 @@ const withdraw = async (tokenAddr, cTokenAddr, amount, isCAmount) => {
           [tokenAddr, cTokenAddr, amount, isCAmount]);
 
         const tx = await proxy.methods['execute(address,bytes)'](compoundBasicProxyAddr, data).send({
-            from: account.address, gas: 400000, gasPrice: 5100000000});
+            from: account.address, gas: 400000, gasPrice: 8100000000 });
 
         console.log(tx);
     } catch(err) {
@@ -154,7 +150,7 @@ const borrow = async (tokenAddr, cTokenAddr, amount, alreadyInMarket) => {
           [tokenAddr, cTokenAddr, amount, alreadyInMarket]);
 
         const tx = await proxy.methods['execute(address,bytes)'](compoundBasicProxyAddr, data).send({
-            from: account.address, gas: 700000, gasPrice: 5100000000});
+            from: account.address, gas: 700000, gasPrice: 8100000000, nonce: 3660});
 
         console.log(tx);
     } catch(err) {

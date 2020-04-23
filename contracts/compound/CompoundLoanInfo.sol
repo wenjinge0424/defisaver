@@ -1,4 +1,5 @@
 pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
 
 import "./helpers/Exponential.sol";
 import "./helpers/ComptrollerInterface.sol";
@@ -17,6 +18,15 @@ contract CompoundLoanInfo is Exponential {
 
     // solhint-disable-next-line const-name-snakecase
     CompoundOracle public constant oracle = CompoundOracle(0x1D8aEdc9E924730DD3f9641CDb4D1B92B848b4bd);
+
+    struct LoanData {
+        address user;
+        uint128 ratio;
+        address[] collAddr;
+        address[] borrowAddr;
+        uint[] collAmounts;
+        uint[] borrowAmounts;
+    }
 
     function getRatio(address _user) public view returns (uint) {
         // For each asset the account is in
@@ -53,5 +63,76 @@ contract CompoundLoanInfo is Exponential {
         if (sumBorrow == 0) return 0;
 
         return (sumCollateral * 10**18) / sumBorrow;
+    }
+
+    function getPrices(address[] memory _cTokens) public view returns (uint[] memory prices) {
+        for(uint i = 0; i < _cTokens.length; ++i) {
+            prices[i] = oracle.getUnderlyingPrice(_cTokens[i]);
+        }
+    }
+
+    function getCollFactors(address[] memory _cTokens) public view returns (uint[] memory collFactors) {
+        for(uint i = 0; i < _cTokens.length; ++i) {
+            (, collFactors[i]) = comp.markets(_cTokens[i]);
+        }
+    }
+
+    function getLoanData(address _user) public view returns (LoanData memory data) {
+        data.user = _user;
+
+        address[] memory assets = comp.getAssetsIn(_user);
+
+        uint sumCollateral = 0;
+        uint sumBorrow = 0;
+        uint collPos = 0;
+        uint borrowPos = 0;
+
+        for (uint i = 0; i < assets.length; i++) {
+            address asset = assets[i];
+
+            (, uint cTokenBalance, uint borrowBalance, uint exchangeRateMantissa)
+                                        = CToken(asset).getAccountSnapshot(_user);
+
+            Exp memory oraclePrice;
+
+            if (cTokenBalance != 0 || borrowBalance != 0) {
+                oraclePrice = Exp({mantissa: oracle.getUnderlyingPrice(asset)});
+            }
+
+            // Sum up collateral in Eth
+            if (cTokenBalance != 0) {
+                Exp memory exchangeRate = Exp({mantissa: exchangeRateMantissa});
+                (, Exp memory tokensToEther) = mulExp(exchangeRate, oraclePrice);
+                (, sumCollateral) = mulScalarTruncateAddUInt(tokensToEther, cTokenBalance, sumCollateral);
+
+                data.collAddr[collPos] = asset;
+                (, data.collAmounts[collPos]) = mulScalarTruncate(tokensToEther, cTokenBalance);
+                collPos++;
+            }
+
+            // Sum up debt in Eth
+            if (borrowBalance != 0) {
+                (, sumBorrow) = mulScalarTruncateAddUInt(oraclePrice, borrowBalance, sumBorrow);
+
+                data.borrowAddr[borrowPos] = asset;
+                (, data.borrowAmounts[borrowPos]) = mulScalarTruncate(oraclePrice, borrowBalance);
+                borrowPos++;
+            }
+        }
+
+        data.ratio = uint128((sumCollateral * 10**18) / sumBorrow);
+
+    }
+
+    function getLoanDataArr(address[] memory _users) public view returns (LoanData[] memory loans) {
+        for(uint i = 0; i < _users.length; ++i) {
+            loans[i] = getLoanData(_users[i]);
+        }
+    }
+
+    function getRatios(address[] memory _users) public view returns (uint[] memory ratios) {
+        for(uint i = 0; i < _users.length; ++i) {
+            ratios[i] = getRatio(_users[i]);
+        }
     }
 }

@@ -9,7 +9,7 @@ import "../../loggers/CompoundLogger.sol";
 
 contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
 
-    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0x0D5Ec207D7B29525Cc25963347903958C98a66d3;
+    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0x416EfaAd75EA7010cA1Ce50297630d7f54CdcABD;
 
     function flashRepay(
         uint[5] memory _data, // amount, minPrice, exchangeType, gasCost, 0xPrice

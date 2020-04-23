@@ -8,7 +8,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prettify": "./node_modules/.bin/prettier --write contracts/**/*.sol",
-    "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol"
+    "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol",
+    "build-contracts": "sol-merger \"./contracts/*.sol\" ./build"
   },
   "repository": {
     "type": "git",
@@ -35,6 +36,7 @@
     "husky": "^4.2.3",
     "prettier": "^1.19.1",
     "prettier-plugin-solidity": "^1.0.0-alpha.39",
+    "sol-merger": "^2.0.1",
     "solhint": "^2.3.0",
     "solhint-plugin-prettier": "0.0.4"
   },
