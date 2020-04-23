@@ -66,13 +66,13 @@ contract CompoundLoanInfo is Exponential {
     }
 
     function getPrices(address[] memory _cTokens) public view returns (uint[] memory prices) {
-        for(uint i = 0; i < _cTokens.length; ++i) {
+        for (uint i = 0; i < _cTokens.length; ++i) {
             prices[i] = oracle.getUnderlyingPrice(_cTokens[i]);
         }
     }
 
     function getCollFactors(address[] memory _cTokens) public view returns (uint[] memory collFactors) {
-        for(uint i = 0; i < _cTokens.length; ++i) {
+        for (uint i = 0; i < _cTokens.length; ++i) {
             (, collFactors[i]) = comp.markets(_cTokens[i]);
         }
     }
@@ -125,13 +125,13 @@ contract CompoundLoanInfo is Exponential {
     }
 
     function getLoanDataArr(address[] memory _users) public view returns (LoanData[] memory loans) {
-        for(uint i = 0; i < _users.length; ++i) {
+        for (uint i = 0; i < _users.length; ++i) {
             loans[i] = getLoanData(_users[i]);
         }
     }
 
     function getRatios(address[] memory _users) public view returns (uint[] memory ratios) {
-        for(uint i = 0; i < _users.length; ++i) {
+        for (uint i = 0; i < _users.length; ++i) {
             ratios[i] = getRatio(_users[i]);
         }
     }
