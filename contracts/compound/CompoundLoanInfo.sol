@@ -12,6 +12,7 @@ contract CompoundOracle {
     function getUnderlyingPrice(address cToken) external view returns (uint);
 }
 
+
 contract CompoundLoanInfo is Exponential {
     // solhint-disable-next-line const-name-snakecase
     ComptrollerInterface public constant comp = ComptrollerInterface(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
@@ -66,21 +67,33 @@ contract CompoundLoanInfo is Exponential {
     }
 
     function getPrices(address[] memory _cTokens) public view returns (uint[] memory prices) {
+        prices = new uint[](_cTokens.length);
+        
         for (uint i = 0; i < _cTokens.length; ++i) {
             prices[i] = oracle.getUnderlyingPrice(_cTokens[i]);
         }
     }
 
     function getCollFactors(address[] memory _cTokens) public view returns (uint[] memory collFactors) {
+        collFactors = new uint[](_cTokens.length);
+        
         for (uint i = 0; i < _cTokens.length; ++i) {
             (, collFactors[i]) = comp.markets(_cTokens[i]);
         }
     }
 
     function getLoanData(address _user) public view returns (LoanData memory data) {
-        data.user = _user;
-
+        
         address[] memory assets = comp.getAssetsIn(_user);
+        
+        data = LoanData({
+            user: _user,
+            ratio: 0,
+            collAddr: new address[](assets.length),
+            borrowAddr: new address[](assets.length),
+            collAmounts: new uint[](assets.length),
+            borrowAmounts: new uint[](assets.length)
+        });
 
         uint sumCollateral = 0;
         uint sumBorrow = 0;
@@ -119,18 +132,24 @@ contract CompoundLoanInfo is Exponential {
                 borrowPos++;
             }
         }
+        
+        if (sumBorrow == 0) return data;
 
         data.ratio = uint128((sumCollateral * 10**18) / sumBorrow);
 
     }
 
     function getLoanDataArr(address[] memory _users) public view returns (LoanData[] memory loans) {
+        loans = new LoanData[](_users.length);
+        
         for (uint i = 0; i < _users.length; ++i) {
             loans[i] = getLoanData(_users[i]);
         }
     }
 
     function getRatios(address[] memory _users) public view returns (uint[] memory ratios) {
+        ratios = new uint[](_users.length);
+        
         for (uint i = 0; i < _users.length; ++i) {
             ratios[i] = getRatio(_users[i]);
         }
