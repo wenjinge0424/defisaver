@@ -70,7 +70,7 @@ contract CompoundSaverHelper is DSMath {
             feeAmount = _amount / 5;
         }
 
-        if (tokenAddr == ETH_ADDRESS){
+        if (tokenAddr == ETH_ADDRESS) {
             WALLET_ID.transfer(feeAmount);
         } else {
             ERC20(tokenAddr).transfer(WALLET_ID, feeAmount);
