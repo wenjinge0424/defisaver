@@ -134,6 +134,8 @@ contract CompoundSubscriptions is AdminAuth {
         uint start = _page * _perPage;
         uint end = start + _perPage;
 
+        end = (end > holders.length) ? holders.length : end;
+
         uint count = 0;
         for (uint i=start; i<end; i++) {
             holders[count] = subscribers[i];

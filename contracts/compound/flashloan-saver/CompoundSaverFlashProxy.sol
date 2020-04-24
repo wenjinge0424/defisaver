@@ -9,8 +9,6 @@ import "../../loggers/CompoundLogger.sol";
 
 contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
 
-    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0x416EfaAd75EA7010cA1Ce50297630d7f54CdcABD;
-
     function flashRepay(
         uint[5] memory _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
@@ -108,10 +106,10 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
 
     function returnFlashLoan(address _tokenAddr, uint _amount) internal {
         if (_tokenAddr != ETH_ADDRESS) {
-            ERC20(_tokenAddr).transfer(COMPOUND_SAVER_FLASH_LOAN, _amount);
+            ERC20(_tokenAddr).transfer(msg.sender, _amount);
         }
 
-        COMPOUND_SAVER_FLASH_LOAN.transfer(address(this).balance);
+        msg.sender.transfer(address(this).balance);
     }
 
 }
