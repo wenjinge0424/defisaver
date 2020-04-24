@@ -44,8 +44,13 @@ contract CompoundSaverHelper is DSMath {
 
     /// @notice Calculates the fee amount
     /// @param _amount Amount that is converted
-    function getFee(uint _amount, address _user, address _tokenAddr) internal returns (uint feeAmount) {
+    /// @param _user Actuall user addr not DSProxy
+    /// @param _gasCost Ether amount of gas we are spending for tx
+    /// @param _cTokenAddr CToken addr. of token we are getting for the fee
+    function getFee(uint _amount, address _user, uint _gasCost, address _cTokenAddr) internal returns (uint feeAmount) {
         uint fee = SERVICE_FEE;
+
+        address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
         if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_user)) {
             fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_user);
@@ -53,12 +58,23 @@ contract CompoundSaverHelper is DSMath {
 
         feeAmount = (fee == 0) ? 0 : (_amount / fee);
 
+        if (_gasCost != 0) {
+            uint ethTokenPrice = CompoundOracle(COMPOUND_ORACLE).getUnderlyingPrice(_cTokenAddr);
+            _gasCost = rmul(_gasCost, ethTokenPrice);
+
+            feeAmount = add(feeAmount, _gasCost);
+        }
+
         // fee can't go over 20% of the whole amount
         if (feeAmount > (_amount / 5)) {
             feeAmount = _amount / 5;
         }
 
-        ERC20(_tokenAddr).transfer(WALLET_ID, feeAmount);
+        if (tokenAddr == ETH_ADDRESS){
+            WALLET_ID.transfer(feeAmount);
+        } else {
+            ERC20(tokenAddr).transfer(WALLET_ID, feeAmount);
+        }
     }
 
     /// @notice Enters the market for the collatera and borrow tokens

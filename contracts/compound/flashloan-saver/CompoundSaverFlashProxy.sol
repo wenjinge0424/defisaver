@@ -40,7 +40,7 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
         );
 
         // get fee
-        swapAmount -= getFee(swapAmount, user, borrowToken);
+        swapAmount -= getFee(swapAmount, user, _data[3], _addrData[1]);
 
         // payback debt
         paybackDebt(swapAmount, _addrData[1], borrowToken, user);
@@ -73,7 +73,7 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
         address borrowToken = getUnderlyingAddr(_addrData[1]);
 
         // get dfs fee
-        borrowAmount -= getFee((borrowAmount + _flashLoanData[0]), user, borrowToken);
+        borrowAmount -= getFee((borrowAmount + _flashLoanData[0]), user, _data[3], _addrData[1]);
 
         // swap borrowed amount and fl loan amount
         uint swapAmount = swap(
