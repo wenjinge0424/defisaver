@@ -3,9 +3,8 @@ pragma solidity ^0.5.0;
 import "../../mcd/saver_proxy/ExchangeHelper.sol";
 import "../../interfaces/CTokenInterface.sol";
 import "../../mcd/Discount.sol";
-import "../CompoundSaverHelper.sol";
+import "../helpers/CompoundSaverHelper.sol";
 import "../../loggers/CompoundLogger.sol";
-
 
 contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
 

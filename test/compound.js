@@ -4,7 +4,6 @@ const CompoundProxy = artifacts.require("./CompoundProxy.sol");
 const DSProxy = artifacts.require("./DSProxy.sol");
 const ProxyRegistryInterface = artifacts.require("./ProxyRegistryInterface.sol");
 const ComptrollerInterface = artifacts.require("./ComptrollerInterface.sol");
-const PriceOracleInterface = artifacts.require("./PriceOracleInterface.sol");
 
 contract("SaverProxy", accounts => {
 
@@ -35,12 +34,12 @@ contract("SaverProxy", accounts => {
 
         const proxyAddr = await registry.proxies(account);
         proxy = await DSProxy.at(proxyAddr);
-       
+
     });
 
     function getAbiFunction(contract, functionName) {
         const abi = contract.toJSON().abi;
-    
+
         return abi.find(abi => abi.name === functionName);
       }
 
@@ -48,7 +47,7 @@ contract("SaverProxy", accounts => {
         const res = await comptrollerInterface.getAccountLiquidity.call(account);
 
         console.log(res[1].toString());
-      });   
+      });
 
 
     // it('...should draw Dai from CDP and add to Compound', async () => {

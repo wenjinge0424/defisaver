@@ -1,8 +1,8 @@
 pragma solidity ^0.5.0;
 
-import "../mcd/saver_proxy/ExchangeHelper.sol";
-import "../loggers/CompoundLogger.sol";
-import "./CompoundSaverHelper.sol";
+import "../../mcd/saver_proxy/ExchangeHelper.sol";
+import "../../loggers/CompoundLogger.sol";
+import "../helpers/CompoundSaverHelper.sol";
 
 contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
 

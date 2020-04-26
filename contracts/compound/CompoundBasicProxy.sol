@@ -2,8 +2,8 @@ pragma solidity ^0.5.0;
 
 import "../interfaces/CTokenInterface.sol";
 import "../interfaces/ERC20.sol";
-import "./helpers/CEtherInterface.sol";
-import "./helpers/ComptrollerInterface.sol";
+import "../interfaces/CEtherInterface.sol";
+import "../interfaces/ComptrollerInterface.sol";
 
 contract CompoundBasicProxy {
 

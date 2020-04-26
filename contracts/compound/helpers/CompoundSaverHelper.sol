@@ -1,15 +1,13 @@
 pragma solidity ^0.5.0;
 
-import "./helpers/CEtherInterface.sol";
-import "../interfaces/CTokenInterface.sol";
-import "./helpers/ComptrollerInterface.sol";
-import "../mcd/Discount.sol";
-import "../DS/DSMath.sol";
-import "../DS/DSProxy.sol";
+import "../../interfaces/CEtherInterface.sol";
+import "../../interfaces/CompoundOracleInterface.sol";
+import "../../interfaces/CTokenInterface.sol";
+import "../../interfaces/ComptrollerInterface.sol";
 
-contract CompoundOracle {
-    function getUnderlyingPrice(address cToken) external view returns (uint);
-}
+import "../../mcd/Discount.sol";
+import "../../DS/DSMath.sol";
+import "../../DS/DSProxy.sol";
 
 contract CompoundSaverHelper is DSMath {
 
@@ -59,7 +57,7 @@ contract CompoundSaverHelper is DSMath {
         feeAmount = (fee == 0) ? 0 : (_amount / fee);
 
         if (_gasCost != 0) {
-            uint ethTokenPrice = CompoundOracle(COMPOUND_ORACLE).getUnderlyingPrice(_cTokenAddr);
+            uint ethTokenPrice = CompoundOracleInterface(COMPOUND_ORACLE).getUnderlyingPrice(_cTokenAddr);
             _gasCost = rmul(_gasCost, ethTokenPrice);
 
             feeAmount = add(feeAmount, _gasCost);
@@ -123,7 +121,7 @@ contract CompoundSaverHelper is DSMath {
             return liquidityInEth;
         }
 
-        uint ethPrice = CompoundOracle(COMPOUND_ORACLE).getUnderlyingPrice(_cCollAddress);
+        uint ethPrice = CompoundOracleInterface(COMPOUND_ORACLE).getUnderlyingPrice(_cCollAddress);
         uint liquidityInToken = wdiv(liquidityInEth, ethPrice);
 
         if (liquidityInToken > usersBalance) return usersBalance;
@@ -138,7 +136,7 @@ contract CompoundSaverHelper is DSMath {
 
         if (_cBorrowAddress == CETH_ADDRESS) return liquidityInEth;
 
-        uint ethPrice = CompoundOracle(COMPOUND_ORACLE).getUnderlyingPrice(_cBorrowAddress);
+        uint ethPrice = CompoundOracleInterface(COMPOUND_ORACLE).getUnderlyingPrice(_cBorrowAddress);
         uint liquidityInToken = wdiv(liquidityInEth, ethPrice);
 
         return sub(liquidityInToken, (liquidityInToken / 100)); // cut off 1% due to rounding issues

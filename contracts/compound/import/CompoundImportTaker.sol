@@ -1,15 +1,13 @@
 pragma solidity ^0.5.0;
 
+import "../../auth/ProxyPermission.sol";
+
+import "../../flashloan/FlashLoanLogger.sol";
 import "../../flashloan/aave/ILendingPool.sol";
 import "../../interfaces/CTokenInterface.sol";
-import "../CompoundSaverHelper.sol";
-import "../../auth/ProxyPermission.sol";
-import "../../flashloan/FlashLoanLogger.sol";
+import "../../interfaces/ProxyRegistryInterface.sol";
 
-contract ProxyRegistryLike {
-    function proxies(address) public view returns (address);
-    function build(address) public returns (address);
-}
+import "../helpers/CompoundSaverHelper.sol";
 
 contract CompoundImportTaker is CompoundSaverHelper, ProxyPermission {
 
@@ -40,10 +38,10 @@ contract CompoundImportTaker is CompoundSaverHelper, ProxyPermission {
     }
 
     function getProxy() internal returns (address proxy) {
-        proxy = ProxyRegistryLike(PROXY_REGISTRY_ADDRESS).proxies(msg.sender);
+        proxy = ProxyRegistryInterface(PROXY_REGISTRY_ADDRESS).proxies(msg.sender);
 
         if (proxy == address(0)) {
-            proxy = ProxyRegistryLike(PROXY_REGISTRY_ADDRESS).build(msg.sender);
+            proxy = ProxyRegistryInterface(PROXY_REGISTRY_ADDRESS).build(msg.sender);
         }
 
     }

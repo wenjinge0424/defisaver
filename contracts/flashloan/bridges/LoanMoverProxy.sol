@@ -3,12 +3,8 @@ pragma solidity ^0.5.0;
 import "../../mcd/saver_proxy/MCDSaverProxy.sol";
 
 import "../../interfaces/CTokenInterface.sol";
-import "../../compound/helpers/CEtherInterface.sol";
-
-contract ComptrollerInterface {
-    function enterMarkets(address[] calldata cTokens) external returns (uint[] memory);
-    function exitMarket(address cToken) external returns (uint);
-}
+import "../../interfaces/CEtherInterface.sol";
+import "../../interfaces/ComptrollerInterface.sol";
 
 contract LoanMoverProxy is MCDSaverProxy {
 

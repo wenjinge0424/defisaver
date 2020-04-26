@@ -1,20 +1,17 @@
 pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
+import "../interfaces/ComptrollerInterface.sol";
+import "../interfaces/CTokenInterface.sol";
 import "./helpers/Exponential.sol";
-import "./helpers/ComptrollerInterface.sol";
-import "./CompoundSaverHelper.sol";
-
-contract CToken {
-    function getAccountSnapshot(address account) external view returns (uint, uint, uint, uint);
-}
+import "./helpers/CompoundSaverHelper.sol";
 
 contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
     // solhint-disable-next-line const-name-snakecase
     ComptrollerInterface public constant comp = ComptrollerInterface(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
 
     // solhint-disable-next-line const-name-snakecase
-    CompoundOracle public constant oracle = CompoundOracle(0x1D8aEdc9E924730DD3f9641CDb4D1B92B848b4bd);
+    CompoundOracleInterface public constant oracle = CompoundOracleInterface(0x1D8aEdc9E924730DD3f9641CDb4D1B92B848b4bd);
 
     struct LoanData {
         address user;
@@ -44,7 +41,7 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
             address asset = assets[i];
 
             (, uint cTokenBalance, uint borrowBalance, uint exchangeRateMantissa)
-                                        = CToken(asset).getAccountSnapshot(_user);
+                                        = CTokenInterface(asset).getAccountSnapshot(_user);
 
             Exp memory oraclePrice;
 
@@ -108,7 +105,7 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
             address asset = assets[i];
 
             (, uint cTokenBalance, uint borrowBalance, uint exchangeRateMantissa)
-                                        = CToken(asset).getAccountSnapshot(_user);
+                                        = CTokenInterface(asset).getAccountSnapshot(_user);
 
             Exp memory oraclePrice;
 

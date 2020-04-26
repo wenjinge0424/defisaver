@@ -4,7 +4,6 @@ import "./DSProxyInterface.sol";
 
 
 contract ProxyRegistryInterface {
-    function proxies(address _owner) public view returns (DSProxyInterface);
-
+    function proxies(address _owner) public view returns (address);
     function build(address) public returns (address);
 }
