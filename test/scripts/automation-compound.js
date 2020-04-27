@@ -4,17 +4,17 @@ const Web3 = require('web3');
 
 require('dotenv').config();
 
-const DSProxy = require('../build/contracts/DSProxy.json');
-const ProxyRegistryInterface = require('../build/contracts/ProxyRegistryInterface.json');
-const CTokenInterface = require('../build/contracts/CTokenInterface.json');
-const CompoundLoanInfo = require('../build/contracts/CompoundLoanInfo.json');
-const CompoundMonitor = require('../build/contracts/CompoundMonitor.json');
-const CompoundSubscriptionsProxy = require('../build/contracts/CompoundSubscriptionsProxy.json');
+const DSProxy = require('../../build/contracts/DSProxy.json');
+const ProxyRegistryInterface = require('../../build/contracts/ProxyRegistryInterface.json');
+const CTokenInterface = require('../../build/contracts/CTokenInterface.json');
+const CompoundLoanInfo = require('../../build/contracts/CompoundLoanInfo.json');
+const CompoundMonitor = require('../../build/contracts/CompoundMonitor.json');
+const CompoundSubscriptionsProxy = require('../../build/contracts/CompoundSubscriptionsProxy.json');
 
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
 const compoundLoanInfoAddr = '0x9d16742a47490A47d3f85E06fcfD52aCA3E5A88d';
-const subscriptionsProxyAddr = '0xDf436ECe24614bB7c6F44fedDE48a0c6725602a2';
-const compoundMonitorAddr = '0xFA849A1C5fC35a2C8D37F5ee690aea80496508c9';
+const subscriptionsProxyAddr = '0x43eaA91b4222fAA7222bcE76DCB123Fd6D280884';
+const compoundMonitorAddr = '0xF3aD78068511E4cD6a2FF4bBbAB1585817098393';
 
 const zeroAddr = '0x0000000000000000000000000000000000000000';
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -81,9 +81,9 @@ function getAbiFunction(contract, functionName) {
 
     console.log(ratio);
 
-    // await subscribe('3300000000000000000', '4300000000000000000', '3700000000000000000', '3400000000000000000', true);
+    // await subscribe('3900000000000000000', '4300000000000000000', '4000000000000000000', '4000000000000000000', true);
 
-    await repayFor('0.008', CETH_ADDRESS, CDAI_ADDRESS, proxyAddr);
+    await repayFor('0.003', CETH_ADDRESS, CDAI_ADDRESS, proxyAddr);
 
 })();
 
@@ -104,7 +104,7 @@ const subscribe = async (minRatio, maxRatio, optimalBoost, optimalRepay, boostEn
         [minRatio, maxRatio, optimalBoost, optimalRepay, boostEnabled]);
 
         const tx = await proxy.methods['execute(address,bytes)'](subscriptionsProxyAddr, data).send({
-            from: account.address, gas: 400000, gasPrice: 8100000000});
+            from: account.address, gas: 400000, gasPrice: 7100000000});
 
         console.log(tx);
     } catch(err) {

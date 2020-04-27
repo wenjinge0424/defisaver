@@ -4,6 +4,7 @@ import "../../interfaces/DSProxyInterface.sol";
 import "../../interfaces/ERC20.sol";
 import "../../auth/AdminAuth.sol";
 
+/// @title Contract with the actuall DSProxy permission calls the automation operations
 contract CompoundMonitorProxy is AdminAuth {
 
     uint public CHANGE_PERIOD;

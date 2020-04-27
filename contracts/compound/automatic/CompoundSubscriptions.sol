@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "../../auth/AdminAuth.sol";
 
+/// @title Stores subscription information for Compound automatization
 contract CompoundSubscriptions is AdminAuth {
 
     struct CompoundHolder {
@@ -77,6 +78,9 @@ contract CompoundSubscriptions is AdminAuth {
     }
 
     /// @dev Checks limit if minRatio is bigger than max
+    /// @param _minRatio Minimum ratio, bellow which repay can be triggered
+    /// @param _maxRatio Maximum ratio, over which boost can be triggered
+    /// @return Returns bool if the params are correct
     function checkParams(uint128 _minRatio, uint128 _maxRatio) internal pure returns (bool) {
 
         if (_minRatio > _maxRatio) {
@@ -87,6 +91,7 @@ contract CompoundSubscriptions is AdminAuth {
     }
 
     /// @dev Internal method to remove a subscriber from the list
+    /// @param _user The actual address that owns the Compound position
     function _unsubscribe(address _user) internal {
         require(subscribers.length > 0, "Must have subscribers in the list");
 
@@ -110,12 +115,18 @@ contract CompoundSubscriptions is AdminAuth {
         emit Unsubscribed(msg.sender);
     }
 
+    /// @dev Checks if the user is subscribed
+    /// @param _user The actual address that owns the Compound position
+    /// @return If the user is subscribed
     function isSubscribed(address _user) public view returns (bool) {
         SubPosition storage subInfo = subscribersPos[_user];
 
         return subInfo.subscribed;
     }
 
+    /// @dev Returns subscribtion information about a user
+    /// @param _user The actual address that owns the Compound position
+    /// @return Subscription information about the user if exists
     function getHolder(address _user) public view returns (CompoundHolder memory) {
         SubPosition storage subInfo = subscribersPos[_user];
 
@@ -123,11 +134,15 @@ contract CompoundSubscriptions is AdminAuth {
     }
 
     /// @notice Helper method to return all the subscribed CDPs
+    /// @return List of all subscribers
     function getSubscribers() public view returns (CompoundHolder[] memory) {
         return subscribers;
     }
 
-    /// @notice Helper method to return all the subscribed CDPs
+    /// @notice Helper method for the frontend, returns all the subscribed CDPs paginated
+    /// @param _page What page of subscribers you want
+    /// @param _perPage Number of entries per page
+    /// @return List of all subscribers for that page
     function getSubscribersByPage(uint _page, uint _perPage) public view returns (CompoundHolder[] memory) {
         CompoundHolder[] memory holders = new CompoundHolder[](_perPage);
 
@@ -137,7 +152,7 @@ contract CompoundSubscriptions is AdminAuth {
         end = (end > holders.length) ? holders.length : end;
 
         uint count = 0;
-        for (uint i=start; i<end; i++) {
+        for (uint i = start; i < end; i++) {
             holders[count] = subscribers[i];
             count++;
         }
@@ -148,6 +163,7 @@ contract CompoundSubscriptions is AdminAuth {
     ////////////// ADMIN METHODS ///////////////////
 
     /// @notice Admin function to unsubscribe a CDP
+    /// @param _user The actual address that owns the Compound position
     function unsubscribeByAdmin(address _user) public onlyOwner {
         SubPosition storage subInfo = subscribersPos[_user];
 

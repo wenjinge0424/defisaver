@@ -9,6 +9,7 @@ import "../../auth/AdminAuth.sol";
 import "../../loggers/AutomaticLogger.sol";
 import "../CompoundLoanInfo.sol";
 
+/// @title Contract implements logic of calling boost/repay in the automatic system
 contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
 
     enum Method { Boost, Repay }
@@ -39,6 +40,9 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
         _;
     }
 
+    /// @param _compoundMonitorProxy Proxy contracts that actually is authorized to call DSProxy
+    /// @param _subscriptions Subscriptions contract for Compound positions
+    /// @param _compoundFlashLoanTaker Contract that actually performs Repay/Boost
     constructor(address _compoundMonitorProxy, address _subscriptions, address _compoundFlashLoanTaker) public {
         approvedCallers[msg.sender] = true;
 
@@ -48,6 +52,11 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
     }
 
     /// @notice Bots call this method to repay for user when conditions are met
+    /// @dev If the contract ownes gas token it will try and use it for gas price reduction
+    /// @param _data Amount and exchange data [amount, minPrice, exchangeType, gasCost, 0xPrice]
+    /// @param _addrData cTokens addreses and exchange [cCollAddress, cBorrowAddress, exchangeAddress]
+    /// @param _callData 0x callData
+    /// @param _user The actual address that owns the Compound position
     function repayFor(
         uint[5] memory _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
@@ -58,10 +67,8 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
             gasToken.free(BOOST_GAS_TOKEN);
         }
 
-        uint ratioBefore;
-        bool isAllowed;
-        (isAllowed, ratioBefore) = canCall(Method.Repay, _user);
-        require(isAllowed);
+        (bool isAllowed, uint ratioBefore) = canCall(Method.Repay, _user);
+        require(isAllowed); // check if conditions are met
 
         uint gasCost = calcGasCost(REPAY_GAS_COST);
         _data[4] = gasCost;
@@ -72,11 +79,8 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
             abi.encodeWithSignature("repayWithLoan(uint256[5],address[3],bytes)",
             _data, _addrData, _callData));
 
-        uint ratioAfter;
-        bool isGoodRatio;
-        (isGoodRatio, ratioAfter) = ratioGoodAfter(Method.Repay, _user);
-        // doesn't allow user to repay too much
-        require(isGoodRatio);
+        (bool isGoodRatio, uint ratioAfter) = ratioGoodAfter(Method.Repay, _user);
+        require(isGoodRatio); // check if the after result of the actions is good
 
         returnEth();
 
@@ -85,6 +89,10 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
 
     /// @notice Bots call this method to boost for user when conditions are met
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
+    /// @param _data Amount and exchange data [amount, minPrice, exchangeType, gasCost, 0xPrice]
+    /// @param _addrData cTokens addreses and exchange [cCollAddress, cBorrowAddress, exchangeAddress]
+    /// @param _callData 0x callData
+    /// @param _user The actual address that owns the Compound position
     function boostFor(
         uint[5] memory _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
@@ -95,10 +103,8 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
             gasToken.free(REPAY_GAS_TOKEN);
         }
 
-        uint ratioBefore;
-        bool isAllowed;
-        (isAllowed, ratioBefore) = canCall(Method.Boost, _user);
-        require(isAllowed);
+        (bool isAllowed, uint ratioBefore) = canCall(Method.Boost, _user);
+        require(isAllowed); // check if conditions are met
 
         uint gasCost = calcGasCost(BOOST_GAS_COST);
         _data[4] = gasCost;
@@ -109,11 +115,9 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
             abi.encodeWithSignature("boostWithLoan(uint256[5],address[3],bytes)",
             _data, _addrData, _callData));
 
-        uint ratioAfter;
-        bool isGoodRatio;
-        (isGoodRatio, ratioAfter) = ratioGoodAfter(Method.Boost, _user);
-        // doesn't allow user to boost too much
-        require(isGoodRatio);
+
+        (bool isGoodRatio, uint ratioAfter) = ratioGoodAfter(Method.Boost, _user);
+        require(isGoodRatio);  // check if the after result of the actions is good
 
         returnEth();
 
@@ -132,6 +136,9 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
 
     /// @notice Checks if Boost/Repay could be triggered for the CDP
     /// @dev Called by MCDMonitor to enforce the min/max check
+    /// @param _method Type of action to be called
+    /// @param _user The actual address that owns the Compound position
+    /// @return Boolean if it can be called and the ratio
     function canCall(Method _method, address _user) public view returns(bool, uint) {
         bool subscribed = subscriptionsContract.isSubscribed(_user);
         CompoundSubscriptions.CompoundHolder memory holder = subscriptionsContract.getHolder(_user);
@@ -152,6 +159,9 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
     }
 
     /// @dev After the Boost/Repay check if the ratio doesn't trigger another call
+    /// @param _method Type of action to be called
+    /// @param _user The actual address that owns the Compound position
+    /// @return Boolean if the recent action preformed correctly and the ratio
     function ratioGoodAfter(Method _method, address _user) public view returns(bool, uint) {
         CompoundSubscriptions.CompoundHolder memory holder;
 
