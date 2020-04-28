@@ -9,6 +9,7 @@ import "../../interfaces/ProxyRegistryInterface.sol";
 
 import "../helpers/CompoundSaverHelper.sol";
 
+/// @title Imports Compound position from the account to DSProxy
 contract CompoundImportTaker is CompoundSaverHelper, ProxyPermission {
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
@@ -21,7 +22,10 @@ contract CompoundImportTaker is CompoundSaverHelper, ProxyPermission {
         0xb9303686B0EE92F92f63973EF85f3105329D345c
     );
 
+    /// @notice Starts the process to move users position 1 collateral and 1 borrow
     /// @dev User must approve COMPOUND_IMPORT_FLASH_LOAN to pull _cCollateralToken
+    /// @param _cCollateralToken Collateral we are moving to DSProxy
+    /// @param _cBorrowToken Borrow token we are moving to DSProxy
     function importLoan(address _cCollateralToken, address _cBorrowToken) external {
         address proxy = getProxy();
 
@@ -37,6 +41,8 @@ contract CompoundImportTaker is CompoundSaverHelper, ProxyPermission {
         logger.logFlashLoan("CompoundImport", loanAmount, 0, _cCollateralToken);
     }
 
+    /// @notice Gets proxy address, if user doesn't has DSProxy build it
+    /// @return DsProxy address
     function getProxy() internal returns (address proxy) {
         proxy = ProxyRegistryInterface(PROXY_REGISTRY_ADDRESS).proxies(msg.sender);
 

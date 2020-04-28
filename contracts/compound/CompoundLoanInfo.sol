@@ -6,6 +6,7 @@ import "../interfaces/CTokenInterface.sol";
 import "./helpers/Exponential.sol";
 import "./helpers/CompoundSaverHelper.sol";
 
+/// @title Gets data about Compound positions
 contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
     // solhint-disable-next-line const-name-snakecase
     ComptrollerInterface public constant comp = ComptrollerInterface(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
@@ -29,7 +30,9 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
         uint price;
     }
 
-
+    /// @notice Calcualted the ratio of coll/debt for a compound user
+    /// @param _user Address of the user
+    /// @return Ratio
     function getRatio(address _user) public view returns (uint) {
         // For each asset the account is in
         address[] memory assets = comp.getAssetsIn(_user);
@@ -67,6 +70,9 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
         return (sumCollateral * 10**18) / sumBorrow;
     }
 
+    /// @notice Fetches Compound prices for tokens
+    /// @param _cTokens Arr. of cTokens for which to get the prices
+    /// @return prices Array of prices
     function getPrices(address[] memory _cTokens) public view returns (uint[] memory prices) {
         prices = new uint[](_cTokens.length);
 
@@ -75,6 +81,9 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
         }
     }
 
+    /// @notice Fetches Compound collateral factors for tokens
+    /// @param _cTokens Arr. of cTokens for which to get the coll. factors
+    /// @return collFactors Array of coll. factors
     function getCollFactors(address[] memory _cTokens) public view returns (uint[] memory collFactors) {
         collFactors = new uint[](_cTokens.length);
 
@@ -83,8 +92,10 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
         }
     }
 
+    /// @notice Fetches all the collateral/debt address and amounts, denominated in ether
+    /// @param _user Address of the user
+    /// @return LoanData information
     function getLoanData(address _user) public view returns (LoanData memory data) {
-
         address[] memory assets = comp.getAssetsIn(_user);
 
         data = LoanData({
@@ -140,6 +151,9 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
 
     }
 
+    /// @notice Fetches all the collateral/debt address and amounts, denominated in ether
+    /// @param _users Addresses of the user
+    /// @return Array of LoanData information
     function getLoanDataArr(address[] memory _users) public view returns (LoanData[] memory loans) {
         loans = new LoanData[](_users.length);
 
@@ -148,6 +162,9 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
         }
     }
 
+    /// @notice Calcualted the ratio of coll/debt for a compound user
+    /// @param _users Addresses of the user
+    /// @return Array of ratios
     function getRatios(address[] memory _users) public view returns (uint[] memory ratios) {
         ratios = new uint[](_users.length);
 
@@ -156,6 +173,9 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
         }
     }
 
+    /// @notice Information about cTokens
+    /// @param _cTokenAddresses Array of cTokens addresses
+    /// @return Array of cTokens infomartion
     function getTokensInfo(address[] memory _cTokenAddresses) public returns(TokenInfo[] memory tokens) {
         tokens = new TokenInfo[](_cTokenAddresses.length);
 

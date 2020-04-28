@@ -12,7 +12,7 @@ const CompoundMonitor = require('../../build/contracts/CompoundMonitor.json');
 const CompoundSubscriptionsProxy = require('../../build/contracts/CompoundSubscriptionsProxy.json');
 
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
-const compoundLoanInfoAddr = '0x9d16742a47490A47d3f85E06fcfD52aCA3E5A88d';
+const compoundLoanInfoAddr = '0x873B3118BcbC05E46aA1f22349B7875F5a45F4Ea';
 const subscriptionsProxyAddr = '0x43eaA91b4222fAA7222bcE76DCB123Fd6D280884';
 const compoundMonitorAddr = '0xF3aD78068511E4cD6a2FF4bBbAB1585817098393';
 
@@ -83,15 +83,15 @@ function getAbiFunction(contract, functionName) {
 
     // await subscribe('3900000000000000000', '4300000000000000000', '4000000000000000000', '4000000000000000000', true);
 
-    await repayFor('0.003', CETH_ADDRESS, CDAI_ADDRESS, proxyAddr);
+    // await repayFor('0.0001', CETH_ADDRESS, CDAI_ADDRESS, proxyAddr);
 
 })();
 
 const getRatio = async (user) => {
     try {
-        const ratio = await compoundLoanInfo.methods.getRatio(user).call();
+        const ratio = await compoundLoanInfo.methods.getLoanData(user).call();
 
-        return ratio.toString();
+        return ratio;
     } catch(err) {
         console.log(err);
     }
@@ -165,7 +165,7 @@ const repayFor = async (amount, cCollAddress, cBorrowAddress, userAddr) => {
 
         const tx = await compoundMonitor.methods.repayFor(
             [amount, 0, 3, 0, 0], [cCollAddress, cBorrowAddress, zeroAddr], "0x0", userAddr).send({
-                from: account.address, gas: 2300000, gasPrice: 7100000000});
+                from: account.address, gas: 2300000, gasPrice: 5100000000});
 
         console.log(tx);
     } catch(err) {

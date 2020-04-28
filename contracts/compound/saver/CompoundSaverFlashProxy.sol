@@ -6,8 +6,14 @@ import "../../mcd/Discount.sol";
 import "../helpers/CompoundSaverHelper.sol";
 import "../../loggers/CompoundLogger.sol";
 
+/// @title Implements the actual logic of Repay/Boost with FL
 contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
 
+    /// @notice Repays the position and sends tokens back for FL
+    /// @param _data Amount and exchange data [amount, minPrice, exchangeType, gasCost, 0xPrice]
+    /// @param _addrData cTokens addreses and exchange [cCollAddress, cBorrowAddress, exchangeAddress]
+    /// @param _callData 0x callData
+    /// @param _flashLoanData Data about FL [amount, fee]
     function flashRepay(
         uint[5] memory _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
@@ -51,7 +57,12 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
         CompoundLogger(COMPOUND_LOGGER).LogRepay(user, _data[0], swapAmount, collToken, borrowToken);
     }
 
-     function flashBoost(
+    /// @notice Boosts the position and sends tokens back for FL
+    /// @param _data Amount and exchange data [amount, minPrice, exchangeType, gasCost, 0xPrice]
+    /// @param _addrData cTokens addreses and exchange [cCollAddress, cBorrowAddress, exchangeAddress]
+    /// @param _callData 0x callData
+    /// @param _flashLoanData Data about FL [amount, fee]
+    function flashBoost(
         uint[5] memory _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes memory _callData,
@@ -93,16 +104,23 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
         CompoundLogger(COMPOUND_LOGGER).LogBoost(user, _data[0], swapAmount, collToken, borrowToken);
     }
 
-    function depositCollateral(address _collToken, address _cCollToken, uint _swapAmount) internal {
+    /// @notice Helper method to deposit tokens in Compound
+    /// @param _collToken Token address of the collateral
+    /// @param _cCollToken CToken address of the collateral
+    /// @param _depositAmount Amount to deposit
+    function depositCollateral(address _collToken, address _cCollToken, uint _depositAmount) internal {
         approveCToken(_collToken, _cCollToken);
 
         if (_collToken != ETH_ADDRESS) {
-            require(CTokenInterface(_cCollToken).mint(_swapAmount) == 0);
+            require(CTokenInterface(_cCollToken).mint(_depositAmount) == 0);
         } else {
-            CEtherInterface(_cCollToken).mint.value(_swapAmount)(); // reverts on fail
+            CEtherInterface(_cCollToken).mint.value(_depositAmount)(); // reverts on fail
         }
     }
 
+    /// @notice Returns the tokens/ether to the msg.sender which is the FL contract
+    /// @param _tokenAddr Address of token which we return
+    /// @param _amount Amount to return
     function returnFlashLoan(address _tokenAddr, uint _amount) internal {
         if (_tokenAddr != ETH_ADDRESS) {
             ERC20(_tokenAddr).transfer(msg.sender, _amount);

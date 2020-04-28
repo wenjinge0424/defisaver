@@ -4,9 +4,14 @@ import "../../mcd/saver_proxy/ExchangeHelper.sol";
 import "../../loggers/CompoundLogger.sol";
 import "../helpers/CompoundSaverHelper.sol";
 
+/// @title Contract that implements repay/boost functionality
 contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
 
     /// @notice Withdraws collateral, converts to borrowed token and repays debt
+    /// @dev Called through the DSProxy
+    /// @param _data Amount and exchange data for the repay [amount, minPrice, exchangeType, gasCost, 0xPrice]
+    /// @param _addrData Coll/Debt addresses [cCollAddress, cBorrowAddress, exchangeAddress]
+    /// @param _callData 0x calldata info
     function repay(
         uint[5] memory _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
@@ -44,6 +49,10 @@ contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
     }
 
     /// @notice Borrows token, converts to collateral, and adds to position
+    /// @dev Called through the DSProxy
+    /// @param _data Amount and exchange data for the boost [amount, minPrice, exchangeType, gasCost, 0xPrice]
+    /// @param _addrData Coll/Debt addresses [cCollAddress, cBorrowAddress, exchangeAddress]
+    /// @param _callData 0x calldata info
     function boost(
         uint[5] memory _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
@@ -83,7 +92,6 @@ contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
         user.transfer(address(this).balance);
 
         CompoundLogger(COMPOUND_LOGGER).LogBoost(user, _data[0], swapAmount, collToken, borrowToken);
-
     }
 
 }

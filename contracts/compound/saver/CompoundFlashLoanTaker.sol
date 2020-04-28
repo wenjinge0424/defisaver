@@ -5,6 +5,7 @@ import "./CompoundSaverProxy.sol";
 import "../../flashloan/FlashLoanLogger.sol";
 import "../../auth/ProxyPermission.sol";
 
+/// @title Entry point for the FL Repay Boosts, called by DSProxy
 contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
@@ -15,6 +16,10 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission {
         0xb9303686B0EE92F92f63973EF85f3105329D345c
     );
 
+    /// @notice Repays the position with it's own fund or with FL if needed
+    /// @param _data Amount and exchange data [amount, minPrice, exchangeType, gasCost, 0xPrice]
+    /// @param _addrData cTokens addreses and exchange [cCollAddress, cBorrowAddress, exchangeAddress]
+    /// @param _callData 0x callData
     function repayWithLoan(
         uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
@@ -41,6 +46,10 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission {
         }
     }
 
+    /// @notice Boosts the position with it's own fund or with FL if needed
+    /// @param _data Amount and exchange data [amount, minPrice, exchangeType, gasCost, 0xPrice]
+    /// @param _addrData cTokens addreses and exchange [cCollAddress, cBorrowAddress, exchangeAddress]
+    /// @param _callData 0x callData
     function boostWithLoan(
         uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress

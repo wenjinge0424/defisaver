@@ -4,6 +4,7 @@ import "../../flashloan/aave/FlashLoanReceiverBase.sol";
 import "../../interfaces/DSProxyInterface.sol";
 import "../../interfaces/ERC20.sol";
 
+/// @title Contract that receives the FL from Aave for Repays/Boost
 contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
@@ -18,6 +19,11 @@ contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
             owner = msg.sender;
     }
 
+    /// @notice Called by Aave when sending back the FL amount
+    /// @param _reserve The address of the borrowed token
+    /// @param _amount Amount of FL tokens received
+    /// @param _fee FL Aave fee
+    /// @param _params The params that are sent from the original FL caller contract
    function executeOperation(
         address _reserve,
         uint256 _amount,
@@ -42,6 +48,11 @@ contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
         }
     }
 
+    /// @notice Formats function data call so we can call it through DSProxy
+    /// @param _amount Amount of FL
+    /// @param _fee Fee of the FL
+    /// @param _params Saver proxy params
+    /// @return proxyData Formated function call data
     function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal returns (bytes memory proxyData, address payable) {
         (
             uint[5] memory data, // amount, minPrice, exchangeType, gasCost, 0xPrice
@@ -63,6 +74,10 @@ contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
         return (proxyData, proxyAddr);
     }
 
+    /// @notice Send the FL funds received to DSProxy
+    /// @param _proxy DSProxy address
+    /// @param _reserve Token address
+    /// @param _amount Amount of tokens
     function sendLoanToProxy(address payable _proxy, address _reserve, uint _amount) internal {
         if (_reserve != ETH_ADDRESS) {
             ERC20(_reserve).transfer(_proxy, _amount);
@@ -71,6 +86,9 @@ contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
         _proxy.transfer(address(this).balance);
     }
 
+    /// @notice Sets the Saver flash proxy address
+    /// @dev Only callable once by the owner
+    /// @param _saverFlashProxy The flash proxy address
     function setSaverFlashProxy(address payable _saverFlashProxy) public {
         require(msg.sender == owner);
 
