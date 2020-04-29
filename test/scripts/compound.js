@@ -14,7 +14,7 @@ const BridgeFlashLoanTaker = require('../build/contracts/BridgeFlashLoanTaker.js
 const CompoundLoanInfo = require('../build/contracts/CompoundLoanInfo.json');
 
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
-const compoundBasicProxyAddr = '0x12f8551a516085E4cEf5e2451D54ede7d24983cC';
+const compoundBasicProxyAddr = '0x0F1e33A36fA6a33Ea01460F04c6D8F1FAc2186E3';
 const compoundSaverProxyAddr = '0xff97C79d207FC3D7a51531d0fa93581cf8E0105D';
 const compoundFlashLoanTakerAddr = '0x2f59bf2779c9AB965ca6BF63F5Eb1504C5B36D38';
 const bridgeFlashLoanTakerAddr = '0x4b922507b808d3895c2213a2b4c4720756b4d9e0';

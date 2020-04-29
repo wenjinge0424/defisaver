@@ -9,7 +9,7 @@ contract CompoundImportFlashLoan is FlashLoanReceiverBase {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
-    address public constant COMPOUND_BASIC_PROXY = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
+    address public constant COMPOUND_BASIC_PROXY = 0x0F1e33A36fA6a33Ea01460F04c6D8F1FAc2186E3;
 
     constructor()
         FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
