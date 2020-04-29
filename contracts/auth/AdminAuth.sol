@@ -18,7 +18,7 @@ contract AdminAuth {
     /// @param _admin Address of multisig that becomes admin
     function setAdminByOwner(address _admin) public {
         require(msg.sender == owner);
-        require(_admin == address(0));
+        require(admin == address(0));
 
         admin = _admin;
     }
