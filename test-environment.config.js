@@ -23,6 +23,6 @@ module.exports = {
       gasPrice: 20e9, // Sets the default gas price for transactions if not otherwise specified.
       networkId: 1,
       fork: `${process.env.INFURA_ENDPOINT}`, // An url to Ethereum node to use as a source for a fork
-      unlocked_accounts: ['0x7d6149aD9A573A6E2Ca6eBf7D4897c1B766841B4'], // Array of addresses specifying which accounts should be unlocked.
+      // unlocked_accounts: [''], // Array of addresses specifying which accounts should be unlocked.
     },
   };
