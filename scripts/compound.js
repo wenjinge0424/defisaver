@@ -4,14 +4,14 @@ const Web3 = require('web3');
 
 require('dotenv').config();
 
-const DSProxy = require('../build/contracts/DSProxy.json');
-const ProxyRegistryInterface = require('../build/contracts/ProxyRegistryInterface.json');
-const CompoundBasicProxy = require('../build/contracts/CompoundBasicProxy.json');
-const CompoundSaverProxy = require('../build/contracts/CompoundSaverProxy.json');
-const CTokenInterface = require('../build/contracts/CTokenInterface.json');
-const CompoundFlashLoanTaker = require('../build/contracts/CompoundFlashLoanTaker.json');
-const BridgeFlashLoanTaker = require('../build/contracts/BridgeFlashLoanTaker.json');
-const CompoundLoanInfo = require('../build/contracts/CompoundLoanInfo.json');
+const DSProxy = require('../../build/contracts/DSProxy.json');
+const ProxyRegistryInterface = require('../../build/contracts/ProxyRegistryInterface.json');
+const CompoundBasicProxy = require('../../build/contracts/CompoundBasicProxy.json');
+const CompoundSaverProxy = require('../../build/contracts/CompoundSaverProxy.json');
+const CTokenInterface = require('../../build/contracts/CTokenInterface.json');
+const CompoundFlashLoanTaker = require('../../build/contracts/CompoundFlashLoanTaker.json');
+const BridgeFlashLoanTaker = require('../../build/contracts/BridgeFlashLoanTaker.json');
+const CompoundLoanInfo = require('../../build/contracts/CompoundLoanInfo.json');
 
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
 const compoundBasicProxyAddr = '0x0F1e33A36fA6a33Ea01460F04c6D8F1FAc2186E3';
@@ -81,7 +81,7 @@ function getAbiFunction(contract, functionName) {
     await initContracts();
 
     // await deposit(ETH_ADDRESS, CETH_ADDRESS, '0.05', false);
-    // await withdraw(ETH_ADDRESS, CETH_ADDRESS, '0.02498541', true);
+    await withdraw(ETH_ADDRESS, CETH_ADDRESS, '0.015', true);
     // await borrow(DAI_ADDRESS, CDAI_ADDRESS, '2.6', false);
     // await payback(DAI_ADDRESS, CDAI_ADDRESS, '0.5', true);
 
@@ -133,7 +133,7 @@ const withdraw = async (tokenAddr, cTokenAddr, amount, isCAmount) => {
           [tokenAddr, cTokenAddr, amount, isCAmount]);
 
         const tx = await proxy.methods['execute(address,bytes)'](compoundBasicProxyAddr, data).send({
-            from: account.address, gas: 400000, gasPrice: 8100000000 });
+            from: account.address, gas: 400000, gasPrice: 9100000000 });
 
         console.log(tx);
     } catch(err) {
