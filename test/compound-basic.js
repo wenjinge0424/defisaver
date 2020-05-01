@@ -1,4 +1,4 @@
-const { accounts, contract, web3, provider } = require('@openzeppelin/test-environment');
+let { accounts, contract, web3, provider } = require('@openzeppelin/test-environment');
 const { expectEvent, balance } = require('@openzeppelin/test-helpers');
 
 const DSProxy = contract.fromArtifact("DSProxy");
@@ -7,7 +7,7 @@ const CompoundBasicProxy = contract.fromArtifact("CompoundBasicProxy");
 
 const { expect } = require('chai');
 
-const { getAbiFunction } = require('./helper.js');
+const { getAbiFunction, loadAccounts, getAccounts } = require('./helper.js');
 
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 const CETH_ADDRESS = '0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5';
@@ -18,19 +18,22 @@ describe("Compound Basic", () => {
 
     let registry, proxy, compoundBasicProxy;
 
-    const [ user ] = accounts;
+    let accounts;
 
     before(async () => {
+
+        web3 = loadAccounts(web3);
+        accounts = getAccounts(web3);
 
         registry = await ProxyRegistryInterface.at("0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4");
         compoundBasicProxy = await CompoundBasicProxy.at(compoundBasicProxyAddr);
 
-        await registry.build(user);
+        // await registry.build(accounts[0], {from: accounts[0]});
 
-        const proxyAddr = await registry.proxies(user);
+        const proxyAddr = await registry.proxies(accounts[0]);
         proxy = await DSProxy.at(proxyAddr);
 
-        const balanceEth = await balance.current(user, 'ether')
+        const balanceEth = await balance.current(accounts[0], 'ether')
 
         console.log(balanceEth.toString());
 
@@ -45,7 +48,7 @@ describe("Compound Basic", () => {
         let value = amount;
 
         const receipt = await proxy.methods['execute(address,bytes)'](compoundBasicProxyAddr, data, {
-            from: user, value});
+            from: accounts[0], value});
 
     });
 

@@ -18,11 +18,9 @@ module.exports = {
       artifactsDir: 'build/contracts', // Directory where contract artifacts are stored
     },
 
-    node: { // Options passed directly to Ganache client
-      gasLimit: 8e6, // Maximum gas per block
-      gasPrice: 20e9, // Sets the default gas price for transactions if not otherwise specified.
-      networkId: 1,
-      fork: `${process.env.INFURA_ENDPOINT}`, // An url to Ethereum node to use as a source for a fork
-      // unlocked_accounts: [''], // Array of addresses specifying which accounts should be unlocked.
-    },
+    setupProvider: (baseProvider) => {
+        baseProvider.host = `${process.env.MOON_NET_KEY}`;
+
+        return baseProvider;
+      },
   };
