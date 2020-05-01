@@ -4,12 +4,12 @@ const Web3 = require('web3');
 
 require('dotenv').config();
 
-const DSProxy = require('../../build/contracts/DSProxy.json');
-const ProxyRegistryInterface = require('../../build/contracts/ProxyRegistryInterface.json');
-const CTokenInterface = require('../../build/contracts/CTokenInterface.json');
-const CompoundLoanInfo = require('../../build/contracts/CompoundLoanInfo.json');
-const CompoundMonitor = require('../../build/contracts/CompoundMonitor.json');
-const CompoundSubscriptionsProxy = require('../../build/contracts/CompoundSubscriptionsProxy.json');
+const DSProxy = require('../build/contracts/DSProxy.json');
+const ProxyRegistryInterface = require('../build/contracts/ProxyRegistryInterface.json');
+const CTokenInterface = require('../build/contracts/CTokenInterface.json');
+const CompoundLoanInfo = require('../build/contracts/CompoundLoanInfo.json');
+const CompoundMonitor = require('../build/contracts/CompoundMonitor.json');
+const CompoundSubscriptionsProxy = require('../build/contracts/CompoundSubscriptionsProxy.json');
 
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
 const compoundLoanInfoAddr = '0x873B3118BcbC05E46aA1f22349B7875F5a45F4Ea';
@@ -51,7 +51,7 @@ const getTokenJoinAddr = (type) => {
 }
 
 const initContracts = async () => {
-    web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_ENDPOINT));
+    web3 = new Web3(new Web3.providers.HttpProvider(process.env.MOON_NET_NODE));
 
     account = web3.eth.accounts.privateKeyToAccount('0x'+process.env.PRIV_KEY)
     web3.eth.accounts.wallet.add(account)

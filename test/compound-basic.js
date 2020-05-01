@@ -39,7 +39,7 @@ describe("Compound Basic", () => {
 
     });
 
-    it('...should despoit 1 Eth into Compound through proxy and enter the market', async () => {
+    it('...should deposit 1 Eth into Compound through proxy and enter the market', async () => {
         const amount = web3.utils.toWei('1', 'ether');
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundBasicProxy, 'deposit'),

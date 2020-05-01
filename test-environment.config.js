@@ -19,7 +19,7 @@ module.exports = {
     },
 
     setupProvider: (baseProvider) => {
-        baseProvider.host = `${process.env.MOON_NET_KEY}`;
+        baseProvider.host = `${process.env.MOON_NET_NODE}`;
 
         return baseProvider;
       },
