@@ -30,11 +30,6 @@ describe("Compound Basic", () => {
 
         const proxyInfo = await getProxy(registry, accounts[0]);
         proxy = proxyInfo.proxy;
-        
-        const balanceEth = await balance.current(accounts[0], 'ether')
-
-        console.log(balanceEth.toString());
-
     });
 
     it('...should deposit 1 Eth into Compound through proxy and enter the market', async () => {
