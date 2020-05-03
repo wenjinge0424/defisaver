@@ -3,6 +3,8 @@ const DSProxy = contract.fromArtifact("DSProxy");
 const axios = require('axios');
 
 const nullAddress = "0x0000000000000000000000000000000000000000";
+const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+const saverExchangeAddress = "0x64C5cc449bD253D7fd57751c9080ACcd0216126d";
 
 const fetchMakerAddresses = async (version, params = {}) => {
     const url = `https://changelog.makerdao.com/releases/mainnet/${version}/contracts.json`;
@@ -52,5 +54,7 @@ module.exports = {
     getAccounts,
     nullAddress,
     getProxy,
-    fetchMakerAddresses
+    fetchMakerAddresses,
+    saverExchangeAddress,
+    ETH_ADDRESS
 };
