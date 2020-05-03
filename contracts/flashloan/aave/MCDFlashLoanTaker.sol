@@ -14,8 +14,8 @@ contract IMCDSubscriptions {
 
 contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
 
-    address payable public constant MCD_SAVER_FLASH_LOAN = 0x0308ACc5Edf725Dc6ba65EaDF24cbC8353a3b37B;
-    address payable public constant MCD_CLOSE_FLASH_LOAN = 0xc8f1d54D68CB83B353D80DB5CCF174dBb1a3C96a;
+    address payable public constant MCD_SAVER_FLASH_LOAN = 0xCcFb21Ced87762a1d8425F867a7F8Ec2dFfaBE92;
+    address payable public constant MCD_CLOSE_FLASH_LOAN = 0xfCF3e72445D105c38C0fDC1a0687BDEeb8947a93;
     address payable public constant MCD_OPEN_FLASH_LOAN = 0x86E132932566fb7030eeF19B997C8797De13CFBD;
 
     address public constant SUBSCRIPTION_ADDRESS_NEW = 0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a;
