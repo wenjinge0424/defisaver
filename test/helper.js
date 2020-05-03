@@ -1,3 +1,16 @@
+let { contract } = require('@openzeppelin/test-environment');
+const DSProxy = contract.fromArtifact("DSProxy");
+const axios = require('axios');
+
+const nullAddress = "0x0000000000000000000000000000000000000000";
+
+const fetchMakerAddresses = async (version, params = {}) => {
+    const url = `https://changelog.makerdao.com/releases/mainnet/${version}/contracts.json`;
+
+    const res = await axios.get(url, params);
+
+    return res.data;
+};
 
 const loadAccounts = (web3) => {
     const account = web3.eth.accounts.privateKeyToAccount('0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d')
@@ -20,8 +33,24 @@ const getAbiFunction = (contract, functionName) => {
 };
 
 
+const getProxy = async (registry, acc) => {
+    let proxyAddr = await registry.proxies(acc);
+    
+    if (proxyAddr === nullAddress) {
+        await registry.build(acc, {from: acc});
+        proxyAddr = await registry.proxies(acc);
+    }
+
+    proxy = await DSProxy.at(proxyAddr);
+
+    return { proxy, proxyAddr };
+}
+
 module.exports = {
     getAbiFunction,
     loadAccounts,
     getAccounts,
+    nullAddress,
+    getProxy,
+    fetchMakerAddresses
 };

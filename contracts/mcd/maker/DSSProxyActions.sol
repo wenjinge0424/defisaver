@@ -100,7 +100,7 @@ contract DssProxyActions {
     function hope(address obj, address usr) public;
     function nope(address obj, address usr) public;
 
-    function open(address manager, bytes32 ilk) public returns (uint cdp);
+    function open(address manager, bytes32 ilk, address usr) public returns (uint cdp);
     function give(address manager, uint cdp, address usr) public;
     function giveToProxy(address proxyRegistry, address manager, uint cdp, address dst) public;
 

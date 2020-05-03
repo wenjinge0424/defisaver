@@ -1,66 +1,81 @@
+let { accounts, contract, web3, provider } = require('@openzeppelin/test-environment');
+const { expectEvent, balance } = require('@openzeppelin/test-helpers');
+const { expect } = require('chai');
 
-// const DSProxy = artifacts.require("./DSProxy.sol");
-// const ProxyRegistryInterface = artifacts.require("./ProxyRegistryInterface.sol");
-// const ERC20 = artifacts.require("./ERC20.sol");
-// const Join = artifacts.require("./Join.sol");
-// const DSSProxyActions = artifacts.require("./DSSProxyActions.sol");
-// const GetCdps = artifacts.require('./GetCdps.sol');
+const { getAbiFunction, loadAccounts, getAccounts, getProxy, fetchMakerAddresses } = require('./helper.js');
 
-// contract("MCDBasic", accounts => {
+const DSProxy = contract.fromArtifact("DSProxy");
+const ProxyRegistryInterface = contract.fromArtifact("ProxyRegistryInterface");
+const ERC20 = contract.fromArtifact("ERC20");
+const Join = contract.fromArtifact("Join");
+const GetCdps = contract.fromArtifact('GetCdps');
+const DSSProxyActions = contract.fromArtifact('DssProxyActions');
 
-//     let account = accounts[0];
-//     let registry, proxy, join, getCdps;
+const makerVersion = "1.0.6";
 
-//     const proxyRegistryAddr = '0x64a436ae831c1672ae81f674cab8b6775df3475c';
-//     const proxyActionsAddr = '0xc21274797a01e133ebd9d79b23498edbd7166137';
-//     const cdpManagerAddr = '0x1cb0d969643af4e929b3fafa5ba82950e31316b8';
-//     const ethAJoinAddr = '0xc3abba566bb62c09b7f94704d8dfd9800935d3f9';
-//     const getCdpsAddr = '0xb5907a51e3b747dbf9d5125ab77eff3a55e50b7d';
+describe("MCDBasic", accounts => {
+    let registry, proxy, join, getCdps, proxyAddr, ethJoin, wbtcJoin, makerAddresses;
 
-//     const ethIlk = '0x4554482d41000000000000000000000000000000000000000000000000000000';
+    before(async () => {
+    	console.log("1");
+    	makerAddresses = await fetchMakerAddresses(makerVersion);
 
-//     function getAbiFunction(contract, functionName) {
-//         const abi = contract.toJSON().abi;
+    	console.log("2");
+        web3 = loadAccounts(web3);
+        console.log("3");
+        accounts = getAccounts(web3);
 
-//         return abi.find(abi => abi.name === functionName);
-//     }
+        console.log("4");
+        registry = await ProxyRegistryInterface.at(makerAddresses["PROXY_REGISTRY"]);
 
-//     before(async () => {
-//         registry = await ProxyRegistryInterface.at(proxyRegistryAddr);
+        console.log("5");
+        const proxyInfo = await getProxy(registry, accounts[0]);
+        proxy = proxyInfo.proxy;
+        proxyAddr = proxyInfo.proxyAddr;
+        console.log("6");
 
-//         const proxyAddr = await registry.proxies(account);
-//         proxy = await DSProxy.at(proxyAddr);
+        getCdps = await GetCdps.at(makerAddresses["GET_CDPS"]);
+        ethJoin = await Join.at(makerAddresses["MCD_JOIN_ETH_A"]);
+        wbtcJoin = await Join.at(makerAddresses["MCD_JOIN_WBTC_A"]);
+        batJoin = await Join.at(makerAddresses["MCD_JOIN_BAT_A"])
+        usdcJoin = await Join.at(makerAddresses["MCD_JOIN_USDC_A"])
+        console.log("7");
 
-//         join = await Join.at(ethAJoinAddr);
-//         getCdps = await GetCdps.at(getCdpsAddr);
+        const balanceEth = await balance.current(accounts[0], 'ether')
+        console.log("Acc balance: ", balanceEth.toString());
 
-//     });
+    });
 
-//     // it('...get info', async () => {
+    it('...get info', async () => {
 
-//     //     console.log(join.methods);
-//     //     const ilk = await join.ilk.call();
+        const ilk = await ethJoin.ilk();
 
-//     //     console.log(ilk.toString());
-//     // });
+        console.log(ilk.toString());
+    });
 
-//     it('... reads all the CDPs', async () => {
-//         const cdps = await getCdps.getCdpsAsc.call(cdpManagerAddr, proxyAddr);
+    it('... reads all the CDPs', async () => {
+        const cdps = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
 
-//         console.log(cdps);
-//     });
+        console.log(cdps);
+    });
 
-//     it('...open a mCDP', async () => {
-//         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'open'),
-//          [cdpManagerAddr, ethIlk]);
+    it('... should be able to open ETH CDP', async () => {
+    	const ethIlk = await ethJoin.ilk();
 
-//          try {
-//             const tx = await proxy.methods['execute(address,bytes)'](proxyActionsAddr, data, {from: account});
-//             console.log(tx);
-//          } catch(err) {
-//              console.log(err);
-//          }
-//     });
+    	const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(DSSProxyActions, 'open'),
+         [makerAddresses['CDP_MANAGER'], ethIlk, proxyAddr]);
 
+    	const cdpsBefore = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
 
-// });
+    	const receipt = await proxy.execute(makerAddresses['PROXY_ACTIONS'], data, {
+            from: accounts[0]});
+
+    	const cdpsAfter = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
+
+    	console.log(receipt);
+    	console.log(cdpsBefore.ids.length);
+    	console.log(cdpsAfter.ids.length);
+
+    	expect(cdpsAfter.ids.length).to.equal(cdpsBefore.ids.length+1);
+    });
+});

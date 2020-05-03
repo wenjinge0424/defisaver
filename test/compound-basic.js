@@ -7,7 +7,7 @@ const CompoundBasicProxy = contract.fromArtifact("CompoundBasicProxy");
 
 const { expect } = require('chai');
 
-const { getAbiFunction, loadAccounts, getAccounts } = require('./helper.js');
+const { getAbiFunction, loadAccounts, getAccounts, getProxy } = require('./helper.js');
 
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 const CETH_ADDRESS = '0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5';
@@ -28,11 +28,9 @@ describe("Compound Basic", () => {
         registry = await ProxyRegistryInterface.at("0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4");
         compoundBasicProxy = await CompoundBasicProxy.at(compoundBasicProxyAddr);
 
-        // await registry.build(accounts[0], {from: accounts[0]});
-
-        const proxyAddr = await registry.proxies(accounts[0]);
-        proxy = await DSProxy.at(proxyAddr);
-
+        const proxyInfo = await getProxy(registry, accounts[0]);
+        proxy = proxyInfo.proxy;
+        
         const balanceEth = await balance.current(accounts[0], 'ether')
 
         console.log(balanceEth.toString());
@@ -51,6 +49,4 @@ describe("Compound Basic", () => {
             from: accounts[0], value});
 
     });
-
-
 });
