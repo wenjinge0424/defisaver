@@ -8,6 +8,7 @@ import "../Discount.sol";
 import "../maker/Spotter.sol";
 import "../maker/Jug.sol";
 import "../maker/DaiJoin.sol";
+import "../maker/Join.sol";
 
 import "./ExchangeHelper.sol";
 import "./SaverProxyHelper.sol";
@@ -192,13 +193,17 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
     /// @param _joinAddr Address of the join contract for the CDP collateral
     /// @param _amount Amount of collateral to draw
     function drawCollateral(uint _cdpId, bytes32 _ilk, address _joinAddr, uint _amount) internal returns (uint) {
-        uint maxCollateral = getMaxCollateral(_cdpId, _ilk);
+        uint maxCollateral = getMaxCollateral(_cdpId, _ilk, _joinAddr);
 
         if (_amount >= maxCollateral) {
             _amount = sub(maxCollateral, 1);
         }
 
-        uint frobAmount = _ilk == USDC_ILK ? _amount * (10 ** 12) : _amount;
+        uint frobAmount = _amount;
+
+        if (Join(_joinAddr).dec() != 18) {
+            frobAmount = _amount * (10 ** (18 - Join(_joinAddr).dec()));
+        }
 
         manager.frob(_cdpId, -toPositiveInt(frobAmount), 0);
         manager.flux(_cdpId, address(this), frobAmount);
@@ -265,8 +270,9 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
     /// @notice Gets the maximum amount of collateral available to draw
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
+    /// @param _joinAddr Joind address of collateral
     /// @dev Substracts 10 wei to aviod rounding error later on
-    function getMaxCollateral(uint _cdpId, bytes32 _ilk) public view returns (uint) {
+    function getMaxCollateral(uint _cdpId, bytes32 _ilk, address _joinAddr) public view returns (uint) {
         uint price = getPrice(_ilk);
 
         (uint collateral, uint debt) = getCdpInfo(manager, _cdpId, _ilk);
@@ -275,7 +281,11 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
 
         uint maxCollateral = sub(sub(collateral, (div(mul(mat, debt), price))), 10);
 
-        uint normalizeMaxCollateral = _ilk == USDC_ILK ? maxCollateral / (10 ** 12) : maxCollateral;
+        uint normalizeMaxCollateral = maxCollateral;
+
+        if (Join(_joinAddr).dec() != 18) {
+            normalizeMaxCollateral = maxCollateral / (10 ** (18 - Join(_joinAddr).dec()));
+        }
 
         return normalizeMaxCollateral;
     }

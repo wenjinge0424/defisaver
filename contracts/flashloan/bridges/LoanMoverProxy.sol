@@ -71,7 +71,11 @@ contract LoanMoverProxy is MCDSaverProxy {
         manager.frob(_cdpId, -toPositiveInt(_amount), 0);
         manager.flux(_cdpId, address(this), _amount);
 
-        uint joinAmount = _ilk == USDC_ILK ? _amount / (10 ** 12) : _amount;
+        uint joinAmount = _amount;
+
+        if (Join(_joinAddr).dec() != 18) {
+            joinAmount = _amount / (10 ** (18 - Join(_joinAddr).dec()));
+        }
 
         Join(_joinAddr).exit(address(this), joinAmount);
 

@@ -105,7 +105,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         address owner = getOwner(MANAGER, _data[0]);
 
         // Draw collateral
-        amounts[0] = getMaxCollateral(_data[0], manager.ilks(_data[0]));
+        amounts[0] = getMaxCollateral(_data[0], manager.ilks(_data[0]), _joinAddr);
         amounts[1] = drawCollateral(_data[0], manager.ilks(_data[0]), _joinAddr, amounts[0]);
 
         // Swap for Dai
