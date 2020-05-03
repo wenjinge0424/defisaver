@@ -62,6 +62,7 @@ contract HopeLike {
 }
 
 contract ProxyRegistryInterface {
+    function proxies(address _owner) public view returns (address);
     function build(address) public returns (address);
 }
 
