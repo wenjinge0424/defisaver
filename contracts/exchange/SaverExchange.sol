@@ -5,18 +5,13 @@ import "../interfaces/TokenInterface.sol";
 import "../DS/DSMath.sol";
 import "./SaverExchangeConstantAddresses.sol";
 import "../mcd/Discount.sol";
-
+import "../loggers/ExchangeLogger.sol";
 
 contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
     uint256 public constant SERVICE_FEE = 800; // 0.125% Fee
 
-    event Swap(
-        address src,
-        address dest,
-        uint256 amountSold,
-        uint256 amountBought,
-        address wrapper
-    );
+    // solhint-disable-next-line const-name-snakecase
+    ExchangeLogger public constant logger = ExchangeLogger(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     function swapTokenToToken(
         address _src,
@@ -42,6 +37,7 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
 
         uint256 fee = takeFee(_amount, orderAddresses[1]);
         _amount = sub(_amount, fee);
+
         // [tokensReturned, tokensLeft]
         uint256[2] memory tokens;
         address wrapper;
@@ -91,7 +87,7 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
                 // either it reverts or order doesn't exist anymore
                 if (success && tokens[0] > 0) {
                     wrapper = address(_exchangeAddress);
-                    emit Swap(orderAddresses[1], orderAddresses[2], _amount, tokens[0], wrapper);
+                    logger.emitSwap(orderAddresses[1], orderAddresses[2], _amount, tokens[0], wrapper);
                 }
             }
 
@@ -132,7 +128,7 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
                     }
                 }
 
-                emit Swap(orderAddresses[1], orderAddresses[2], _amount, tokens[0], wrapper);
+                logger.emitSwap(orderAddresses[1], orderAddresses[2], _amount, tokens[0], wrapper);
             }
         }
 
