@@ -1,4 +1,5 @@
 pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
 
 import "../interfaces/ExchangeInterface.sol";
 import "../interfaces/TokenInterface.sol";
@@ -10,191 +11,137 @@ import "../loggers/ExchangeLogger.sol";
 contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
     uint256 public constant SERVICE_FEE = 800; // 0.125% Fee
 
+
     // solhint-disable-next-line const-name-snakecase
     ExchangeLogger public constant logger = ExchangeLogger(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
-    function swapTokenToToken(
-        address _src,
-        address _dest,
-        uint256 _amount,
-        uint256 _minPrice,
-        uint256 _exchangeType,
-        address _exchangeAddress,
-        bytes memory _callData,
-        uint256 _0xPrice
-    ) public payable {
-        // use this to avoid stack too deep error
-        address[3] memory orderAddresses = [_exchangeAddress, _src, _dest];
+    // first is empty to keep the legacy order in place
+    enum ExchangeType { _, OASIS, KYBER, UNISWAP, ZEROX }
 
-        if (orderAddresses[1] == KYBER_ETH_ADDRESS) {
-            require(msg.value >= _amount, "msg.value smaller than amount");
-        } else {
-            require(
-                ERC20(orderAddresses[1]).transferFrom(msg.sender, address(this), _amount),
-                "Not able to withdraw wanted amount"
-            );
-        }
+    struct ExchangeData {
+        address srcAddr;
+        address destAddr;
+        uint amount;
+        uint minPrice;
+        ExchangeType exchangeType;
+        address exchangeAddr;
+        bytes callData;
+        uint256 price0x;
+    }
 
-        uint256 fee = takeFee(_amount, orderAddresses[1]);
-        _amount = sub(_amount, fee);
+    function swap(ExchangeData memory exData) public payable {
+        // transfer tokens from the user
+        pullTokens(exData.srcAddr, exData.amount);
 
-        // [tokensReturned, tokensLeft]
-        uint256[2] memory tokens;
+        // take fee
+        uint dfsFee = takeFee(exData.amount, exData.srcAddr);
+        exData.amount = sub(exData.amount, dfsFee);
+
         address wrapper;
-        uint256 price;
+        uint swapedTokens;
         bool success;
 
-        // at the beggining tokensLeft equals _amount
-        tokens[1] = _amount;
+        // if 0x is selected try first the 0x order
+        if (exData.exchangeType == ExchangeType.ZEROX) {
+            approve0xProxy(exData.srcAddr, exData.amount);
 
-        if (_exchangeType == 4) {
-            if (orderAddresses[1] != KYBER_ETH_ADDRESS) {
-                ERC20(orderAddresses[1]).approve(address(ERC20_PROXY_0X), _amount);
-            }
-
-            (success, tokens[0], ) = takeOrder(
-                orderAddresses,
-                _callData,
+            (success, swapedTokens, ) = takeOrder(
+                exData.exchangeAddr,
+                exData.srcAddr,
+                exData.destAddr,
+                exData.callData,
                 address(this).balance,
-                _amount
+                exData.amount
             );
+
             // either it reverts or order doesn't exist anymore, we reverts as it was explicitely asked for this exchange
-            require(success && tokens[0] > 0, "0x transaction failed");
-            wrapper = address(_exchangeAddress);
+            require(success && swapedTokens > 0, "0x transaction failed");
+
+            wrapper = exData.exchangeAddr;
         }
 
-        if (tokens[0] == 0) {
-            (wrapper, price) = getBestPrice(
-                _amount,
-                orderAddresses[1],
-                orderAddresses[2],
-                _exchangeType
-            );
+        // check if we have already swapped with 0x, or tried swapping but failed
+        if (swapedTokens == 0) {
 
-            require(price > _minPrice || _0xPrice > _minPrice, "Slippage hit");
+            uint price;
+            uint tokensLeft = exData.amount;
 
-            // handle 0x exchange, if equal price, try 0x to use less gas
-            if (_0xPrice >= price) {
-                if (orderAddresses[1] != KYBER_ETH_ADDRESS) {
-                    ERC20(orderAddresses[1]).approve(address(ERC20_PROXY_0X), _amount);
-                }
-                (success, tokens[0], tokens[1]) = takeOrder(
-                    orderAddresses,
-                    _callData,
+            (wrapper, price)
+                = getBestPrice(exData.amount, exData.srcAddr, exData.destAddr, exData.exchangeType);
+
+            require(price > exData.minPrice || exData.price0x > exData.minPrice, "Slippage hit");
+
+            // if 0x has better prices use 0x
+            if (exData.price0x >= price) {
+                approve0xProxy(exData.srcAddr, exData.amount);
+
+                (success, swapedTokens, ) = takeOrder(
+                    exData.exchangeAddr,
+                    exData.srcAddr,
+                    exData.destAddr,
+                    exData.callData,
                     address(this).balance,
-                    _amount
+                    exData.amount
                 );
-                // either it reverts or order doesn't exist anymore
-                if (success && tokens[0] > 0) {
-                    wrapper = address(_exchangeAddress);
-                    logger.emitSwap(orderAddresses[1], orderAddresses[2], _amount, tokens[0], wrapper);
-                }
             }
 
-            if (tokens[1] > 0) {
-                // in case 0x swapped just some amount of tokens and returned everything else
-                if (tokens[1] != _amount) {
-                    (wrapper, price) = getBestPrice(
-                        tokens[1],
-                        orderAddresses[1],
-                        orderAddresses[2],
-                        _exchangeType
-                    );
-                }
-
-                // in case 0x failed, price on other exchanges still needs to be higher than minPrice
-                require(price > _minPrice, "Slippage hit onchain price");
-                if (orderAddresses[1] == KYBER_ETH_ADDRESS) {
-                    (tokens[0], ) = ExchangeInterface(wrapper).swapEtherToToken.value(tokens[1])(
-                        tokens[1],
-                        orderAddresses[2],
-                        uint256(-1)
-                    );
-                } else {
-                    ERC20(orderAddresses[1]).transfer(wrapper, tokens[1]);
-
-                    if (orderAddresses[2] == KYBER_ETH_ADDRESS) {
-                        tokens[0] = ExchangeInterface(wrapper).swapTokenToEther(
-                            orderAddresses[1],
-                            tokens[1],
-                            uint256(-1)
-                        );
-                    } else {
-                        tokens[0] = ExchangeInterface(wrapper).swapTokenToToken(
-                            orderAddresses[1],
-                            orderAddresses[2],
-                            tokens[1]
-                        );
-                    }
-                }
-
-                logger.emitSwap(orderAddresses[1], orderAddresses[2], _amount, tokens[0], wrapper);
+            // 0x either had worse price or we tried and order fill failed, so call on chain swap
+            if (tokensLeft > 0) {
+                swapedTokens = saverSwap(exData, wrapper);
             }
         }
 
-        // return whatever is left in contract
+        // send back any leftover ether or tokens
         if (address(this).balance > 0) {
             msg.sender.transfer(address(this).balance);
         }
 
-        // return if there is any tokens left
-        if (orderAddresses[2] != KYBER_ETH_ADDRESS) {
-            if (ERC20(orderAddresses[2]).balanceOf(address(this)) > 0) {
-                ERC20(orderAddresses[2]).transfer(
-                    msg.sender,
-                    ERC20(orderAddresses[2]).balanceOf(address(this))
-                );
-            }
+        if (getBalance(exData.srcAddr) > 0) {
+            ERC20(exData.srcAddr).transfer(msg.sender, getBalance(exData.srcAddr));
         }
 
-        if (orderAddresses[1] != KYBER_ETH_ADDRESS) {
-            if (ERC20(orderAddresses[1]).balanceOf(address(this)) > 0) {
-                ERC20(orderAddresses[1]).transfer(
-                    msg.sender,
-                    ERC20(orderAddresses[1]).balanceOf(address(this))
-                );
-            }
+        if (getBalance(exData.destAddr) > 0) {
+            ERC20(exData.destAddr).transfer(msg.sender, getBalance(exData.destAddr));
         }
+
+        logger.emitSwap(exData.srcAddr, exData.destAddr, exData.amount, swapedTokens, wrapper);
     }
 
     // @notice Takes order from 0x and returns bool indicating if it is successful
-    // @param _addresses [exchange, src, dst]
     // @param _data Data to send with call
     // @param _value Value to send with call
     // @param _amount Amount being sold
     function takeOrder(
-        address[3] memory _addresses,
+        address _exchangeAddr,
+        address _srcAddr,
+        address _destAddr,
         bytes memory _data,
         uint256 _value,
         uint256 _amount
-    ) private returns (bool, uint256, uint256) {
-        bool success;
+    ) private returns (bool success, uint256, uint256) {
 
         // solhint-disable-next-line avoid-call-value
-        (success, ) = _addresses[0].call.value(_value)(_data);
+        (success, ) = _exchangeAddr.call.value(_value)(_data);
 
+        uint256 tokensSwaped = 0;
         uint256 tokensLeft = _amount;
-        uint256 tokensReturned = 0;
-        if (success) {
-            // check how many tokens left from _src
-            if (_addresses[1] == KYBER_ETH_ADDRESS) {
-                tokensLeft = address(this).balance;
-            } else {
-                tokensLeft = ERC20(_addresses[1]).balanceOf(address(this));
-            }
 
-            // check how many tokens are returned
-            if (_addresses[2] == KYBER_ETH_ADDRESS) {
+        if (success) {
+            // check to see if any _src tokens are left over after exchange
+            tokensLeft = getBalance(_srcAddr);
+
+            // convert weth -> eth if needed
+            if (_srcAddr == KYBER_ETH_ADDRESS) {
                 TokenInterface(WETH_ADDRESS).withdraw(
                     TokenInterface(WETH_ADDRESS).balanceOf(address(this))
                 );
-                tokensReturned = address(this).balance;
-            } else {
-                tokensReturned = ERC20(_addresses[2]).balanceOf(address(this));
             }
+
+            // get the current balance of the swaped tokens
+            tokensSwaped = getBalance(_destAddr);
         }
 
-        return (success, tokensReturned, tokensLeft);
+        return (success, tokensSwaped, tokensLeft);
     }
 
     /// @notice Returns the best estimated price from 2 exchanges
@@ -206,21 +153,21 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
         uint256 _amount,
         address _srcToken,
         address _destToken,
-        uint256 _exchangeType
+        ExchangeType _exchangeType
     ) public returns (address, uint256) {
         uint256 expectedRateKyber;
         uint256 expectedRateUniswap;
         uint256 expectedRateOasis;
 
-        if (_exchangeType == 1) {
+        if (_exchangeType == ExchangeType.OASIS) {
             return (OASIS_WRAPPER, getExpectedRate(OASIS_WRAPPER, _srcToken, _destToken, _amount));
         }
 
-        if (_exchangeType == 2) {
+        if (_exchangeType == ExchangeType.KYBER) {
             return (KYBER_WRAPPER, getExpectedRate(KYBER_WRAPPER, _srcToken, _destToken, _amount));
         }
 
-        if (_exchangeType == 3) {
+        if (_exchangeType == ExchangeType.UNISWAP) {
             expectedRateUniswap = getExpectedRate(UNISWAP_WRAPPER, _srcToken, _destToken, _amount);
             expectedRateUniswap = expectedRateUniswap * (10**(18 - getDecimals(_destToken)));
             return (UNISWAP_WRAPPER, expectedRateUniswap);
@@ -299,20 +246,60 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
     }
 
     function getDecimals(address _token) internal view returns (uint256) {
-        // DGD
-        if (_token == address(0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A)) {
-            return 9;
-        }
-        // USDC
-        if (_token == address(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48)) {
-            return 6;
-        }
-        // WBTC
-        if (_token == address(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599)) {
-            return 8;
-        }
+        if (_token == DGD_ADDRESS) return 9;
 
-        return 18;
+        return ERC20(_token).decimals();
+    }
+
+    function saverSwap(ExchangeData memory exData, address _wrapper) internal returns (uint swapedTokens) {
+        if (exData.srcAddr == KYBER_ETH_ADDRESS) {
+            (swapedTokens, ) = ExchangeInterface(_wrapper).swapEtherToToken.value(exData.amount)(
+                exData.amount,
+                exData.destAddr,
+                uint256(-1)
+            );
+        } else {
+            ERC20(exData.srcAddr).transfer(_wrapper, exData.amount);
+
+            if (exData.destAddr == KYBER_ETH_ADDRESS) {
+                swapedTokens = ExchangeInterface(_wrapper).swapTokenToEther(
+                    exData.srcAddr,
+                    exData.amount,
+                    uint256(-1)
+                );
+            } else {
+                swapedTokens = ExchangeInterface(_wrapper).swapTokenToToken(
+                    exData.srcAddr,
+                    exData.destAddr,
+                    exData.amount
+                );
+            }
+        }
+    }
+
+    function pullTokens(address _tokenAddr, uint _amount) internal {
+        if (_tokenAddr == KYBER_ETH_ADDRESS) {
+            require(msg.value >= _amount, "msg.value smaller than amount");
+        } else {
+            require(
+                ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount),
+                "Not able to withdraw wanted amount"
+            );
+        }
+    }
+
+    function getBalance(address _tokenAddr) internal view returns (uint balance) {
+        if (_tokenAddr == KYBER_ETH_ADDRESS) {
+            balance = address(this).balance;
+        } else {
+            balance = ERC20(_tokenAddr).balanceOf(address(this));
+        }
+    }
+
+    function approve0xProxy(address _tokenAddr, uint _amount) internal {
+        if (_tokenAddr != KYBER_ETH_ADDRESS) {
+            ERC20(_tokenAddr).approve(address(ERC20_PROXY_0X), _amount);
+        }
     }
 
     function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
