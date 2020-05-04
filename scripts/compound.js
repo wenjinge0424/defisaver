@@ -4,14 +4,14 @@ const Web3 = require('web3');
 
 require('dotenv').config();
 
-const DSProxy = require('../../build/contracts/DSProxy.json');
-const ProxyRegistryInterface = require('../../build/contracts/ProxyRegistryInterface.json');
-const CompoundBasicProxy = require('../../build/contracts/CompoundBasicProxy.json');
-const CompoundSaverProxy = require('../../build/contracts/CompoundSaverProxy.json');
-const CTokenInterface = require('../../build/contracts/CTokenInterface.json');
-const CompoundFlashLoanTaker = require('../../build/contracts/CompoundFlashLoanTaker.json');
-const BridgeFlashLoanTaker = require('../../build/contracts/BridgeFlashLoanTaker.json');
-const CompoundLoanInfo = require('../../build/contracts/CompoundLoanInfo.json');
+const DSProxy = require('../build/contracts/DSProxy.json');
+const ProxyRegistryInterface = require('../build/contracts/ProxyRegistryInterface.json');
+const CompoundBasicProxy = require('../build/contracts/CompoundBasicProxy.json');
+const CompoundSaverProxy = require('../build/contracts/CompoundSaverProxy.json');
+const CTokenInterface = require('../build/contracts/CTokenInterface.json');
+const CompoundFlashLoanTaker = require('../build/contracts/CompoundFlashLoanTaker.json');
+const BridgeFlashLoanTaker = require('../build/contracts/BridgeFlashLoanTaker.json');
+const CompoundLoanInfo = require('../build/contracts/CompoundLoanInfo.json');
 
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
 const compoundBasicProxyAddr = '0x0F1e33A36fA6a33Ea01460F04c6D8F1FAc2186E3';
@@ -55,10 +55,20 @@ const getTokenJoinAddr = (type) => {
 }
 
 const initContracts = async () => {
-    web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_ENDPOINT));
+    web3 = new Web3(new Web3.providers.HttpProvider(process.env.MOON_NET_NODE));
+
+    fundAcc = web3.eth.accounts.privateKeyToAccount('0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d')
+    web3.eth.accounts.wallet.add(fundAcc)
 
     account = web3.eth.accounts.privateKeyToAccount('0x'+process.env.PRIV_KEY)
     web3.eth.accounts.wallet.add(account)
+
+    const bal = await web3.eth.getBalance(fundAcc.address);
+    console.log(bal.toString());
+
+    console.log('saljem')
+    await web3.eth.sendTransaction({gas: 21000, from: fundAcc.address, to: account.address, value: web3.utils.toWei("10", "ether")});
+    console.log('sent');
 
     registry = new web3.eth.Contract(ProxyRegistryInterface.abi, proxyRegistryAddr);
 
@@ -80,9 +90,9 @@ function getAbiFunction(contract, functionName) {
 (async () => {
     await initContracts();
 
-    // await deposit(ETH_ADDRESS, CETH_ADDRESS, '0.05', false);
-    await withdraw(ETH_ADDRESS, CETH_ADDRESS, '0.015', true);
-    // await borrow(DAI_ADDRESS, CDAI_ADDRESS, '2.6', false);
+    await deposit(ETH_ADDRESS, CETH_ADDRESS, '10', false);
+    // await withdraw(ETH_ADDRESS, CETH_ADDRESS, '0.015', true);
+    await borrow(DAI_ADDRESS, CDAI_ADDRESS, '50', false);
     // await payback(DAI_ADDRESS, CDAI_ADDRESS, '0.5', true);
 
     // await repayWithLoan('0.015', CETH_ADDRESS, CDAI_ADDRESS);
@@ -150,7 +160,7 @@ const borrow = async (tokenAddr, cTokenAddr, amount, alreadyInMarket) => {
           [tokenAddr, cTokenAddr, amount, alreadyInMarket]);
 
         const tx = await proxy.methods['execute(address,bytes)'](compoundBasicProxyAddr, data).send({
-            from: account.address, gas: 700000, gasPrice: 8100000000, nonce: 3660});
+            from: account.address, gas: 700000, gasPrice: 8100000000});
 
         console.log(tx);
     } catch(err) {

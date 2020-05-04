@@ -10,11 +10,15 @@ const CTokenInterface = require('../build/contracts/CTokenInterface.json');
 const CompoundLoanInfo = require('../build/contracts/CompoundLoanInfo.json');
 const CompoundMonitor = require('../build/contracts/CompoundMonitor.json');
 const CompoundSubscriptionsProxy = require('../build/contracts/CompoundSubscriptionsProxy.json');
+const CompoundFlashLoanTaker = require('../build/contracts/CompoundFlashLoanTaker.json');
+const CompoundBasicProxy = require('../build/contracts/CompoundBasicProxy.json');
 
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
 const compoundLoanInfoAddr = '0x873B3118BcbC05E46aA1f22349B7875F5a45F4Ea';
 const subscriptionsProxyAddr = '0x43eaA91b4222fAA7222bcE76DCB123Fd6D280884';
 const compoundMonitorAddr = '0xF3aD78068511E4cD6a2FF4bBbAB1585817098393';
+const compoundFlashLoanTakerAddr = '0xbA6a725BAe83D8879610D1E957253e195d6e4b71';
+const compoundBasicProxyAddr = '0x0F1e33A36fA6a33Ea01460F04c6D8F1FAc2186E3';
 
 const zeroAddr = '0x0000000000000000000000000000000000000000';
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -53,8 +57,13 @@ const getTokenJoinAddr = (type) => {
 const initContracts = async () => {
     web3 = new Web3(new Web3.providers.HttpProvider(process.env.MOON_NET_NODE));
 
+    fundAcc = web3.eth.accounts.privateKeyToAccount('0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d')
+    web3.eth.accounts.wallet.add(fundAcc)
+
     account = web3.eth.accounts.privateKeyToAccount('0x'+process.env.PRIV_KEY)
     web3.eth.accounts.wallet.add(account)
+
+    await web3.eth.sendTransaction({gas: 21000, from: fundAcc.address, to: account.address, value: web3.utils.toWei("10", "ether")});
 
     registry = new web3.eth.Contract(ProxyRegistryInterface.abi, proxyRegistryAddr);
 
@@ -66,6 +75,8 @@ const initContracts = async () => {
 
     compoundLoanInfo = new web3.eth.Contract(CompoundLoanInfo.abi, compoundLoanInfoAddr);
     compoundMonitor = new web3.eth.Contract(CompoundMonitor.abi, compoundMonitorAddr);
+    compoundFlashLoanTaker = new web3.eth.Contract(CompoundFlashLoanTaker.abi, compoundFlashLoanTakerAddr);
+    compoundBasicProxy = new web3.eth.Contract(CompoundBasicProxy.abi, compoundBasicProxyAddr);
 };
 
 function getAbiFunction(contract, functionName) {
@@ -77,21 +88,30 @@ function getAbiFunction(contract, functionName) {
 (async () => {
     await initContracts();
 
-    const ratio = await getRatio(proxyAddr);
+    const info = await getInfo(proxyAddr);
+    console.log(info)
 
-    console.log(ratio);
+    // await deposit(ETH_ADDRESS, CETH_ADDRESS, '5', false);
+    // await withdraw(ETH_ADDRESS, CETH_ADDRESS, '0.015', true);
+    // await borrow(DAI_ADDRESS, CDAI_ADDRESS, '50', false);
+    // await payback(DAI_ADDRESS, CDAI_ADDRESS, '0.5', true);
 
-    // await subscribe('3900000000000000000', '4300000000000000000', '4000000000000000000', '4000000000000000000', true);
+    // const newInfo = await getInfo(proxyAddr);
+    // console.log(newInfo);
+
+    await subscribe('3900000000000000000', '4300000000000000000', '4000000000000000000', '4000000000000000000', true);
+
+    // await boost('10', info.collAddr[0], info.borrowAddr[0]);
 
     // await repayFor('0.0001', CETH_ADDRESS, CDAI_ADDRESS, proxyAddr);
 
 })();
 
-const getRatio = async (user) => {
+const getInfo = async (user) => {
     try {
-        const ratio = await compoundLoanInfo.methods.getLoanData(user).call();
+        const info = await compoundLoanInfo.methods.getLoanData(user).call();
 
-        return ratio;
+        return info;
     } catch(err) {
         console.log(err);
     }
@@ -143,6 +163,114 @@ const update = async (minRatio, maxRatio, optimalBoost, optimalRepay, boostEnabl
     }
 };
 
+// User needs to approve the DSProxy to pull the _tokenAddr tokens
+//function deposit(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) public payable {
+const deposit = async (tokenAddr, cTokenAddr, amount, alreadyInMarket) => {
+    try {
+        amount = web3.utils.toWei(amount, 'ether');
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundBasicProxy, 'deposit'),
+          [tokenAddr, cTokenAddr, amount, alreadyInMarket]);
+
+        let value = '0';
+
+        if (tokenAddr === ETH_ADDRESS) {
+            value = amount;
+        }
+
+        const tx = await proxy.methods['execute(address,bytes)'](compoundBasicProxyAddr, data).send({
+            from: account.address, value, gas: 400000, gasPrice: 8100000000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+// withdraw(address _tokenAddr, address _cTokenAddr, uint _amount, bool _isCAmount)
+const withdraw = async (tokenAddr, cTokenAddr, amount, isCAmount) => {
+    try {
+        if (isCAmount) {
+            amount = (amount * 1e8).toString();
+        } else {
+            amount = web3.utils.toWei(amount, 'ether');
+        }
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundBasicProxy, 'withdraw'),
+          [tokenAddr, cTokenAddr, amount, isCAmount]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](compoundBasicProxyAddr, data).send({
+            from: account.address, gas: 400000, gasPrice: 9100000000 });
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+// function borrow(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket)
+const borrow = async (tokenAddr, cTokenAddr, amount, alreadyInMarket) => {
+    try {
+        amount = web3.utils.toWei(amount, 'ether');
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundBasicProxy, 'borrow'),
+          [tokenAddr, cTokenAddr, amount, alreadyInMarket]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](compoundBasicProxyAddr, data).send({
+            from: account.address, gas: 700000, gasPrice: 8100000000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+// User needs to approve the DSProxy to pull the _tokenAddr tokens
+// payback(address _tokenAddr, address _cTokenAddr, uint _amount, bool _wholeDebt)
+//
+const payback = async (tokenAddr, cTokenAddr, amount, wholeDebt) => {
+    try {
+        amount = web3.utils.toWei(amount, 'ether');
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundBasicProxy, 'payback'),
+            [tokenAddr, cTokenAddr, amount, wholeDebt]);
+
+        let value = '0';
+
+        if (tokenAddr === ETH_ADDRESS) {
+            value = amount;
+        }
+
+        const tx = await proxy.methods['execute(address,bytes)'](compoundBasicProxyAddr, data).send({
+            from: account.address, value, gas: 500000, gasPrice: 5100000000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+const boost = async (amount, cCollAddress, cBorrowAddress) => {
+    try {
+        amount = web3.utils.toWei(amount, 'ether');
+
+        console.log('boosting');
+        console.log('col:', cCollAddress);
+        console.log('bor:', cBorrowAddress);
+        console.log('amount:', amount);
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundFlashLoanTaker, 'boost'),
+        [[amount, 0, 3, 0, 0], [cCollAddress, cBorrowAddress, zeroAddr], "0x0"]);
+
+        const tx = await proxy.methods['execute(address,bytes)'](compoundFlashLoanTakerAddr, data).send({
+            from: account.address, gas: 2300000, gasPrice: 5100000000});
+
+        console.log(tx);
+    } catch(err) {
+        console.log(err);
+    }
+};
+
 const boostFor = async (amount, cCollAddress, cBorrowAddress) => {
     try {
         amount = web3.utils.toWei(amount, 'ether');
@@ -151,7 +279,7 @@ const boostFor = async (amount, cCollAddress, cBorrowAddress) => {
         [[amount, 0, 3, 0, 0], [cCollAddress, cBorrowAddress, zeroAddr], "0x0"]);
 
         const tx = await proxy.methods['execute(address,bytes)'](compoundSaverProxyAddr, data).send({
-            from: account.address, gas: 1300000, gasPrice: 5100000000});
+            from: account.address, gas: 2300000, gasPrice: 5100000000});
 
         console.log(tx);
     } catch(err) {
