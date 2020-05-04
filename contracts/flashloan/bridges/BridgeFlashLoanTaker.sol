@@ -31,14 +31,14 @@ contract BridgeFlashLoanTaker is DSMath, ProxyPermission {
     );
 
     function compound2Maker(
-        uint _cdpId,
+        uint[3] calldata amountData, // [cdpId, collAmount, debtAmount]
         address _joinAddr,
         address _cCollateralAddr
     ) external {
-        bytes32 ilk = manager.ilks(_cdpId);
+        bytes32 ilk = manager.ilks(amountData[0]);
         uint debtAmount = getAllDebtCompound();
 
-        bytes memory paramsData = abi.encode(_cdpId, _joinAddr, _cCollateralAddr, ilk, uint8(1), address(this));
+        bytes memory paramsData = abi.encode(amountData, _joinAddr, _cCollateralAddr, ilk, uint8(1), address(this));
 
         givePermission(LOAN_MOVER);
 
@@ -46,26 +46,26 @@ contract BridgeFlashLoanTaker is DSMath, ProxyPermission {
 
         removePermission(LOAN_MOVER);
 
-        logger.logFlashLoan("compound2Maker", debtAmount, _cdpId, DAI_ADDRESS);
+        logger.logFlashLoan("compound2Maker", debtAmount, amountData[0], DAI_ADDRESS);
     }
 
     function maker2Compound(
-        uint _cdpId,
+        uint[3] calldata amountData, // [cdpId, collAmount, debtAmount]
         address _joinAddr,
         address _cCollateralAddr
     ) external {
-        bytes32 ilk = manager.ilks(_cdpId);
-        uint debtAmount = getAllDebtCDP(VAT_ADDRESS, manager.urns(_cdpId), manager.urns(_cdpId), ilk);
+        bytes32 ilk = manager.ilks(amountData[0]);
+        uint wholeDebtAmount = getAllDebtCDP(VAT_ADDRESS, manager.urns(amountData[0]), manager.urns(amountData[0]), ilk);
 
-        bytes memory paramsData = abi.encode(_cdpId, _joinAddr, _cCollateralAddr, ilk, uint8(2), address(this));
+        bytes memory paramsData = abi.encode(amountData, _joinAddr, _cCollateralAddr, ilk, uint8(2), address(this));
 
         givePermission(LOAN_MOVER);
 
-        lendingPool.flashLoan(LOAN_MOVER, DAI_ADDRESS, debtAmount, paramsData);
+        lendingPool.flashLoan(LOAN_MOVER, DAI_ADDRESS, wholeDebtAmount, paramsData);
 
         removePermission(LOAN_MOVER);
 
-        logger.logFlashLoan("maker2Compound", debtAmount, _cdpId, DAI_ADDRESS);
+        logger.logFlashLoan("maker2Compound", wholeDebtAmount, amountData[0], DAI_ADDRESS);
     }
 
     function getAllDebtCDP(address _vat, address _usr, address _urn, bytes32 _ilk) internal view returns (uint daiAmount) {

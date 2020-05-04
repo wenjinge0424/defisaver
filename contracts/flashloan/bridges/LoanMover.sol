@@ -40,6 +40,11 @@ contract LoanMover is FlashLoanReceiverBase {
 
         // Repay FL
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
+
+        // if there is some eth left (0x fee), return it to user
+        if (address(this).balance > 0) {
+            tx.origin.transfer(address(this).balance);
+        }
     }
 
     function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal returns (bytes memory proxyData, address payable) {
