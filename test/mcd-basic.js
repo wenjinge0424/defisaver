@@ -1,6 +1,7 @@
 let { accounts, contract, web3, provider } = require('@openzeppelin/test-environment');
-const { expectEvent, balance, BN } = require('@openzeppelin/test-helpers');
+const { expectEvent, balance, expectRevert } = require('@openzeppelin/test-helpers');
 const { expect } = require('chai');
+const Dec = require('decimal.js');
 
 const { getAbiFunction, loadAccounts, getAccounts, getProxy, fetchMakerAddresses, saverExchangeAddress, ETH_ADDRESS, nullAddress, mcdSaverProxyAddress } = require('./helper.js');
 
@@ -29,6 +30,7 @@ describe("MCDBasic", accounts => {
         const proxyInfo = await getProxy(registry, accounts[0]);
         proxy = proxyInfo.proxy;
         proxyAddr = proxyInfo.proxyAddr;
+        web3Proxy = new web3.eth.Contract(DSProxy.abi, proxyAddr);
 
         getCdps = await GetCdps.at(makerAddresses["GET_CDPS"]);
         ethJoin = await Join.at(makerAddresses["MCD_JOIN_ETH_A"]);
@@ -97,7 +99,7 @@ describe("MCDBasic", accounts => {
 
         const cdpsBefore = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
 
-        await proxy.methods['execute(address,bytes)'](makerAddresses['PROXY_ACTIONS'], data, {from: accounts[0]});
+        const tx = await proxy.methods['execute(address,bytes)'](makerAddresses['PROXY_ACTIONS'], data, {from: accounts[0]});
 
         const cdpsAfter = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
 
@@ -120,25 +122,22 @@ describe("MCDBasic", accounts => {
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(MCDSaverProxy, 'boost'),
          [uintData, makerAddresses["MCD_JOIN_WBTC_A"], nullAddress, '0x0']);
 
-        const tx = await proxy.methods['execute(address,bytes)'](mcdSaverProxyAddress, data, {from: accounts[0]});
+        await web3Proxy.methods['execute(address,bytes)'](mcdSaverProxyAddress, data).send({from: accounts[0], gas: 3500000});
 
         const infoAfter = await mcdSaverProxy.getCdpDetailedInfo(cdpId.toString());
 
-        const debtBn = new BN(infoAfter.debt.toString());
-        const daiBn = new BN(daiAmount);
-        const daiAmountBn = debtBn.add(daiBn);
-        const offset = new BN(web3.utils.toWei('0.0001', 'ether'));
+        const daiAmountBn = Dec(infoBefore.debt.toString()).plus(daiAmount);
 
-        // because of stability fee
-        expect(infoBefore.debt).to.be.within(daiAmountBn, daiAmountBn.add(offset));
+        // because of stability fee it can be higher
+        expect(infoAfter.debt.toString()).to.be.bignumber.at.least(daiAmountBn.toString());
     });
 
     it('... should be able to repay WBTC CDP', async () => {
         const wbtcIlk = await wbtcJoin.ilk();
         // 0.001 wbtc == close to 10 dai
-        const wbtcAmount = new BN(web3.utils.toWei('0.001', 'ether'));
-        const divider = new BN(1e10);
-        const wbtcAmountNormalize = wbtcAmount.div(divider);
+        const wbtcAmount = Dec(web3.utils.toWei('0.001', 'ether'));
+        // const divider = new BN(1e10);
+        const wbtcAmountNormalize = wbtcAmount.div(1e10);
         
         const cdps = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
 
@@ -156,10 +155,10 @@ describe("MCDBasic", accounts => {
 
         const infoAfter = await mcdSaverProxy.getCdpDetailedInfo(cdpId.toString());
 
-        const collateralBn = new BN(infoAfter.collateral.toString())
-        const wbtcAmountBn = collateralBn.add(wbtcAmount);
+        const collateralBn = Dec(infoAfter.collateral.toString())
+        const wbtcAmountBn = collateralBn.plus(wbtcAmount);
 
-        const collateralBefore = new BN(infoBefore.collateral.toString())
+        const collateralBefore = Dec(infoBefore.collateral.toString())
 
         const ratioBefore = await mcdSaverProxy.getRatio(cdpId.toString(), wbtcIlk);
 
