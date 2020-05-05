@@ -12,7 +12,7 @@ contract SubscriptionsInterfaceV2 {
 /// @title SubscriptionsProxy handles authorization and interaction with the Subscriptions contract
 contract SubscriptionsProxyV2 is ConstantAddresses {
 
-    address public constant MONITOR_PROXY_ADDRESS = 0x47d9f61bADEc4378842d809077A5e87B9c996898;
+    address public constant MONITOR_PROXY_ADDRESS = 0x7456f4218874eAe1aF8B83a64848A1B89fEB7d7C;
     address public constant OLD_SUBSCRIPTION = 0x83152CAA0d344a2Fd428769529e2d490A88f4393;
 
     function migrate(uint _cdpId, uint128 _minRatio, uint128 _maxRatio, uint128 _optimalRatioBoost, uint128 _optimalRatioRepay, bool _boostEnabled, bool _nextPriceEnabled, address _subscriptions) public {

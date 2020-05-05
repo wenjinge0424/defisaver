@@ -1,47 +1,47 @@
-let { accounts, contract, web3, provider } = require('@openzeppelin/test-environment');
-const { expectEvent, balance } = require('@openzeppelin/test-helpers');
+// let { accounts, contract, web3, provider } = require('@openzeppelin/test-environment');
+// const { expectEvent, balance } = require('@openzeppelin/test-helpers');
 
-const DSProxy = contract.fromArtifact("DSProxy");
-const ProxyRegistryInterface = contract.fromArtifact("ProxyRegistryInterface");
-const CompoundBasicProxy = contract.fromArtifact("CompoundBasicProxy");
+// const DSProxy = contract.fromArtifact("DSProxy");
+// const ProxyRegistryInterface = contract.fromArtifact("ProxyRegistryInterface");
+// const CompoundBasicProxy = contract.fromArtifact("CompoundBasicProxy");
 
-const { expect } = require('chai');
+// const { expect } = require('chai');
 
-const { getAbiFunction, loadAccounts, getAccounts, getProxy } = require('./helper.js');
+// const { getAbiFunction, loadAccounts, getAccounts, getProxy } = require('./helper.js');
 
-const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-const CETH_ADDRESS = '0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5';
+// const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+// const CETH_ADDRESS = '0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5';
 
-const compoundBasicProxyAddr = "0x0F1e33A36fA6a33Ea01460F04c6D8F1FAc2186E3";
+// const compoundBasicProxyAddr = "0x0F1e33A36fA6a33Ea01460F04c6D8F1FAc2186E3";
 
-describe("Compound Basic", () => {
+// describe("Compound Basic", () => {
 
-    let registry, proxy, compoundBasicProxy;
+//     let registry, proxy, compoundBasicProxy;
 
-    let accounts;
+//     let accounts;
 
-    before(async () => {
+//     before(async () => {
 
-        web3 = loadAccounts(web3);
-        accounts = getAccounts(web3);
+//         web3 = loadAccounts(web3);
+//         accounts = getAccounts(web3);
 
-        registry = await ProxyRegistryInterface.at("0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4");
-        compoundBasicProxy = await CompoundBasicProxy.at(compoundBasicProxyAddr);
+//         registry = await ProxyRegistryInterface.at("0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4");
+//         compoundBasicProxy = await CompoundBasicProxy.at(compoundBasicProxyAddr);
 
-        const proxyInfo = await getProxy(registry, accounts[0]);
-        proxy = proxyInfo.proxy;
-    });
+//         const proxyInfo = await getProxy(registry, accounts[0]);
+//         proxy = proxyInfo.proxy;
+//     });
 
-    it('...should deposit 1 Eth into Compound through proxy and enter the market', async () => {
-        const amount = web3.utils.toWei('1', 'ether');
+//     it('...should deposit 1 Eth into Compound through proxy and enter the market', async () => {
+//         const amount = web3.utils.toWei('1', 'ether');
 
-        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundBasicProxy, 'deposit'),
-          [ETH_ADDRESS, CETH_ADDRESS, amount, false]);
+//         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundBasicProxy, 'deposit'),
+//           [ETH_ADDRESS, CETH_ADDRESS, amount, false]);
 
-        let value = amount;
+//         let value = amount;
 
-        const receipt = await proxy.methods['execute(address,bytes)'](compoundBasicProxyAddr, data, {
-            from: accounts[0], value});
+//         const receipt = await proxy.methods['execute(address,bytes)'](compoundBasicProxyAddr, data, {
+//             from: accounts[0], value});
 
-    });
-});
+//     });
+// });
