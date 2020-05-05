@@ -25,6 +25,10 @@ contract MCDPriceVerifier is AdminAuth {
 
         address osmAddress = osmMom.osms(_ilk);
         
+        uint whitelisted = Osm(osmAddress).bud(address(this));
+        // If contracts doesn't have access return true
+        if (whitelisted != 0) return true;
+
         bytes32 price32;
         bool has;
         (price32, has) = Osm(osmAddress).peep();
