@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "./ISubscriptionsV2.sol";
@@ -85,7 +85,7 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
         // doesn't allow user to repay too much
         require(isGoodRatio);
 
-        returnEth();        
+        returnEth();
 
         logger.logRepay(_data[0], msg.sender, _data[1], ratioBefore, ratioAfter);
     }

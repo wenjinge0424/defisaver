@@ -1,12 +1,12 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "./Gem.sol";
 
-contract Join {
+abstract contract Join {
     bytes32 public ilk;
 
-    function dec() public view returns (uint);
-    function gem() public returns (Gem);
-    function join(address, uint) public payable;
-    function exit(address, uint) public;
+    function dec() virtual public view returns (uint);
+    function gem() virtual public returns (Gem);
+    function join(address, uint) virtual public payable;
+    function exit(address, uint) virtual public;
 }

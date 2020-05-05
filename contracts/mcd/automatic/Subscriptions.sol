@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../maker/Manager.sol";
@@ -159,7 +159,6 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
 
         subscribers[subInfo.arrPos] = subscribers[subscribers.length - 1];
         delete subscribers[subscribers.length - 1];
-        subscribers.length--;
 
         changeIndex++;
         subInfo.subscribed = false;

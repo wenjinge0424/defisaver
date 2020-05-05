@@ -1,13 +1,13 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
-contract ILendingPool {
-    function flashLoan( address payable _receiver, address _reserve, uint _amount, bytes calldata _params) external;
-    function deposit(address _reserve, uint256 _amount, uint16 _referralCode) external payable;
-	function setUserUseReserveAsCollateral(address _reserve, bool _useAsCollateral) external;
-	function borrow(address _reserve, uint256 _amount, uint256 _interestRateMode, uint16 _referralCode) external;
-	function repay( address _reserve, uint256 _amount, address payable _onBehalfOf) external;
+abstract contract ILendingPool {
+    function flashLoan( address payable _receiver, address _reserve, uint _amount, bytes calldata _params) external virtual;
+    function deposit(address _reserve, uint256 _amount, uint16 _referralCode) external virtual payable;
+	function setUserUseReserveAsCollateral(address _reserve, bool _useAsCollateral) external virtual;
+	function borrow(address _reserve, uint256 _amount, uint256 _interestRateMode, uint16 _referralCode) external virtual;
+	function repay( address _reserve, uint256 _amount, address payable _onBehalfOf) external virtual;
 	function getReserveData(address _reserve)
-        external
+        external virtual
         view
         returns (
             uint256 totalLiquidity,

@@ -1,16 +1,13 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "./ERC20.sol";
 
+abstract contract ITokenInterface is ERC20 {
+    function assetBalanceOf(address _owner) public virtual view returns (uint256);
 
-contract ITokenInterface is ERC20 {
-    function assetBalanceOf(address _owner) public view returns (uint256);
+    function mint(address receiver, uint256 depositAmount) external virtual returns (uint256 mintAmount);
 
-    function mint(address receiver, uint256 depositAmount) external returns (uint256 mintAmount);
+    function burn(address receiver, uint256 burnAmount) external virtual returns (uint256 loanAmountPaid);
 
-    function burn(address receiver, uint256 burnAmount) external returns (uint256 loanAmountPaid);
-
-    function balanceOf(address _owner) external view returns (uint256 balance);
-
-    function tokenPrice() public view returns (uint256 price);
+    function tokenPrice() public virtual view returns (uint256 price);
 }

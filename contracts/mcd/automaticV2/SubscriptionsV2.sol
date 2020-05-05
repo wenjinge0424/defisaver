@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../maker/Manager.sol";
@@ -127,7 +127,6 @@ contract SubscriptionsV2 is AdminAuth, StaticV2, ConstantAddresses {
 
         subscribers[subInfo.arrPos] = subscribers[subscribers.length - 1];
         delete subscribers[subscribers.length - 1];
-        subscribers.length--;
 
         changeIndex++;
         subInfo.subscribed = false;
@@ -170,7 +169,7 @@ contract SubscriptionsV2 is AdminAuth, StaticV2, ConstantAddresses {
         if (!subInfo.subscribed) return (false, CdpHolder(0, 0, 0, 0, address(0), 0, false, false));
 
         CdpHolder memory subscriber = subscribers[subInfo.arrPos];
-    
+
         return (true, subscriber);
     }
 

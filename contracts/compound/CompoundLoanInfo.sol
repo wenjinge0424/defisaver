@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../interfaces/ComptrollerInterface.sol";
@@ -32,7 +32,6 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
 
     /// @notice Calcualted the ratio of coll/debt for a compound user
     /// @param _user Address of the user
-    /// @return Ratio
     function getRatio(address _user) public view returns (uint) {
         // For each asset the account is in
         address[] memory assets = comp.getAssetsIn(_user);
@@ -94,7 +93,7 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
 
     /// @notice Fetches all the collateral/debt address and amounts, denominated in ether
     /// @param _user Address of the user
-    /// @return LoanData information
+    /// @return data LoanData information
     function getLoanData(address _user) public view returns (LoanData memory data) {
         address[] memory assets = comp.getAssetsIn(_user);
 
@@ -153,7 +152,7 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
 
     /// @notice Fetches all the collateral/debt address and amounts, denominated in ether
     /// @param _users Addresses of the user
-    /// @return Array of LoanData information
+    /// @return loans Array of LoanData information
     function getLoanDataArr(address[] memory _users) public view returns (LoanData[] memory loans) {
         loans = new LoanData[](_users.length);
 
@@ -164,7 +163,7 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
 
     /// @notice Calcualted the ratio of coll/debt for a compound user
     /// @param _users Addresses of the user
-    /// @return Array of ratios
+    /// @return ratios Array of ratios
     function getRatios(address[] memory _users) public view returns (uint[] memory ratios) {
         ratios = new uint[](_users.length);
 
@@ -175,7 +174,7 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
 
     /// @notice Information about cTokens
     /// @param _cTokenAddresses Array of cTokens addresses
-    /// @return Array of cTokens infomartion
+    /// @return tokens Array of cTokens infomartion
     function getTokensInfo(address[] memory _cTokenAddresses) public returns(TokenInfo[] memory tokens) {
         tokens = new TokenInfo[](_cTokenAddresses.length);
 

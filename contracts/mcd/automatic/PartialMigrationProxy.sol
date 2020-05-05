@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../DS/DSGuard.sol";
 import "../../DS/DSProxy.sol";
@@ -88,7 +88,7 @@ contract PartialMigrationProxy is PayProxyActions, ConstantAddresses {
 
     function getDSGuard() internal view returns (DSGuard) {
         DSProxy proxy = DSProxy(address(uint160(address(this))));
-        DSAuth auth = DSAuth(address(proxy.authority));
+        DSAuth auth = DSAuth(address(proxy.authority()));
 
         return DSGuard(address(auth));
     }

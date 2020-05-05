@@ -1,5 +1,4 @@
-pragma solidity ^0.5.0;
-
+pragma solidity ^0.6.0;
 
 contract SavingsLogger {
     event Deposit(address indexed sender, uint8 protocol, uint256 amount);

@@ -1,38 +1,38 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../mcd/maker/Join.sol";
 import "../../DS/DSMath.sol";
 
-contract VatLike {
-    function can(address, address) public view returns (uint);
-    function ilks(bytes32) public view returns (uint, uint, uint, uint, uint);
-    function dai(address) public view returns (uint);
-    function urns(bytes32, address) public view returns (uint, uint);
-    function frob(bytes32, address, address, address, int, int) public;
-    function hope(address) public;
-    function move(address, address, uint) public;
+abstract contract VatLike {
+    function can(address, address) virtual public view returns (uint);
+    function ilks(bytes32) virtual public view returns (uint, uint, uint, uint, uint);
+    function dai(address) virtual public view returns (uint);
+    function urns(bytes32, address) virtual public view returns (uint, uint);
+    function frob(bytes32, address, address, address, int, int) virtual public;
+    function hope(address) virtual public;
+    function move(address, address, uint) virtual public;
 }
 
-contract PotLike {
-    function pie(address) public view returns (uint);
-    function drip() public returns (uint);
-    function join(uint) public;
-    function exit(uint) public;
+abstract contract PotLike {
+    function pie(address) virtual public view returns (uint);
+    function drip() virtual public returns (uint);
+    function join(uint) virtual public;
+    function exit(uint) virtual public;
 }
 
-contract GemLike {
-    function approve(address, uint) public;
-    function transfer(address, uint) public;
-    function transferFrom(address, address, uint) public;
-    function deposit() public payable;
-    function withdraw(uint) public;
+abstract contract GemLike {
+    function approve(address, uint) virtual public;
+    function transfer(address, uint) virtual public;
+    function transferFrom(address, address, uint) virtual public;
+    function deposit() virtual public payable;
+    function withdraw(uint) virtual public;
 }
 
-contract DaiJoinLike {
-    function vat() public returns (VatLike);
-    function dai() public returns (GemLike);
-    function join(address, uint) public payable;
-    function exit(address, uint) public;
+abstract contract DaiJoinLike {
+    function vat() virtual public returns (VatLike);
+    function dai() virtual public returns (GemLike);
+    function join(address, uint) virtual public payable;
+    function exit(address, uint) virtual public;
 }
 
 contract DSRSavingsProtocol is DSMath {

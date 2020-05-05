@@ -1,7 +1,6 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "./ERC20.sol";
-
 
 //TODO: currenlty only adjusted to kyber, but should be genric interfaces for more dec. exchanges
 interface ExchangeInterface {

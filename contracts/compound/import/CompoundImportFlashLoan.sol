@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../flashloan/aave/FlashLoanReceiverBase.sol";
 import "../../interfaces/ProxyRegistryInterface.sol";
@@ -26,7 +26,7 @@ contract CompoundImportFlashLoan is FlashLoanReceiverBase {
         uint256 _amount,
         uint256 _fee,
         bytes calldata _params)
-    external {
+    external override {
 
         (
             address cCollateralToken,
@@ -56,7 +56,7 @@ contract CompoundImportFlashLoan is FlashLoanReceiverBase {
     /// @param _cBorrowToken CToken address we will borrow
     /// @param _amount Amount that will be borrowed
     /// @return proxyData Formated function call data
-    function getProxyData(address _borrowToken, address _cBorrowToken, uint _amount) internal returns (bytes memory proxyData) {
+    function getProxyData(address _borrowToken, address _cBorrowToken, uint _amount) internal pure returns (bytes memory proxyData) {
         proxyData = abi.encodeWithSignature(
             "borrow(address,address,uint256,bool)",
             _borrowToken, _cBorrowToken, _amount, false);

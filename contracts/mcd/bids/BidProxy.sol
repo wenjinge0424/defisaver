@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../maker/Join.sol";
 import "../../interfaces/ERC20.sol";
@@ -12,11 +12,9 @@ contract BidProxy is ExchangeHelper {
 
     address public constant ETH_FLIPPER = 0xd8a04F5412223F513DC55F839574430f5EC15531;
     address public constant BAT_FLIPPER = 0xaA745404d55f88C108A28c86abE7b5A1E7817c07;
-    address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
     address public constant DAI_JOIN = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
     address public constant ETH_JOIN = 0x2F0b23f53734252Bda2277357e97e1517d6B042A;
     address public constant BAT_JOIN = 0x3D0B1912B66114d4096F48A8CEe3A56C231772cA;
-    address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     bytes32 public constant BAT_ILK = 0x4241542d41000000000000000000000000000000000000000000000000000000;
     bytes32 public constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
@@ -71,7 +69,6 @@ contract BidProxy is ExchangeHelper {
     public {
         address flipper = _isEth ? ETH_FLIPPER : BAT_FLIPPER;
         address join = _isEth ? ETH_JOIN : BAT_JOIN;
-        bytes32 ilk = _isEth ? ETH_ILK : BAT_ILK;
 
         (uint bidAmount, , , , , , , ) = Flipper(flipper).bids(_bidId);
 

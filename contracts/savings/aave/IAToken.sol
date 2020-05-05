@@ -1,5 +1,5 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
-contract IAToken {
-    function redeem(uint256 _amount) external;
+abstract contract IAToken {
+    function redeem(uint256 _amount) external virtual;
 }

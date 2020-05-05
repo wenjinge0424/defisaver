@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../mcd/saver_proxy/MCDSaverProxy.sol";
 import "../MCDOpenProxyActions.sol";
@@ -7,7 +7,7 @@ import "./FlashLoanReceiverBase.sol";
 
 contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
     // solhint-disable-next-line const-name-snakecase
-    Manager public constant manager = Manager(MANAGER_ADDRESS);
+    Manager public override constant manager = Manager(MANAGER_ADDRESS);
 
     address public constant OPEN_PROXY_ACTIONS = 0x6d0984E80a86f26c0dd564ca0CF74a8E9Da03305;
 
@@ -26,7 +26,7 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         uint256 _amount,
         uint256 _fee,
         bytes calldata _params)
-    external {
+    external override {
 
         //check the contract has the specified balance
         require(_amount <= getBalanceInternal(address(this), _reserve),
@@ -97,7 +97,7 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         }
     }
 
-    function() external payable {}
+    receive() external override payable {}
 
     // ADMIN ONLY FAIL SAFE FUNCTION IF FUNDS GET STUCK
     function withdrawStuckFunds(address _tokenAddr, uint _amount) public {

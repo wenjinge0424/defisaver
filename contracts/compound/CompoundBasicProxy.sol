@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../interfaces/CTokenInterface.sol";
 import "../interfaces/ERC20.sol";
@@ -31,7 +31,7 @@ contract CompoundBasicProxy {
         if (_tokenAddr != ETH_ADDRESS) {
             require(CTokenInterface(_cTokenAddr).mint(_amount) == 0);
         } else {
-            CEtherInterface(_cTokenAddr).mint.value(msg.value)(); // reverts on fail
+            CEtherInterface(_cTokenAddr).mint{value: msg.value}(); // reverts on fail
         }
     }
 
@@ -95,7 +95,7 @@ contract CompoundBasicProxy {
 
             require(CTokenInterface(_cTokenAddr).repayBorrow(_amount) == 0);
         } else {
-            CEtherInterface(_cTokenAddr).repayBorrow.value(msg.value)();
+            CEtherInterface(_cTokenAddr).repayBorrow{value: msg.value}();
             msg.sender.transfer(address(this).balance); // send back the extra eth
         }
     }

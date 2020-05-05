@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../ProtocolInterface.sol";
@@ -16,7 +16,7 @@ contract FulcrumSavingsProtocol is ProtocolInterface, ConstantAddresses, DSAuth 
         savingsProxy = _savingsProxy;
     }
 
-    function deposit(address _user, uint _amount) public {
+    function deposit(address _user, uint _amount) public override {
         require(msg.sender == _user);
 
         // get dai from user
@@ -29,7 +29,7 @@ contract FulcrumSavingsProtocol is ProtocolInterface, ConstantAddresses, DSAuth 
         ITokenInterface(NEW_IDAI_ADDRESS).mint(_user, _amount);
     }
 
-    function withdraw(address _user, uint _amount) public {
+    function withdraw(address _user, uint _amount) public override {
         require(msg.sender == _user);
 
         // transfer all users tokens to our contract

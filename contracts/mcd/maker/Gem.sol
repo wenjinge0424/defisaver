@@ -1,15 +1,15 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
-contract Gem {
-    function dec() public returns (uint);
-    function gem() public returns (Gem);
-    function join(address, uint) public payable;
-    function exit(address, uint) public;
+abstract contract Gem {
+    function dec() virtual public returns (uint);
+    function gem() virtual public returns (Gem);
+    function join(address, uint) virtual public payable;
+    function exit(address, uint) virtual public;
 
-    function approve(address, uint) public;
-    function transfer(address, uint) public returns (bool);
-    function transferFrom(address, address, uint) public returns (bool);
-    function deposit() public payable;
-    function withdraw(uint) public;
-    function allowance(address, address) public returns (uint);
+    function approve(address, uint) virtual public;
+    function transfer(address, uint) virtual public returns (bool);
+    function transferFrom(address, address, uint) virtual public returns (bool);
+    function deposit() virtual public payable;
+    function withdraw(uint) virtual public;
+    function allowance(address, address) virtual public returns (uint);
 }

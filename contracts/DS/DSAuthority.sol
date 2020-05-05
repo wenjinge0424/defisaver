@@ -1,6 +1,6 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 
-contract DSAuthority {
-    function canCall(address src, address dst, bytes4 sig) public view returns (bool);
+abstract contract DSAuthority {
+    function canCall(address src, address dst, bytes4 sig) public virtual view returns (bool);
 }

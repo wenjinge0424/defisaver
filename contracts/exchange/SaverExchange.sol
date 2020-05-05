@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../interfaces/ExchangeInterface.sol";
@@ -10,7 +10,6 @@ import "../loggers/ExchangeLogger.sol";
 
 contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
     uint256 public constant SERVICE_FEE = 800; // 0.125% Fee
-
 
     // solhint-disable-next-line const-name-snakecase
     ExchangeLogger public constant logger = ExchangeLogger(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
@@ -314,5 +313,5 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
     }
 
     // receive eth from wrappers
-    function() external payable {}
+    receive() external payable {}
 }

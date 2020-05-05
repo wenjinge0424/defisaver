@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../maker/ScdMcdMigration.sol";
 import "../migration/SaiTubLike.sol";
@@ -8,11 +8,11 @@ import "../../interfaces/CTokenInterface.sol";
 import "../../interfaces/ERC20.sol";
 import "../../constants/ConstantAddresses.sol";
 
-contract SavingsProxyInterface {
+abstract contract SavingsProxyInterface {
     enum SavingsProtocol { Compound, Dydx, Fulcrum, Dsr }
 
-    function deposit(SavingsProtocol _protocol, uint _amount) public;
-    function withdraw(SavingsProtocol _protocol, uint _amount) public;
+    function deposit(SavingsProtocol _protocol, uint _amount) public virtual;
+    function withdraw(SavingsProtocol _protocol, uint _amount) public virtual;
 }
 
 contract SavingsMigration is ConstantAddresses {

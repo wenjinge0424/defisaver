@@ -16,7 +16,7 @@
 
 */
 
-pragma solidity 0.5.7;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import { Account } from "./Account.sol";

@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../DS/DSMath.sol";
 import "../migration/SaiTubLike.sol";
@@ -143,7 +143,7 @@ contract AutomaticMigration is DSMath, ConstantAddresses {
         return true;
     }
 
-    function() external payable {}
+    receive() external payable {}
 
     //////////////// Admin only functions /////////////////////////
 
