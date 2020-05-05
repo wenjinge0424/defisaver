@@ -312,6 +312,6 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
         return x;
     }
 
-    // receive eth from wrappers
+    // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 }

@@ -6,9 +6,6 @@ import "./FlashLoanReceiverBase.sol";
 
 
 contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
-    // solhint-disable-next-line const-name-snakecase
-    Manager public override constant manager = Manager(MANAGER_ADDRESS);
-
     address public constant OPEN_PROXY_ACTIONS = 0x6d0984E80a86f26c0dd564ca0CF74a8E9Da03305;
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);

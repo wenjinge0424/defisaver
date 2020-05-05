@@ -11,6 +11,7 @@ abstract contract DSProxy is DSAuth, DSNote {
         require(setCache(_cacheAddr));
     }
 
+    // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
     // use the proxy to execute calldata _data on contract _code

@@ -294,7 +294,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
     /// @dev Substracts 10 wei to aviod rounding error later on
-    function getMaxDebt(uint _cdpId, bytes32 _ilk) public view returns (uint) {
+    function getMaxDebt(uint _cdpId, bytes32 _ilk) public virtual view returns (uint) {
         uint price = getPrice(_ilk);
 
         (, uint mat) = spotter.ilks(_ilk);

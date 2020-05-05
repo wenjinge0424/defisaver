@@ -396,7 +396,7 @@ abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
         addressesProvider = _provider;
     }
 
-    receive () external payable {}
+    receive () external virtual payable {}
 
     function transferFundsBackToPoolInternal(address _reserve, uint256 _amount) internal {
 

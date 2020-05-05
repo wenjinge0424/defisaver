@@ -8,8 +8,8 @@ import "../interfaces/ComptrollerInterface.sol";
 /// @title Basic compound interactions through the DSProxy
 contract CompoundBasicProxy {
 
-    address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant COMPTROLLER = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
+    address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant COMPTROLLER_ADDR = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
 
     /// @notice User deposits tokens to the Compound protocol
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
@@ -18,17 +18,17 @@ contract CompoundBasicProxy {
     /// @param _amount Amount of tokens to be deposited
     /// @param _inMarket True if the tokend is already in market for that address
     function deposit(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) public payable {
-        if (_tokenAddr != ETH_ADDRESS) {
+        if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount);
         }
 
-        approveCToken(_tokenAddr, _cTokenAddr);
+        approveToken(_tokenAddr, _cTokenAddr);
 
         if (!_inMarket) {
             enterMarket(_cTokenAddr);
         }
 
-        if (_tokenAddr != ETH_ADDRESS) {
+        if (_tokenAddr != ETH_ADDR) {
             require(CTokenInterface(_cTokenAddr).mint(_amount) == 0);
         } else {
             CEtherInterface(_cTokenAddr).mint{value: msg.value}(); // reverts on fail
@@ -49,7 +49,7 @@ contract CompoundBasicProxy {
         }
 
         // withdraw funds to msg.sender
-        if (_tokenAddr != ETH_ADDRESS) {
+        if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).transfer(msg.sender, ERC20(_tokenAddr).balanceOf(address(this)));
         } else {
             msg.sender.transfer(address(this).balance);
@@ -70,7 +70,7 @@ contract CompoundBasicProxy {
         require(CTokenInterface(_cTokenAddr).borrow(_amount) == 0);
 
         // withdraw funds to msg.sender
-        if (_tokenAddr != ETH_ADDRESS) {
+        if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).transfer(msg.sender, ERC20(_tokenAddr).balanceOf(address(this)));
         } else {
             msg.sender.transfer(address(this).balance);
@@ -84,13 +84,13 @@ contract CompoundBasicProxy {
     /// @param _amount Amount of tokens to be payedback
     /// @param _wholeDebt If true the _amount will be set to the whole amount of the debt
     function payback(address _tokenAddr, address _cTokenAddr, uint _amount, bool _wholeDebt) public payable {
-        approveCToken(_tokenAddr, _cTokenAddr);
+        approveToken(_tokenAddr, _cTokenAddr);
 
         if (_wholeDebt) {
             _amount = CTokenInterface(_cTokenAddr).borrowBalanceCurrent(address(this));
         }
 
-        if (_tokenAddr != ETH_ADDRESS) {
+        if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount);
 
             require(CTokenInterface(_cTokenAddr).repayBorrow(_amount) == 0);
@@ -103,7 +103,7 @@ contract CompoundBasicProxy {
     /// @notice Helper method to withdraw tokens from the DSProxy
     /// @param _tokenAddr Address of the token to be withdrawn
     function withdrawTokens(address _tokenAddr) public {
-        if (_tokenAddr != ETH_ADDRESS) {
+        if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).transfer(msg.sender, ERC20(_tokenAddr).balanceOf(address(this)));
         } else {
             msg.sender.transfer(address(this).balance);
@@ -116,20 +116,20 @@ contract CompoundBasicProxy {
         address[] memory markets = new address[](1);
         markets[0] = _cTokenAddr;
 
-        ComptrollerInterface(COMPTROLLER).enterMarkets(markets);
+        ComptrollerInterface(COMPTROLLER_ADDR).enterMarkets(markets);
     }
 
     /// @notice Exits the Compound market so it can't be deposited/borrowed
     /// @param _cTokenAddr CToken address of the token
     function exitMarket(address _cTokenAddr) public {
-        ComptrollerInterface(COMPTROLLER).exitMarket(_cTokenAddr);
+        ComptrollerInterface(COMPTROLLER_ADDR).exitMarket(_cTokenAddr);
     }
 
     /// @notice Approves CToken contract to pull underlying tokens from the DSProxy
     /// @param _tokenAddr Token we are trying to approve
     /// @param _cTokenAddr Address which will gain the approval
-    function approveCToken(address _tokenAddr, address _cTokenAddr) internal {
-        if (_tokenAddr != ETH_ADDRESS) {
+    function approveToken(address _tokenAddr, address _cTokenAddr) internal {
+        if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).approve(_cTokenAddr, uint(-1));
         }
     }

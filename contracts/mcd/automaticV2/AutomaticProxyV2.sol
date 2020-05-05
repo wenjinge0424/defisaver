@@ -110,15 +110,6 @@ contract AutomaticProxyV2 is MCDSaverProxy {
         return sub(sub(collateral, (div(mul(mat, debt), price))), 10);
     }
 
-    /// @notice Gets a price of the asset
-    /// @param _ilk Ilk of the CDP
-    function getPrice(bytes32 _ilk) public override view returns (uint256) {
-        (, uint256 mat) = spotter.ilks(_ilk);
-        (, , uint256 spot, , ) = vat.ilks(_ilk);
-
-        return rmul(rmul(spot, spotter.par()), mat);
-    }
-
     function getAaveCollAddr(address _joinAddr) internal returns (address) {
         if (_joinAddr == 0x2F0b23f53734252Bda2277357e97e1517d6B042A
             || _joinAddr == 0x775787933e92b709f2a3C70aa87999696e74A9F8) {

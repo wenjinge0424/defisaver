@@ -12,8 +12,8 @@ import "../../DS/DSProxy.sol";
 /// @title Utlity functions for Compound contracts
 contract CompoundSaverHelper is DSMath {
 
-    address payable public constant WALLET_ID = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
-    address public constant DISCOUNT_ADDRESS = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
+    address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
+    address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
 
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -62,8 +62,8 @@ contract CompoundSaverHelper is DSMath {
 
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_user)) {
-            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_user);
+        if (Discount(DISCOUNT_ADDR).isCustomFeeSet(_user)) {
+            fee = Discount(DISCOUNT_ADDR).getCustomServiceFee(_user);
         }
 
         feeAmount = (fee == 0) ? 0 : (_amount / fee);
@@ -81,9 +81,9 @@ contract CompoundSaverHelper is DSMath {
         }
 
         if (tokenAddr == ETH_ADDRESS) {
-            WALLET_ID.transfer(feeAmount);
+            WALLET_ADDR.transfer(feeAmount);
         } else {
-            ERC20(tokenAddr).transfer(WALLET_ID, feeAmount);
+            ERC20(tokenAddr).transfer(WALLET_ADDR, feeAmount);
         }
     }
 

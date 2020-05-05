@@ -4,9 +4,6 @@ import "../../mcd/saver_proxy/MCDSaverProxy.sol";
 import "./FlashLoanReceiverBase.sol";
 
 contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
-    // solhint-disable-next-line const-name-snakecase
-    Manager public override constant manager = Manager(MANAGER_ADDRESS);
-
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
     address payable public owner;
