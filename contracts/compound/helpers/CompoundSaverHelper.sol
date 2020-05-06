@@ -153,7 +153,7 @@ contract CompoundSaverHelper is DSMath {
     /// @dev Due to rounding errors the result is - 1% wei from the exact amount
     /// @param _cBorrowAddress Borrow token we are getting the max value of
     /// @return Returns the max. borrow amount in that token
-    function getMaxBorrow(address _cBorrowAddress) public returns (uint) {
+    function getMaxBorrow(address _cBorrowAddress) public view returns (uint) {
         (, uint liquidityInEth, ) = ComptrollerInterface(COMPTROLLER).getAccountLiquidity(address(this));
 
         if (_cBorrowAddress == CETH_ADDRESS) return liquidityInEth;
