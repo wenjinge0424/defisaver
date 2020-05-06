@@ -39,22 +39,16 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
         address wrapper;
         uint swapedTokens;
         bool success;
+        uint tokensLeft = exData.amount;
 
         // if 0x is selected try first the 0x order
         if (exData.exchangeType == ExchangeType.ZEROX) {
             approve0xProxy(exData.srcAddr, exData.amount);
 
-            (success, swapedTokens, ) = takeOrder(
-                exData.exchangeAddr,
-                exData.srcAddr,
-                exData.destAddr,
-                exData.callData,
-                address(this).balance,
-                exData.amount
-            );
+            (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance);
 
             // either it reverts or order doesn't exist anymore, we reverts as it was explicitely asked for this exchange
-            require(success && swapedTokens > 0, "0x transaction failed");
+            require(success && tokensLeft == 0, "0x transaction failed");
 
             wrapper = exData.exchangeAddr;
         }
@@ -63,7 +57,6 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
         if (swapedTokens == 0) {
 
             uint price;
-            uint tokensLeft = exData.amount;
 
             (wrapper, price)
                 = getBestPrice(exData.amount, exData.srcAddr, exData.destAddr, exData.exchangeType);
@@ -74,14 +67,7 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
             if (exData.price0x >= price) {
                 approve0xProxy(exData.srcAddr, exData.amount);
 
-                (success, swapedTokens, ) = takeOrder(
-                    exData.exchangeAddr,
-                    exData.srcAddr,
-                    exData.destAddr,
-                    exData.callData,
-                    address(this).balance,
-                    exData.amount
-                );
+                (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance);
             }
 
             // 0x either had worse price or we tried and order fill failed, so call on chain swap
@@ -106,38 +92,33 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
         logger.logSwap(exData.srcAddr, exData.destAddr, exData.amount, swapedTokens, wrapper);
     }
 
-    // @notice Takes order from 0x and returns bool indicating if it is successful
-    // @param _data Data to send with call
-    // @param _value Value to send with call
-    // @param _amount Amount being sold
+    /// @notice Takes order from 0x and returns bool indicating if it is successful
+    /// @param _exData Exchange data
+    /// @param _0xFee Ether fee needed for 0x order
     function takeOrder(
-        address _exchangeAddr,
-        address _srcAddr,
-        address _destAddr,
-        bytes memory _data,
-        uint256 _value,
-        uint256 _amount
+        ExchangeData memory _exData,
+        uint256 _0xFee
     ) private returns (bool success, uint256, uint256) {
 
         // solhint-disable-next-line avoid-call-value
-        (success, ) = _exchangeAddr.call{value: _value}(_data);
+        (success, ) = _exData.exchangeAddr.call{value: _0xFee}(_exData.callData);
 
         uint256 tokensSwaped = 0;
-        uint256 tokensLeft = _amount;
+        uint256 tokensLeft = _exData.amount;
 
         if (success) {
             // check to see if any _src tokens are left over after exchange
-            tokensLeft = getBalance(_srcAddr);
+            tokensLeft = getBalance(_exData.srcAddr);
 
             // convert weth -> eth if needed
-            if (_srcAddr == KYBER_ETH_ADDRESS) {
+            if (_exData.srcAddr == KYBER_ETH_ADDRESS) {
                 TokenInterface(WETH_ADDRESS).withdraw(
                     TokenInterface(WETH_ADDRESS).balanceOf(address(this))
                 );
             }
 
             // get the current balance of the swaped tokens
-            tokensSwaped = getBalance(_destAddr);
+            tokensSwaped = getBalance(_exData.destAddr);
         }
 
         return (success, tokensSwaped, tokensLeft);
