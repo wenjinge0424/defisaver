@@ -12,7 +12,7 @@ contract MCDPriceVerifier is AdminAuth {
 
     mapping(address => bool) public authorized;
 
-    function verifyNextPriceWithCdpId(uint _nextPrice, uint _cdpId) public view returns(bool) {
+    function verifyVaultNextPrice(uint _nextPrice, uint _cdpId) public view returns(bool) {
         require(authorized[msg.sender]);
 
         bytes32 ilk = manager.ilks(_cdpId);
@@ -27,13 +27,11 @@ contract MCDPriceVerifier is AdminAuth {
         
         uint whitelisted = Osm(osmAddress).bud(address(this));
         // If contracts doesn't have access return true
-        if (whitelisted != 0) return true;
+        if (whitelisted != 1) return true;
 
-        bytes32 price32;
-        bool has;
-        (price32, has) = Osm(osmAddress).peep();
+        (bytes32 price, bool has) = Osm(osmAddress).peep();
 
-        return has ? uint(price32) == _nextPrice : false;
+        return has ? uint(price) == _nextPrice : false;
     } 
 
     function setAuthorized(address _address, bool _allowed) public onlyOwner {
