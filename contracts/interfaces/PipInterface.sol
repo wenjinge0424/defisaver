@@ -1,6 +1,6 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 
-contract PipInterface {
-    function read() public returns (bytes32);
+abstract contract PipInterface {
+    function read() public virtual returns (bytes32);
 }

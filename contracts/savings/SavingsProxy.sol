@@ -1,18 +1,17 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "./ProtocolInterface.sol";
 import "../interfaces/ERC20.sol";
 import "../interfaces/ITokenInterface.sol";
-import "../constants/ConstantAddresses.sol";
 import "./dydx/ISoloMargin.sol";
 import "./SavingsLogger.sol";
 import "./dsr/DSRSavingsProtocol.sol";
 
 
-contract SavingsProxy is ConstantAddresses, DSRSavingsProtocol {
+contract SavingsProxy is DSRSavingsProtocol {
     address public constant ADAI_ADDRESS = 0xfC1E690f61EFd961294b3e1Ce3313fBD8aa4f85d;
-    
+
     address public constant SAVINGS_COMPOUND_ADDRESS = 0x72c5a18D651DA5568EFfE731a98484dE62C9F347;
     address public constant SAVINGS_DYDX_ADDRESS = 0x03b1565e070df392e48e7a8e01798C4B00E534A5;
     address public constant SAVINGS_FULCRUM_ADDRESS = 0xe9ea575d2d8Ca26b0E026a2146994592e0Ee1Dd9;

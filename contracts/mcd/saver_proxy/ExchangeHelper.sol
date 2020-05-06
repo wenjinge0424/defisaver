@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../interfaces/ExchangeInterface.sol";
 import "../../interfaces/TokenInterface.sol";
@@ -94,7 +94,7 @@ contract ExchangeHelper is ConstantAddressesExchange {
 
                 if (orderAddresses[1] == KYBER_ETH_ADDRESS) {
                     uint tRet;
-                    (tRet,) = ExchangeInterface(wrapper).swapEtherToToken.value(tokens[1])(tokens[1], orderAddresses[2], uint(-1));
+                    (tRet,) = ExchangeInterface(wrapper).swapEtherToToken{value: tokens[1]}(tokens[1], orderAddresses[2], uint(-1));
                     tokens[0] += tRet;
                 } else {
                     ERC20(orderAddresses[1]).transfer(wrapper, tokens[1]);
@@ -119,7 +119,7 @@ contract ExchangeHelper is ConstantAddressesExchange {
     function takeOrder(address[3] memory _addresses, bytes memory _data, uint _value, uint _amount) private returns(bool, uint, uint) {
         bool success;
 
-        (success, ) = _addresses[0].call.value(_value)(_data);
+        (success, ) = _addresses[0].call{value: _value}(_data);
 
         uint tokensLeft = _amount;
         uint tokensReturned = 0;

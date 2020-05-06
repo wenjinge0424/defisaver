@@ -1,6 +1,6 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
-contract Jug {
+abstract contract Jug {
     struct Ilk {
         uint256 duty;
         uint256  rho;
@@ -8,5 +8,5 @@ contract Jug {
 
     mapping (bytes32 => Ilk) public ilks;
 
-    function drip(bytes32) public returns (uint);
+    function drip(bytes32) public virtual returns (uint);
 }

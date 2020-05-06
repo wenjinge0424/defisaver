@@ -1,21 +1,20 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "./ERC20.sol";
 
+abstract contract KyberNetworkProxyInterface {
+    function maxGasPrice() external virtual view returns (uint256);
 
-contract KyberNetworkProxyInterface {
-    function maxGasPrice() external view returns (uint256);
+    function getUserCapInWei(address user) external virtual view returns (uint256);
 
-    function getUserCapInWei(address user) external view returns (uint256);
+    function getUserCapInTokenWei(address user, ERC20 token) external virtual view returns (uint256);
 
-    function getUserCapInTokenWei(address user, ERC20 token) external view returns (uint256);
+    function enabled() external virtual view returns (bool);
 
-    function enabled() external view returns (bool);
-
-    function info(bytes32 id) external view returns (uint256);
+    function info(bytes32 id) external virtual view returns (uint256);
 
     function getExpectedRate(ERC20 src, ERC20 dest, uint256 srcQty)
-        public
+        public virtual
         view
         returns (uint256 expectedRate, uint256 slippageRate);
 
@@ -28,7 +27,7 @@ contract KyberNetworkProxyInterface {
         uint256 minConversionRate,
         address walletId,
         bytes memory hint
-    ) public payable returns (uint256);
+    ) public virtual payable returns (uint256);
 
     function trade(
         ERC20 src,
@@ -38,19 +37,19 @@ contract KyberNetworkProxyInterface {
         uint256 maxDestAmount,
         uint256 minConversionRate,
         address walletId
-    ) public payable returns (uint256);
+    ) public virtual payable returns (uint256);
 
     function swapEtherToToken(ERC20 token, uint256 minConversionRate)
-        external
+        external virtual
         payable
         returns (uint256);
 
     function swapTokenToEther(ERC20 token, uint256 tokenQty, uint256 minRate)
-        external
+        external virtual
         payable
         returns (uint256);
 
     function swapTokenToToken(ERC20 src, uint256 srcAmount, ERC20 dest, uint256 minConversionRate)
-        public
+        public virtual
         returns (uint256);
 }

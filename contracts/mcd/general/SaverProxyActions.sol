@@ -1,102 +1,102 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
-contract GemLike {
-    function approve(address, uint) public;
-    function transfer(address, uint) public;
-    function transferFrom(address, address, uint) public;
-    function deposit() public payable;
-    function withdraw(uint) public;
+abstract contract GemLike {
+    function approve(address, uint) virtual public;
+    function transfer(address, uint) virtual public;
+    function transferFrom(address, address, uint) virtual public;
+    function deposit() virtual public payable;
+    function withdraw(uint) virtual public;
 }
 
-contract ManagerLike {
-    function cdpCan(address, uint, address) public view returns (uint);
-    function ilks(uint) public view returns (bytes32);
-    function owns(uint) public view returns (address);
-    function urns(uint) public view returns (address);
-    function vat() public view returns (address);
-    function open(bytes32, address) public returns (uint);
-    function give(uint, address) public;
-    function cdpAllow(uint, address, uint) public;
-    function urnAllow(address, uint) public;
-    function frob(uint, int, int) public;
-    function flux(uint, address, uint) public;
-    function move(uint, address, uint) public;
-    function exit(address, uint, address, uint) public;
-    function quit(uint, address) public;
-    function enter(address, uint) public;
-    function shift(uint, uint) public;
+abstract contract ManagerLike {
+    function cdpCan(address, uint, address) virtual public view returns (uint);
+    function ilks(uint) virtual public view returns (bytes32);
+    function owns(uint) virtual public view returns (address);
+    function urns(uint) virtual public view returns (address);
+    function vat() virtual public view returns (address);
+    function open(bytes32, address) virtual public returns (uint);
+    function give(uint, address) virtual public;
+    function cdpAllow(uint, address, uint) virtual public;
+    function urnAllow(address, uint) virtual public;
+    function frob(uint, int, int) virtual public;
+    function flux(uint, address, uint) virtual public;
+    function move(uint, address, uint) virtual public;
+    function exit(address, uint, address, uint) virtual public;
+    function quit(uint, address) virtual public;
+    function enter(address, uint) virtual public;
+    function shift(uint, uint) virtual public;
 }
 
-contract VatLike {
-    function can(address, address) public view returns (uint);
-    function ilks(bytes32) public view returns (uint, uint, uint, uint, uint);
-    function dai(address) public view returns (uint);
-    function urns(bytes32, address) public view returns (uint, uint);
-    function frob(bytes32, address, address, address, int, int) public;
-    function hope(address) public;
-    function move(address, address, uint) public;
+abstract contract VatLike {
+    function can(address, address) virtual public view returns (uint);
+    function ilks(bytes32) virtual public view returns (uint, uint, uint, uint, uint);
+    function dai(address) virtual public view returns (uint);
+    function urns(bytes32, address) virtual public view returns (uint, uint);
+    function frob(bytes32, address, address, address, int, int) virtual public;
+    function hope(address) virtual public;
+    function move(address, address, uint) virtual public;
 }
 
-contract GemJoinLike {
-    function dec() public returns (uint);
-    function gem() public returns (GemLike);
-    function join(address, uint) public payable;
-    function exit(address, uint) public;
+abstract contract GemJoinLike {
+    function dec() virtual public returns (uint);
+    function gem() virtual public returns (GemLike);
+    function join(address, uint) virtual public payable;
+    function exit(address, uint) virtual public;
 }
 
-contract GNTJoinLike {
-    function bags(address) public view returns (address);
-    function make(address) public returns (address);
+abstract contract GNTJoinLike {
+    function bags(address) virtual public view returns (address);
+    function make(address) virtual public returns (address);
 }
 
-contract DaiJoinLike {
-    function vat() public returns (VatLike);
-    function dai() public returns (GemLike);
-    function join(address, uint) public payable;
-    function exit(address, uint) public;
+abstract contract DaiJoinLike {
+    function vat() virtual public returns (VatLike);
+    function dai() virtual public returns (GemLike);
+    function join(address, uint) virtual public payable;
+    function exit(address, uint) virtual public;
 }
 
-contract HopeLike {
-    function hope(address) public;
-    function nope(address) public;
+abstract contract HopeLike {
+    function hope(address) virtual public;
+    function nope(address) virtual public;
 }
 
-contract ProxyRegistryInterface {
-    function proxies(address _owner) public view returns (address);
-    function build(address) public returns (address);
+abstract contract ProxyRegistryInterface {
+    function proxies(address _owner) virtual public view returns (address);
+    function build(address) virtual public returns (address);
 }
 
-contract EndLike {
-    function fix(bytes32) public view returns (uint);
-    function cash(bytes32, uint) public;
-    function free(bytes32) public;
-    function pack(uint) public;
-    function skim(bytes32, address) public;
+abstract contract EndLike {
+    function fix(bytes32) virtual public view returns (uint);
+    function cash(bytes32, uint) virtual public;
+    function free(bytes32) virtual public;
+    function pack(uint) virtual public;
+    function skim(bytes32, address) virtual public;
 }
 
-contract JugLike {
-    function drip(bytes32) public returns (uint);
+abstract contract JugLike {
+    function drip(bytes32) virtual public returns (uint);
 }
 
-contract PotLike {
-    function pie(address) public view returns (uint);
-    function drip() public returns (uint);
-    function join(uint) public;
-    function exit(uint) public;
+abstract contract PotLike {
+    function pie(address) virtual public view returns (uint);
+    function drip() virtual public returns (uint);
+    function join(uint) virtual public;
+    function exit(uint) virtual public;
 }
 
-contract ProxyRegistryLike {
-    function proxies(address) public view returns (address);
-    function build(address) public returns (address);
+abstract contract ProxyRegistryLike {
+    function proxies(address) virtual public view returns (address);
+    function build(address) virtual public returns (address);
 }
 
-contract ProxyLike {
-    function owner() public view returns (address);
+abstract contract ProxyLike {
+    function owner() virtual public view returns (address);
 }
 
-contract DSProxy {
-    function execute(address _target, bytes memory _data) public payable returns (bytes32);
-    function setOwner(address owner_) public;
+abstract contract DSProxy {
+    function execute(address _target, bytes memory _data) virtual public payable returns (bytes32);
+    function setOwner(address owner_) virtual public;
 }
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -220,7 +220,7 @@ contract SaverProxyActions is Common {
 
     function ethJoin_join(address apt, address urn) public payable {
         // Wraps ETH in WETH
-        GemJoinLike(apt).gem().deposit.value(msg.value)();
+        GemJoinLike(apt).gem().deposit{value: msg.value}();
         // Approves adapter to take the WETH amount
         GemJoinLike(apt).gem().approve(address(apt), msg.value);
         // Joins WETH collateral into the vat

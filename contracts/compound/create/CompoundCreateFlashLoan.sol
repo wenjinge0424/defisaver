@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../flashloan/aave/FlashLoanReceiverBase.sol";
 import "../../interfaces/DSProxyInterface.sol";
@@ -30,7 +30,7 @@ contract CompoundCreateFlashLoan is FlashLoanReceiverBase {
         uint256 _amount,
         uint256 _fee,
         bytes calldata _params)
-    external {
+    external override {
         // Format the call data for DSProxy
         (bytes memory proxyData, address payable proxyAddr) = packFunctionCall(_amount, _fee, _params);
 
@@ -82,6 +82,5 @@ contract CompoundCreateFlashLoan is FlashLoanReceiverBase {
         _proxy.transfer(address(this).balance);
     }
 
-
-    function() external payable {}
+    receive() external override payable {}
 }

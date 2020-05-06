@@ -1,14 +1,14 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../mcd/saver_proxy/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../FlashLoanLogger.sol";
 import "./ILendingPool.sol";
 
-contract IMCDSubscriptions {
-    function unsubscribe(uint256 _cdpId) external;
+abstract contract IMCDSubscriptions {
+    function unsubscribe(uint256 _cdpId) external virtual ;
 
-    function subscribersPos(uint256 _cdpId) external returns (uint256, bool);
+    function subscribersPos(uint256 _cdpId) external virtual returns (uint256, bool);
 }
 
 

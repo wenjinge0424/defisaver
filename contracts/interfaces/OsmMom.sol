@@ -1,6 +1,6 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 
-contract OsmMom {
+abstract contract OsmMom {
     mapping (bytes32 => address) public osms;
 }

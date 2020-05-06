@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../interfaces/DSProxyInterface.sol";
 import "../../interfaces/ERC20.sol";
@@ -41,7 +41,7 @@ contract CompoundMonitorProxy is AdminAuth {
     /// @param _data Data to send to CompoundSaverProxy
     function callExecute(address _owner, address _compoundSaverProxy, bytes memory _data) public payable onlyMonitor {
         // execute reverts if calling specific method fails
-        DSProxyInterface(_owner).execute.value(msg.value)(_compoundSaverProxy, _data);
+        DSProxyInterface(_owner).execute{value: msg.value}(_compoundSaverProxy, _data);
 
         // return if anything left
         if (address(this).balance > 0) {

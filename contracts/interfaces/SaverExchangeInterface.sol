@@ -1,11 +1,11 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 
-contract SaverExchangeInterface {
+abstract contract SaverExchangeInterface {
     function getBestPrice(
         uint256 _amount,
         address _srcToken,
         address _destToken,
         uint256 _exchangeType
-    ) public view returns (address, uint256);
+    ) public view virtual returns (address, uint256);
 }

@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../interfaces/ExchangeInterface.sol";
 
@@ -166,7 +166,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         int convertAmount = 0;
 
         if (_joinAddr == ETH_JOIN_ADDRESS) {
-            Join(_joinAddr).gem().deposit.value(_amount)();
+            Join(_joinAddr).gem().deposit{value: _amount}();
             convertAmount = toPositiveInt(_amount);
         } else {
             convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
@@ -294,7 +294,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
     /// @dev Substracts 10 wei to aviod rounding error later on
-    function getMaxDebt(uint _cdpId, bytes32 _ilk) public view returns (uint) {
+    function getMaxDebt(uint _cdpId, bytes32 _ilk) public virtual view returns (uint) {
         uint price = getPrice(_ilk);
 
         (, uint mat) = spotter.ilks(_ilk);

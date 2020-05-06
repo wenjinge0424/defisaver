@@ -1,18 +1,17 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
+abstract contract TokenInterface {
+    function allowance(address, address) public virtual returns (uint256);
 
-contract TokenInterface {
-    function allowance(address, address) public returns (uint256);
+    function balanceOf(address) public virtual returns (uint256);
 
-    function balanceOf(address) public returns (uint256);
+    function approve(address, uint256) public virtual;
 
-    function approve(address, uint256) public;
+    function transfer(address, uint256) public virtual returns (bool);
 
-    function transfer(address, uint256) public returns (bool);
+    function transferFrom(address, address, uint256) public virtual returns (bool);
 
-    function transferFrom(address, address, uint256) public returns (bool);
+    function deposit() public virtual payable;
 
-    function deposit() public payable;
-
-    function withdraw(uint256) public;
+    function withdraw(uint256) public virtual;
 }

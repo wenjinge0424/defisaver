@@ -1,6 +1,6 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
-contract CEtherInterface {
-    function mint() external payable;
-    function repayBorrow() external payable;
+abstract contract CEtherInterface {
+    function mint() external virtual payable;
+    function repayBorrow() external virtual payable;
 }

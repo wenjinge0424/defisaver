@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../interfaces/ExchangeInterface.sol";
@@ -10,7 +10,6 @@ import "../loggers/ExchangeLogger.sol";
 
 contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
     uint256 public constant SERVICE_FEE = 800; // 0.125% Fee
-
 
     // solhint-disable-next-line const-name-snakecase
     ExchangeLogger public constant logger = ExchangeLogger(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
@@ -121,7 +120,7 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
     ) private returns (bool success, uint256, uint256) {
 
         // solhint-disable-next-line avoid-call-value
-        (success, ) = _exchangeAddr.call.value(_value)(_data);
+        (success, ) = _exchangeAddr.call{value: _value}(_data);
 
         uint256 tokensSwaped = 0;
         uint256 tokensLeft = _amount;
@@ -253,7 +252,7 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
 
     function saverSwap(ExchangeData memory exData, address _wrapper) internal returns (uint swapedTokens) {
         if (exData.srcAddr == KYBER_ETH_ADDRESS) {
-            (swapedTokens, ) = ExchangeInterface(_wrapper).swapEtherToToken.value(exData.amount)(
+            (swapedTokens, ) = ExchangeInterface(_wrapper).swapEtherToToken{value: exData.amount}(
                 exData.amount,
                 exData.destAddr,
                 uint256(-1)
@@ -313,6 +312,6 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
         return x;
     }
 
-    // receive eth from wrappers
-    function() external payable {}
+    // solhint-disable-next-line no-empty-blocks
+    receive() external payable {}
 }

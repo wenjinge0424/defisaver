@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../aave/FlashLoanReceiverBase.sol";
 import "../../interfaces/DSProxyInterface.sol";
@@ -28,7 +28,7 @@ contract LoanMover is FlashLoanReceiverBase {
         uint256 _amount,
         uint256 _fee,
         bytes calldata _params)
-    external {
+    external override {
         // Format the call data for DSProxy
         (bytes memory proxyData, address payable proxyAddr) = packFunctionCall(_amount, _fee, _params);
 
@@ -47,7 +47,7 @@ contract LoanMover is FlashLoanReceiverBase {
         }
     }
 
-    function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal returns (bytes memory proxyData, address payable) {
+    function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal pure returns (bytes memory proxyData, address payable) {
         (
             uint cdpId,
             address joinAddr,

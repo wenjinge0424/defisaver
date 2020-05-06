@@ -1,7 +1,7 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 /// @title Implements enum Method
-contract StaticV2 {
+abstract contract StaticV2 {
 
     enum Method { Boost, Repay }
 

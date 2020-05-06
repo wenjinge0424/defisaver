@@ -1,48 +1,48 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../mcd/maker/Join.sol";
 import "../../DS/DSMath.sol";
+import "../../constants/ConstantAddresses.sol";
 
-contract VatLike {
-    function can(address, address) public view returns (uint);
-    function ilks(bytes32) public view returns (uint, uint, uint, uint, uint);
-    function dai(address) public view returns (uint);
-    function urns(bytes32, address) public view returns (uint, uint);
-    function frob(bytes32, address, address, address, int, int) public;
-    function hope(address) public;
-    function move(address, address, uint) public;
+abstract contract VatLike {
+    function can(address, address) virtual public view returns (uint);
+    function ilks(bytes32) virtual public view returns (uint, uint, uint, uint, uint);
+    function dai(address) virtual public view returns (uint);
+    function urns(bytes32, address) virtual public view returns (uint, uint);
+    function frob(bytes32, address, address, address, int, int) virtual public;
+    function hope(address) virtual public;
+    function move(address, address, uint) virtual public;
 }
 
-contract PotLike {
-    function pie(address) public view returns (uint);
-    function drip() public returns (uint);
-    function join(uint) public;
-    function exit(uint) public;
+abstract contract PotLike {
+    function pie(address) virtual public view returns (uint);
+    function drip() virtual public returns (uint);
+    function join(uint) virtual public;
+    function exit(uint) virtual public;
 }
 
-contract GemLike {
-    function approve(address, uint) public;
-    function transfer(address, uint) public;
-    function transferFrom(address, address, uint) public;
-    function deposit() public payable;
-    function withdraw(uint) public;
+abstract contract GemLike {
+    function approve(address, uint) virtual public;
+    function transfer(address, uint) virtual public;
+    function transferFrom(address, address, uint) virtual public;
+    function deposit() virtual public payable;
+    function withdraw(uint) virtual public;
 }
 
-contract DaiJoinLike {
-    function vat() public returns (VatLike);
-    function dai() public returns (GemLike);
-    function join(address, uint) public payable;
-    function exit(address, uint) public;
+abstract contract DaiJoinLike {
+    function vat() virtual public returns (VatLike);
+    function dai() virtual public returns (GemLike);
+    function join(address, uint) virtual public payable;
+    function exit(address, uint) virtual public;
 }
 
-contract DSRSavingsProtocol is DSMath {
+contract DSRSavingsProtocol is DSMath, ConstantAddresses {
 
     // Kovan
     // address public constant DAI_JOIN_ADDRESS = 0x5AA71a3ae1C0bd6ac27A1f28e1415fFFB6F15B8c;
     // address public constant POT_ADDRESS = 0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb;
 
     // Mainnet
-    address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
     address public constant POT_ADDRESS = 0x197E90f9FAD81970bA7976f33CbD77088E5D7cf7;
 
     function dsrDeposit(uint _amount, bool _fromUser) internal {

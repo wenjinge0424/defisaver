@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../flashloan/aave/ILendingPool.sol";
 import "../../flashloan/FlashLoanLogger.sol";

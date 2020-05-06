@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../maker/Manager.sol";
@@ -120,13 +120,13 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
     }
 
     /// @dev Gets CDP ratio, calls MCDSaverProxy for getting the ratio
-    function getRatio(uint _cdpId) public view returns (uint) {
+    function getRatio(uint _cdpId) public override view returns (uint) {
         return saverProxy.getRatio(_cdpId, manager.ilks(_cdpId)) / (10 ** 18);
     }
 
     /// @notice Checks if Boost/Repay could be triggered for the CDP
     /// @dev Called by MCDMonitor to enforce the min/max check
-    function canCall(Method _method, uint _cdpId) public view returns(bool, uint) {
+    function canCall(Method _method, uint _cdpId) public override view returns(bool, uint) {
         SubPosition memory subInfo = subscribersPos[_cdpId];
 
         if (!subInfo.subscribed) return (false, 0);
@@ -158,8 +158,7 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
         subInfo2.arrPos = subInfo.arrPos;
 
         subscribers[subInfo.arrPos] = subscribers[subscribers.length - 1];
-        delete subscribers[subscribers.length - 1];
-        subscribers.length--;
+        subscribers.pop();
 
         changeIndex++;
         subInfo.subscribed = false;
@@ -170,12 +169,12 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
 
     /// @notice Returns an address that owns the CDP
     /// @param _cdpId Id of the CDP
-    function getOwner(uint _cdpId) public view returns(address) {
+    function getOwner(uint _cdpId) public override view returns(address) {
         return manager.owns(_cdpId);
     }
 
     /// @dev After the Boost/Repay check if the ratio doesn't trigger another call
-    function ratioGoodAfter(Method _method, uint _cdpId) public view returns(bool, uint) {
+    function ratioGoodAfter(Method _method, uint _cdpId) public override view returns(bool, uint) {
         SubPosition memory subInfo = subscribersPos[_cdpId];
         CdpHolder memory subscriber = subscribers[subInfo.arrPos];
 

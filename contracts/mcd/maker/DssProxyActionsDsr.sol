@@ -1,7 +1,7 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
-contract DssProxyActionsDsr {
-    function join(address daiJoin, address pot, uint wad) public;
-    function exit(address daiJoin, address pot, uint wad) public;
-    function exitAll(address daiJoin, address pot) public;
+abstract contract DssProxyActionsDsr {
+    function join(address daiJoin, address pot, uint wad) virtual public;
+    function exit(address daiJoin, address pot, uint wad) virtual public;
+    function exitAll(address daiJoin, address pot) virtual public;
 }

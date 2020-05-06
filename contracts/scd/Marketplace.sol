@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../DS/DSMath.sol";
 import "../DS/DSAuth.sol";
@@ -151,7 +151,7 @@ contract Marketplace is DSAuth, DSMath, ConstantAddresses {
     }
 
     /// @notice Used by front to fetch what is on sale
-    /// @return Returns all CDP ids that are on sale and are not closed
+    /// @return arr Returns all CDP ids that are on sale and are not closed
     function getItemsOnSale() public view returns (bytes32[] memory arr) {
         uint256 n = 0;
 
@@ -179,7 +179,7 @@ contract Marketplace is DSAuth, DSMath, ConstantAddresses {
         itemPos[_cup] = 0;
         itemPos[itemsArr[itemsArr.length - 1]] = index;
 
-        itemsArr.length--;
+        // itemsArr.length--; IN 0.6.0 length is readonly
     }
 
     function isOwner(address _owner, bytes32 _cup) internal view returns (bool) {

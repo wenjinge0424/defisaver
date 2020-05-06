@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../mcd/saver_proxy/ExchangeHelper.sol";
 import "../../interfaces/CTokenInterface.sol";
@@ -114,7 +114,7 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
         if (_collToken != ETH_ADDRESS) {
             require(CTokenInterface(_cCollToken).mint(_depositAmount) == 0);
         } else {
-            CEtherInterface(_cCollToken).mint.value(_depositAmount)(); // reverts on fail
+            CEtherInterface(_cCollToken).mint{value: _depositAmount}(); // reverts on fail
         }
     }
 

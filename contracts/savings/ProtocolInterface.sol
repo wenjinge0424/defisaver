@@ -1,8 +1,7 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
+abstract contract ProtocolInterface {
+    function deposit(address _user, uint256 _amount) public virtual;
 
-contract ProtocolInterface {
-    function deposit(address _user, uint256 _amount) public;
-
-    function withdraw(address _user, uint256 _amount) public;
+    function withdraw(address _user, uint256 _amount) public virtual;
 }

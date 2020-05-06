@@ -90,9 +90,9 @@ function getAbiFunction(contract, functionName) {
 (async () => {
     await initContracts();
 
-    await deposit(ETH_ADDRESS, CETH_ADDRESS, '10', false);
+    // await deposit(ETH_ADDRESS, CETH_ADDRESS, '10', false);
     // await withdraw(ETH_ADDRESS, CETH_ADDRESS, '0.015', true);
-    await borrow(DAI_ADDRESS, CDAI_ADDRESS, '50', false);
+    // await borrow(DAI_ADDRESS, CDAI_ADDRESS, '50', false);
     // await payback(DAI_ADDRESS, CDAI_ADDRESS, '0.5', true);
 
     // await repayWithLoan('0.015', CETH_ADDRESS, CDAI_ADDRESS);

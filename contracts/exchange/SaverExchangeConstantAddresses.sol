@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 
 contract SaverExchangeConstantAddresses {
@@ -10,7 +10,7 @@ contract SaverExchangeConstantAddresses {
     address public constant KYBER_WRAPPER = 0x8F337bD3b7F2b05d9A8dC8Ac518584e833424893;
     address public constant UNISWAP_WRAPPER = 0x1e30124FDE14533231216D95F7798cD0061e5cf8;
     address public constant OASIS_WRAPPER = 0x891f5A171f865031b0f3Eb9723bb8f68C901c9FE;
-    
+
     address public constant DGD_ADDRESS = 0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A;
 
     // Our contracts

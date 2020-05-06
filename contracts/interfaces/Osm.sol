@@ -1,8 +1,8 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 
-contract Osm {
+abstract contract Osm {
     mapping(address => uint256) public bud;
-    
-    function peep() external view returns (bytes32, bool);
+
+    function peep() external view virtual returns (bytes32, bool);
 }

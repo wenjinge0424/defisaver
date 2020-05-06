@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../mcd/saver_proxy/ExchangeHelper.sol";
 import "../../loggers/CompoundLogger.sol";
@@ -85,7 +85,7 @@ contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
         if (collToken != ETH_ADDRESS) {
             require(CTokenInterface(_addrData[0]).mint(swapAmount) == 0);
         } else {
-            CEtherInterface(_addrData[0]).mint.value(swapAmount)(); // reverts on fail
+            CEtherInterface(_addrData[0]).mint{value: swapAmount}(); // reverts on fail
         }
 
         // handle 0x fee

@@ -1,32 +1,24 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../saver_proxy/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../../flashloan/FlashLoanLogger.sol";
 
 
-contract ILendingPool {
-    function flashLoan( address payable _receiver, address _reserve, uint _amount, bytes calldata _params) external;
+abstract contract ILendingPool {
+    function flashLoan( address payable _receiver, address _reserve, uint _amount, bytes calldata _params) external virtual;
 }
 
-contract AutomaticProxyV2 is ConstantAddresses, MCDSaverProxy {
+contract AutomaticProxyV2 is MCDSaverProxy {
 
     address payable public constant MCD_SAVER_FLASH_LOAN = 0xCcFb21Ced87762a1d8425F867a7F8Ec2dFfaBE92;
     address public constant AAVE_POOL_CORE = 0x3dfd23A6c5E8BbcFc9581d2E864a68feb6a076d3;
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
-    // solhint-disable-next-line const-name-snakecase
-    Manager public constant manager = Manager(MANAGER_ADDRESS);
-    // solhint-disable-next-line const-name-snakecase
     FlashLoanLogger public constant logger = FlashLoanLogger(
         0xb9303686B0EE92F92f63973EF85f3105329D345c
     );
-
-    // solhint-disable-next-line const-name-snakecase
-    Vat public constant vat = Vat(VAT_ADDRESS);
-    // solhint-disable-next-line const-name-snakecase
-    Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
 
     function automaticBoost(
         uint[6] memory _data, // cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
@@ -95,7 +87,7 @@ contract AutomaticProxyV2 is ConstantAddresses, MCDSaverProxy {
     /// @notice Gets the maximum amount of debt available to generate
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
-    function getMaxDebt(uint256 _cdpId, bytes32 _ilk) public view returns (uint256) {
+    function getMaxDebt(uint256 _cdpId, bytes32 _ilk) public override view returns (uint256) {
         uint256 price = getPrice(_ilk);
 
         (, uint256 mat) = spotter.ilks(_ilk);
@@ -116,15 +108,6 @@ contract AutomaticProxyV2 is ConstantAddresses, MCDSaverProxy {
         (, uint mat) = Spotter(SPOTTER_ADDRESS).ilks(_ilk);
 
         return sub(sub(collateral, (div(mul(mat, debt), price))), 10);
-    }
-
-    /// @notice Gets a price of the asset
-    /// @param _ilk Ilk of the CDP
-    function getPrice(bytes32 _ilk) public view returns (uint256) {
-        (, uint256 mat) = spotter.ilks(_ilk);
-        (, , uint256 spot, , ) = vat.ilks(_ilk);
-
-        return rmul(rmul(spot, spotter.par()), mat);
     }
 
     function getAaveCollAddr(address _joinAddr) internal returns (address) {

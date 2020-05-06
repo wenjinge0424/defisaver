@@ -1,6 +1,6 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
-contract Cat {
+abstract contract Cat {
     struct Ilk {
         address flip;  // Liquidator
         uint256 chop;  // Liquidation Penalty   [ray]

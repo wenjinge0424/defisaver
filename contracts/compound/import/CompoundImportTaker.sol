@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../auth/ProxyPermission.sol";
 
@@ -42,7 +42,7 @@ contract CompoundImportTaker is CompoundSaverHelper, ProxyPermission {
     }
 
     /// @notice Gets proxy address, if user doesn't has DSProxy build it
-    /// @return DsProxy address
+    /// @return proxy DsProxy address
     function getProxy() internal returns (address proxy) {
         proxy = ProxyRegistryInterface(PROXY_REGISTRY_ADDRESS).proxies(msg.sender);
 

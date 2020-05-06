@@ -1,21 +1,21 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
-contract Manager {
-    function last(address) public returns (uint);
-    function cdpCan(address, uint, address) public view returns (uint);
-    function ilks(uint) public view returns (bytes32);
-    function owns(uint) public view returns (address);
-    function urns(uint) public view returns (address);
-    function vat() public view returns (address);
-    function open(bytes32, address) public returns (uint);
-    function give(uint, address) public;
-    function cdpAllow(uint, address, uint) public;
-    function urnAllow(address, uint) public;
-    function frob(uint, int, int) public;
-    function flux(uint, address, uint) public;
-    function move(uint, address, uint) public;
-    function exit(address, uint, address, uint) public;
-    function quit(uint, address) public;
-    function enter(address, uint) public;
-    function shift(uint, uint) public;
+abstract contract Manager {
+    function last(address) virtual public returns (uint);
+    function cdpCan(address, uint, address) virtual public view returns (uint);
+    function ilks(uint) virtual public view returns (bytes32);
+    function owns(uint) virtual public view returns (address);
+    function urns(uint) virtual public view returns (address);
+    function vat() virtual public view returns (address);
+    function open(bytes32, address) virtual public returns (uint);
+    function give(uint, address) virtual public;
+    function cdpAllow(uint, address, uint) virtual public;
+    function urnAllow(address, uint) virtual public;
+    function frob(uint, int, int) virtual public;
+    function flux(uint, address, uint) virtual public;
+    function move(uint, address, uint) virtual public;
+    function exit(address, uint, address, uint) virtual public;
+    function quit(uint, address) virtual public;
+    function enter(address, uint) virtual public;
+    function shift(uint, uint) virtual public;
 }
