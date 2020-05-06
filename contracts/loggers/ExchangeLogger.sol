@@ -9,7 +9,7 @@ contract ExchangeLogger {
         address wrapper
     );
 
-    function emitSwap(
+    function logSwap(
         address _src,
         address _dest,
         uint256 _amountSold,

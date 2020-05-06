@@ -104,7 +104,7 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
             ERC20(exData.destAddr).transfer(msg.sender, getBalance(exData.destAddr));
         }
 
-        logger.emitSwap(exData.srcAddr, exData.destAddr, exData.amount, swapedTokens, wrapper);
+        logger.logSwap(exData.srcAddr, exData.destAddr, exData.amount, swapedTokens, wrapper);
     }
 
     // @notice Takes order from 0x and returns bool indicating if it is successful
