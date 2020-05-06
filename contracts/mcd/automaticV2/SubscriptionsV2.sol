@@ -126,7 +126,7 @@ contract SubscriptionsV2 is AdminAuth, StaticV2, ConstantAddresses {
         subInfo2.arrPos = subInfo.arrPos;
 
         subscribers[subInfo.arrPos] = subscribers[subscribers.length - 1];
-        delete subscribers[subscribers.length - 1];
+        subscribers.pop();
 
         changeIndex++;
         subInfo.subscribed = false;

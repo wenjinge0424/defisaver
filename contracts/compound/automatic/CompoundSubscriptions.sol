@@ -105,7 +105,7 @@ contract CompoundSubscriptions is AdminAuth {
         subInfo2.arrPos = subInfo.arrPos;
 
         subscribers[subInfo.arrPos] = subscribers[subscribers.length - 1];
-        delete subscribers[subscribers.length - 1];
+        subscribers.pop(); // remove last element and reduce arr length
 
         changeIndex++;
         subInfo.subscribed = false;
