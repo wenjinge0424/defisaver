@@ -7,7 +7,6 @@
   },
   "scripts": {
     "test": "npx mocha --exit --recursive --timeout 60000",
-    "prettify": "./node_modules/.bin/prettier --write contracts/**/*.sol",
     "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol",
     "build-contracts": "sol-merger \"./contracts/*.sol\" ./build"
   },
@@ -24,12 +23,10 @@
   "dependencies": {
     "@chainsafe/truffle-plugin-abigen": "0.0.1",
     "@openzeppelin/contracts": "^3.0.1",
+    "@truffle/hdwallet-provider": "^1.0.34",
     "axios": "^0.19.0",
     "decimal.js": "^10.2.0",
     "dotenv": "^6.2.0",
-    "openzeppelin-solidity": "^3.0.0",
-    "openzeppelin-test-helpers": "^0.4.2",
-    "truffle-hdwallet-provider": "^1.0.2",
     "truffle-plugin-verify": "^0.3.6"
   },
   "devDependencies": {
@@ -39,15 +36,12 @@
     "chai": "^4.2.0",
     "husky": "^4.2.3",
     "mocha": "^7.1.2",
-    "prettier": "^1.19.1",
-    "prettier-plugin-solidity": "^1.0.0-alpha.39",
     "sol-merger": "^2.0.1",
-    "solhint": "^3.0.0",
-    "solhint-plugin-prettier": "0.0.4"
+    "solhint": "^3.0.0"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "truffle compile && npm run lint"
+      "pre-commit": "truffle compile"
     }
   }
 }
