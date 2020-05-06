@@ -36,16 +36,16 @@ module.exports = function(deployer, network, accounts) {
         // 2. deploy these
         // ------------------------------------------------------------------------------------------------------
 
-        await deployer.deploy(AutomaticProxyV2, {gas: 5000000, overwrite: deployAgain});
+        await deployer.deploy(AutomaticProxyV2, {gas: 6700000, overwrite: deployAgain});
         let automaticProxyAddress = (await AutomaticProxyV2.deployed()).address;
         
-        // await deployer.deploy(SubscriptionsV2, automaticProxyAddress, {gas: 5000000, overwrite: deployAgain});
+        await deployer.deploy(SubscriptionsV2, automaticProxyAddress, {gas: 5000000, overwrite: deployAgain});
         let subscriptionsAddress = (await SubscriptionsV2.deployed()).address;
 
-        // await deployer.deploy(SubscriptionsProxyV2, {gas: 5000000, overwrite: deployAgain});
+        await deployer.deploy(SubscriptionsProxyV2, {gas: 5000000, overwrite: deployAgain});
         let subscriptionsProxyAddress = (await SubscriptionsProxyV2.deployed()).address;
 
-        await deployer.deploy(MCDMonitorV2, monitorProxyAddress, subscriptionsAddress, automaticProxyAddress, {gas: 5000000, overwrite: deployAgain});
+        await deployer.deploy(MCDMonitorV2, monitorProxyAddress, subscriptionsAddress, automaticProxyAddress, {gas: 6700000, overwrite: deployAgain});
         let monitorAddress = (await MCDMonitorV2.deployed()).address;
 
         let monitorProxyV2 = await MCDMonitorProxyV2.deployed();
@@ -58,6 +58,7 @@ module.exports = function(deployer, network, accounts) {
         let monitor = await MCDMonitorV2.deployed();
         await monitor.addCaller('0xAED662abcC4FA3314985E67Ea993CAD064a7F5cF');
         await monitor.addCaller('0xa5d330F6619d6bF892A5B87D80272e1607b3e34D');
+        await monitor.addCaller('0x6c259ea1fCa0D1883e3FFFdDeb8a0719E1D7265f');
         console.log('----callers added----');
 
         console.log({automaticProxyAddress});

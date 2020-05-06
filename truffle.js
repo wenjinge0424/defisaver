@@ -31,12 +31,12 @@ module.exports = {
         gasPrice: 3000000000,
         // skipDryRun: true,
     },
-    test: {
+    moonnet: {
         provider: function() {
             return new HDWalletProvider(mnemonic, process.env.MOON_NET_NODE);
         },
         network_id: '1',
-        gas: 8000000,
+        gas: 6700000,
         gasPrice: 3000000000,
         skipDryRun: true,
     },

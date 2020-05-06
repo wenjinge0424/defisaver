@@ -12,7 +12,7 @@ const bidsProxy = '0x49f0D7B5cAD919f88C019Ca748A27383EA0f4Bbe';
 const proxyRegistryAddr = '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4';
 
 const initContracts = async () => {
-    web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_ENDPOINT));
+    web3 = new Web3(new Web3.providers.HttpProvider(process.env.MOON_NET_NODE));
 
     account = web3.eth.accounts.privateKeyToAccount('0x'+process.env.PRIV_KEY)
     web3.eth.accounts.wallet.add(account)

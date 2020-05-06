@@ -35,6 +35,15 @@ const getAbiFunction = (contract, functionName) => {
     return abi.find(abi => abi.name === functionName);
 };
 
+const fundIfNeeded = async (web3, fundAccAddress, accAddress, minBal=5, addBal=10) => {
+    const weiBal = await web3.eth.getBalance(accAddress);
+    const bal = web3.utils.fromWei(weiBal.toString(), 'ether')
+
+    console.log(`Funding ${accAddress}, current balance: ${bal.toString()} from: ${fundAccAddress}`);
+    if (parseFloat(bal) < minBal) {
+        await web3.eth.sendTransaction({gas: 21000, from: fundAccAddress, to: accAddress, value: web3.utils.toWei(addBal.toString(), "ether")});
+    }
+}
 
 const getProxy = async (registry, acc) => {
     let proxyAddr = await registry.proxies(acc);
@@ -58,5 +67,6 @@ module.exports = {
     fetchMakerAddresses,
     saverExchangeAddress,
     mcdSaverProxyAddress,
-    ETH_ADDRESS
+    ETH_ADDRESS,
+    fundIfNeeded
 };
