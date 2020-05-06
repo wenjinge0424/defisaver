@@ -71,7 +71,7 @@ contract PartialMigrationProxy is PayProxyActions, ConstantAddresses {
     function lock(TubInterface tub, bytes32 cup, uint value) private {
         if (value > 0) {
 
-            tub.gem().deposit.value(value)();
+            tub.gem().deposit{value: value}();
 
             uint ink = rdiv(value, tub.per());
             if (tub.gem().allowance(address(this), address(tub)) != uint(-1)) {

@@ -41,7 +41,7 @@ contract MCDMonitorProxyV2 is AdminAuth {
     /// @param _data Data to send to MCDSaverProxy
     function callExecute(address _owner, address _saverProxy, bytes memory _data) public payable onlyMonitor {
         // execute reverts if calling specific method fails
-        DSProxyInterface(_owner).execute.value(msg.value)(_saverProxy, _data);
+        DSProxyInterface(_owner).execute{value: msg.value}(_saverProxy, _data);
 
         // return if anything left
         if (address(this).balance > 0) {

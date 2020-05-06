@@ -85,7 +85,7 @@ contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
         if (collToken != ETH_ADDRESS) {
             require(CTokenInterface(_addrData[0]).mint(swapAmount) == 0);
         } else {
-            CEtherInterface(_addrData[0]).mint.value(swapAmount)(); // reverts on fail
+            CEtherInterface(_addrData[0]).mint{value: swapAmount}(); // reverts on fail
         }
 
         // handle 0x fee

@@ -73,7 +73,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
         uint gasCost = calcGasCost(REPAY_GAS_COST);
         _data[4] = gasCost;
 
-        compoundMonitorProxy.callExecute.value(msg.value)(
+        compoundMonitorProxy.callExecute{value: msg.value}(
             _user,
             compoundFlashLoanTakerAddress,
             abi.encodeWithSignature("repayWithLoan(uint256[5],address[3],bytes)",
@@ -109,7 +109,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
         uint gasCost = calcGasCost(BOOST_GAS_COST);
         _data[4] = gasCost;
 
-        compoundMonitorProxy.callExecute.value(msg.value)(
+        compoundMonitorProxy.callExecute{value: msg.value}(
             _user,
             compoundFlashLoanTakerAddress,
             abi.encodeWithSignature("boostWithLoan(uint256[5],address[3],bytes)",

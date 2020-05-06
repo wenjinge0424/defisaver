@@ -57,7 +57,7 @@ contract SaverProxy is DSMath, ConstantAddresses {
         uint256 ethFee = wdiv(mkrAmount, estimatedMkrPrice(_amount));
 
         uint256 change;
-        (, change) = ExchangeInterface(KYBER_WRAPPER).swapEtherToToken.value(ethFee)(
+        (, change) = ExchangeInterface(KYBER_WRAPPER).swapEtherToToken{value: ethFee}(
             ethFee,
             MKR_ADDRESS,
             mkrAmount
@@ -65,7 +65,7 @@ contract SaverProxy is DSMath, ConstantAddresses {
 
         _amount = sub(_amount, sub(ethFee, change));
 
-        (daiAmount, ) = ExchangeInterface(exchangeWrapper).swapEtherToToken.value(_amount)(
+        (daiAmount, ) = ExchangeInterface(exchangeWrapper).swapEtherToToken{value: _amount}(
             _amount,
             MAKER_DAI_ADDRESS,
             uint256(-1)
@@ -194,7 +194,7 @@ contract SaverProxy is DSMath, ConstantAddresses {
             uint256(-1)
         );
 
-        _tub.gem().deposit.value(ethAmount)();
+        _tub.gem().deposit{value: ethAmount}();
 
         uint256 ink = sub(rdiv(ethAmount, _tub.per()), 1);
 

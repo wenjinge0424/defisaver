@@ -166,7 +166,7 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
         int convertAmount = 0;
 
         if (_joinAddr == ETH_JOIN_ADDRESS) {
-            Join(_joinAddr).gem().deposit.value(_amount)();
+            Join(_joinAddr).gem().deposit{value: _amount}();
             convertAmount = toPositiveInt(_amount);
         } else {
             convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));

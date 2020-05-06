@@ -92,7 +92,7 @@ contract LoanMoverProxy is MCDSaverProxy {
         if (_tokenAddr != ETH_ADDRESS) {
             require(CTokenInterface(_cTokenAddr).repayBorrow(_amount) == 0);
         } else {
-            CEtherInterface(_cTokenAddr).repayBorrow.value(_amount)();
+            CEtherInterface(_cTokenAddr).repayBorrow{value: _amount}();
         }
     }
 
@@ -116,7 +116,7 @@ contract LoanMoverProxy is MCDSaverProxy {
         if (_tokenAddr != ETH_ADDRESS) {
             require(CTokenInterface(_cTokenAddr).mint(_amount) == 0);
         } else {
-            CEtherInterface(_cTokenAddr).mint.value(_amount)();
+            CEtherInterface(_cTokenAddr).mint{value: _amount}();
         }
     }
 

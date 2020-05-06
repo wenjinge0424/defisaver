@@ -33,7 +33,7 @@ contract UniswapWrapper is ExchangeInterface, DSMath, ConstantAddresses {
         address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_tokenAddress);
 
         uint tokenAmount = UniswapExchangeInterface(uniswapTokenAddress).
-                ethToTokenTransferInput.value(_ethAmount)(1, block.timestamp + 1, msg.sender);
+                ethToTokenTransferInput{value: _ethAmount}(1, block.timestamp + 1, msg.sender);
 
         return (tokenAmount, 0);
     }

@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "../../interfaces/OsmMom.sol";
 import "../../interfaces/Osm.sol";
@@ -24,7 +24,7 @@ contract MCDPriceVerifier is AdminAuth {
         require(authorized[msg.sender]);
 
         address osmAddress = osmMom.osms(_ilk);
-        
+
         uint whitelisted = Osm(osmAddress).bud(address(this));
         // If contracts doesn't have access return true
         if (whitelisted != 0) return true;
@@ -34,7 +34,7 @@ contract MCDPriceVerifier is AdminAuth {
         (price32, has) = Osm(osmAddress).peep();
 
         return has ? uint(price32) == _nextPrice : false;
-    } 
+    }
 
     function setAuthorized(address _address, bool _allowed) public onlyOwner {
         authorized[_address] = _allowed;

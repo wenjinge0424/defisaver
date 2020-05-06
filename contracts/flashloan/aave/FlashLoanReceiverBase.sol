@@ -58,7 +58,7 @@ library Address {
         require(address(this).balance >= amount, "Address: insufficient balance");
 
         // solhint-disable-next-line avoid-low-level-calls, avoid-call-value
-        (bool success, ) = recipient.call.value(amount)("");
+        (bool success, ) = recipient.call{value: amount}("");
         require(success, "Address: unable to send value, recipient may have reverted");
     }
 }
@@ -408,7 +408,7 @@ abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
     function transferInternal(address payable _destination, address _reserve, uint256  _amount) internal {
         if(_reserve == EthAddressLib.ethAddress()) {
             //solium-disable-next-line
-            _destination.call.value(_amount)("");
+            _destination.call{value: _amount}("");
             return;
         }
 

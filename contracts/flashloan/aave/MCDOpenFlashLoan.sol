@@ -68,7 +68,7 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         );
 
         if (_isEth) {
-            MCDOpenProxyActions(OPEN_PROXY_ACTIONS).openLockETHAndDraw.value(address(this).balance)(
+            MCDOpenProxyActions(OPEN_PROXY_ACTIONS).openLockETHAndDraw{value: address(this).balance}(
                 address(manager),
                 JUG_ADDRESS,
                 ETH_JOIN_ADDRESS,

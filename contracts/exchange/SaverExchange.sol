@@ -120,7 +120,7 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
     ) private returns (bool success, uint256, uint256) {
 
         // solhint-disable-next-line avoid-call-value
-        (success, ) = _exchangeAddr.call.value(_value)(_data);
+        (success, ) = _exchangeAddr.call{value: _value}(_data);
 
         uint256 tokensSwaped = 0;
         uint256 tokensLeft = _amount;
@@ -252,7 +252,7 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
 
     function saverSwap(ExchangeData memory exData, address _wrapper) internal returns (uint swapedTokens) {
         if (exData.srcAddr == KYBER_ETH_ADDRESS) {
-            (swapedTokens, ) = ExchangeInterface(_wrapper).swapEtherToToken.value(exData.amount)(
+            (swapedTokens, ) = ExchangeInterface(_wrapper).swapEtherToToken{value: exData.amount}(
                 exData.amount,
                 exData.destAddr,
                 uint256(-1)

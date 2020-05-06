@@ -77,7 +77,7 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
         uint gasCost = calcGasCost(REPAY_GAS_COST);
         _data[4] = gasCost;
 
-        monitorProxyContract.callExecute.value(msg.value)(subscriptionsContract.getOwner(_data[0]), automaticSaverProxyAddress, abi.encodeWithSignature("automaticRepay(uint256[6],address,address,bytes)", _data, _joinAddr, _exchangeAddress, _callData));
+        monitorProxyContract.callExecute{value: msg.value}(subscriptionsContract.getOwner(_data[0]), automaticSaverProxyAddress, abi.encodeWithSignature("automaticRepay(uint256[6],address,address,bytes)", _data, _joinAddr, _exchangeAddress, _callData));
 
         uint ratioAfter;
         bool isGoodRatio;
@@ -116,7 +116,7 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
         uint gasCost = calcGasCost(BOOST_GAS_COST);
         _data[4] = gasCost;
 
-        monitorProxyContract.callExecute.value(msg.value)(subscriptionsContract.getOwner(_data[0]), automaticSaverProxyAddress, abi.encodeWithSignature("automaticBoost(uint256[6],address,address,bytes)", _data, _joinAddr, _exchangeAddress, _callData));
+        monitorProxyContract.callExecute{value: msg.value}(subscriptionsContract.getOwner(_data[0]), automaticSaverProxyAddress, abi.encodeWithSignature("automaticBoost(uint256[6],address,address,bytes)", _data, _joinAddr, _exchangeAddress, _callData));
 
         uint ratioAfter;
         bool isGoodRatio;

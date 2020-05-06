@@ -45,7 +45,7 @@ contract CompoundSaverHelper is DSMath {
         approveCToken(_borrowToken, _cBorrowToken);
 
         if (_borrowToken == ETH_ADDRESS) {
-            CEtherInterface(_cBorrowToken).repayBorrow.value(_amount)();
+            CEtherInterface(_cBorrowToken).repayBorrow{value: _amount}();
         } else {
             require(CTokenInterface(_cBorrowToken).repayBorrow(_amount) == 0);
         }
