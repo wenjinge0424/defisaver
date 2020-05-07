@@ -2,7 +2,7 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "./SaverExchangeHelper.sol";
-import "../interfaces/ExchangeInterface.sol";
+import "../interfaces/ExchangeInterfaceV2.sol";
 import "../interfaces/TokenInterface.sol";
 import "../DS/DSMath.sol";
 import "../loggers/ExchangeLogger.sol";
@@ -51,8 +51,8 @@ contract SaverExchange is SaverExchangeHelper, DSMath {
         uint tokensLeft = exData.amount;
 
         // Transform Weth address to Eth address kyber uses
-        exData.srcAddr = wethToKyberEth(exData.srcAddr);
-        exData.destAddr = wethToKyberEth(exData.destAddr);
+        // exData.srcAddr = wethToEthAddr(exData.srcAddr);
+        // exData.destAddr = wethToEthAddr(exData.destAddr);
 
         // if 0x is selected try first the 0x order
         if (exData.exchangeType == ExchangeType.ZEROX) {
@@ -188,7 +188,7 @@ contract SaverExchange is SaverExchangeHelper, DSMath {
 
         (success, result) = _wrapper.call(
             abi.encodeWithSignature(
-                "getExpectedRate(address,address,uint256)",
+                "getSellRate(address,address,uint256)",
                 _srcToken,
                 _destToken,
                 _amount
@@ -203,29 +203,15 @@ contract SaverExchange is SaverExchangeHelper, DSMath {
     }
 
     function saverSwap(ExchangeData memory exData, address _wrapper) internal returns (uint swapedTokens) {
-        if (exData.srcAddr == KYBER_ETH_ADDRESS) {
-            (swapedTokens, ) = ExchangeInterface(_wrapper).swapEtherToToken{value: exData.amount}(
-                exData.amount,
-                exData.destAddr,
-                uint256(-1)
-            );
-        } else {
-            ERC20(exData.srcAddr).transfer(_wrapper, exData.amount);
+        uint ethValue = 0;
 
-            if (exData.destAddr == KYBER_ETH_ADDRESS) {
-                swapedTokens = ExchangeInterface(_wrapper).swapTokenToEther(
-                    exData.srcAddr,
-                    exData.amount,
-                    uint256(-1)
-                );
-            } else {
-                swapedTokens = ExchangeInterface(_wrapper).swapTokenToToken(
-                    exData.srcAddr,
-                    exData.destAddr,
-                    exData.amount
-                );
-            }
+        if (exData.srcAddr == KYBER_ETH_ADDRESS) {
+            ethValue = exData.amount;
         }
+
+        swapedTokens = ExchangeInterfaceV2(_wrapper).
+                    sell{value: ethValue}(exData.srcAddr, exData.destAddr, exData.amount);
+
     }
 
     // solhint-disable-next-line no-empty-blocks

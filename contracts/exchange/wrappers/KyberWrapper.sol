@@ -4,101 +4,80 @@ import "../../interfaces/ERC20.sol";
 import "../../interfaces/KyberNetworkProxyInterface.sol";
 import "../../interfaces/ExchangeInterface.sol";
 import "../../constants/ConstantAddresses.sol";
+import "../../DS/DSMath.sol";
 
+contract KyberWrapper is DSMath, ConstantAddresses {
 
-contract KyberWrapper is ExchangeInterface, ConstantAddresses {
+    function sell(address _srcAddr, address _destAddr, uint _srcAmount) external payable returns (uint) {
+        ERC20 srcToken = ERC20(wethToEthAddr(_srcAddr));
+        ERC20 destToken = ERC20(wethToEthAddr(_destAddr));
 
-    function swapTokenToToken(address _src, address _dest, uint _amount) external override payable returns(uint) {
-        require(_src != KYBER_ETH_ADDRESS && _dest != KYBER_ETH_ADDRESS);
+        KyberNetworkProxyInterface kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
+        (, uint minRate) = kyberNetworkProxy.getExpectedRate(srcToken, destToken, _srcAmount);
 
-        uint minRate;
-        uint destAmount;
-        ERC20 SRC_TOKEN = ERC20(_src);
-        ERC20 DEST_TOKEN = ERC20(_dest);
-
-        KyberNetworkProxyInterface _kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
-
-        (, minRate) = _kyberNetworkProxy.getExpectedRate(SRC_TOKEN, DEST_TOKEN, _amount);
-
-        // Mitigate ERC20 Approve front-running attack, by initially setting, allowance to 0
-        require(SRC_TOKEN.approve(address(_kyberNetworkProxy), 0));
-        // Approve tokens so network can take them during the swap
-        SRC_TOKEN.approve(address(_kyberNetworkProxy), _amount);
-
-        destAmount = _kyberNetworkProxy.trade(
-            SRC_TOKEN,
-            _amount,
-            DEST_TOKEN,
+        uint destAmount = kyberNetworkProxy.trade{value: msg.value}(
+            srcToken,
+            _srcAmount,
+            destToken,
             msg.sender,
             uint(-1),
             minRate,
             WALLET_ID
         );
 
-
         return destAmount;
     }
 
+    function buy(address _srcAddr, address _destAddr, uint _destAmount) external payable returns(uint) {
+        ERC20 srcToken = ERC20(wethToEthAddr(_srcAddr));
+        ERC20 destToken = ERC20(wethToEthAddr(_destAddr));
 
-    function swapEtherToToken(uint _ethAmount, address _tokenAddress, uint _maxAmount) external override payable returns(uint, uint) {
-        uint minRate;
-        ERC20 ETH_TOKEN_ADDRESS = ERC20(KYBER_ETH_ADDRESS);
-        ERC20 token = ERC20(_tokenAddress);
+        uint srcAmount = srcToken.balanceOf(address(this));
 
-        KyberNetworkProxyInterface _kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
+        KyberNetworkProxyInterface kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
+        (, uint minRate) = kyberNetworkProxy.getExpectedRate(srcToken, destToken, srcAmount);
 
-        (, minRate) = _kyberNetworkProxy.getExpectedRate(ETH_TOKEN_ADDRESS, token, _ethAmount);
-
-        uint destAmount = _kyberNetworkProxy.trade{value: _ethAmount}(
-            ETH_TOKEN_ADDRESS,
-            _ethAmount,
-            token,
+        uint destAmount = kyberNetworkProxy.trade{value: msg.value}(
+            srcToken,
+            srcAmount,
+            destToken,
             msg.sender,
-            _maxAmount,
+            _destAmount,
             minRate,
             WALLET_ID
         );
 
-        uint balance = address(this).balance;
+        require(destAmount == _destAmount);
 
-        msg.sender.transfer(balance);
+        // TODO: return leftover tokens
 
-        return (destAmount, balance);
+        uint srcAmountAfter = srcToken.balanceOf(address(this));
+
+        return (srcAmount - srcAmountAfter);
     }
 
-    function swapTokenToEther(address _tokenAddress, uint _amount, uint _maxAmount) external override returns(uint) {
-        uint minRate;
-        ERC20 ETH_TOKEN_ADDRESS = ERC20(KYBER_ETH_ADDRESS);
-        ERC20 token = ERC20(_tokenAddress);
-
-        KyberNetworkProxyInterface _kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
-
-        (, minRate) = _kyberNetworkProxy.getExpectedRate(token, ETH_TOKEN_ADDRESS, _amount);
-
-        // Mitigate ERC20 Approve front-running attack, by initially setting, allowance to 0
-        require(token.approve(address(_kyberNetworkProxy), 0));
-
-        // Approve tokens so network can take them during the swap
-        token.approve(address(_kyberNetworkProxy), _amount);
-
-        uint destAmount = _kyberNetworkProxy.trade(
-            token,
-            _amount,
-            ETH_TOKEN_ADDRESS,
-            msg.sender,
-            _maxAmount,
-            minRate,
-            WALLET_ID
-        );
-
-        return destAmount;
+    function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount) public view returns (uint rate) {
+        (rate, ) = KyberNetworkProxyInterface(KYBER_INTERFACE)
+            .getExpectedRate(ERC20(_srcAddr), ERC20(_destAddr), _srcAmount);
     }
 
-    function getExpectedRate(address _src, address _dest, uint _srcQty) public view override returns (uint) {
-        uint rate;
-        (rate, ) = KyberNetworkProxyInterface(KYBER_INTERFACE).getExpectedRate(ERC20(_src), ERC20(_dest), _srcQty);
+    // check this if we get the same rate as the other wrappers
+    function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount) public view returns (uint rate) {
+        (uint srcRate, ) = KyberNetworkProxyInterface(KYBER_INTERFACE)
+            .getExpectedRate(ERC20(_destAddr), ERC20(_srcAddr), _destAmount);
 
-        return rate;
+        uint srcAmount = wdiv(_destAmount, srcRate);
+
+        // TODO: lower the rate a bit, beacuse of the buy/sell conversion
+
+        (rate, ) = KyberNetworkProxyInterface(KYBER_INTERFACE)
+            .getExpectedRate(ERC20(_srcAddr), ERC20(_destAddr), srcAmount);
+    }
+
+    /// @notice Converts WETH -> Kybers Eth address
+    /// @param _src Input address
+    function wethToEthAddr(address _src) internal pure returns (address) {
+        return _src == WETH_ADDRESS ? KYBER_ETH_ADDRESS : _src;
     }
 
     receive() payable external {}

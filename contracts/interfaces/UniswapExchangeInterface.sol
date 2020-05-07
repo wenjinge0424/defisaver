@@ -41,4 +41,27 @@ abstract contract UniswapExchangeInterface {
         address recipient,
         address token_addr
     ) external virtual returns (uint256 tokens_bought);
+
+    function ethToTokenTransferOutput(
+        uint256 tokens_bought,
+        uint256 deadline,
+        address recipient
+    ) external virtual payable returns (uint256  eth_sold);
+
+    function tokenToEthTransferOutput(
+        uint256 eth_bought,
+        uint256 max_tokens,
+        uint256 deadline,
+        address recipient
+    ) external virtual returns (uint256  tokens_sold);
+
+    function tokenToTokenTransferOutput(
+        uint256 tokens_bought,
+        uint256 max_tokens_sold,
+        uint256 max_eth_sold,
+        uint256 deadline,
+        address recipient,
+        address token_addr
+    ) external virtual returns (uint256  tokens_sold);
+
 }

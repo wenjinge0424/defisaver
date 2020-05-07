@@ -76,10 +76,10 @@ contract SaverExchangeHelper is SaverExchangeConstantAddresses {
         }
     }
 
-    /// @notice Converts WETH -> Kybers Eth address
+    /// @notice Converts Kybers Eth address -> Weth
     /// @param _src Input address
-    function wethToKyberEth(address _src) internal pure returns (address) {
-        return _src == WETH_ADDRESS ? KYBER_ETH_ADDRESS : _src;
+    function ethToWethAddr(address _src) internal pure returns (address) {
+        return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
     }
 
     function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
