@@ -1,16 +1,13 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
+import "./SaverExchangeHelper.sol";
 import "../interfaces/ExchangeInterface.sol";
 import "../interfaces/TokenInterface.sol";
 import "../DS/DSMath.sol";
-import "./SaverExchangeConstantAddresses.sol";
-import "../mcd/Discount.sol";
 import "../loggers/ExchangeLogger.sol";
 
-contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
-    uint256 public constant SERVICE_FEE = 800; // 0.125% Fee
-
+contract SaverExchange is SaverExchangeHelper, DSMath {
     // solhint-disable-next-line const-name-snakecase
     ExchangeLogger public constant logger = ExchangeLogger(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
@@ -36,10 +33,26 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
         uint dfsFee = takeFee(exData.amount, exData.srcAddr);
         exData.amount = sub(exData.amount, dfsFee);
 
+        // Perform the exchange
+        (address wrapper, uint swapedTokens) = _swap(exData);
+
+        // send back any leftover ether or tokens
+        sendLeftover(exData.srcAddr, exData.destAddr);
+
+        // log the event
+        logger.logSwap(exData.srcAddr, exData.destAddr, exData.amount, swapedTokens, wrapper);
+    }
+
+    function _swap(ExchangeData memory exData) internal returns (address, uint) {
+
         address wrapper;
         uint swapedTokens;
         bool success;
         uint tokensLeft = exData.amount;
+
+        // Transform Weth address to Eth address kyber uses
+        exData.srcAddr = wethToKyberEth(exData.srcAddr);
+        exData.destAddr = wethToKyberEth(exData.destAddr);
 
         // if 0x is selected try first the 0x order
         if (exData.exchangeType == ExchangeType.ZEROX) {
@@ -55,7 +68,6 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
 
         // check if we have already swapped with 0x, or tried swapping but failed
         if (swapedTokens == 0) {
-
             uint price;
 
             (wrapper, price)
@@ -76,20 +88,7 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
             }
         }
 
-        // send back any leftover ether or tokens
-        if (address(this).balance > 0) {
-            msg.sender.transfer(address(this).balance);
-        }
-
-        if (getBalance(exData.srcAddr) > 0) {
-            ERC20(exData.srcAddr).transfer(msg.sender, getBalance(exData.srcAddr));
-        }
-
-        if (getBalance(exData.destAddr) > 0) {
-            ERC20(exData.destAddr).transfer(msg.sender, getBalance(exData.destAddr));
-        }
-
-        logger.logSwap(exData.srcAddr, exData.destAddr, exData.amount, swapedTokens, wrapper);
+        return (wrapper, swapedTokens);
     }
 
     /// @notice Takes order from 0x and returns bool indicating if it is successful
@@ -203,34 +202,6 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
         }
     }
 
-    /// @notice Takes a feePercentage and sends it to wallet
-    /// @param _amount Dai amount of the whole trade
-    /// @return feeAmount Amount in Dai owner earned on the fee
-    function takeFee(uint256 _amount, address _token) internal returns (uint256 feeAmount) {
-        uint256 fee = SERVICE_FEE;
-
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(msg.sender)) {
-            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(msg.sender);
-        }
-
-        if (fee == 0) {
-            feeAmount = 0;
-        } else {
-            feeAmount = _amount / SERVICE_FEE;
-            if (_token == KYBER_ETH_ADDRESS) {
-                WALLET_ID.transfer(feeAmount);
-            } else {
-                ERC20(_token).transfer(WALLET_ID, feeAmount);
-            }
-        }
-    }
-
-    function getDecimals(address _token) internal view returns (uint256) {
-        if (_token == DGD_ADDRESS) return 9;
-
-        return ERC20(_token).decimals();
-    }
-
     function saverSwap(ExchangeData memory exData, address _wrapper) internal returns (uint swapedTokens) {
         if (exData.srcAddr == KYBER_ETH_ADDRESS) {
             (swapedTokens, ) = ExchangeInterface(_wrapper).swapEtherToToken{value: exData.amount}(
@@ -255,42 +226,6 @@ contract SaverExchange is DSMath, SaverExchangeConstantAddresses {
                 );
             }
         }
-    }
-
-    function pullTokens(address _tokenAddr, uint _amount) internal {
-        if (_tokenAddr == KYBER_ETH_ADDRESS) {
-            require(msg.value >= _amount, "msg.value smaller than amount");
-        } else {
-            require(
-                ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount),
-                "Not able to withdraw wanted amount"
-            );
-        }
-    }
-
-    function getBalance(address _tokenAddr) internal view returns (uint balance) {
-        if (_tokenAddr == KYBER_ETH_ADDRESS) {
-            balance = address(this).balance;
-        } else {
-            balance = ERC20(_tokenAddr).balanceOf(address(this));
-        }
-    }
-
-    function approve0xProxy(address _tokenAddr, uint _amount) internal {
-        if (_tokenAddr != KYBER_ETH_ADDRESS) {
-            ERC20(_tokenAddr).approve(address(ERC20_PROXY_0X), _amount);
-        }
-    }
-
-    function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
-        require(bs.length >= start + 32, "slicing out of range");
-
-        uint256 x;
-        assembly {
-            x := mload(add(bs, add(0x20, start)))
-        }
-
-        return x;
     }
 
     // solhint-disable-next-line no-empty-blocks
