@@ -30,6 +30,17 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
         uint price;
     }
 
+    struct TokenInfoFull {
+        address underlyingTokenAddress;
+        uint supplyRate;
+        uint borrowRate;
+        uint exchangeRate;
+        uint marketLiquidity;
+        uint totalSupply;
+        uint collateralFactor;
+        uint price;
+    }
+
     /// @notice Calcualted the ratio of coll/debt for a compound user
     /// @param _user Address of the user
     function getRatio(address _user) public view returns (uint) {
@@ -147,7 +158,64 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
         if (sumBorrow == 0) return data;
 
         data.ratio = uint128((sumCollateral * 10**18) / sumBorrow);
+    }
 
+    /// @notice Fetches all the collateral/debt address and amounts, denominated in token balances
+    /// @param _user Address of the user
+    /// @return data LoanData information
+    function getLoanDataInTokenBalances(address _user) public view returns (LoanData memory data) {
+        address[] memory assets = comp.getAssetsIn(_user);
+
+        data = LoanData({
+            user: _user,
+            ratio: 0,
+            collAddr: new address[](assets.length),
+            borrowAddr: new address[](assets.length),
+            collAmounts: new uint[](assets.length),
+            borrowAmounts: new uint[](assets.length)
+        });
+
+        uint sumCollateral = 0;
+        uint sumBorrow = 0;
+        uint collPos = 0;
+        uint borrowPos = 0;
+
+        for (uint i = 0; i < assets.length; i++) {
+            address asset = assets[i];
+
+            (, uint cTokenBalance, uint borrowBalance, uint exchangeRateMantissa)
+                                        = CTokenInterface(asset).getAccountSnapshot(_user);
+
+            Exp memory oraclePrice;
+
+            if (cTokenBalance != 0 || borrowBalance != 0) {
+                oraclePrice = Exp({mantissa: oracle.getUnderlyingPrice(asset)});
+            }
+
+            // Sum up collateral in Eth
+            if (cTokenBalance != 0) {
+                Exp memory exchangeRate = Exp({mantissa: exchangeRateMantissa});
+                (, Exp memory tokensToEther) = mulExp(exchangeRate, oraclePrice);
+                (, sumCollateral) = mulScalarTruncateAddUInt(tokensToEther, cTokenBalance, sumCollateral);
+
+                data.collAddr[collPos] = asset;
+                (, data.collAmounts[collPos]) = mulScalarTruncate(exchangeRate, cTokenBalance);
+                collPos++;
+            }
+
+            // Sum up debt in Eth
+            if (borrowBalance != 0) {
+                (, sumBorrow) = mulScalarTruncateAddUInt(oraclePrice, borrowBalance, sumBorrow);
+
+                data.borrowAddr[borrowPos] = asset;
+                data.borrowAmounts[borrowPos] = borrowBalance;
+                borrowPos++;
+            }
+        }
+
+        if (sumBorrow == 0) return data;
+
+        data.ratio = uint128((sumCollateral * 10**18) / sumBorrow);
     }
 
     /// @notice Fetches all the collateral/debt address and amounts, denominated in ether
@@ -184,6 +252,29 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
             tokens[i] = TokenInfo({
                 cTokenAddress: _cTokenAddresses[i],
                 underlyingTokenAddress: getUnderlyingAddr(_cTokenAddresses[i]),
+                collateralFactor: collFactor,
+                price: oracle.getUnderlyingPrice(_cTokenAddresses[i])
+            });
+        }
+    }
+
+    /// @notice Information about cTokens
+    /// @param _cTokenAddresses Array of cTokens addresses
+    /// @return tokens Array of cTokens infomartion
+    function getFullTokensInfo(address[] memory _cTokenAddresses) public returns(TokenInfoFull[] memory tokens) {
+        tokens = new TokenInfoFull[](_cTokenAddresses.length);
+
+        for (uint i = 0; i < _cTokenAddresses.length; ++i) {
+            (, uint collFactor) = comp.markets(_cTokenAddresses[i]);
+            CTokenInterface cToken = CTokenInterface(_cTokenAddresses[i]);
+
+            tokens[i] = TokenInfoFull({
+                underlyingTokenAddress: getUnderlyingAddr(_cTokenAddresses[i]),
+                supplyRate: cToken.supplyRatePerBlock(),
+                borrowRate: cToken.borrowRatePerBlock(),
+                exchangeRate: cToken.exchangeRateCurrent(),
+                marketLiquidity: cToken.getCash(),
+                totalSupply: cToken.totalSupply(),
                 collateralFactor: collFactor,
                 price: oracle.getUnderlyingPrice(_cTokenAddresses[i])
             });
