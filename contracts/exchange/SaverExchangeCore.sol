@@ -76,42 +76,44 @@ contract SaverExchangeCore is SaverExchangeHelper {
         address wrapper;
         uint swapedTokens;
         bool success;
-        uint tokensLeft = exData.srcAmount;
+
+        require(exData.destAmount != 0);
 
         // Transform Weth address to Eth address kyber uses
         // exData.srcAddr = wethToEthAddr(exData.srcAddr);
         // exData.destAddr = wethToEthAddr(exData.destAddr);
 
         // if 0x is selected try first the 0x order
-        // if (exData.exchangeType == ExchangeType.ZEROX) {
-        //     approve0xProxy(exData.srcAddr, exData.srcAmount);
+        if (exData.exchangeType == ExchangeType.ZEROX) {
+            approve0xProxy(exData.srcAddr, exData.srcAmount);
 
-        //     (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance);
+            // TODO: should we use address(this).balance?
+            (success, swapedTokens,) = takeOrder(exData, address(this).balance);
 
-        //     // either it reverts or order doesn't exist anymore, we reverts as it was explicitely asked for this exchange
-        //     require(success && tokensLeft == 0, "0x transaction failed");
+            // either it reverts or order doesn't exist anymore, we reverts as it was explicitely asked for this exchange
+            require(success && swapedTokens >= exData.destAmount, "0x transaction failed");
 
-        //     wrapper = exData.exchangeAddr;
-        // }
+            wrapper = exData.exchangeAddr;
+        }
 
         // check if we have already swapped with 0x, or tried swapping but failed
-        if (swapedTokens == 0) {
+        if (getBalance(exData.destAddr) < exData.destAmount) {
             uint price;
 
             (wrapper, price)
                 = getBestPrice(exData.srcAmount, exData.srcAddr, exData.destAddr, exData.exchangeType, ActionType.BUY);
 
-            require(price > exData.minPrice || exData.price0x > exData.minPrice, "Slippage hit");
+            require(price < exData.minPrice || exData.price0x < exData.minPrice, "Slippage hit");
 
             // if 0x has better prices use 0x
-            // if (exData.price0x >= price) {
-            //     approve0xProxy(exData.srcAddr, exData.srcAmount);
+            if (exData.price0x <= price) {
+                approve0xProxy(exData.srcAddr, exData.srcAmount);
 
-            //     (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance);
-            // }
+                (success, swapedTokens,) = takeOrder(exData, address(this).balance);
+            }
 
             // 0x either had worse price or we tried and order fill failed, so call on chain swap
-            if (tokensLeft > 0) {
+            if (getBalance(exData.destAddr) < exData.destAmount) {
                 swapedTokens = saverSwap(exData, wrapper, ActionType.BUY);
             }
         }
@@ -138,7 +140,7 @@ contract SaverExchangeCore is SaverExchangeHelper {
             tokensLeft = getBalance(_exData.srcAddr);
 
             // convert weth -> eth if needed
-            if (_exData.srcAddr == KYBER_ETH_ADDRESS) {
+            if (_exData.destAddr == KYBER_ETH_ADDRESS) {
                 TokenInterface(WETH_ADDRESS).withdraw(
                     TokenInterface(WETH_ADDRESS).balanceOf(address(this))
                 );
