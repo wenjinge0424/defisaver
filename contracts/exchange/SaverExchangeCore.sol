@@ -163,9 +163,6 @@ contract SaverExchangeCore is SaverExchangeHelper {
         ExchangeType _exchangeType,
         ActionType _type
     ) public returns (address, uint256) {
-        uint256 expectedRateKyber;
-        uint256 expectedRateUniswap;
-        uint256 expectedRateOasis;
 
         if (_exchangeType == ExchangeType.OASIS) {
             return (OASIS_WRAPPER, getExpectedRate(OASIS_WRAPPER, _srcToken, _destToken, _amount, _type));
@@ -176,33 +173,17 @@ contract SaverExchangeCore is SaverExchangeHelper {
         }
 
         if (_exchangeType == ExchangeType.UNISWAP) {
-            expectedRateUniswap = getExpectedRate(UNISWAP_WRAPPER, _srcToken, _destToken, _amount, _type);
-            expectedRateUniswap = expectedRateUniswap * (10**(18 - getDecimals(_destToken)));
-            return (UNISWAP_WRAPPER, expectedRateUniswap);
+            return (UNISWAP_WRAPPER, getExpectedRate(UNISWAP_WRAPPER, _srcToken, _destToken, _amount, _type));
         }
 
-        expectedRateKyber = getExpectedRate(KYBER_WRAPPER, _srcToken, _destToken, _amount, _type);
-        expectedRateUniswap = getExpectedRate(UNISWAP_WRAPPER, _srcToken, _destToken, _amount, _type);
-        expectedRateUniswap = expectedRateUniswap * (10**(18 - getDecimals(_destToken)));
-        expectedRateOasis = getExpectedRate(OASIS_WRAPPER, _srcToken, _destToken, _amount, _type);
-        expectedRateOasis = expectedRateOasis * (10**(18 - getDecimals(_destToken)));
+        uint expectedRateKyber = getExpectedRate(KYBER_WRAPPER, _srcToken, _destToken, _amount, _type);
+        uint expectedRateUniswap = getExpectedRate(UNISWAP_WRAPPER, _srcToken, _destToken, _amount, _type);
+        uint expectedRateOasis = getExpectedRate(OASIS_WRAPPER, _srcToken, _destToken, _amount, _type);
 
-        if (
-            (expectedRateKyber >= expectedRateUniswap) && (expectedRateKyber >= expectedRateOasis)
-        ) {
-            return (KYBER_WRAPPER, expectedRateKyber);
-        }
-
-        if (
-            (expectedRateOasis >= expectedRateKyber) && (expectedRateOasis >= expectedRateUniswap)
-        ) {
-            return (OASIS_WRAPPER, expectedRateOasis);
-        }
-
-        if (
-            (expectedRateUniswap >= expectedRateKyber) && (expectedRateUniswap >= expectedRateOasis)
-        ) {
-            return (UNISWAP_WRAPPER, expectedRateUniswap);
+        if (_type == ActionType.SELL) {
+            return getBiggestRate(expectedRateKyber, expectedRateUniswap, expectedRateOasis);
+        } else {
+            return getSmallestRate(expectedRateKyber, expectedRateUniswap, expectedRateOasis);
         }
     }
 
@@ -232,12 +213,17 @@ contract SaverExchangeCore is SaverExchangeHelper {
             ));
         }
 
-
         if (success) {
-            return sliceUint(result, 0);
-        } else {
-            return 0;
+            uint rate = sliceUint(result, 0);
+
+            if (_wrapper != KYBER_WRAPPER) {
+                rate = rate * (10**(18 - getDecimals(_destToken)));
+            }
+
+            return rate;
         }
+
+        return 0;
     }
 
     function saverSwap(ExchangeData memory exData, address _wrapper, ActionType _type) internal returns (uint swapedTokens) {
@@ -254,7 +240,54 @@ contract SaverExchangeCore is SaverExchangeHelper {
             swapedTokens = ExchangeInterfaceV2(_wrapper).
                     buy{value: ethValue}(exData.srcAddr, exData.destAddr, exData.destAmount);
         }
+    }
 
+    function getBiggestRate(
+        uint _expectedRateKyber,
+        uint _expectedRateUniswap,
+        uint _expectedRateOasis
+    ) internal pure returns (address, uint) {
+        if (
+            (_expectedRateUniswap >= _expectedRateKyber) && (_expectedRateUniswap >= _expectedRateOasis)
+        ) {
+            return (UNISWAP_WRAPPER, _expectedRateUniswap);
+        }
+
+        if (
+            (_expectedRateKyber >= _expectedRateUniswap) && (_expectedRateKyber >= _expectedRateOasis)
+        ) {
+            return (KYBER_WRAPPER, _expectedRateKyber);
+        }
+
+        if (
+            (_expectedRateOasis >= _expectedRateKyber) && (_expectedRateOasis >= _expectedRateUniswap)
+        ) {
+            return (OASIS_WRAPPER, _expectedRateOasis);
+        }
+    }
+
+    function getSmallestRate(
+        uint _expectedRateKyber,
+        uint _expectedRateUniswap,
+        uint _expectedRateOasis
+    ) internal pure returns (address, uint) {
+        if (
+            (_expectedRateUniswap <= _expectedRateKyber) && (_expectedRateUniswap <= _expectedRateOasis)
+        ) {
+            return (UNISWAP_WRAPPER, _expectedRateUniswap);
+        }
+
+        if (
+            (_expectedRateKyber <= _expectedRateUniswap) && (_expectedRateKyber <= _expectedRateOasis)
+        ) {
+            return (KYBER_WRAPPER, _expectedRateKyber);
+        }
+
+        if (
+            (_expectedRateOasis <= _expectedRateKyber) && (_expectedRateOasis <= _expectedRateUniswap)
+        ) {
+            return (OASIS_WRAPPER, _expectedRateOasis);
+        }
     }
 
     // solhint-disable-next-line no-empty-blocks

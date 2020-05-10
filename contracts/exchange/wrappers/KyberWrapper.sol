@@ -47,7 +47,7 @@ contract KyberWrapper is DSMath, ConstantAddresses {
             WALLET_ID
         );
 
-        require(destAmount == _destAmount); // TODO: check this
+        require(destAmount == _destAmount);
 
         uint srcAmountAfter = srcToken.balanceOf(address(this));
 
@@ -62,17 +62,18 @@ contract KyberWrapper is DSMath, ConstantAddresses {
             .getExpectedRate(ERC20(_srcAddr), ERC20(_destAddr), _srcAmount);
     }
 
-    // check this if we get the same rate as the other wrappers
+    //TODO: check this if we get the same rate as the other wrappers
     function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount) public view returns (uint rate) {
         (uint srcRate, ) = KyberNetworkProxyInterface(KYBER_INTERFACE)
             .getExpectedRate(ERC20(_destAddr), ERC20(_srcAddr), _destAmount);
 
         uint srcAmount = wdiv(_destAmount, srcRate);
 
-        // TODO: lower the rate a bit, beacuse of the buy/sell conversion
-
         (rate, ) = KyberNetworkProxyInterface(KYBER_INTERFACE)
             .getExpectedRate(ERC20(_srcAddr), ERC20(_destAddr), srcAmount);
+
+        // increare rate by 3% too account for inaccuracy between sell/buy conversion
+        rate = rate + (rate / 30);
     }
 
     /// @notice Converts WETH -> Kybers Eth address
