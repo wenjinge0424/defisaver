@@ -64,7 +64,7 @@ contract SaverExchange is SaverExchangeCore, DSMath {
             feeAmount = 0;
         } else {
             feeAmount = _amount / SERVICE_FEE;
-            if (_token == KYBER_ETH_ADDRESS) {
+            if (_token == KYBER_ETH_ADDRESS || _token == WETH_ADDRESS) {
                 WALLET_ID.transfer(feeAmount);
             } else {
                 ERC20(_token).transfer(WALLET_ID, feeAmount);

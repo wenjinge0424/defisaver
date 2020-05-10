@@ -13,7 +13,7 @@ contract SaverExchangeHelper is SaverExchangeConstantAddresses {
     }
 
     function pullTokens(address _tokenAddr, uint _amount) internal {
-        if (_tokenAddr == KYBER_ETH_ADDRESS) {
+        if (_tokenAddr == KYBER_ETH_ADDRESS || _tokenAddr == WETH_ADDRESS) {
             require(msg.value >= _amount, "msg.value smaller than amount");
         } else {
             require(
@@ -24,7 +24,7 @@ contract SaverExchangeHelper is SaverExchangeConstantAddresses {
     }
 
     function getBalance(address _tokenAddr) internal view returns (uint balance) {
-        if (_tokenAddr == KYBER_ETH_ADDRESS) {
+        if (_tokenAddr == KYBER_ETH_ADDRESS || _tokenAddr == WETH_ADDRESS) {
             balance = address(this).balance;
         } else {
             balance = ERC20(_tokenAddr).balanceOf(address(this));
@@ -32,7 +32,7 @@ contract SaverExchangeHelper is SaverExchangeConstantAddresses {
     }
 
     function approve0xProxy(address _tokenAddr, uint _amount) internal {
-        if (_tokenAddr != KYBER_ETH_ADDRESS) {
+        if (_tokenAddr != KYBER_ETH_ADDRESS || _tokenAddr != WETH_ADDRESS) {
             ERC20(_tokenAddr).approve(address(ERC20_PROXY_0X), _amount);
         }
     }
@@ -56,6 +56,12 @@ contract SaverExchangeHelper is SaverExchangeConstantAddresses {
     /// @param _src Input address
     function ethToWethAddr(address _src) internal pure returns (address) {
         return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
+    }
+
+    /// @notice Converts Weth -> Kybers Eth address
+    /// @param _src Input address
+    function wethToEth(address _src) internal pure returns (address) {
+        return _src == WETH_ADDRESS ? KYBER_ETH_ADDRESS : _src;
     }
 
     function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {

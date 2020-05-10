@@ -30,9 +30,8 @@ contract SaverExchangeCore is SaverExchangeHelper {
         bool success;
         uint tokensLeft = exData.srcAmount;
 
-        // Transform Weth address to Eth address kyber uses
-        // exData.srcAddr = wethToEthAddr(exData.srcAddr);
-        // exData.destAddr = wethToEthAddr(exData.destAddr);
+        exData.srcAddr = ethToWethAddr(exData.srcAddr);
+        exData.destAddr = ethToWethAddr(exData.destAddr);
 
         // if 0x is selected try first the 0x order
         if (exData.exchangeType == ExchangeType.ZEROX) {
@@ -79,9 +78,8 @@ contract SaverExchangeCore is SaverExchangeHelper {
 
         require(exData.destAmount != 0);
 
-        // Transform Weth address to Eth address kyber uses
-        // exData.srcAddr = wethToEthAddr(exData.srcAddr);
-        // exData.destAddr = wethToEthAddr(exData.destAddr);
+        exData.srcAddr = ethToWethAddr(exData.srcAddr);
+        exData.destAddr = ethToWethAddr(exData.destAddr);
 
         // if 0x is selected try first the 0x order
         if (exData.exchangeType == ExchangeType.ZEROX) {
@@ -140,7 +138,7 @@ contract SaverExchangeCore is SaverExchangeHelper {
             tokensLeft = getBalance(_exData.srcAddr);
 
             // convert weth -> eth if needed
-            if (_exData.destAddr == KYBER_ETH_ADDRESS) {
+            if (_exData.destAddr == KYBER_ETH_ADDRESS || _exData.destAddr == WETH_ADDRESS) {
                 TokenInterface(WETH_ADDRESS).withdraw(
                     TokenInterface(WETH_ADDRESS).balanceOf(address(this))
                 );
@@ -231,7 +229,7 @@ contract SaverExchangeCore is SaverExchangeHelper {
     function saverSwap(ExchangeData memory exData, address _wrapper, ActionType _type) internal returns (uint swapedTokens) {
         uint ethValue = 0;
 
-        if (exData.srcAddr == KYBER_ETH_ADDRESS) {
+        if (exData.srcAddr == KYBER_ETH_ADDRESS || exData.srcAddr == WETH_ADDRESS) {
             ethValue = exData.srcAmount;
         }
 
