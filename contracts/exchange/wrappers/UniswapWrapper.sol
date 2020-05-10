@@ -4,12 +4,9 @@ import "../../interfaces/ERC20.sol";
 import "../../interfaces/KyberNetworkProxyInterface.sol";
 import "../../interfaces/ExchangeInterface.sol";
 import "../../interfaces/UniswapExchangeInterface.sol";
+import "../../interfaces/UniswapFactoryInterface.sol";
 import "../../DS/DSMath.sol";
 import "../../constants/ConstantAddresses.sol";
-
-abstract contract UniswapFactoryInterface {
-    function getExchange(address token) external view virtual returns (address exchange);
-}
 
 contract UniswapWrapper is DSMath, ConstantAddresses {
 

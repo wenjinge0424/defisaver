@@ -6,8 +6,8 @@ import "../DS/DSMath.sol";
 import "../loggers/ExchangeLogger.sol";
 
 contract SaverExchange is SaverExchangeCore, DSMath {
-    uint256 public constant SERVICE_FEE = 800; // 0.125% Fee
 
+    uint256 public constant SERVICE_FEE = 800; // 0.125% Fee
 
     // solhint-disable-next-line const-name-snakecase
     ExchangeLogger public constant logger = ExchangeLogger(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
@@ -30,13 +30,11 @@ contract SaverExchange is SaverExchangeCore, DSMath {
         logger.logSwap(exData.srcAddr, exData.destAddr, exData.srcAmount, swapedTokens, wrapper);
     }
 
-
+    /// @dev srcAmount when using 0x should be bigger by fee amount
     function buy(ExchangeData memory exData) public payable {
         // transfer tokens from the user
         pullTokens(exData.srcAddr, exData.srcAmount);
 
-        // TODO: take into account 0x order specifying srcAmount
-        // Can't take out of srcAmount because 0x
         uint dfsFee = takeFee(exData.srcAmount, exData.srcAddr);
         exData.srcAmount = sub(exData.srcAmount, dfsFee);
 
