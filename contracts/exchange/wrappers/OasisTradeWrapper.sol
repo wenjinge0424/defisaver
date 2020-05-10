@@ -33,14 +33,11 @@ contract OasisTradeWrapper is DSMath, ConstantAddresses {
     function buy(address _srcAddr, address _destAddr, uint _destAmount) external payable returns(uint) {
         require(ERC20(_srcAddr).approve(OTC_ADDRESS, uint(-1)));
 
-        // TODO: how much ether to send?
-
         // convert eth -> weth
         if (_srcAddr == WETH_ADDRESS) {
             TokenInterface(WETH_ADDRESS).deposit{value: msg.value}();
         }
 
-        // TODO: check if we actually get destAmount back
         uint srcAmount = OasisInterface(OTC_ADDRESS).buyAllAmount(_srcAddr, _destAmount, _destAddr, uint(-1));
 
         // convert weth -> eth and send back
@@ -51,6 +48,9 @@ contract OasisTradeWrapper is DSMath, ConstantAddresses {
             ERC20(_destAddr).transfer(msg.sender, _destAmount);
         }
 
+        // Send the leftover from the source token back
+        sendLeftOver(_srcAddr);
+
         return srcAmount;
     }
 
@@ -58,9 +58,16 @@ contract OasisTradeWrapper is DSMath, ConstantAddresses {
         return wdiv(OasisInterface(OTC_ADDRESS).getBuyAmount(_destAddr, _srcAddr, _srcAmount), _srcAmount);
     }
 
-    // TODO: check this calc.
     function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount) public view returns (uint) {
         return wdiv(OasisInterface(OTC_ADDRESS).getPayAmount(_destAddr, _srcAddr, _destAmount), _destAmount);
+    }
+
+    function sendLeftOver(address _srcAddr) internal {
+        if (_srcAddr == WETH_ADDRESS) {
+            msg.sender.transfer(address(this).balance);
+        } else {
+            ERC20(_srcAddr).transfer(msg.sender, ERC20(_srcAddr).balanceOf(address(this)));
+        }
     }
 
     receive() payable external {}

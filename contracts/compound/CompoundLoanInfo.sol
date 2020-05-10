@@ -37,6 +37,7 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
         uint exchangeRate;
         uint marketLiquidity;
         uint totalSupply;
+        uint totalBorrow;
         uint collateralFactor;
         uint price;
     }
@@ -160,62 +161,22 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
         data.ratio = uint128((sumCollateral * 10**18) / sumBorrow);
     }
 
-    /// @notice Fetches all the collateral/debt address and amounts, denominated in token balances
-    /// @param _user Address of the user
-    /// @return data LoanData information
-    function getLoanDataInTokenBalances(address _user) public view returns (LoanData memory data) {
-        address[] memory assets = comp.getAssetsIn(_user);
+    function getTokenBalances(address _user, address[] memory _cTokens) public view returns (uint[] memory balances, uint[] memory borrows) {
+        balances = new uint[](_cTokens.length);
+        borrows = new uint[](_cTokens.length);
 
-        data = LoanData({
-            user: _user,
-            ratio: 0,
-            collAddr: new address[](assets.length),
-            borrowAddr: new address[](assets.length),
-            collAmounts: new uint[](assets.length),
-            borrowAmounts: new uint[](assets.length)
-        });
-
-        uint sumCollateral = 0;
-        uint sumBorrow = 0;
-        uint collPos = 0;
-        uint borrowPos = 0;
-
-        for (uint i = 0; i < assets.length; i++) {
-            address asset = assets[i];
+        for (uint i = 0; i < _cTokens.length; i++) {
+            address asset = _cTokens[i];
 
             (, uint cTokenBalance, uint borrowBalance, uint exchangeRateMantissa)
                                         = CTokenInterface(asset).getAccountSnapshot(_user);
 
-            Exp memory oraclePrice;
-
-            if (cTokenBalance != 0 || borrowBalance != 0) {
-                oraclePrice = Exp({mantissa: oracle.getUnderlyingPrice(asset)});
-            }
-
-            // Sum up collateral in Eth
-            if (cTokenBalance != 0) {
-                Exp memory exchangeRate = Exp({mantissa: exchangeRateMantissa});
-                (, Exp memory tokensToEther) = mulExp(exchangeRate, oraclePrice);
-                (, sumCollateral) = mulScalarTruncateAddUInt(tokensToEther, cTokenBalance, sumCollateral);
-
-                data.collAddr[collPos] = asset;
-                (, data.collAmounts[collPos]) = mulScalarTruncate(exchangeRate, cTokenBalance);
-                collPos++;
-            }
-
-            // Sum up debt in Eth
-            if (borrowBalance != 0) {
-                (, sumBorrow) = mulScalarTruncateAddUInt(oraclePrice, borrowBalance, sumBorrow);
-
-                data.borrowAddr[borrowPos] = asset;
-                data.borrowAmounts[borrowPos] = borrowBalance;
-                borrowPos++;
-            }
+            Exp memory exchangeRate = Exp({mantissa: exchangeRateMantissa});
+            (, balances[i]) = mulScalarTruncate(exchangeRate, cTokenBalance);
+            
+            borrows[i] = borrowBalance;
         }
 
-        if (sumBorrow == 0) return data;
-
-        data.ratio = uint128((sumCollateral * 10**18) / sumBorrow);
     }
 
     /// @notice Fetches all the collateral/debt address and amounts, denominated in ether
@@ -275,6 +236,7 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
                 exchangeRate: cToken.exchangeRateCurrent(),
                 marketLiquidity: cToken.getCash(),
                 totalSupply: cToken.totalSupply(),
+                totalBorrow: cToken.totalBorrowsCurrent(),
                 collateralFactor: collFactor,
                 price: oracle.getUnderlyingPrice(_cTokenAddresses[i])
             });

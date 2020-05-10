@@ -47,11 +47,12 @@ contract KyberWrapper is DSMath, ConstantAddresses {
             WALLET_ID
         );
 
-        require(destAmount == _destAmount);
-
-        // TODO: return leftover tokens
+        require(destAmount == _destAmount); // TODO: check this
 
         uint srcAmountAfter = srcToken.balanceOf(address(this));
+
+        // Send the leftover from the source token back
+        sendLeftOver(_srcAddr);
 
         return (srcAmount - srcAmountAfter);
     }
@@ -78,6 +79,14 @@ contract KyberWrapper is DSMath, ConstantAddresses {
     /// @param _src Input address
     function wethToEthAddr(address _src) internal pure returns (address) {
         return _src == WETH_ADDRESS ? KYBER_ETH_ADDRESS : _src;
+    }
+
+    function sendLeftOver(address _srcAddr) internal {
+        if (_srcAddr == WETH_ADDRESS) {
+            msg.sender.transfer(address(this).balance);
+        } else {
+            ERC20(_srcAddr).transfer(msg.sender, ERC20(_srcAddr).balanceOf(address(this)));
+        }
     }
 
     receive() payable external {}

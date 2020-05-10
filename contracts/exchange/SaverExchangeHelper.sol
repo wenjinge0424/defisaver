@@ -1,34 +1,10 @@
 pragma solidity ^0.6.0;
 
-import "./SaverExchangeConstantAddresses.sol";
+import "../constants/SaverExchangeConstantAddresses.sol";
 import "../interfaces/ERC20.sol";
 import "../mcd/Discount.sol";
 
 contract SaverExchangeHelper is SaverExchangeConstantAddresses {
-
-    uint256 public constant SERVICE_FEE = 800; // 0.125% Fee
-
-    /// @notice Takes a feePercentage and sends it to wallet
-    /// @param _amount Dai amount of the whole trade
-    /// @return feeAmount Amount in Dai owner earned on the fee
-    function takeFee(uint256 _amount, address _token) internal returns (uint256 feeAmount) {
-        uint256 fee = SERVICE_FEE;
-
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(msg.sender)) {
-            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(msg.sender);
-        }
-
-        if (fee == 0) {
-            feeAmount = 0;
-        } else {
-            feeAmount = _amount / SERVICE_FEE;
-            if (_token == KYBER_ETH_ADDRESS) {
-                WALLET_ID.transfer(feeAmount);
-            } else {
-                ERC20(_token).transfer(WALLET_ID, feeAmount);
-            }
-        }
-    }
 
     function getDecimals(address _token) internal view returns (uint256) {
         if (_token == DGD_ADDRESS) return 9;

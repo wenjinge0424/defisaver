@@ -1,219 +1,74 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "./SaverExchangeHelper.sol";
-import "../interfaces/ExchangeInterfaceV2.sol";
-import "../interfaces/TokenInterface.sol";
+import "./SaverExchangeCore.sol";
 import "../DS/DSMath.sol";
 import "../loggers/ExchangeLogger.sol";
 
-contract SaverExchange is SaverExchangeHelper, DSMath {
+contract SaverExchange is SaverExchangeCore, DSMath {
+    uint256 public constant SERVICE_FEE = 800; // 0.125% Fee
+
+
     // solhint-disable-next-line const-name-snakecase
     ExchangeLogger public constant logger = ExchangeLogger(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
-    // first is empty to keep the legacy order in place
-    enum ExchangeType { _, OASIS, KYBER, UNISWAP, ZEROX }
-
-    struct ExchangeData {
-        address srcAddr;
-        address destAddr;
-        uint amount;
-        uint minPrice;
-        ExchangeType exchangeType;
-        address exchangeAddr;
-        bytes callData;
-        uint256 price0x;
-    }
-
-    function swap(ExchangeData memory exData) public payable {
+    function sell(ExchangeData memory exData) public payable {
         // transfer tokens from the user
-        pullTokens(exData.srcAddr, exData.amount);
+        pullTokens(exData.srcAddr, exData.srcAmount);
 
         // take fee
-        uint dfsFee = takeFee(exData.amount, exData.srcAddr);
-        exData.amount = sub(exData.amount, dfsFee);
+        uint dfsFee = takeFee(exData.srcAmount, exData.srcAddr);
+        exData.srcAmount = sub(exData.srcAmount, dfsFee);
 
         // Perform the exchange
-        (address wrapper, uint swapedTokens) = _swap(exData);
+        (address wrapper, uint swapedTokens) = _sell(exData);
 
         // send back any leftover ether or tokens
         sendLeftover(exData.srcAddr, exData.destAddr);
 
         // log the event
-        logger.logSwap(exData.srcAddr, exData.destAddr, exData.amount, swapedTokens, wrapper);
+        logger.logSwap(exData.srcAddr, exData.destAddr, exData.srcAmount, swapedTokens, wrapper);
     }
 
-    function _swap(ExchangeData memory exData) internal returns (address, uint) {
 
-        address wrapper;
-        uint swapedTokens;
-        bool success;
-        uint tokensLeft = exData.amount;
+    function buy(ExchangeData memory exData) public payable {
+        // transfer tokens from the user
+        pullTokens(exData.srcAddr, exData.srcAmount);
 
-        // Transform Weth address to Eth address kyber uses
-        // exData.srcAddr = wethToEthAddr(exData.srcAddr);
-        // exData.destAddr = wethToEthAddr(exData.destAddr);
+        // TODO: take into account 0x order specifying srcAmount
+        // Can't take out of srcAmount because 0x
+        uint dfsFee = takeFee(exData.srcAmount, exData.srcAddr);
+        exData.srcAmount = sub(exData.srcAmount, dfsFee);
 
-        // if 0x is selected try first the 0x order
-        if (exData.exchangeType == ExchangeType.ZEROX) {
-            approve0xProxy(exData.srcAddr, exData.amount);
+        // Perform the exchange
+        (address wrapper, uint swapedTokens) = _buy(exData);
 
-            (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance);
+        // send back any leftover ether or tokens
+        sendLeftover(exData.srcAddr, exData.destAddr);
 
-            // either it reverts or order doesn't exist anymore, we reverts as it was explicitely asked for this exchange
-            require(success && tokensLeft == 0, "0x transaction failed");
-
-            wrapper = exData.exchangeAddr;
-        }
-
-        // check if we have already swapped with 0x, or tried swapping but failed
-        if (swapedTokens == 0) {
-            uint price;
-
-            (wrapper, price)
-                = getBestPrice(exData.amount, exData.srcAddr, exData.destAddr, exData.exchangeType);
-
-            require(price > exData.minPrice || exData.price0x > exData.minPrice, "Slippage hit");
-
-            // if 0x has better prices use 0x
-            if (exData.price0x >= price) {
-                approve0xProxy(exData.srcAddr, exData.amount);
-
-                (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance);
-            }
-
-            // 0x either had worse price or we tried and order fill failed, so call on chain swap
-            if (tokensLeft > 0) {
-                swapedTokens = saverSwap(exData, wrapper);
-            }
-        }
-
-        return (wrapper, swapedTokens);
+        // log the event
+        logger.logSwap(exData.srcAddr, exData.destAddr, exData.srcAmount, swapedTokens, wrapper);
     }
 
-    /// @notice Takes order from 0x and returns bool indicating if it is successful
-    /// @param _exData Exchange data
-    /// @param _0xFee Ether fee needed for 0x order
-    function takeOrder(
-        ExchangeData memory _exData,
-        uint256 _0xFee
-    ) private returns (bool success, uint256, uint256) {
+    /// @notice Takes a feePercentage and sends it to wallet
+    /// @param _amount Dai amount of the whole trade
+    /// @return feeAmount Amount in Dai owner earned on the fee
+    function takeFee(uint256 _amount, address _token) internal returns (uint256 feeAmount) {
+        uint256 fee = SERVICE_FEE;
 
-        // solhint-disable-next-line avoid-call-value
-        (success, ) = _exData.exchangeAddr.call{value: _0xFee}(_exData.callData);
-
-        uint256 tokensSwaped = 0;
-        uint256 tokensLeft = _exData.amount;
-
-        if (success) {
-            // check to see if any _src tokens are left over after exchange
-            tokensLeft = getBalance(_exData.srcAddr);
-
-            // convert weth -> eth if needed
-            if (_exData.srcAddr == KYBER_ETH_ADDRESS) {
-                TokenInterface(WETH_ADDRESS).withdraw(
-                    TokenInterface(WETH_ADDRESS).balanceOf(address(this))
-                );
-            }
-
-            // get the current balance of the swaped tokens
-            tokensSwaped = getBalance(_exData.destAddr);
+        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(msg.sender)) {
+            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(msg.sender);
         }
 
-        return (success, tokensSwaped, tokensLeft);
-    }
-
-    /// @notice Returns the best estimated price from 2 exchanges
-    /// @param _amount Amount of source tokens you want to exchange
-    /// @param _srcToken Address of the source token
-    /// @param _destToken Address of the destination token
-    /// @return (address, uint) The address of the best exchange and the exchange price
-    function getBestPrice(
-        uint256 _amount,
-        address _srcToken,
-        address _destToken,
-        ExchangeType _exchangeType
-    ) public returns (address, uint256) {
-        uint256 expectedRateKyber;
-        uint256 expectedRateUniswap;
-        uint256 expectedRateOasis;
-
-        if (_exchangeType == ExchangeType.OASIS) {
-            return (OASIS_WRAPPER, getExpectedRate(OASIS_WRAPPER, _srcToken, _destToken, _amount));
-        }
-
-        if (_exchangeType == ExchangeType.KYBER) {
-            return (KYBER_WRAPPER, getExpectedRate(KYBER_WRAPPER, _srcToken, _destToken, _amount));
-        }
-
-        if (_exchangeType == ExchangeType.UNISWAP) {
-            expectedRateUniswap = getExpectedRate(UNISWAP_WRAPPER, _srcToken, _destToken, _amount);
-            expectedRateUniswap = expectedRateUniswap * (10**(18 - getDecimals(_destToken)));
-            return (UNISWAP_WRAPPER, expectedRateUniswap);
-        }
-
-        expectedRateKyber = getExpectedRate(KYBER_WRAPPER, _srcToken, _destToken, _amount);
-        expectedRateUniswap = getExpectedRate(UNISWAP_WRAPPER, _srcToken, _destToken, _amount);
-        expectedRateUniswap = expectedRateUniswap * (10**(18 - getDecimals(_destToken)));
-        expectedRateOasis = getExpectedRate(OASIS_WRAPPER, _srcToken, _destToken, _amount);
-        expectedRateOasis = expectedRateOasis * (10**(18 - getDecimals(_destToken)));
-
-        if (
-            (expectedRateKyber >= expectedRateUniswap) && (expectedRateKyber >= expectedRateOasis)
-        ) {
-            return (KYBER_WRAPPER, expectedRateKyber);
-        }
-
-        if (
-            (expectedRateOasis >= expectedRateKyber) && (expectedRateOasis >= expectedRateUniswap)
-        ) {
-            return (OASIS_WRAPPER, expectedRateOasis);
-        }
-
-        if (
-            (expectedRateUniswap >= expectedRateKyber) && (expectedRateUniswap >= expectedRateOasis)
-        ) {
-            return (UNISWAP_WRAPPER, expectedRateUniswap);
-        }
-    }
-
-    function getExpectedRate(
-        address _wrapper,
-        address _srcToken,
-        address _destToken,
-        uint256 _amount
-    ) public returns (uint256) {
-        bool success;
-        bytes memory result;
-
-        (success, result) = _wrapper.call(
-            abi.encodeWithSignature(
-                "getSellRate(address,address,uint256)",
-                _srcToken,
-                _destToken,
-                _amount
-            )
-        );
-
-        if (success) {
-            return sliceUint(result, 0);
+        if (fee == 0) {
+            feeAmount = 0;
         } else {
-            return 0;
+            feeAmount = _amount / SERVICE_FEE;
+            if (_token == KYBER_ETH_ADDRESS) {
+                WALLET_ID.transfer(feeAmount);
+            } else {
+                ERC20(_token).transfer(WALLET_ID, feeAmount);
+            }
         }
     }
-
-    function saverSwap(ExchangeData memory exData, address _wrapper) internal returns (uint swapedTokens) {
-        uint ethValue = 0;
-
-        if (exData.srcAddr == KYBER_ETH_ADDRESS) {
-            ethValue = exData.amount;
-        }
-
-        swapedTokens = ExchangeInterfaceV2(_wrapper).
-                    sell{value: ethValue}(exData.srcAddr, exData.destAddr, exData.amount);
-
-    }
-
-    // solhint-disable-next-line no-empty-blocks
-    receive() external payable {}
 }
