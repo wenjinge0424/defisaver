@@ -22,6 +22,9 @@ contract SaverExchange is SaverExchangeCore, DSMath {
         burnAmount = 10;
     }
 
+    /// @notice Takes a src amount of tokens and converts it into the dest token
+    /// @dev Takes fee from the _srcAmount before the exchange
+    /// @param exData [srcAddr, destAddr, srcAmount, destAmount, minPrice, exchangeType, exchangeAddr, callData, price0x]
     function sell(ExchangeData memory exData) public payable {
         if (gasToken.balanceOf(address(this)) >= burnAmount) {
             gasToken.free(burnAmount);
@@ -35,16 +38,18 @@ contract SaverExchange is SaverExchangeCore, DSMath {
         exData.srcAmount = sub(exData.srcAmount, dfsFee);
 
         // Perform the exchange
-        (address wrapper, uint swapedTokens) = _sell(exData);
+        (address wrapper, uint destAmount) = _sell(exData);
 
         // send back any leftover ether or tokens
         sendLeftover(exData.srcAddr, exData.destAddr);
 
         // log the event
-        logger.logSwap(exData.srcAddr, exData.destAddr, exData.srcAmount, swapedTokens, wrapper);
+        logger.logSwap(exData.srcAddr, exData.destAddr, exData.srcAmount, destAmount, wrapper);
     }
 
-    /// @dev srcAmount when using 0x should be bigger by fee amount
+    /// @notice Takes a dest amount of tokens and converts it from the src token
+    /// @dev Send always more than needed for the swap, extra will be returned
+    /// @param exData [srcAddr, destAddr, srcAmount, destAmount, minPrice, exchangeType, exchangeAddr, callData, price0x]
     function buy(ExchangeData memory exData) public payable {
         if (gasToken.balanceOf(address(this)) >= burnAmount) {
             gasToken.free(burnAmount);
@@ -57,17 +62,18 @@ contract SaverExchange is SaverExchangeCore, DSMath {
         exData.srcAmount = sub(exData.srcAmount, dfsFee);
 
         // Perform the exchange
-        (address wrapper, uint swapedTokens) = _buy(exData);
+        (address wrapper, uint srcAmount) = _buy(exData);
 
         // send back any leftover ether or tokens
         sendLeftover(exData.srcAddr, exData.destAddr);
 
         // log the event
-        logger.logSwap(exData.srcAddr, exData.destAddr, exData.srcAmount, swapedTokens, wrapper);
+        logger.logSwap(exData.srcAddr, exData.destAddr, srcAmount, exData.destAmount, wrapper);
     }
 
     /// @notice Takes a feePercentage and sends it to wallet
     /// @param _amount Dai amount of the whole trade
+    /// @param _token Address of the token
     /// @return feeAmount Amount in Dai owner earned on the fee
     function takeFee(uint256 _amount, address _token) internal returns (uint256 feeAmount) {
         uint256 fee = SERVICE_FEE;
@@ -88,6 +94,9 @@ contract SaverExchange is SaverExchangeCore, DSMath {
         }
     }
 
+    /// @notice Changes the amount of gas token we burn for each call
+    /// @dev Only callable by the owner
+    /// @param _newBurnAmount New amount of gas tokens to be burned
     function changeBurnAmount(uint _newBurnAmount) public {
         require(owner == msg.sender);
 

@@ -10,6 +10,11 @@ import "../../constants/ConstantAddresses.sol";
 
 contract UniswapWrapper is DSMath, ConstantAddresses {
 
+    /// @notice Sells a _srcAmount of tokens at Uniswap
+    /// @param _srcAddr From token
+    /// @param _destAddr To token
+    /// @param _srcAmount From amount
+    /// @return uint Destination amount
     function sell(address _srcAddr, address _destAddr, uint _srcAmount) external payable returns (uint) {
         address uniswapExchangeAddr;
         uint destAmount;
@@ -43,6 +48,11 @@ contract UniswapWrapper is DSMath, ConstantAddresses {
         return destAmount;
     }
 
+    /// @notice Buys a _destAmount of tokens at Uniswap
+    /// @param _srcAddr From token
+    /// @param _destAddr To token
+    /// @param _destAmount To amount
+    /// @return uint srcAmount
     function buy(address _srcAddr, address _destAddr, uint _destAmount) external payable returns(uint) {
         address uniswapExchangeAddr;
         uint srcAmount;
@@ -79,6 +89,11 @@ contract UniswapWrapper is DSMath, ConstantAddresses {
         return srcAmount;
     }
 
+    /// @notice Return a rate for which we can sell an amount of tokens
+    /// @param _srcAddr From token
+    /// @param _destAddr To token
+    /// @param _srcAmount From amount
+    /// @return uint Rate
     function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount) public view returns (uint) {
         if(_srcAddr == WETH_ADDRESS) {
             address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_destAddr);
@@ -92,6 +107,11 @@ contract UniswapWrapper is DSMath, ConstantAddresses {
         }
     }
 
+    /// @notice Return a rate for which we can buy an amount of tokens
+    /// @param _srcAddr From token
+    /// @param _destAddr To token
+    /// @param _destAmount To amount
+    /// @return uint Rate
     function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount) public view returns (uint) {
         if(_srcAddr == WETH_ADDRESS) {
             address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_destAddr);
@@ -105,6 +125,8 @@ contract UniswapWrapper is DSMath, ConstantAddresses {
         }
     }
 
+    /// @notice Send any leftover tokens, we use to clear out srcTokens after buy
+    /// @param _srcAddr Source token address
     function sendLeftOver(address _srcAddr) internal {
         if (_srcAddr == WETH_ADDRESS) {
             msg.sender.transfer(address(this).balance);

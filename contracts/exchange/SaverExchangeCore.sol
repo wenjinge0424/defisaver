@@ -23,6 +23,10 @@ contract SaverExchangeCore is SaverExchangeHelper {
         uint256 price0x;
     }
 
+    /// @notice Internal method that preforms a sell on 0x/on-chain
+    /// @dev Usefull for other DFS contract to integrate for exchanging
+    /// @param exData Exchange data struct
+    /// @return (address, uint) Address of the wrapper used and destAmount
     function _sell(ExchangeData memory exData) internal returns (address, uint) {
 
         address wrapper;
@@ -70,6 +74,10 @@ contract SaverExchangeCore is SaverExchangeHelper {
         return (wrapper, swapedTokens);
     }
 
+    /// @notice Internal method that preforms a buy on 0x/on-chain
+    /// @dev Usefull for other DFS contract to integrate for exchanging
+    /// @param exData Exchange data struct
+    /// @return (address, uint) Address of the wrapper used and srcAmount
     function _buy(ExchangeData memory exData) internal returns (address, uint) {
 
         address wrapper;
@@ -116,10 +124,10 @@ contract SaverExchangeCore is SaverExchangeHelper {
             }
         }
 
-        return (wrapper, swapedTokens);
+        return (wrapper, getBalance(exData.destAddr));
     }
 
-     /// @notice Takes order from 0x and returns bool indicating if it is successful
+    /// @notice Takes order from 0x and returns bool indicating if it is successful
     /// @param _exData Exchange data
     /// @param _0xFee Ether fee needed for 0x order
     function takeOrder(
@@ -155,6 +163,8 @@ contract SaverExchangeCore is SaverExchangeHelper {
     /// @param _amount Amount of source tokens you want to exchange
     /// @param _srcToken Address of the source token
     /// @param _destToken Address of the destination token
+    /// @param _exchangeType Which exchange will be used
+    /// @param _type Type of action SELL|BUY
     /// @return (address, uint) The address of the best exchange and the exchange price
     function getBestPrice(
         uint256 _amount,
@@ -187,6 +197,13 @@ contract SaverExchangeCore is SaverExchangeHelper {
         }
     }
 
+    /// @notice Return the expected rate from the exchange wrapper
+    /// @dev In case of Oasis/Uniswap handles the different precision tokens
+    /// @param _wrapper Address of exchange wrapper
+    /// @param _srcToken From token
+    /// @param _destToken To token
+    /// @param _amount Amount to be exchanged
+    /// @param _type Type of action SELL|BUY
     function getExpectedRate(
         address _wrapper,
         address _srcToken,
@@ -226,6 +243,11 @@ contract SaverExchangeCore is SaverExchangeHelper {
         return 0;
     }
 
+    /// @notice Calls wraper contract for exchage to preform an on-chain swap
+    /// @param exData Exchange data struct
+    /// @param _wrapper Address of exchange wrapper
+    /// @param _type Type of action SELL|BUY
+    /// @return swapedTokens For Sell that the destAmount, for Buy thats the srcAmount
     function saverSwap(ExchangeData memory exData, address _wrapper, ActionType _type) internal returns (uint swapedTokens) {
         uint ethValue = 0;
 
@@ -242,6 +264,10 @@ contract SaverExchangeCore is SaverExchangeHelper {
         }
     }
 
+    /// @notice Finds the biggest rate between exchanges, needed for sell rate
+    /// @param _expectedRateKyber Kyber rate
+    /// @param _expectedRateUniswap Uniswap rate
+    /// @param _expectedRateOasis Oasis rate
     function getBiggestRate(
         uint _expectedRateKyber,
         uint _expectedRateUniswap,
@@ -266,6 +292,10 @@ contract SaverExchangeCore is SaverExchangeHelper {
         }
     }
 
+    /// @notice Finds the smallest rate between exchanges, needed for buy rate
+    /// @param _expectedRateKyber Kyber rate
+    /// @param _expectedRateUniswap Uniswap rate
+    /// @param _expectedRateOasis Oasis rate
     function getSmallestRate(
         uint _expectedRateKyber,
         uint _expectedRateUniswap,
