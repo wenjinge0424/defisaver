@@ -1,6 +1,7 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
+import "../interfaces/GasTokenInterface.sol";
 import "./SaverExchangeCore.sol";
 import "../DS/DSMath.sol";
 import "../loggers/ExchangeLogger.sol";
@@ -11,8 +12,21 @@ contract SaverExchange is SaverExchangeCore, DSMath {
 
     // solhint-disable-next-line const-name-snakecase
     ExchangeLogger public constant logger = ExchangeLogger(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    GasTokenInterface gasToken = GasTokenInterface(0x0000000000b3F879cb30FE243b4Dfee438691c04);
+
+    address public owner;
+    uint public burnAmount;
+
+    constructor() public {
+        owner = msg.sender;
+        burnAmount = 10;
+    }
 
     function sell(ExchangeData memory exData) public payable {
+        if (gasToken.balanceOf(address(this)) >= burnAmount) {
+            gasToken.free(burnAmount);
+        }
+
         // transfer tokens from the user
         pullTokens(exData.srcAddr, exData.srcAmount);
 
@@ -32,6 +46,10 @@ contract SaverExchange is SaverExchangeCore, DSMath {
 
     /// @dev srcAmount when using 0x should be bigger by fee amount
     function buy(ExchangeData memory exData) public payable {
+        if (gasToken.balanceOf(address(this)) >= burnAmount) {
+            gasToken.free(burnAmount);
+        }
+
         // transfer tokens from the user
         pullTokens(exData.srcAddr, exData.srcAmount);
 
@@ -68,5 +86,11 @@ contract SaverExchange is SaverExchangeCore, DSMath {
                 ERC20(_token).transfer(WALLET_ID, feeAmount);
             }
         }
+    }
+
+    function changeBurnAmount(uint _newBurnAmount) public {
+        require(owner == msg.sender);
+
+        burnAmount = _newBurnAmount;
     }
 }
