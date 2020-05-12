@@ -12,7 +12,7 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
     ComptrollerInterface public constant comp = ComptrollerInterface(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
 
     // solhint-disable-next-line const-name-snakecase
-    CompoundOracleInterface public constant oracle = CompoundOracleInterface(0x1D8aEdc9E924730DD3f9641CDb4D1B92B848b4bd);
+    CompoundOracleInterface public constant oracle = CompoundOracleInterface(0xDDc46a3B076aec7ab3Fc37420A8eDd2959764Ec4);
 
     struct LoanData {
         address user;
@@ -173,7 +173,7 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
 
             Exp memory exchangeRate = Exp({mantissa: exchangeRateMantissa});
             (, balances[i]) = mulScalarTruncate(exchangeRate, cTokenBalance);
-            
+
             borrows[i] = borrowBalance;
         }
 

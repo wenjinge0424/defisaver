@@ -11,7 +11,7 @@ contract SaverExchange is SaverExchangeCore, DSMath {
     uint256 public constant SERVICE_FEE = 800; // 0.125% Fee
 
     // solhint-disable-next-line const-name-snakecase
-    ExchangeLogger public constant logger = ExchangeLogger(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    ExchangeLogger public constant logger = ExchangeLogger(0xf7CE9aa00bc4f4c413E4B4a613e889C1Ad01883e);
     GasTokenInterface gasToken = GasTokenInterface(0x0000000000b3F879cb30FE243b4Dfee438691c04);
 
     address public owner;

@@ -21,7 +21,7 @@ contract CompoundSaverHelper is DSMath {
     address public constant COMPTROLLER = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
 
     address public constant COMPOUND_LOGGER = 0x3DD0CDf5fFA28C6847B4B276e2fD256046a44bb7;
-    address public constant COMPOUND_ORACLE = 0x1D8aEdc9E924730DD3f9641CDb4D1B92B848b4bd;
+    address public constant COMPOUND_ORACLE = 0xDDc46a3B076aec7ab3Fc37420A8eDd2959764Ec4;
 
     /// @notice Helper method to payback the Compound debt
     /// @dev If amount is bigger it will repay the whole debt and send the extra to the _user
