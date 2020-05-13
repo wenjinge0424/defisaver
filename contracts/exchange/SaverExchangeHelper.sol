@@ -13,7 +13,7 @@ contract SaverExchangeHelper is SaverExchangeConstantAddresses {
     }
 
     function pullTokens(address _tokenAddr, uint _amount) internal {
-        if (_tokenAddr == KYBER_ETH_ADDRESS || _tokenAddr == WETH_ADDRESS) {
+        if (_tokenAddr == KYBER_ETH_ADDRESS) {
             require(msg.value >= _amount, "msg.value smaller than amount");
         } else {
             require(
@@ -24,7 +24,7 @@ contract SaverExchangeHelper is SaverExchangeConstantAddresses {
     }
 
     function getBalance(address _tokenAddr) internal view returns (uint balance) {
-        if (_tokenAddr == KYBER_ETH_ADDRESS || _tokenAddr == WETH_ADDRESS) {
+        if (_tokenAddr == KYBER_ETH_ADDRESS) {
             balance = address(this).balance;
         } else {
             balance = ERC20(_tokenAddr).balanceOf(address(this));
@@ -32,23 +32,23 @@ contract SaverExchangeHelper is SaverExchangeConstantAddresses {
     }
 
     function approve0xProxy(address _tokenAddr, uint _amount) internal {
-        if (_tokenAddr != KYBER_ETH_ADDRESS || _tokenAddr != WETH_ADDRESS) {
+        if (_tokenAddr != KYBER_ETH_ADDRESS) {
             ERC20(_tokenAddr).approve(address(ERC20_PROXY_0X), _amount);
         }
     }
 
-    function sendLeftover(address _srcAddr, address _destAddr) internal {
+    function sendLeftover(address _srcAddr, address _destAddr, address payable _to) internal {
         // send back any leftover ether or tokens
         if (address(this).balance > 0) {
-            msg.sender.transfer(address(this).balance);
+            _to.transfer(address(this).balance);
         }
 
         if (getBalance(_srcAddr) > 0) {
-            ERC20(_srcAddr).transfer(msg.sender, getBalance(_srcAddr));
+            ERC20(_srcAddr).transfer(_to, getBalance(_srcAddr));
         }
 
         if (getBalance(_destAddr) > 0) {
-            ERC20(_destAddr).transfer(msg.sender, getBalance(_destAddr));
+            ERC20(_destAddr).transfer(_to, getBalance(_destAddr));
         }
     }
 

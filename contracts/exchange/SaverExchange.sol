@@ -41,7 +41,7 @@ contract SaverExchange is SaverExchangeCore, DSMath {
         (address wrapper, uint destAmount) = _sell(exData);
 
         // send back any leftover ether or tokens
-        sendLeftover(exData.srcAddr, exData.destAddr);
+        sendLeftover(exData.srcAddr, exData.destAddr, msg.sender);
 
         // log the event
         logger.logSwap(exData.srcAddr, exData.destAddr, exData.srcAmount, destAmount, wrapper);
@@ -65,7 +65,7 @@ contract SaverExchange is SaverExchangeCore, DSMath {
         (address wrapper, uint srcAmount) = _buy(exData);
 
         // send back any leftover ether or tokens
-        sendLeftover(exData.srcAddr, exData.destAddr);
+        sendLeftover(exData.srcAddr, exData.destAddr, msg.sender);
 
         // log the event
         logger.logSwap(exData.srcAddr, exData.destAddr, srcAmount, exData.destAmount, wrapper);

@@ -34,23 +34,17 @@ contract SaverExchangeCore is SaverExchangeHelper {
         bool success;
         uint tokensLeft = exData.srcAmount;
 
-        exData.srcAddr = ethToWethAddr(exData.srcAddr);
-        exData.destAddr = ethToWethAddr(exData.destAddr);
-
         // if 0x is selected try first the 0x order
         if (exData.exchangeType == ExchangeType.ZEROX) {
             approve0xProxy(exData.srcAddr, exData.srcAmount);
 
             (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance);
 
-            // either it reverts or order doesn't exist anymore, we reverts as it was explicitely asked for this exchange
-            require(success && tokensLeft == 0, "0x transaction failed");
-
             wrapper = exData.exchangeAddr;
         }
 
         // check if we have already swapped with 0x, or tried swapping but failed
-        if (swapedTokens == 0) {
+        if (tokensLeft > 0) {
             uint price;
 
             (wrapper, price)
@@ -59,7 +53,7 @@ contract SaverExchangeCore is SaverExchangeHelper {
             require(price > exData.minPrice || exData.price0x > exData.minPrice, "Slippage hit");
 
             // if 0x has better prices use 0x
-            if (exData.price0x >= price) {
+            if (exData.price0x >= price && exData.exchangeType != ExchangeType.ZEROX) {
                 approve0xProxy(exData.srcAddr, exData.srcAmount);
 
                 (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance);
@@ -86,18 +80,12 @@ contract SaverExchangeCore is SaverExchangeHelper {
 
         require(exData.destAmount != 0);
 
-        exData.srcAddr = ethToWethAddr(exData.srcAddr);
-        exData.destAddr = ethToWethAddr(exData.destAddr);
-
         // if 0x is selected try first the 0x order
         if (exData.exchangeType == ExchangeType.ZEROX) {
             approve0xProxy(exData.srcAddr, exData.srcAmount);
 
             // TODO: should we use address(this).balance?
             (success, swapedTokens,) = takeOrder(exData, address(this).balance);
-
-            // either it reverts or order doesn't exist anymore, we reverts as it was explicitely asked for this exchange
-            require(success && swapedTokens >= exData.destAmount, "0x transaction failed");
 
             wrapper = exData.exchangeAddr;
         }
@@ -124,6 +112,8 @@ contract SaverExchangeCore is SaverExchangeHelper {
             }
         }
 
+        require(getBalance(exData.destAddr) >= exData.destAmount);
+
         return (wrapper, getBalance(exData.destAddr));
     }
 
@@ -146,7 +136,7 @@ contract SaverExchangeCore is SaverExchangeHelper {
             tokensLeft = getBalance(_exData.srcAddr);
 
             // convert weth -> eth if needed
-            if (_exData.destAddr == KYBER_ETH_ADDRESS || _exData.destAddr == WETH_ADDRESS) {
+            if (_exData.destAddr == KYBER_ETH_ADDRESS) {
                 TokenInterface(WETH_ADDRESS).withdraw(
                     TokenInterface(WETH_ADDRESS).balanceOf(address(this))
                 );
@@ -250,6 +240,9 @@ contract SaverExchangeCore is SaverExchangeHelper {
     /// @return swapedTokens For Sell that the destAmount, for Buy thats the srcAmount
     function saverSwap(ExchangeData memory exData, address _wrapper, ActionType _type) internal returns (uint swapedTokens) {
         uint ethValue = 0;
+
+        exData.srcAddr = ethToWethAddr(exData.srcAddr);
+        exData.destAddr = ethToWethAddr(exData.destAddr);
 
         if (exData.srcAddr == KYBER_ETH_ADDRESS || exData.srcAddr == WETH_ADDRESS) {
             ethValue = exData.srcAmount;
