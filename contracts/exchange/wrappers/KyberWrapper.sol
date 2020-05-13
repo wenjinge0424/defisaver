@@ -15,11 +15,13 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
     /// @param _srcAmount From amount
     /// @return uint Destination amount
     function sell(address _srcAddr, address _destAddr, uint _srcAmount) external override payable returns (uint) {
-        ERC20 srcToken = ERC20(wethToEthAddr(_srcAddr));
-        ERC20 destToken = ERC20(wethToEthAddr(_destAddr));
+        ERC20 srcToken = ERC20(_srcAddr);
+        ERC20 destToken = ERC20(_destAddr);
 
         KyberNetworkProxyInterface kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
         (, uint minRate) = kyberNetworkProxy.getExpectedRate(srcToken, destToken, _srcAmount);
+
+        srcToken.approve(address(kyberNetworkProxy), _srcAmount);
 
         uint destAmount = kyberNetworkProxy.trade{value: msg.value}(
             srcToken,
@@ -40,13 +42,15 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
     /// @param _destAmount To amount
     /// @return uint srcAmount
     function buy(address _srcAddr, address _destAddr, uint _destAmount) external override payable returns(uint) {
-        ERC20 srcToken = ERC20(wethToEthAddr(_srcAddr));
-        ERC20 destToken = ERC20(wethToEthAddr(_destAddr));
+        ERC20 srcToken = ERC20(_srcAddr);
+        ERC20 destToken = ERC20(_destAddr);
 
         uint srcAmount = srcToken.balanceOf(address(this));
 
         KyberNetworkProxyInterface kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
         (, uint minRate) = kyberNetworkProxy.getExpectedRate(srcToken, destToken, srcAmount);
+
+        srcToken.approve(address(kyberNetworkProxy), srcAmount);
 
         uint destAmount = kyberNetworkProxy.trade{value: msg.value}(
             srcToken,
@@ -94,12 +98,6 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
 
         // increare rate by 3% too account for inaccuracy between sell/buy conversion
         rate = rate + (rate / 30);
-    }
-
-    /// @notice Converts WETH -> Kybers Eth address
-    /// @param _src Input address
-    function wethToEthAddr(address _src) internal pure returns (address) {
-        return _src == WETH_ADDRESS ? KYBER_ETH_ADDRESS : _src;
     }
 
     /// @notice Send any leftover tokens, we use to clear out srcTokens after buy

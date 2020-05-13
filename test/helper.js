@@ -4,7 +4,7 @@ const axios = require('axios');
 
 const nullAddress = "0x0000000000000000000000000000000000000000";
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-const saverExchangeAddress = "0xE8e43b5D61C43375aB7b651F1419F2a81C5E6615";
+const saverExchangeAddress = "0xc21dc5A1b919088F308e0b02243Aaf64c060Dbd0";
 const mcdSaverProxyAddress = "0xa292832ACF0b0226E378E216A982fA966eaA7EBc";
 
 const ERC20 = contract.fromArtifact("ERC20");

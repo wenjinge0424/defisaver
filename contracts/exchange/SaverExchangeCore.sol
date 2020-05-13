@@ -211,15 +211,15 @@ contract SaverExchangeCore is SaverExchangeHelper {
         if (_type == ActionType.SELL) {
             (success, result) = _wrapper.call(abi.encodeWithSignature(
                 "getSellRate(address,address,uint256)",
-                ethToWethAddr(_srcToken),
-                ethToWethAddr(_destToken),
+                _srcToken,
+                _destToken,
                 _amount
             ));
         } else {
             (success, result) = _wrapper.call(abi.encodeWithSignature(
                 "getBuyRate(address,address,uint256)",
-                ethToWethAddr(_srcToken),
-                ethToWethAddr(_destToken),
+                _srcToken,
+                _destToken,
                 _amount
             ));
         }
@@ -245,13 +245,10 @@ contract SaverExchangeCore is SaverExchangeHelper {
     function saverSwap(ExchangeData memory exData, address _wrapper, ActionType _type) internal returns (uint swapedTokens) {
         uint ethValue = 0;
 
-        exData.srcAddr = ethToWethAddr(exData.srcAddr);
-        exData.destAddr = ethToWethAddr(exData.destAddr);
-
-        if (exData.srcAddr == KYBER_ETH_ADDRESS || exData.srcAddr == WETH_ADDRESS) {
+        if (exData.srcAddr == KYBER_ETH_ADDRESS) {
             ethValue = exData.srcAmount;
         } else {
-            ERC20(exData.srcAddr).transfer(_wrapper, exData.srcAmount);
+            ERC20(exData.srcAddr).transfer(_wrapper, ERC20(exData.srcAddr).balanceOf(address(this)));
         }
 
         if (_type == ActionType.SELL) {

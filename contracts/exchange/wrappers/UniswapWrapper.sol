@@ -19,6 +19,9 @@ contract UniswapWrapper is DSMath, ConstantAddresses {
         address uniswapExchangeAddr;
         uint destAmount;
 
+        _srcAddr = ethToWethAddr(_srcAddr);
+        _destAddr = ethToWethAddr(_destAddr);
+
         // // if we are selling ether
         if (_srcAddr == WETH_ADDRESS) {
             uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_destAddr);
@@ -56,6 +59,9 @@ contract UniswapWrapper is DSMath, ConstantAddresses {
     function buy(address _srcAddr, address _destAddr, uint _destAmount) external payable returns(uint) {
         address uniswapExchangeAddr;
         uint srcAmount;
+
+        _srcAddr = ethToWethAddr(_srcAddr);
+        _destAddr = ethToWethAddr(_destAddr);
 
         // if we are selling ether
         if (_srcAddr == WETH_ADDRESS) {
@@ -95,6 +101,9 @@ contract UniswapWrapper is DSMath, ConstantAddresses {
     /// @param _srcAmount From amount
     /// @return uint Rate
     function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount) public view returns (uint) {
+        _srcAddr = ethToWethAddr(_srcAddr);
+        _destAddr = ethToWethAddr(_destAddr);
+
         if(_srcAddr == WETH_ADDRESS) {
             address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_destAddr);
             return wdiv(UniswapExchangeInterface(uniswapTokenAddress).getEthToTokenInputPrice(_srcAmount), _srcAmount);
@@ -113,6 +122,9 @@ contract UniswapWrapper is DSMath, ConstantAddresses {
     /// @param _destAmount To amount
     /// @return uint Rate
     function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount) public view returns (uint) {
+        _srcAddr = ethToWethAddr(_srcAddr);
+        _destAddr = ethToWethAddr(_destAddr);
+
         if(_srcAddr == WETH_ADDRESS) {
             address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_destAddr);
             return wdiv(UniswapExchangeInterface(uniswapTokenAddress).getEthToTokenOutputPrice(_destAmount), _destAmount);
@@ -133,6 +145,12 @@ contract UniswapWrapper is DSMath, ConstantAddresses {
         } else {
             ERC20(_srcAddr).transfer(msg.sender, ERC20(_srcAddr).balanceOf(address(this)));
         }
+    }
+
+    /// @notice Converts Kybers Eth address -> Weth
+    /// @param _src Input address
+    function ethToWethAddr(address _src) internal pure returns (address) {
+        return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
     }
 
     receive() payable external {}
