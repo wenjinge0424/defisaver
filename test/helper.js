@@ -4,13 +4,17 @@ const axios = require('axios');
 
 const nullAddress = "0x0000000000000000000000000000000000000000";
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-const saverExchangeAddress = "0x64C5cc449bD253D7fd57751c9080ACcd0216126d";
+const saverExchangeAddress = "0xE8e43b5D61C43375aB7b651F1419F2a81C5E6615";
 const mcdSaverProxyAddress = "0xa292832ACF0b0226E378E216A982fA966eaA7EBc";
+
+const ERC20 = contract.fromArtifact("ERC20");
 
 const fetchMakerAddresses = async (version, params = {}) => {
     const url = `https://changelog.makerdao.com/releases/mainnet/${version}/contracts.json`;
 
     const res = await axios.get(url, params);
+
+    // console.log(res.data);
 
     return res.data;
 };
@@ -43,11 +47,11 @@ const fundIfNeeded = async (web3, fundAccAddress, accAddress, minBal=5, addBal=1
     if (parseFloat(bal) < minBal) {
         await web3.eth.sendTransaction({gas: 21000, from: fundAccAddress, to: accAddress, value: web3.utils.toWei(addBal.toString(), "ether")});
     }
-}
+};
 
 const getProxy = async (registry, acc) => {
     let proxyAddr = await registry.proxies(acc);
-    
+
     if (proxyAddr === nullAddress) {
         await registry.build(acc, {from: acc});
         proxyAddr = await registry.proxies(acc);
@@ -56,17 +60,44 @@ const getProxy = async (registry, acc) => {
     proxy = await DSProxy.at(proxyAddr);
 
     return { proxy, proxyAddr };
-}
+};
+
+const getBalance = async (web3, account, tokenAddress) => {
+    if (tokenAddress === ETH_ADDRESS) {
+        const ethBalance = await web3.eth.getBalance(account);
+        return ethBalance.toString();
+    }
+
+    const erc20 = await ERC20.at(tokenAddress);
+
+    const tokenBalance = await erc20.balanceOf(account);
+    return tokenBalance.toString();
+};
+
+const approve = async (web3, tokenAddress, from, to, amount) => {
+    if (tokenAddress === ETH_ADDRESS) {
+        return;
+    }
+
+    if (!amount) {
+        amount = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
+    }
+
+    const erc20 = new web3.eth.Contract(ERC20.abi, tokenAddress);
+    await erc20.methods.approve(to, amount).send({from, gas: 100000});
+};
 
 module.exports = {
     getAbiFunction,
     loadAccounts,
     getAccounts,
-    nullAddress,
+    getBalance,
+    approve,
     getProxy,
     fetchMakerAddresses,
+    fundIfNeeded,
+    nullAddress,
     saverExchangeAddress,
     mcdSaverProxyAddress,
     ETH_ADDRESS,
-    fundIfNeeded
 };

@@ -102,4 +102,5 @@ contract SaverExchange is SaverExchangeCore, DSMath {
 
         burnAmount = _newBurnAmount;
     }
+
 }

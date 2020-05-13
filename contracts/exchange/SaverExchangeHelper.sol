@@ -4,7 +4,19 @@ import "../constants/SaverExchangeConstantAddresses.sol";
 import "../interfaces/ERC20.sol";
 import "../mcd/Discount.sol";
 
-contract SaverExchangeHelper is SaverExchangeConstantAddresses {
+contract SaverExchangeHelper {
+
+    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public constant DGD_ADDRESS = 0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A;
+
+    address payable public constant WALLET_ID = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
+    address public constant DISCOUNT_ADDRESS = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
+
+    address public constant KYBER_WRAPPER = 0x86072CbFF48dA3C1F01824a6761A03F105BCC697;
+    address public constant UNISWAP_WRAPPER = 0xFF6049B87215476aBf744eaA3a476cBAd46fB1cA;
+    address public constant OASIS_WRAPPER = 0x5017A545b09ab9a30499DE7F431DF0855bCb7275;
+    address public constant ERC20_PROXY_0X = 0x95E6F48254609A6ee006F7D493c8e5fB97094ceF;
 
     function getDecimals(address _token) internal view returns (uint256) {
         if (_token == DGD_ADDRESS) return 9;

@@ -59,6 +59,8 @@ contract SaverExchangeCore is SaverExchangeHelper {
                 (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance);
             }
 
+            require(price > exData.minPrice, "On chain slippage hit");
+
             // 0x either had worse price or we tried and order fill failed, so call on chain swap
             if (tokensLeft > 0) {
                 swapedTokens = saverSwap(exData, wrapper, ActionType.SELL);
@@ -78,7 +80,7 @@ contract SaverExchangeCore is SaverExchangeHelper {
         uint swapedTokens;
         bool success;
 
-        require(exData.destAmount != 0);
+        require(exData.destAmount != 0, "Dest amount must be specified");
 
         // if 0x is selected try first the 0x order
         if (exData.exchangeType == ExchangeType.ZEROX) {
@@ -106,13 +108,15 @@ contract SaverExchangeCore is SaverExchangeHelper {
                 (success, swapedTokens,) = takeOrder(exData, address(this).balance);
             }
 
+            require(price > exData.minPrice, "On chain slippage hit");
+
             // 0x either had worse price or we tried and order fill failed, so call on chain swap
             if (getBalance(exData.destAddr) < exData.destAmount) {
                 swapedTokens = saverSwap(exData, wrapper, ActionType.BUY);
             }
         }
 
-        require(getBalance(exData.destAddr) >= exData.destAmount);
+        require(getBalance(exData.destAddr) >= exData.destAmount, "Less then destAmount");
 
         return (wrapper, getBalance(exData.destAddr));
     }
@@ -207,15 +211,15 @@ contract SaverExchangeCore is SaverExchangeHelper {
         if (_type == ActionType.SELL) {
             (success, result) = _wrapper.call(abi.encodeWithSignature(
                 "getSellRate(address,address,uint256)",
-                _srcToken,
-                _destToken,
+                ethToWethAddr(_srcToken),
+                ethToWethAddr(_destToken),
                 _amount
             ));
         } else {
             (success, result) = _wrapper.call(abi.encodeWithSignature(
                 "getBuyRate(address,address,uint256)",
-                _srcToken,
-                _destToken,
+                ethToWethAddr(_srcToken),
+                ethToWethAddr(_destToken),
                 _amount
             ));
         }
@@ -246,6 +250,8 @@ contract SaverExchangeCore is SaverExchangeHelper {
 
         if (exData.srcAddr == KYBER_ETH_ADDRESS || exData.srcAddr == WETH_ADDRESS) {
             ethValue = exData.srcAmount;
+        } else {
+            ERC20(exData.srcAddr).transfer(_wrapper, exData.srcAmount);
         }
 
         if (_type == ActionType.SELL) {

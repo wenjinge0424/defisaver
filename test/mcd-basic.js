@@ -75,7 +75,8 @@ describe("MCDBasic", accounts => {
         const bal = await web3.eth.getBalance(accounts[0]);
         const weiBal = web3.utils.fromWei(bal.toString(), 'ether')
 
-        await web3Exchange.methods.swapTokenToToken(ETH_ADDRESS, makerAddresses["WBTC"], value, 0, 0, nullAddress, "0x0", 0).send({from: accounts[0], value, gas: 3000000});
+        await web3Exchange.methods.sell(
+            [ETH_ADDRESS, makerAddresses["WBTC"], value, 0, 0, 0, nullAddress, "0x0", 0]).send({from: accounts[0], value, gas: 3000000});
 
         const newBal = await web3.eth.getBalance(accounts[0]);
         const newWeiBal = web3.utils.fromWei(newBal.toString(), 'ether')
@@ -89,7 +90,7 @@ describe("MCDBasic", accounts => {
         const daiAmount = web3.utils.toWei('50', 'ether');
 
         const wbtcToken = await ERC20.at(makerAddresses["WBTC"]);
-        
+
         const wbtcAmount = await wbtcToken.balanceOf(accounts[0]);
 
         await wbtcToken.approve(proxyAddr, wbtcAmount.toString(), {from: accounts[0]});
@@ -138,7 +139,7 @@ describe("MCDBasic", accounts => {
         const wbtcAmount = Dec(web3.utils.toWei('0.001', 'ether'));
         // const divider = new BN(1e10);
         const wbtcAmountNormalize = wbtcAmount.div(1e10);
-        
+
         const cdps = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
 
         // last made is wbtc cdp
