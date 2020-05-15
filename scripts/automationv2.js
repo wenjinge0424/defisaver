@@ -43,11 +43,11 @@ const SubscriptionsProxyV2 = require("../build/contracts/SubscriptionsProxyV2.js
 const SaverExchange = require('../build/contracts/SaverExchange.json');
 
 
-const automaticProxyAddress = '0xf970c81747BdCbAFED54ab77f859cf0DE1ecA9C9';
-const subscriptionsAddress = '0x77dd93B8E49BEf255a7F8D5d8f7b7A70006A5E7b';
-const subscriptionsProxyAddress = '0x06AbaC6fe0e49e57763aAa79c0D79e3e42c1894F';
-const monitorAddress = '0xB08069a920F7EFC9e88c81Ee93989169be6eC879';
-const monitorProxyAddress = '0x7456f4218874eAe1aF8B83a64848A1B89fEB7d7C';
+const automaticProxyAddress = '0x86Fd9f5988A4d2335d37a0DaECe48069AE2F3432';
+const subscriptionsAddress = '0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a';
+const subscriptionsProxyAddress = '0xd6f2125bF7FE2bc793dE7685EA7DEd8bff3917DD';
+const monitorAddress = '0x6df73D2f8E4f451f40DF475942808fC99eFFC995';
+const monitorProxyAddress = '0x47d9f61bADEc4378842d809077A5e87B9c996898';
 
 
 const initContracts = async () => {
@@ -309,10 +309,10 @@ const openWbtcCdp = async () => {
 
     // select cdp to use
     let wcdp = cdps[cdps.length-1];
-    let ecdp = cdps[cdps.length-2];
+    // let ecdp = cdps[cdps.length-2];
 
     let wJoinAddr = makerAddresses["MCD_JOIN_WBTC_A"];
-    let eJoinAddr = makerAddresses["MCD_JOIN_ETH_A"];
+    // let eJoinAddr = makerAddresses["MCD_JOIN_ETH_A"];
 
     // let joinAddr = tokenJoinAddrData['1'][cdp.ilk];
 
@@ -320,17 +320,18 @@ const openWbtcCdp = async () => {
 
     // ----------------------starters-------------------------------------
     // subscribe vault
-    // await subscribeVault(wcdp.cdpId, '2000000000000000000', '25000000000000000000', '2400000000000000000', '2350000000000000000');
-                                     
+    // await subscribeVault(wcdp.cdpId, '2000000000000000000', '2300000000000000000', '2100000000000000000', '2150000000000000000');
+                                                                                                            
     // await addCaller(bot.address);
     // await addCaller('0xAED662abcC4FA3314985E67Ea993CAD064a7F5cF');
     // await addCaller('0xa5d330F6619d6bF892A5B87D80272e1607b3e34D');
 
     // -------------------------------------------------------------------
-    const maxDebt = await getMaxDebt(wcdp.cdpId, wcdp.ilk);
+    // const maxDebt = await getMaxDebt(wcdp.cdpId, wcdp.ilk);
+    // console.log(maxDebt.toString());
 
     // await repay(wcdp.cdpId, '10000000', wJoinAddr, '0');
-    // await boost(wcdp.cdpId, web3.utils.toWei(maxDebt, 'ether'), wJoinAddr, '0');
+    // await boost(wcdp.cdpId, maxDebt.toString(), wJoinAddr, '0');
 
     // ----------------------getters-------------------------------------
     // let subscriptions = await getSubscriptions();
@@ -339,22 +340,22 @@ const openWbtcCdp = async () => {
     // let cdpHolder = await getCdpHolder(cdp.cdpId);
     // console.log(cdpHolder);
 
-    let canCallBoost = await canCall(MethodEnum.Boost, wcdp.cdpId, 0);
-    console.log('canCallBoost', canCallBoost);
+    // let canCallBoost = await canCall(MethodEnum.Boost, wcdp.cdpId, 0);
+    // console.log('canCallBoost', canCallBoost);
     
 
-    let canCallRepay = await canCall(MethodEnum.Repay, wcdp.cdpId, 0);
-    console.log('canCallRepay', canCallRepay);
+    // let canCallRepay = await canCall(MethodEnum.Repay, wcdp.cdpId, 0);
+    // console.log('canCallRepay', canCallRepay);
     // ------------------------------------------------------------------
 
     // let info = await getCdpInfo(wcdp.cdpId, wcdp.ilk);
     // console.log(info);
 
-    // await repayFor(wcdp.cdpId, '10000000', wJoinAddr, '0');
-    info = await getCdpInfo(wcdp.cdpId, wcdp.ilk);
-    console.log('after repay', info);
+    // await repayFor(wcdp.cdpId, '2500000', wJoinAddr, '0');
+    // info = await getCdpInfo(wcdp.cdpId, wcdp.ilk);
+    // console.log('after repay', info);
 
-    // await boostFor(wcdp.cdpId, web3.utils.toWei('500', 'ether'), wJoinAddr, '0');
+    // await boostFor(wcdp.cdpId, maxDebt.toString(), wJoinAddr, '0');
     // info = await getCdpInfo(wcdp.cdpId, wcdp.ilk);
     // console.log('after boost', info);
 
