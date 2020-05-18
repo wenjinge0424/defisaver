@@ -25,7 +25,7 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
         address payable user = address(uint160(getUserAddress()));
         uint flashBorrowed = _flashLoanData[0] + _flashLoanData[1];
 
-        uint maxColl = getMaxCollateral(_addrData[0]);
+        uint maxColl = getMaxCollateral(_addrData[0], address(this));
 
         // draw max coll
         require(CTokenInterface(_addrData[0]).redeemUnderlying(maxColl) == 0);
@@ -74,7 +74,7 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
         uint flashBorrowed = _flashLoanData[0] + _flashLoanData[1];
 
         // borrow max amount
-        uint borrowAmount = getMaxBorrow(_addrData[1]);
+        uint borrowAmount = getMaxBorrow(_addrData[1], address(this));
         require(CTokenInterface(_addrData[1]).borrow(borrowAmount) == 0);
 
         address collToken = getUnderlyingAddr(_addrData[0]);

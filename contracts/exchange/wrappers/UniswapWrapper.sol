@@ -2,20 +2,20 @@ pragma solidity ^0.6.0;
 
 import "../../interfaces/ERC20.sol";
 import "../../interfaces/KyberNetworkProxyInterface.sol";
-import "../../interfaces/ExchangeInterface.sol";
+import "../../interfaces/ExchangeInterfaceV2.sol";
 import "../../interfaces/UniswapExchangeInterface.sol";
 import "../../interfaces/UniswapFactoryInterface.sol";
 import "../../DS/DSMath.sol";
 import "../../constants/ConstantAddresses.sol";
 
-contract UniswapWrapper is DSMath, ConstantAddresses {
+contract UniswapWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
 
     /// @notice Sells a _srcAmount of tokens at Uniswap
     /// @param _srcAddr From token
     /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return uint Destination amount
-    function sell(address _srcAddr, address _destAddr, uint _srcAmount) external payable returns (uint) {
+    function sell(address _srcAddr, address _destAddr, uint _srcAmount) external payable override returns (uint) {
         address uniswapExchangeAddr;
         uint destAmount;
 
@@ -56,7 +56,7 @@ contract UniswapWrapper is DSMath, ConstantAddresses {
     /// @param _destAddr To token
     /// @param _destAmount To amount
     /// @return uint srcAmount
-    function buy(address _srcAddr, address _destAddr, uint _destAmount) external payable returns(uint) {
+    function buy(address _srcAddr, address _destAddr, uint _destAmount) external override payable returns(uint) {
         address uniswapExchangeAddr;
         uint srcAmount;
 
@@ -100,7 +100,7 @@ contract UniswapWrapper is DSMath, ConstantAddresses {
     /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return uint Rate
-    function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount) public view returns (uint) {
+    function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount) public override view returns (uint) {
         _srcAddr = ethToWethAddr(_srcAddr);
         _destAddr = ethToWethAddr(_destAddr);
 
@@ -121,7 +121,7 @@ contract UniswapWrapper is DSMath, ConstantAddresses {
     /// @param _destAddr To token
     /// @param _destAmount To amount
     /// @return uint Rate
-    function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount) public view returns (uint) {
+    function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount) public override view returns (uint) {
         _srcAddr = ethToWethAddr(_srcAddr);
         _destAddr = ethToWethAddr(_destAddr);
 

@@ -21,7 +21,7 @@ contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
 
         address payable user = address(uint160(getUserAddress()));
 
-        uint maxColl = getMaxCollateral(_addrData[0]);
+        uint maxColl = getMaxCollateral(_addrData[0], address(this));
 
         uint collAmount = (_data[0] > maxColl) ? maxColl : _data[0];
 
@@ -62,7 +62,7 @@ contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
 
         address payable user = address(uint160(getUserAddress()));
 
-        uint maxBorrow = getMaxBorrow(_addrData[1]);
+        uint maxBorrow = getMaxBorrow(_addrData[1], address(this));
         uint borrowAmount = (_data[0] > maxBorrow) ? maxBorrow : _data[0];
 
         require(CTokenInterface(_addrData[1]).borrow(borrowAmount) == 0);

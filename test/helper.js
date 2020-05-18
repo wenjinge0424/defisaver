@@ -4,7 +4,9 @@ const axios = require('axios');
 
 const nullAddress = "0x0000000000000000000000000000000000000000";
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-const saverExchangeAddress = "0xc21dc5A1b919088F308e0b02243Aaf64c060Dbd0";
+const C_ETH_ADDRESS = '0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5';
+const C_DAI_ADDRESS = '0x5d3a536e4d6dbd6114cc1ead35777bab948e3643';
+const saverExchangeAddress = "0xa69F4c9F17e4C90138c55279aAF1917352D435C7";
 const mcdSaverProxyAddress = "0xa292832ACF0b0226E378E216A982fA966eaA7EBc";
 
 const ERC20 = contract.fromArtifact("ERC20");
@@ -100,4 +102,6 @@ module.exports = {
     saverExchangeAddress,
     mcdSaverProxyAddress,
     ETH_ADDRESS,
+    C_ETH_ADDRESS,
+    C_DAI_ADDRESS,
 };

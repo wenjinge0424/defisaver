@@ -33,7 +33,7 @@ describe("Exchange", accounts => {
 
 
     // it('... should sell Ether for Dai', async () => {
-    //     const value = web3.utils.toWei('1', 'ether');
+    //     const value = web3.utils.toWei('10', 'ether');
 
     //     const daiBalanceBefore = await getBalance(web3, accounts[0], makerAddresses["MCD_DAI"]);
 
@@ -50,11 +50,13 @@ describe("Exchange", accounts => {
 
         await approve(web3, makerAddresses["MCD_DAI"], accounts[0], saverExchangeAddress);
 
+        console.log(makerAddresses["MCD_DAI"]);
+
         const etherBalanceBefore = await getBalance(web3, accounts[0], ETH_ADDRESS);
         console.log(etherBalanceBefore/1e18);
 
         await web3Exchange.methods.sell(
-            [makerAddresses["MCD_DAI"], '0xd0A1E359811322d97991E03f863a0C30C2cF029C', value, 0, 0, 1, nullAddress, "0x0", 0]).send({from: accounts[0], value, gas: 5000000});
+            [makerAddresses["MCD_DAI"], ETH_ADDRESS, value, 0, 0, 1, nullAddress, "0x0", 0]).send({from: accounts[0], value: 0, gas: 5000000});
 
         const etherBalanceAfter = await getBalance(web3, accounts[0], ETH_ADDRESS);
 

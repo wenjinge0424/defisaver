@@ -21,7 +21,9 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
         KyberNetworkProxyInterface kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
         (, uint minRate) = kyberNetworkProxy.getExpectedRate(srcToken, destToken, _srcAmount);
 
-        srcToken.approve(address(kyberNetworkProxy), _srcAmount);
+        if (_srcAddr != KYBER_ETH_ADDRESS) {
+            srcToken.approve(address(kyberNetworkProxy), _srcAmount);
+        }
 
         uint destAmount = kyberNetworkProxy.trade{value: msg.value}(
             srcToken,

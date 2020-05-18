@@ -27,7 +27,7 @@ contract CompoundCreateTaker is CompoundSaverHelper, CompoundBasicProxy, ProxyPe
 
         deposit(tokenAddr, _addrData[0], _data[0], true);
 
-        uint maxDebt = getMaxBorrow(_addrData[1]);
+        uint maxDebt = getMaxBorrow(_addrData[1], address(this));
 
         if (_data[1] <= maxDebt) {
             // convert that debt and deposit back

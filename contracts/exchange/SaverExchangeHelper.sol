@@ -13,9 +13,9 @@ contract SaverExchangeHelper {
     address payable public constant WALLET_ID = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDRESS = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
 
-    address public constant KYBER_WRAPPER = 0x49de73CaB6e369f1F97Def0b95b558cd77c5d6a2;
-    address public constant UNISWAP_WRAPPER = 0x8E7a8d3CAeEbbe9A92faC4db19424218aE6791a3;
-    address public constant OASIS_WRAPPER = 0x72440269630E393d38975Db7fA7Cb4D14e7eC061;
+    address public constant KYBER_WRAPPER = 0xDb56f2e9369E0D7bD191099125a3f6C370F8ed15;
+    address public constant UNISWAP_WRAPPER = 0xC89Ce4735882C9F0f0FE26686c53074E09B0D550;
+    address public constant OASIS_WRAPPER = 0x74E33B80BC77cdB5d49861a53913A8301CB72B4D;
     address public constant ERC20_PROXY_0X = 0x95E6F48254609A6ee006F7D493c8e5fB97094ceF;
 
     function getDecimals(address _token) internal view returns (uint256) {
@@ -62,18 +62,6 @@ contract SaverExchangeHelper {
         if (getBalance(_destAddr) > 0) {
             ERC20(_destAddr).transfer(_to, getBalance(_destAddr));
         }
-    }
-
-    /// @notice Converts Kybers Eth address -> Weth
-    /// @param _src Input address
-    function ethToWethAddr(address _src) internal pure returns (address) {
-        return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
-    }
-
-    /// @notice Converts Weth -> Kybers Eth address
-    /// @param _src Input address
-    function wethToEth(address _src) internal pure returns (address) {
-        return _src == WETH_ADDRESS ? KYBER_ETH_ADDRESS : _src;
     }
 
     function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {

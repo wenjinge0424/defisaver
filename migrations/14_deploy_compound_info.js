@@ -7,7 +7,7 @@ module.exports = function(deployer, network, accounts) {
 
     deployer.then(async () => {
 
-        await deployer.deploy(CompoundLoanInfo, {gas: 900000, overwrite: deployAgain});
+        await deployer.deploy(CompoundLoanInfo, {gas: 3500000, overwrite: deployAgain});
 
     });
 };

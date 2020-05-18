@@ -1,20 +1,20 @@
 pragma solidity ^0.6.0;
 
-import "../../interfaces/ExchangeInterface.sol";
+import "../../interfaces/ExchangeInterfaceV2.sol";
 import "../../interfaces/OasisInterface.sol";
 import "../../interfaces/ERC20.sol";
 import "../../interfaces/TokenInterface.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../../DS/DSMath.sol";
 
-contract OasisTradeWrapper is DSMath, ConstantAddresses {
+contract OasisTradeWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
 
     /// @notice Sells a _srcAmount of tokens at Oasis
     /// @param _srcAddr From token
     /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return uint Destination amount
-    function sell(address _srcAddr, address _destAddr, uint _srcAmount) external payable returns (uint) {
+    function sell(address _srcAddr, address _destAddr, uint _srcAmount) external override payable returns (uint) {
         address srcAddr = ethToWethAddr(_srcAddr);
         address destAddr = ethToWethAddr(_destAddr);
 
@@ -43,7 +43,7 @@ contract OasisTradeWrapper is DSMath, ConstantAddresses {
     /// @param _destAddr To token
     /// @param _destAmount To amount
     /// @return uint srcAmount
-    function buy(address _srcAddr, address _destAddr, uint _destAmount) external payable returns(uint) {
+    function buy(address _srcAddr, address _destAddr, uint _destAmount) external override payable returns(uint) {
         address srcAddr = ethToWethAddr(_srcAddr);
         address destAddr = ethToWethAddr(_destAddr);
 
@@ -75,19 +75,34 @@ contract OasisTradeWrapper is DSMath, ConstantAddresses {
     /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return uint Rate
-    function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount) public view returns (uint) {
-        address srcAddr = ethToWethAddr(_srcAddr);
-        address destAddr = ethToWethAddr(_destAddr);
+    // function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount) public override view returns (uint) {
+    //     require(_destAddr == KYBER_ETH_ADDRESS, "Kyber eth addr");
 
-        return wdiv(OasisInterface(OTC_ADDRESS).getBuyAmount(destAddr, srcAddr, _srcAmount), _srcAmount);
+    //     address srcAddr = ethToWethAddr(_srcAddr);
+    //     address destAddr = ethToWethAddr(_destAddr);
+
+    //     return wdiv(OasisInterface(OTC_ADDRESS).getBuyAmount(0x6B175474E89094C44Da98b954EedeAC495271d0F, 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2, 10000000), 10000000);
+    // }
+
+    function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount) public override view returns (uint) {
+        // require(_srcAddr == 0x6B175474E89094C44Da98b954EedeAC495271d0F, "1");
+        // require(_destAddr == KYBER_ETH_ADDRESS, "1");
+        // require(ethToWethAddr(_destAddr) == WETH_ADDRESS, "1");
+
+
+        // address srcAddr = ethToWethAddr(_srcAddr);
+        // address destAddr = ethToWethAddr(_destAddr);
+
+        return 1000;
     }
+
 
     /// @notice Return a rate for which we can buy an amount of tokens
     /// @param _srcAddr From token
     /// @param _destAddr To token
     /// @param _destAmount To amount
     /// @return uint Rate
-    function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount) public view returns (uint) {
+    function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount) public override view returns (uint) {
         address srcAddr = ethToWethAddr(_srcAddr);
         address destAddr = ethToWethAddr(_destAddr);
 

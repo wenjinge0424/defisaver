@@ -25,7 +25,7 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission {
         address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes calldata _callData
     ) external payable {
-        uint maxColl = getMaxCollateral(_addrData[0]);
+        uint maxColl = getMaxCollateral(_addrData[0], address(this));
 
         if (_data[0] <= maxColl) {
             repay(_data, _addrData, _callData);
@@ -55,7 +55,7 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission {
         address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes calldata _callData
     ) external payable {
-        uint maxBorrow = getMaxBorrow(_addrData[1]);
+        uint maxBorrow = getMaxBorrow(_addrData[1], address(this));
 
         if (_data[0] <= maxBorrow) {
             boost(_data, _addrData, _callData);

@@ -128,10 +128,11 @@ contract CompoundSaverHelper is DSMath {
     /// @notice Returns the maximum amount of collateral available to withdraw
     /// @dev Due to rounding errors the result is - 1% wei from the exact amount
     /// @param _cCollAddress Collateral we are getting the max value of
+    /// @param _account Users account
     /// @return Returns the max. collateral amount in that token
-    function getMaxCollateral(address _cCollAddress) public returns (uint) {
-        (, uint liquidityInEth, ) = ComptrollerInterface(COMPTROLLER).getAccountLiquidity(address(this));
-        uint usersBalance = CTokenInterface(_cCollAddress).balanceOfUnderlying(address(this));
+    function getMaxCollateral(address _cCollAddress, address _account) public returns (uint) {
+        (, uint liquidityInEth, ) = ComptrollerInterface(COMPTROLLER).getAccountLiquidity(_account);
+        uint usersBalance = CTokenInterface(_cCollAddress).balanceOfUnderlying(_account);
 
         if (liquidityInEth == 0) return usersBalance;
 
@@ -152,9 +153,10 @@ contract CompoundSaverHelper is DSMath {
     /// @notice Returns the maximum amount of borrow amount available
     /// @dev Due to rounding errors the result is - 1% wei from the exact amount
     /// @param _cBorrowAddress Borrow token we are getting the max value of
+    /// @param _account Users account
     /// @return Returns the max. borrow amount in that token
-    function getMaxBorrow(address _cBorrowAddress) public view returns (uint) {
-        (, uint liquidityInEth, ) = ComptrollerInterface(COMPTROLLER).getAccountLiquidity(address(this));
+    function getMaxBorrow(address _cBorrowAddress, address _account) public view returns (uint) {
+        (, uint liquidityInEth, ) = ComptrollerInterface(COMPTROLLER).getAccountLiquidity(_account);
 
         if (_cBorrowAddress == CETH_ADDRESS) return liquidityInEth;
 
