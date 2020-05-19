@@ -63,7 +63,7 @@ contract SaverExchangeCore is SaverExchangeHelper {
 
             // 0x either had worse price or we tried and order fill failed, so call on chain swap
             if (tokensLeft > 0) {
-                // swapedTokens = saverSwap(exData, wrapper, ActionType.SELL);
+                swapedTokens = saverSwap(exData, wrapper, ActionType.SELL);
             }
         }
 
@@ -216,11 +216,6 @@ contract SaverExchangeCore is SaverExchangeHelper {
                 _amount
             ));
 
-            require(success, 'pls');
-            // return sliceUint(result, 0);
-
-            // success = true;
-            // return 20;
         } else {
             (success, result) = _wrapper.call(abi.encodeWithSignature(
                 "getBuyRate(address,address,uint256)",
