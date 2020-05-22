@@ -22,28 +22,28 @@ module.exports = function(deployer, network, accounts) {
         // 2. run migration
         // ------------------------------------------------------------------------------------------------------
 
-        await deployer.deploy(AutomaticProxyV2, {gas: 6700000, overwrite: deployAgain});
-        let automaticProxyAddress = (await AutomaticProxyV2.deployed()).address;
+        // await deployer.deploy(AutomaticProxyV2, {gas: 6700000, overwrite: deployAgain});
+        // let automaticProxyAddress = (await AutomaticProxyV2.deployed()).address;
 
-        await deployer.deploy(MCDMonitorV2, monitorProxyAddress, subscriptionsAddress, automaticProxyAddress, {gas: 6700000, overwrite: deployAgain});
-        let monitorAddress = (await MCDMonitorV2.deployed()).address;
+        // await deployer.deploy(MCDMonitorV2, monitorProxyAddress, subscriptionsAddress, automaticProxyAddress, {gas: 6700000, overwrite: deployAgain});
+        // let monitorAddress = (await MCDMonitorV2.deployed()).address;
 
-        console.log('-----adding callers----')
-        let monitor = await MCDMonitorV2.deployed();
-        await monitor.addCaller('0xAED662abcC4FA3314985E67Ea993CAD064a7F5cF');
-        await monitor.addCaller('0xa5d330F6619d6bF892A5B87D80272e1607b3e34D');
-        await monitor.addCaller('0x6c259ea1fCa0D1883e3FFFdDeb8a0719E1D7265f');
-        console.log('----callers added----');
+        // console.log('-----adding callers----')
+        // let monitor = await MCDMonitorV2.deployed();
+        // await monitor.addCaller('0xAED662abcC4FA3314985E67Ea993CAD064a7F5cF');
+        // await monitor.addCaller('0xa5d330F6619d6bF892A5B87D80272e1607b3e34D');
+        // await monitor.addCaller('0x6c259ea1fCa0D1883e3FFFdDeb8a0719E1D7265f');
+        // console.log('----callers added----');
 
-        console.log('----changing monitor----');
-        let monitorProxyV2 = await MCDMonitorProxyV2.at(monitorProxyAddress);
-        console.log('New monitor address:', monitorAddress, 'from:', accounts[0]);
-        await monitorProxyV2.changeMonitor(monitorAddress);
-        console.log('----monitor changed-----')
+        // console.log('----changing monitor----');
+        // let monitorProxyV2 = await MCDMonitorProxyV2.at(monitorProxyAddress);
+        // console.log('New monitor address:', monitorAddress, 'from:', accounts[0]);
+        // await monitorProxyV2.changeMonitor(monitorAddress);
+        // console.log('----monitor changed-----')
 
         
-        console.log({automaticProxyAddress});
-        console.log({monitorAddress});
+        // console.log({automaticProxyAddress});
+        // console.log({monitorAddress});
 
         // ------------------------------------------------------------------------------------------------------
 
@@ -53,10 +53,10 @@ module.exports = function(deployer, network, accounts) {
         // 2. run migration
         // ------------------------------------------------------------------------------------------------------
         
-        // console.log('------confirming new monitor---------');
-        // let monitorProxyV2 = await MCDMonitorProxyV2.at(monitorProxyAddress);
-        // await monitorProxyV2.confirmNewMonitor(); 
-        // console.log('------new monitor confirmed----------');
+        console.log('------confirming new monitor---------');
+        let monitorProxyV2 = await MCDMonitorProxyV2.at(monitorProxyAddress);
+        await monitorProxyV2.confirmNewMonitor(); 
+        console.log('------new monitor confirmed----------');
 
         // ------------------------------------------------------------------------------------------------------   
         
