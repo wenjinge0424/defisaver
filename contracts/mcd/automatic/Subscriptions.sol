@@ -188,7 +188,7 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
     }
 
     /// @notice Helper method for the front to get all the info about the subscribed CDP
-    function getSubscribedInfo(uint _cdpId) public view returns(bool, uint128, uint128, uint128, uint128, address, uint coll, uint debt) {
+    function getSubscribedInfo(uint _cdpId) public override view returns(bool, uint128, uint128, uint128, uint128, address, uint coll, uint debt) {
         SubPosition memory subInfo = subscribersPos[_cdpId];
 
         if (!subInfo.subscribed) return (false, 0, 0, 0, 0, address(0), 0, 0);
