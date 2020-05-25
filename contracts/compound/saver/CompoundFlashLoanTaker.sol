@@ -1,12 +1,13 @@
 pragma solidity ^0.6.0;
 
+import "../../helpers/GasBurner.sol";
 import "../../flashloan/aave/ILendingPool.sol";
 import "./CompoundSaverProxy.sol";
 import "../../flashloan/FlashLoanLogger.sol";
 import "../../auth/ProxyPermission.sol";
 
 /// @title Entry point for the FL Repay Boosts, called by DSProxy
-contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission {
+contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurner {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
     address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0x416EfaAd75EA7010cA1Ce50297630d7f54CdcABD;
@@ -24,7 +25,7 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission {
         uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes calldata _callData
-    ) external payable {
+    ) external payable burnGas(0) {
         uint maxColl = getMaxCollateral(_addrData[0], address(this));
 
         if (_data[0] <= maxColl) {
@@ -54,7 +55,7 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission {
         uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes calldata _callData
-    ) external payable {
+    ) external payable burnGas(0) {
         uint maxBorrow = getMaxBorrow(_addrData[1], address(this));
 
         if (_data[0] <= maxBorrow) {

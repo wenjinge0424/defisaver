@@ -1,5 +1,6 @@
 pragma solidity ^0.6.0;
 
+import "../../helpers/GasBurner.sol";
 import "../../auth/ProxyPermission.sol";
 
 import "../../flashloan/FlashLoanLogger.sol";
@@ -10,7 +11,7 @@ import "../../interfaces/ProxyRegistryInterface.sol";
 import "../helpers/CompoundSaverHelper.sol";
 
 /// @title Imports Compound position from the account to DSProxy
-contract CompoundImportTaker is CompoundSaverHelper, ProxyPermission {
+contract CompoundImportTaker is CompoundSaverHelper, ProxyPermission, GasBurner {
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
@@ -26,7 +27,7 @@ contract CompoundImportTaker is CompoundSaverHelper, ProxyPermission {
     /// @dev User must approve COMPOUND_IMPORT_FLASH_LOAN to pull _cCollateralToken
     /// @param _cCollateralToken Collateral we are moving to DSProxy
     /// @param _cBorrowToken Borrow token we are moving to DSProxy
-    function importLoan(address _cCollateralToken, address _cBorrowToken) external {
+    function importLoan(address _cCollateralToken, address _cBorrowToken) external burnGas(0) {
         address proxy = getProxy();
 
         uint loanAmount = CTokenInterface(_cBorrowToken).borrowBalanceCurrent(address(this));

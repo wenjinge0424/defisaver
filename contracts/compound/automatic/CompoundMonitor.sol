@@ -1,6 +1,7 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
+import "../../helpers/GasBurner.sol";
 import "./CompoundMonitorProxy.sol";
 import "./CompoundSubscriptions.sol";
 import "../../interfaces/GasTokenInterface.sol";
@@ -10,7 +11,7 @@ import "../../loggers/AutomaticLogger.sol";
 import "../CompoundLoanInfo.sol";
 
 /// @title Contract implements logic of calling boost/repay in the automatic system
-contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
+contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo, GasBurner {
 
     enum Method { Boost, Repay }
 
@@ -27,7 +28,6 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
 
     CompoundMonitorProxy public compoundMonitorProxy;
     CompoundSubscriptions public subscriptionsContract;
-    GasTokenInterface gasToken = GasTokenInterface(GAS_TOKEN_INTERFACE_ADDRESS);
     address public compoundFlashLoanTakerAddress;
 
     AutomaticLogger public logger = AutomaticLogger(AUTOMATIC_LOGGER_ADDRESS);
@@ -62,10 +62,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
         address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes memory _callData,
         address _user
-    ) public payable onlyApproved {
-        if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
-            gasToken.free(BOOST_GAS_TOKEN);
-        }
+    ) public payable onlyApproved burnGas(0) {
 
         (bool isAllowed, uint ratioBefore) = canCall(Method.Repay, _user);
         require(isAllowed); // check if conditions are met
@@ -98,7 +95,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
         address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes memory _callData,
         address _user
-    ) public payable onlyApproved {
+    ) public payable onlyApproved burnGas(0) {
         if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
             gasToken.free(REPAY_GAS_TOKEN);
         }
@@ -201,17 +198,6 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo {
         require(_gasCost < 3000000);
 
         REPAY_GAS_COST = _gasCost;
-    }
-
-    /// @notice Allows owner to change the amount of gas token burned per function call
-    /// @param _gasAmount Amount of gas token
-    /// @param _isRepay Flag to know for which function we are setting the gas token amount
-    function changeGasTokenAmount(uint _gasAmount, bool _isRepay) public onlyOwner {
-        if (_isRepay) {
-            REPAY_GAS_TOKEN = _gasAmount;
-        } else {
-            BOOST_GAS_TOKEN = _gasAmount;
-        }
     }
 
     /// @notice Adds a new bot address which will be able to call repay/boost

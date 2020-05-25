@@ -1,12 +1,13 @@
 pragma solidity ^0.6.0;
 
+import "../helpers/GasBurner.sol";
 import "../interfaces/CTokenInterface.sol";
 import "../interfaces/ERC20.sol";
 import "../interfaces/CEtherInterface.sol";
 import "../interfaces/ComptrollerInterface.sol";
 
 /// @title Basic compound interactions through the DSProxy
-contract CompoundBasicProxy {
+contract CompoundBasicProxy is GasBurner {
 
     address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant COMPTROLLER_ADDR = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
@@ -17,7 +18,7 @@ contract CompoundBasicProxy {
     /// @param _cTokenAddr CTokens to be deposited
     /// @param _amount Amount of tokens to be deposited
     /// @param _inMarket True if the tokend is already in market for that address
-    function deposit(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) public payable {
+    function deposit(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) public burnGas(0) payable {
         if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount);
         }
@@ -40,7 +41,7 @@ contract CompoundBasicProxy {
     /// @param _cTokenAddr CTokens to be withdrawn
     /// @param _amount Amount of tokens to be withdrawn
     /// @param _isCAmount If true _amount is cTokens if falls _amount is underlying tokens
-    function withdraw(address _tokenAddr, address _cTokenAddr, uint _amount, bool _isCAmount) public {
+    function withdraw(address _tokenAddr, address _cTokenAddr, uint _amount, bool _isCAmount) public burnGas(0) {
 
         if (_isCAmount) {
             require(CTokenInterface(_cTokenAddr).redeem(_amount) == 0);
@@ -62,7 +63,7 @@ contract CompoundBasicProxy {
     /// @param _cTokenAddr CTokens to be borrowed
     /// @param _amount Amount of tokens to be borrowed
     /// @param _inMarket True if the tokend is already in market for that address
-    function borrow(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) public {
+    function borrow(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) public burnGas(0) {
         if (!_inMarket) {
             enterMarket(_cTokenAddr);
         }
@@ -83,7 +84,7 @@ contract CompoundBasicProxy {
     /// @param _cTokenAddr CTokens to be paybacked
     /// @param _amount Amount of tokens to be payedback
     /// @param _wholeDebt If true the _amount will be set to the whole amount of the debt
-    function payback(address _tokenAddr, address _cTokenAddr, uint _amount, bool _wholeDebt) public payable {
+    function payback(address _tokenAddr, address _cTokenAddr, uint _amount, bool _wholeDebt) public burnGas(0) payable {
         approveToken(_tokenAddr, _cTokenAddr);
 
         if (_wholeDebt) {
