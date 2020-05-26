@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "../../helpers/GasBurner.sol";
+import "../../utils/GasBurner.sol";
 import "./CompoundMonitorProxy.sol";
 import "./CompoundSubscriptions.sol";
 import "../../interfaces/GasTokenInterface.sol";

@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-import "../../helpers/GasBurner.sol";
+import "../../utils/GasBurner.sol";
 import "../../auth/ProxyPermission.sol";
 
 import "../../flashloan/FlashLoanLogger.sol";

@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-import "../helpers/GasBurner.sol";
+import "../utils/GasBurner.sol";
 import "../interfaces/CTokenInterface.sol";
 import "../interfaces/ERC20.sol";
 import "../interfaces/CEtherInterface.sol";
