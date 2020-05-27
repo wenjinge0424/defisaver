@@ -238,7 +238,7 @@ contract Subscriptions is ISubscriptions, ConstantAddresses {
     }
 
     /// @notice Admin function to unsubscribe a CDP if it's owner transfered to a different addr
-    function unsubscribeIfMoved(uint _cdpId) public {
+    function unsubscribeIfMoved(uint _cdpId) public override {
         require(msg.sender == owner, "Must be owner");
 
         SubPosition storage subInfo = subscribersPos[_cdpId];
