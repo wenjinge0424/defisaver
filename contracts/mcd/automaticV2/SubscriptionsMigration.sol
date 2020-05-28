@@ -13,7 +13,7 @@ contract SubscriptionsMigration is Auth {
 
 	// DSAuthorityUnsubscribe address
 	// TODO: SET ADDRESS
-	address public dsAuthorityUnsubscribeAddress = 0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab;
+	address public dsAuthorityUnsubscribeAddress;
 
 
 	address public monitorProxyAddress = 0x93Efcf86b6a7a33aE961A7Ec6C741F49bce11DA7;
@@ -31,6 +31,10 @@ contract SubscriptionsMigration is Auth {
 	address public subscriptionsProxyV1address = 0xA5D33b02dBfFB3A9eF26ec21F15c43BdB53EB455;
 	// manager to check if owner is valid
 	Manager public manager = Manager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
+
+	constructor(address _dsAuthorityUnsubscribeAddress) public {
+		dsAuthorityUnsubscribeAddress = _dsAuthorityUnsubscribeAddress;
+	}
 
 	function migrate(uint[] memory _cdps) public onlyAuthorized {
 
