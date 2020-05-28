@@ -4,16 +4,15 @@ import "../automatic/MCDMonitorProxy.sol";
 import "../automatic/ISubscriptions.sol";
 import "../maker/Manager.sol";
 import "../../auth/Auth.sol";
+import "../../auth/ProxyPermission.sol";
 import "../../DS/DSAuth.sol";
 import "../../DS/DSGuard.sol";
-import "../../utils/DSAuthorityUnsubscribe.sol";
 
 
 contract SubscriptionsMigration is Auth {
 
-	// DSAuthorityUnsubscribe address
-	// TODO: SET ADDRESS
-	address public dsAuthorityUnsubscribeAddress;
+	// proxyPermission address
+	address public proxyPermission;
 
 
 	address public monitorProxyAddress = 0x93Efcf86b6a7a33aE961A7Ec6C741F49bce11DA7;
@@ -32,8 +31,8 @@ contract SubscriptionsMigration is Auth {
 	// manager to check if owner is valid
 	Manager public manager = Manager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
 
-	constructor(address _dsAuthorityUnsubscribeAddress) public {
-		dsAuthorityUnsubscribeAddress = _dsAuthorityUnsubscribeAddress;
+	constructor(address _proxyPermission) public {
+		proxyPermission = _proxyPermission;
 	}
 
 	function migrate(uint[] memory _cdps) public onlyAuthorized {
@@ -101,7 +100,7 @@ contract SubscriptionsMigration is Auth {
         // if we don't have permission, that means its already removed
         if (!guard.canCall(monitorProxyAddress, _cdpOwner, bytes4(keccak256("execute(address,bytes)")))) return;
 
-		monitorProxyContract.callExecute(_cdpOwner, dsAuthorityUnsubscribeAddress, abi.encodeWithSignature("removeAuthority(address)", monitorProxyAddress));
+		monitorProxyContract.callExecute(_cdpOwner, proxyPermission, abi.encodeWithSignature("removePermission(address)", monitorProxyAddress));
 	}
 
 	/// @notice Returns an address that owns the CDP
