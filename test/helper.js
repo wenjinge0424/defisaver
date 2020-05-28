@@ -59,7 +59,7 @@ const fundIfNeeded = async (web3, fundAccAddress, accAddress, minBal=5, addBal=1
 
     console.log(`Funding ${accAddress}, current balance: ${bal.toString()} from: ${fundAccAddress}`);
     if (parseFloat(bal) < minBal) {
-        await web3.eth.sendTransaction({gas: 21000, from: fundAccAddress, to: accAddress, value: web3.utils.toWei(addBal.toString(), "ether")});
+        await web3.eth.sendTransaction({gas: 25000, from: fundAccAddress, to: accAddress, value: web3.utils.toWei(addBal.toString(), "ether")});
     }
 };
 
