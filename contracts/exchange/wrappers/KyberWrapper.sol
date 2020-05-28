@@ -64,7 +64,7 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
             WALLET_ID
         );
 
-        require(destAmount == _destAmount);
+        require(destAmount == _destAmount, "Wrong dest amount");
 
         uint srcAmountAfter = srcToken.balanceOf(address(this));
 

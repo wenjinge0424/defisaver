@@ -108,11 +108,11 @@ contract SaverExchangeCore is SaverExchangeHelper {
                 (success, swapedTokens,) = takeOrder(exData, address(this).balance);
             }
 
-            require(price > exData.minPrice, "On chain slippage hit");
+            require(price < exData.minPrice, "On chain slippage hit");
 
             // 0x either had worse price or we tried and order fill failed, so call on chain swap
             if (getBalance(exData.destAddr) < exData.destAmount) {
-                swapedTokens = saverSwap(exData, wrapper, ActionType.BUY);
+               swapedTokens = saverSwap(exData, wrapper, ActionType.BUY);
             }
         }
 
@@ -235,7 +235,7 @@ contract SaverExchangeCore is SaverExchangeHelper {
             return rate;
         }
 
-        return 0;
+        return 10;
     }
 
     /// @notice Calls wraper contract for exchage to preform an on-chain swap
