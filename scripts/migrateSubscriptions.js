@@ -43,8 +43,6 @@ const initContracts = async () => {
     web3 = loadAccounts(web3);
     accounts = getAccounts(web3);
 
-    makerAddresses = await fetchMakerAddresses(makerVersion);
-
     bot = web3.eth.accounts.privateKeyToAccount('0x'+process.env.PRIV_KEY_BOT)
     web3.eth.accounts.wallet.add(bot)
 
@@ -96,7 +94,7 @@ const removeAuthorities = async (addresses) => {
 
   for (var i = chunks1.length-1; i >= 0; i--) {
       console.log(chunks1[i])
-      await subscriptionsMigrations.methods.removeAuthority(chunks1[i]).send({from: bot.address, gas: 4000000}, gasPrice: gasPrice);
+      await subscriptionsMigrations.methods.removeAuthority(chunks1[i]).send({from: bot.address, gas: 4000000, gasPrice: gasPrice});
   }
 
   console.log('Authorities removed'); 
