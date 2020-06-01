@@ -73,6 +73,7 @@ describe("SubscriptionMigrations", accounts => {
         const monitor = await web3MonitorProxy.methods.monitor().call();
 
         const subscriptionsContract = await OldSubscription.at('0x83152CAA0d344a2Fd428769529e2d490A88f4393');
+        const web3SubscriptionsContract = new web3.eth.Contract(OldSubscription.abi, '0x83152CAA0d344a2Fd428769529e2d490A88f4393');
 
         const subscribersAll = await subscriptionsContract.getSubscribers();
         const subscribers = removeZeroElements(subscribersAll);
@@ -97,13 +98,21 @@ describe("SubscriptionMigrations", accounts => {
         const owners = subscribers.map(sub => sub.owner);
         const chunks1 = chunk(owners, 15);
 
-        for (var i = chunks1.length - 5; i >= 0; i--) {
+        for (var i = chunks1.length-1; i >= 0; i--) {
             console.log(chunks1[i])
             await web3SubscriptionMigraitons.methods.removeAuthority(chunks1[i]).send({from: account.address, gas: 4000000});
         }
 
-        const newSubscribers = await subscriptionsContract.getSubscribers();
-        console.log('Subscribers:', removeZeroElements(newSubscribers.length));
-        console.log(newSubscribers);
+        const leftSubscribers = await subscriptionsContract.getSubscribers();
+        console.log('Left subscribers:', removeZeroElements(leftSubscribers.length));
+
+        for (var i = leftSubscribers.length-1; i >= 0; i--) {
+            await web3SubscriptionsContract.methods.unsubscribeIfMoved(leftSubscribers[i].cdpId).send({from: account.address, gas: 500000});
+        }
+
+        const finalSubscribers = await subscriptionsContract.getSubscribers();
+        console.log('Final subscribers:', removeZeroElements(finalSubscribers.length));
+
+        expect(finalSubscribers.length).to.be.equal(0);
     });
 });
