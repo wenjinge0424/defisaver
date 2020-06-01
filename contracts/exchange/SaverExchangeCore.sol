@@ -97,12 +97,12 @@ contract SaverExchangeCore is SaverExchangeHelper {
             uint price;
 
             (wrapper, price)
-                = getBestPrice(exData.srcAmount, exData.srcAddr, exData.destAddr, exData.exchangeType, ActionType.BUY);
+                = getBestPrice(exData.destAmount, exData.srcAddr, exData.destAddr, exData.exchangeType, ActionType.BUY);
 
             require(price < exData.minPrice || exData.price0x < exData.minPrice, "Slippage hit");
 
             // if 0x has better prices use 0x
-            if (exData.price0x <= price) {
+            if (exData.price0x <= price && exData.exchangeType != ExchangeType.ZEROX) {
                 approve0xProxy(exData.srcAddr, exData.srcAmount);
 
                 (success, swapedTokens,) = takeOrder(exData, address(this).balance);
@@ -116,7 +116,7 @@ contract SaverExchangeCore is SaverExchangeHelper {
             }
         }
 
-        require(getBalance(exData.destAddr) >= exData.destAmount, "Less then destAmount");
+        // require(getBalance(exData.destAddr) >= exData.destAmount, "Less then destAmount");
 
         return (wrapper, getBalance(exData.destAddr));
     }
@@ -235,7 +235,7 @@ contract SaverExchangeCore is SaverExchangeHelper {
             return rate;
         }
 
-        return 10;
+        return 0;
     }
 
     /// @notice Calls wraper contract for exchage to preform an on-chain swap

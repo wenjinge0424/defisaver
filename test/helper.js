@@ -3,6 +3,7 @@ const DSProxy = contract.fromArtifact("DSProxy");
 const axios = require('axios');
 
 const nullAddress = "0x0000000000000000000000000000000000000000";
+const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 const BAT_ADDRESS = '0x0d8775f648430679a709e98d2b0cb6250d2887ef';
 const REP_ADDRESS = '0x1985365e9f78359a9b6ad760e32412f4a445e862';
@@ -18,7 +19,7 @@ const C_USDC_ADDRESS = '0x39aa39c021dfbae8fac545936693ac917d5e7563';
 const C_USDT_ADDRESS = '0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9';
 const C_WBTC_ADDRESS = '0xc11b1268c1a384e55c48c2391d8d480264a3a7f4';
 const C_ZRX_ADDRESS = '0xb3319f5d18bc0d84dd1b4825dcde5d5f7266d407';
-const saverExchangeAddress = "0x2612Af3A521c2df9EAF28422Ca335b04AdF3ac66";
+const saverExchangeAddress = "0x0d3C71782055bD88A71b611972152d6e984EDF79";
 const mcdSaverProxyAddress = "0xa292832ACF0b0226E378E216A982fA966eaA7EBc";
 
 const ERC20 = contract.fromArtifact("ERC20");
@@ -128,4 +129,5 @@ module.exports = {
     C_USDT_ADDRESS,
     C_WBTC_ADDRESS,
     C_ZRX_ADDRESS,
+    WETH_ADDRESS,
 };

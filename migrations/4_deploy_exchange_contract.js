@@ -11,7 +11,7 @@ module.exports = function(deployer, network, accounts) {
     deployer.then(async () => {
         // await deployer.deploy(OasisTradeWrapper, {gas: 6720000, overwrite: deployAgain});
         // await deployer.deploy(KyberWrapper, {gas: 6720000, overwrite: deployAgain});
-        // await deployer.deploy(UniswapWrapper, {gas: 6720000, overwrite: deployAgain});
+        await deployer.deploy(UniswapWrapper, {gas: 6720000, overwrite: deployAgain});
 
         await deployer.deploy(SaverExchange, {gas: 6720000, overwrite: deployAgain});
     });
