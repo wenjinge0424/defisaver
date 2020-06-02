@@ -5,10 +5,9 @@ const { loadAccounts, getAccounts, fundIfNeeded } = require('../test/helper.js')
 const { time } = require('@openzeppelin/test-helpers');
 
 // configs
-const gasPrice = 9200000000;
+const gasPrice = 33200000000;
 
-// TODO: Change for mainnet
-const subscriptionsContractAddress = '0x5b1869D9A4C187F2EAa108f3062412ecf0526b24';
+const subscriptionsContractAddress = '0x13Aa9807Fb67737F9E99c5BF466ab5529607cd1a';
 
 const MCDMonitorProxy = require("../build/contracts/MCDMonitorProxy.json");
 const Subscriptions = require("../build/contracts/Subscriptions.json");
@@ -50,6 +49,7 @@ const initContracts = async () => {
     web3.eth.accounts.wallet.add(owner)
 
     // fund all addresses
+    // TODO: remove this on mainnet
     await fundIfNeeded(web3, accounts[0], bot.address);
     await fundIfNeeded(web3, accounts[0], owner.address);
 
