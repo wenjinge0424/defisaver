@@ -103,6 +103,17 @@ const approve = async (web3, tokenAddress, from, to, amount) => {
     await erc20.methods.approve(to, amount).send({from, gas: 100000});
 };
 
+const transferToken = async (web3, tokenAddress, from, to, amount) => {
+    if (tokenAddress === ETH_ADDRESS) {
+        return;
+    }
+
+    console.log('Transfer tokens');
+    const erc20 = new web3.eth.Contract(ERC20.abi, tokenAddress);
+    await erc20.methods.transfer(to, amount).send({from, gas: 250000});
+    console.log('Tokens transfered');
+};
+
 module.exports = {
     getAbiFunction,
     loadAccounts,
@@ -131,4 +142,5 @@ module.exports = {
     C_WBTC_ADDRESS,
     C_ZRX_ADDRESS,
     WETH_ADDRESS,
+    transferToken
 };
