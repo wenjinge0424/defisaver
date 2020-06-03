@@ -21,6 +21,19 @@ contract SaverExchange is SaverExchangeCore, DSMath {
         owner = msg.sender;
         burnAmount = 10;
     }
+    
+    // for testing only
+    function setWrapper(address _newWrapper, uint _type) public {
+        require(owner == msg.sender);
+        
+        if (_type == 1) {
+            UNISWAP_WRAPPER = _newWrapper;
+        } else if (_type == 2) {
+            KYBER_WRAPPER = _newWrapper;
+        } else {
+            UNISWAP_WRAPPER = _newWrapper;
+        }
+    }
 
     /// @notice Takes a src amount of tokens and converts it into the dest token
     /// @dev Takes fee from the _srcAmount before the exchange

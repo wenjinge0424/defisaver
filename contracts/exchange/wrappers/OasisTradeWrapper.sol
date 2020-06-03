@@ -4,10 +4,13 @@ import "../../interfaces/ExchangeInterfaceV2.sol";
 import "../../interfaces/OasisInterface.sol";
 import "../../interfaces/ERC20.sol";
 import "../../interfaces/TokenInterface.sol";
-import "../../constants/ConstantAddresses.sol";
 import "../../DS/DSMath.sol";
 
-contract OasisTradeWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
+contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2 {
+    
+    address public constant OTC_ADDRESS = 0x794e6e91555438aFc3ccF1c5076A74F42133d08D;
+    address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     /// @notice Sells a _srcAmount of tokens at Oasis
     /// @param _srcAddr From token
@@ -54,7 +57,7 @@ contract OasisTradeWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
             TokenInterface(WETH_ADDRESS).deposit{value: msg.value}();
         }
 
-        uint srcAmount = OasisInterface(OTC_ADDRESS).buyAllAmount(destAddr, _destAmount, srcAddr, uint(-1));
+        uint srcAmount = OasisInterface(OTC_ADDRESS).buyAllAmount(srcAddr, _destAmount, destAddr, uint(-1));
 
         // convert weth -> eth and send back
         if (destAddr == WETH_ADDRESS) {

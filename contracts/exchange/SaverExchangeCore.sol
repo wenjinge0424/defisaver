@@ -269,7 +269,7 @@ contract SaverExchangeCore is SaverExchangeHelper {
         uint _expectedRateKyber,
         uint _expectedRateUniswap,
         uint _expectedRateOasis
-    ) internal pure returns (address, uint) {
+    ) internal view returns (address, uint) {
         if (
             (_expectedRateUniswap >= _expectedRateKyber) && (_expectedRateUniswap >= _expectedRateOasis)
         ) {
@@ -297,7 +297,7 @@ contract SaverExchangeCore is SaverExchangeHelper {
         uint _expectedRateKyber,
         uint _expectedRateUniswap,
         uint _expectedRateOasis
-    ) internal pure returns (address, uint) {
+    ) internal view returns (address, uint) {
         if (
             (_expectedRateUniswap <= _expectedRateKyber) && (_expectedRateUniswap <= _expectedRateOasis)
         ) {

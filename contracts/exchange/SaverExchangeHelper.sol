@@ -13,9 +13,10 @@ contract SaverExchangeHelper {
     address payable public constant WALLET_ID = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDRESS = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
 
-    address public constant KYBER_WRAPPER = 0x393A6a6850e0788e496d73c50a436606e6CcA874;
-    address public constant UNISWAP_WRAPPER = 0xEdCD6442143188Deb586e182B7900dFb8707Bc27;
-    address public constant OASIS_WRAPPER = 0xdA9FbD039c001e17e404a5bcEbA665e54F44bDE9;
+    // TODO: switch to constant
+    address public KYBER_WRAPPER = 0x393A6a6850e0788e496d73c50a436606e6CcA874;
+    address public UNISWAP_WRAPPER = 0xEdCD6442143188Deb586e182B7900dFb8707Bc27;
+    address public OASIS_WRAPPER = 0xe67a1e001a30eF1e0EDE04637F1Aceb3F2080604;
     address public constant ERC20_PROXY_0X = 0x95E6F48254609A6ee006F7D493c8e5fB97094ceF;
 
     function getDecimals(address _token) internal view returns (uint256) {
