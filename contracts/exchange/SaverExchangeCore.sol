@@ -102,7 +102,7 @@ contract SaverExchangeCore is SaverExchangeHelper {
             require(price < exData.minPrice || exData.price0x < exData.minPrice, "Slippage hit");
 
             // if 0x has better prices use 0x
-            if (exData.price0x <= price && exData.exchangeType != ExchangeType.ZEROX) {
+            if (exData.price0x != 0 && exData.price0x <= price && exData.exchangeType != ExchangeType.ZEROX) {
                 approve0xProxy(exData.srcAddr, exData.srcAmount);
 
                 (success, swapedTokens,) = takeOrder(exData, address(this).balance);

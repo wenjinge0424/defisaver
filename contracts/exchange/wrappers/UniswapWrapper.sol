@@ -64,30 +64,30 @@ contract UniswapWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
         _destAddr = ethToWethAddr(_destAddr);
 
         // if we are selling ether
-        // if (_srcAddr == WETH_ADDRESS) {
-        //     uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_destAddr);
+        if (_srcAddr == WETH_ADDRESS) {
+            uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_destAddr);
 
-        //     srcAmount = UniswapExchangeInterface(uniswapExchangeAddr).
-        //         ethToTokenTransferOutput{value: msg.value}(_destAmount, block.timestamp + 1, msg.sender);
-        // }
+            srcAmount = UniswapExchangeInterface(uniswapExchangeAddr).
+                ethToTokenTransferOutput{value: msg.value}(_destAmount, block.timestamp + 1, msg.sender);
+        }
          // if we are buying ether
-        // else if (_destAddr == WETH_ADDRESS) {
-        //     uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
+        else if (_destAddr == WETH_ADDRESS) {
+            uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
 
-        //     ERC20(_srcAddr).approve(uniswapExchangeAddr, uint(-1));
+            ERC20(_srcAddr).approve(uniswapExchangeAddr, uint(-1));
 
-        //     srcAmount = UniswapExchangeInterface(uniswapExchangeAddr).
-        //         tokenToEthTransferOutput(_destAmount, uint(-1), block.timestamp + 1, msg.sender);
-        // }
-        // // if we are buying token to token
-        // else {
-        //     uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
+            srcAmount = UniswapExchangeInterface(uniswapExchangeAddr).
+                tokenToEthTransferOutput(_destAmount, uint(-1), block.timestamp + 1, msg.sender);
+        }
+        // if we are buying token to token
+        else {
+            uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
 
-        //     ERC20(_srcAddr).approve(uniswapExchangeAddr, uint(-1));
+            ERC20(_srcAddr).approve(uniswapExchangeAddr, uint(-1));
 
-        //     srcAmount = UniswapExchangeInterface(uniswapExchangeAddr).
-        //         tokenToTokenTransferOutput(_destAmount, uint(-1), uint(-1), block.timestamp + 1, msg.sender, _destAddr);
-        // }
+            srcAmount = UniswapExchangeInterface(uniswapExchangeAddr).
+                tokenToTokenTransferOutput(_destAmount, uint(-1), uint(-1), block.timestamp + 1, msg.sender, _destAddr);
+        }
 
         // Send the leftover from the source token back
         sendLeftOver(_srcAddr);

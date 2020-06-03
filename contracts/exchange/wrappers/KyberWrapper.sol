@@ -47,12 +47,19 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
         ERC20 srcToken = ERC20(_srcAddr);
         ERC20 destToken = ERC20(_destAddr);
 
-        uint srcAmount = srcToken.balanceOf(address(this));
+        uint srcAmount = 0;
+        if (_srcAddr != KYBER_ETH_ADDRESS) {
+            srcAmount = srcToken.balanceOf(address(this));
+        } else {
+            srcAmount = msg.value;
+        }
 
         KyberNetworkProxyInterface kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
         (, uint minRate) = kyberNetworkProxy.getExpectedRate(srcToken, destToken, srcAmount);
 
-        srcToken.approve(address(kyberNetworkProxy), srcAmount);
+        if (_srcAddr != KYBER_ETH_ADDRESS) {
+            srcToken.approve(address(kyberNetworkProxy), srcAmount);
+        }
 
         uint destAmount = kyberNetworkProxy.trade{value: msg.value}(
             srcToken,
@@ -66,7 +73,13 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
 
         require(destAmount == _destAmount, "Wrong dest amount");
 
-        uint srcAmountAfter = srcToken.balanceOf(address(this));
+        uint srcAmountAfter = 0;
+
+        if (_srcAddr != KYBER_ETH_ADDRESS) {
+            srcAmountAfter = srcToken.balanceOf(address(this));
+        } else {
+            srcAmountAfter = address(this).balance;
+        }
 
         // Send the leftover from the source token back
         sendLeftOver(_srcAddr);
@@ -98,14 +111,14 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
         (rate, ) = KyberNetworkProxyInterface(KYBER_INTERFACE)
             .getExpectedRate(ERC20(_srcAddr), ERC20(_destAddr), srcAmount);
 
-        // increare rate by 3% too account for inaccuracy between sell/buy conversion
+        // increase rate by 3% too account for inaccuracy between sell/buy conversion
         rate = rate + (rate / 30);
     }
 
     /// @notice Send any leftover tokens, we use to clear out srcTokens after buy
     /// @param _srcAddr Source token address
     function sendLeftOver(address _srcAddr) internal {
-        if (_srcAddr == WETH_ADDRESS) {
+        if (_srcAddr == KYBER_ETH_ADDRESS) {
             msg.sender.transfer(address(this).balance);
         } else {
             ERC20(_srcAddr).transfer(msg.sender, ERC20(_srcAddr).balanceOf(address(this)));

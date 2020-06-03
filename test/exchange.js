@@ -35,16 +35,16 @@ describe("Exchange", accounts => {
         web3OasisWrapper = new web3.eth.Contract(ExchangeInterfaceV2.abi, oasisWrapperAddress);
     });
 
-    it('... should check sell rate', async () => {
-        const value = web3.utils.toWei('1', 'ether');
+    // it('... should check sell rate', async () => {
+    //     const value = web3.utils.toWei('1', 'ether');
 
-        // const wrapperRate = await web3OasisWrapper.methods.getSellRate(ETH_ADDRESS, makerAddresses["MCD_DAI"], value).call();
+    //     // const wrapperRate = await web3OasisWrapper.methods.getSellRate(ETH_ADDRESS, makerAddresses["MCD_DAI"], value).call();
 
-        const sellRate = await web3Exchange.methods.getBestPrice(value, ETH_ADDRESS, makerAddresses["MCD_DAI"],  3, 1).call();
+    //     const sellRate = await web3Exchange.methods.getBestPrice(value, ETH_ADDRESS, makerAddresses["MCD_DAI"],  3, 1).call();
 
-        console.log(sellRate);
+    //     console.log(sellRate);
 
-    });
+    // });
 
     // it('... should sell Ether for Dai', async () => {
     //     const value = web3.utils.toWei('10', 'ether');
@@ -78,33 +78,11 @@ describe("Exchange", accounts => {
     //     expect(etherBalanceAfter).to.be.bignumber.is.above(etherBalanceBefore);
     // });
 
-    // it('... should buy Ether with Dai', async () => {
-    //     const srcAmount = web3.utils.toWei('200', 'ether');
-    //     const destAmount = web3.utils.toWei('0.69', 'ether');
+    it('... should buy Ether with Dai', async () => {
+        const srcAmount = web3.utils.toWei('200', 'ether');
+        const destAmount = web3.utils.toWei('0.5', 'ether');
 
-    //     await approve(web3, makerAddresses["MCD_DAI"], accounts[0], saverExchangeAddress);
-
-    //     const etherBalanceBefore = await getBalance(web3, accounts[0], ETH_ADDRESS);
-    //     console.log('Eth balance: ',etherBalanceBefore/1e18);
-
-    //     const daiBalanceBefore = await getBalance(web3, accounts[0], makerAddresses["MCD_DAI"]);
-    //     console.log('Dai balance: ', daiBalanceBefore/1e18);
-
-    //     await web3Exchange.methods.buy(
-    //         [makerAddresses["MCD_DAI"], ETH_ADDRESS, srcAmount, destAmount, '220186648236679176942', 3, nullAddress, "0x0", 0]).send({from: accounts[0], gas: 5000000});
-
-    //     const etherBalanceAfter = await getBalance(web3, accounts[0], ETH_ADDRESS);
-    //     console.log('Eth balance: ', etherBalanceAfter/1e18);
-
-    //     const daiBalanceAfter = await getBalance(web3, accounts[0], makerAddresses["MCD_DAI"]);
-    //     console.log('Dai balance: ', daiBalanceAfter/1e18);
-
-    //     expect(etherBalanceAfter).to.be.bignumber.is.above(etherBalanceBefore);
-    // });
-
-    it('... should buy Dai with Eth', async () => {
-        const srcAmount = web3.utils.toWei('0.8', 'ether');
-        const destAmount = web3.utils.toWei('100', 'ether');
+        await approve(web3, makerAddresses["MCD_DAI"], accounts[0], saverExchangeAddress);
 
         const etherBalanceBefore = await getBalance(web3, accounts[0], ETH_ADDRESS);
         console.log('Eth balance: ',etherBalanceBefore/1e18);
@@ -113,7 +91,9 @@ describe("Exchange", accounts => {
         console.log('Dai balance: ', daiBalanceBefore/1e18);
 
         await web3Exchange.methods.buy(
-            [ETH_ADDRESS, makerAddresses["MCD_DAI"], srcAmount, destAmount, '220186648236679176942', 3, nullAddress, "0x0", 0]).send({from: accounts[0], value: srcAmount, gas: 5000000});
+            [makerAddresses["MCD_DAI"], ETH_ADDRESS, srcAmount, destAmount,
+             '270186648236679176942', 1, nullAddress, "0x0", 0])
+             .send({from: accounts[0], gas: 5000000});
 
         const etherBalanceAfter = await getBalance(web3, accounts[0], ETH_ADDRESS);
         console.log('Eth balance: ', etherBalanceAfter/1e18);
@@ -123,5 +103,29 @@ describe("Exchange", accounts => {
 
         expect(etherBalanceAfter).to.be.bignumber.is.above(etherBalanceBefore);
     });
+
+    // it('... should buy Dai with Eth', async () => {
+    //     const value = web3.utils.toWei('1', 'ether');
+    //     const destAmount = web3.utils.toWei('100', 'ether');
+
+    //     const etherBalanceBefore = await getBalance(web3, accounts[0], ETH_ADDRESS);
+    //     console.log('Eth balance: ',etherBalanceBefore/1e18);
+
+    //     const daiBalanceBefore = await getBalance(web3, accounts[0], makerAddresses["MCD_DAI"]);
+    //     console.log('Dai balance: ', daiBalanceBefore/1e18);
+
+    //     await web3Exchange.methods.buy(
+    //         [ETH_ADDRESS, makerAddresses["MCD_DAI"], value, destAmount,
+    //          '270186648236679176942', 1, nullAddress, "0x0", 0])
+    //          .send({from: accounts[0], value, gas: 5000000});
+
+    //     const etherBalanceAfter = await getBalance(web3, accounts[0], ETH_ADDRESS);
+    //     console.log('Eth balance: ', etherBalanceAfter/1e18);
+
+    //     const daiBalanceAfter = await getBalance(web3, accounts[0], makerAddresses["MCD_DAI"]);
+    //     console.log('Dai balance: ', daiBalanceAfter/1e18);
+
+    //     expect(daiBalanceAfter).to.be.bignumber.is.above(daiBalanceBefore);
+    // });
 
 });
