@@ -5,14 +5,14 @@ const { loadAccounts, getAccounts, fundIfNeeded } = require('../test/helper.js')
 const { time } = require('@openzeppelin/test-helpers');
 
 // configs
-const gasPrice = 9200000000;
+const gasPrice = 33200000000;
 
-// TODO: Change for mainnet
-const subscriptionsContractAddress = '0x5b1869D9A4C187F2EAa108f3062412ecf0526b24';
+const subscriptionsMigrationContractAddress = '0x13Aa9807Fb67737F9E99c5BF466ab5529607cd1a';
 
 const MCDMonitorProxy = require("../build/contracts/MCDMonitorProxy.json");
 const Subscriptions = require("../build/contracts/Subscriptions.json");
 const SubscriptionsMigrations = require("../build/contracts/SubscriptionsMigration.json");
+const NewSubscriptions = require("../build/contracts/SubscriptionsV2.json");
 
 function chunk (arr, len) {
 
@@ -39,7 +39,7 @@ function removeZeroElements(arr) {
 
 const initContracts = async () => {
     // TODO: change to mainnet
-    web3 = new Web3(new Web3.providers.HttpProvider(process.env.MOON_NET_NODE));
+    web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_ENDPOINT));
     web3 = loadAccounts(web3);
     accounts = getAccounts(web3);
 
@@ -50,19 +50,21 @@ const initContracts = async () => {
     web3.eth.accounts.wallet.add(owner)
 
     // fund all addresses
-    await fundIfNeeded(web3, accounts[0], bot.address);
-    await fundIfNeeded(web3, accounts[0], owner.address);
+    // TODO: remove this on mainnet
+    // await fundIfNeeded(web3, accounts[0], bot.address);
+    // await fundIfNeeded(web3, accounts[0], owner.address);
 
     // ----------------------------- automatic specific -----------------------------
 
     subscriptionsContract = new web3.eth.Contract(Subscriptions.abi, '0x83152CAA0d344a2Fd428769529e2d490A88f4393');
     monitorProxy = new web3.eth.Contract(MCDMonitorProxy.abi, '0x93Efcf86b6a7a33aE961A7Ec6C741F49bce11DA7');
-    subscriptionsMigrations = new web3.eth.Contract(SubscriptionsMigrations.abi, subscriptionsContractAddress);
+    subscriptionsMigrations = new web3.eth.Contract(SubscriptionsMigrations.abi, subscriptionsMigrationContractAddress);
+    subscriptionsV2 = new web3.eth.Contract(NewSubscriptions.abi, '0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a');
 };
 
 const startChangeMonitor = async () => {
   console.log('Start monitor change');
-  await monitorProxy.methods.changeMonitor(subscriptionsContractAddress).send({from: bot.address, gas: 250000, gasPrice: gasPrice});
+  await monitorProxy.methods.changeMonitor(subscriptionsMigrationContractAddress).send({from: bot.address, gas: 250000, gasPrice: gasPrice});
 };
 
 const confirmMonitorChangeAndAuthorizeBot = async () => {
@@ -70,8 +72,7 @@ const confirmMonitorChangeAndAuthorizeBot = async () => {
   console.log('Monitor changed');
 
   console.log('Authorize bot');
-  // TODO: change sender to owner
-  await subscriptionsMigrations.methods.setAuthorized(bot.address, true).send({from: accounts[0], gas: 250000, gasPrice: gasPrice});
+  await subscriptionsMigrations.methods.setAuthorized(bot.address, true).send({from: owner.address, gas: 250000, gasPrice: gasPrice});
   console.log('Bot authorized');
 }
 
@@ -114,15 +115,18 @@ const unsubscribeMoved = async (subscribers) => {
 (async () => {
     await initContracts();
 
+    // const subs = await subscriptionsV2.methods.getSubscribers().call();
+    // console.log('New subs:', subs.length);
+
     // FIRST PART
     // -----------------------------------------------------------------
-    await startChangeMonitor();
+    // await startChangeMonitor();
 
     // SECOND PART
     // -----------------------------------------------------------------
     // forward time for two weeks 
     // TODO: remove for mainnet
-    await time.increase(60*60*24*15);  
+    // await time.increase(60*60*24*15);  
 
     await confirmMonitorChangeAndAuthorizeBot();
     const subscribersAll = await subscriptionsContract.methods.getSubscribers().call();
@@ -135,4 +139,7 @@ const unsubscribeMoved = async (subscribers) => {
 
     const leftSubscribers = await subscriptionsContract.methods.getSubscribers().call();
     await unsubscribeMoved(removeZeroElements(leftSubscribers));
+
+    const endSubs = await subscriptionsV2.methods.getSubscribers().call();
+    console.log('New subs:', endSubs.length);
 })();
