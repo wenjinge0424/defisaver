@@ -3,7 +3,7 @@ const { expectEvent, balance, expectRevert } = require('@openzeppelin/test-helpe
 const { expect } = require('chai');
 const Dec = require('decimal.js');
 
-const { getBalance, approve, loadAccounts, getAccounts, getProxy, fetchMakerAddresses, saverExchangeAddress, ETH_ADDRESS, WETH_ADDRESS, nullAddress, transferToken } = require('./helper.js');
+const { getBalance, approve, loadAccounts, getAccounts, getProxy, fetchMakerAddresses, saverExchangeAddress, ETH_ADDRESS, WETH_ADDRESS, nullAddress, transferToken, MAX_UINT } = require('./helper.js');
 
 const DSProxy = contract.fromArtifact("DSProxy");
 const ProxyRegistryInterface = contract.fromArtifact("ProxyRegistryInterface");
@@ -103,7 +103,7 @@ describe("Exchange", accounts => {
 
         await web3Exchange.methods.buy(
             [makerAddresses[tokenName], ETH_ADDRESS, srcAmount, destAmount,
-             '270186648236679176942000', 1, nullAddress, "0x0", 0])
+             MAX_UINT, 1, nullAddress, "0x0", 0])
              .send({from: accounts[0], gas: 5000000});
 
         const etherBalanceAfter = await getBalance(web3, accounts[0], ETH_ADDRESS);
@@ -127,7 +127,7 @@ describe("Exchange", accounts => {
 
         await web3Exchange.methods.buy(
             [ETH_ADDRESS, makerAddresses[tokenName], value, destAmount,
-             '270186648236679176942', 1, nullAddress, "0x0", 0])
+             MAX_UINT, 1, nullAddress, "0x0", 0])
              .send({from: accounts[0], value, gas: 5000000});
 
         const etherBalanceAfter = await getBalance(web3, accounts[0], ETH_ADDRESS);
