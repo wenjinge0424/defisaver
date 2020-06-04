@@ -2,7 +2,6 @@ pragma solidity ^0.6.0;
 
 import "../../flashloan/aave/FlashLoanReceiverBase.sol";
 import "../../interfaces/DSProxyInterface.sol";
-import "../../interfaces/ERC20.sol";
 
 /// @title Contract that receives the FL from Aave for Repays/Boost
 contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
@@ -12,6 +11,8 @@ contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address public owner;
+
+    using SafeERC20 for IERC20;
 
     constructor()
         FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
@@ -80,7 +81,7 @@ contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
     /// @param _amount Amount of tokens
     function sendLoanToProxy(address payable _proxy, address _reserve, uint _amount) internal {
         if (_reserve != ETH_ADDRESS) {
-            ERC20(_reserve).transfer(_proxy, _amount);
+            IERC20(_reserve).safeTransfer(_proxy, _amount);
         }
 
         _proxy.transfer(address(this).balance);

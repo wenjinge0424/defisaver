@@ -11,7 +11,7 @@ contract GasBurner {
 
         if (_amount == 0) {
             gst2Amount = (gasleft() + 14154) / (2 * 24000 - 6870);
-            gst2Amount = gst2Amount - (gst2Amount / 8); // 12.5% less because of gaslimit != gas_used
+            gst2Amount = gst2Amount - (gst2Amount / 3); // 33.3% less because of gaslimit != gas_used
         }
 
         if (gasToken.balanceOf(address(this)) >= gst2Amount) {

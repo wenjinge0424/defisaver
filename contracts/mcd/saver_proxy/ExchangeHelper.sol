@@ -6,9 +6,12 @@ import "../../interfaces/SaverExchangeInterface.sol";
 
 import "../../constants/ConstantAddressesExchange.sol";
 
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 /// @title Helper methods for integration with SaverExchange
 contract ExchangeHelper is ConstantAddressesExchange {
+
+    using SafeERC20 for IERC20;
 
     /// @notice Swaps 2 tokens on the Saver Exchange
     /// @dev ETH is sent with Weth address
@@ -45,29 +48,6 @@ contract ExchangeHelper is ConstantAddressesExchange {
             require(success && tokens[0] > 0, "0x transaction failed");
         }
 
-        // no 0x
-        // if (_data[2] == 5) {
-        //     (wrapper, price) = SaverExchangeInterface(SAVER_EXCHANGE_ADDRESS).getBestPrice(tokens[1], orderAddresses[1], orderAddresses[2], _data[2]);
-
-        //     require(price > _data[1], "Slippage hit onchain price");
-
-        //     if (orderAddresses[1] == KYBER_ETH_ADDRESS) {
-        //         uint tRet;
-        //         (tRet,) = ExchangeInterface(wrapper).swapEtherToToken.value(tokens[1])(tokens[1], orderAddresses[2], uint(-1));
-        //         tokens[0] += tRet;
-        //     } else {
-        //         ERC20(orderAddresses[1]).transfer(wrapper, tokens[1]);
-
-        //         if (orderAddresses[2] == KYBER_ETH_ADDRESS) {
-        //             tokens[0] += ExchangeInterface(wrapper).swapTokenToEther(orderAddresses[1], tokens[1], uint(-1));
-        //         } else {
-        //             tokens[0] += ExchangeInterface(wrapper).swapTokenToToken(orderAddresses[1], orderAddresses[2], tokens[1]);
-        //         }
-        //     }
-
-        //     return tokens[0];
-        // }
-
         if (tokens[0] == 0) {
             (wrapper, price) = SaverExchangeInterface(SAVER_EXCHANGE_ADDRESS).getBestPrice(_data[0], orderAddresses[1], orderAddresses[2], _data[2]);
 
@@ -97,7 +77,7 @@ contract ExchangeHelper is ConstantAddressesExchange {
                     (tRet,) = ExchangeInterface(wrapper).swapEtherToToken{value: tokens[1]}(tokens[1], orderAddresses[2], uint(-1));
                     tokens[0] += tRet;
                 } else {
-                    ERC20(orderAddresses[1]).transfer(wrapper, tokens[1]);
+                    IERC20(orderAddresses[1]).safeTransfer(wrapper, tokens[1]);
 
                     if (orderAddresses[2] == KYBER_ETH_ADDRESS) {
                         tokens[0] += ExchangeInterface(wrapper).swapTokenToEther(orderAddresses[1], tokens[1], uint(-1));

@@ -2,12 +2,15 @@ pragma solidity ^0.6.0;
 
 import "../utils/GasBurner.sol";
 import "../interfaces/CTokenInterface.sol";
-import "../interfaces/ERC20.sol";
 import "../interfaces/CEtherInterface.sol";
 import "../interfaces/ComptrollerInterface.sol";
 
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+
 /// @title Basic compound interactions through the DSProxy
 contract CompoundBasicProxy is GasBurner {
+
+    using SafeERC20 for IERC20;
 
     address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant COMPTROLLER_ADDR = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
@@ -17,10 +20,10 @@ contract CompoundBasicProxy is GasBurner {
     /// @param _tokenAddr The address of the token to be deposited
     /// @param _cTokenAddr CTokens to be deposited
     /// @param _amount Amount of tokens to be deposited
-    /// @param _inMarket True if the tokend is already in market for that address
+    /// @param _inMarket True if the token is already in market for that address
     function deposit(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) public burnGas(0) payable {
         if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount);
+            IERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), _amount);
         }
 
         approveToken(_tokenAddr, _cTokenAddr);
@@ -51,7 +54,7 @@ contract CompoundBasicProxy is GasBurner {
 
         // withdraw funds to msg.sender
         if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).transfer(msg.sender, ERC20(_tokenAddr).balanceOf(address(this)));
+            IERC20(_tokenAddr).safeTransfer(msg.sender, IERC20(_tokenAddr).balanceOf(address(this)));
         } else {
             msg.sender.transfer(address(this).balance);
         }
@@ -72,7 +75,7 @@ contract CompoundBasicProxy is GasBurner {
 
         // withdraw funds to msg.sender
         if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).transfer(msg.sender, ERC20(_tokenAddr).balanceOf(address(this)));
+            IERC20(_tokenAddr).safeTransfer(msg.sender, IERC20(_tokenAddr).balanceOf(address(this)));
         } else {
             msg.sender.transfer(address(this).balance);
         }
@@ -92,7 +95,7 @@ contract CompoundBasicProxy is GasBurner {
         }
 
         if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount);
+            IERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), _amount);
 
             require(CTokenInterface(_cTokenAddr).repayBorrow(_amount) == 0);
         } else {
@@ -105,7 +108,7 @@ contract CompoundBasicProxy is GasBurner {
     /// @param _tokenAddr Address of the token to be withdrawn
     function withdrawTokens(address _tokenAddr) public {
         if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).transfer(msg.sender, ERC20(_tokenAddr).balanceOf(address(this)));
+            IERC20(_tokenAddr).safeTransfer(msg.sender, IERC20(_tokenAddr).balanceOf(address(this)));
         } else {
             msg.sender.transfer(address(this).balance);
         }
@@ -131,7 +134,7 @@ contract CompoundBasicProxy is GasBurner {
     /// @param _cTokenAddr Address which will gain the approval
     function approveToken(address _tokenAddr, address _cTokenAddr) internal {
         if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).approve(_cTokenAddr, uint(-1));
+            IERC20(_tokenAddr).safeApprove(_cTokenAddr, uint(-1));
         }
     }
 }

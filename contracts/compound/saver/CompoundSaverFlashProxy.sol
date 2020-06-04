@@ -123,7 +123,7 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
     /// @param _amount Amount to return
     function returnFlashLoan(address _tokenAddr, uint _amount) internal {
         if (_tokenAddr != ETH_ADDRESS) {
-            ERC20(_tokenAddr).transfer(msg.sender, _amount);
+            IERC20(_tokenAddr).safeTransfer(msg.sender, _amount);
         }
 
         msg.sender.transfer(address(this).balance);

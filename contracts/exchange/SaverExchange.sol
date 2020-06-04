@@ -27,7 +27,7 @@ contract SaverExchange is SaverExchangeCore, DSMath {
         require(owner == msg.sender);
         
         if (_type == 1) {
-            UNISWAP_WRAPPER = _newWrapper;
+            OASIS_WRAPPER = _newWrapper;
         } else if (_type == 2) {
             KYBER_WRAPPER = _newWrapper;
         } else {

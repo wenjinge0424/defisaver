@@ -25,7 +25,7 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurne
         uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes calldata _callData
-    ) external payable burnGas(0) {
+    ) external payable burnGas(25) {
         uint maxColl = getMaxCollateral(_addrData[0], address(this));
 
         if (_data[0] <= maxColl) {
@@ -55,7 +55,7 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurne
         uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes calldata _callData
-    ) external payable burnGas(0) {
+    ) external payable burnGas(20) {
         uint maxBorrow = getMaxBorrow(_addrData[1], address(this));
 
         if (_data[0] <= maxBorrow) {
