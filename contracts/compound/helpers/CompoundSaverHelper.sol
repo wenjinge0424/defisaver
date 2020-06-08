@@ -9,12 +9,8 @@ import "../../mcd/Discount.sol";
 import "../../DS/DSMath.sol";
 import "../../DS/DSProxy.sol";
 
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-
 /// @title Utlity functions for Compound contracts
 contract CompoundSaverHelper is DSMath {
-
-    using SafeERC20 for IERC20;
 
     address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
@@ -40,7 +36,7 @@ contract CompoundSaverHelper is DSMath {
             if (_borrowToken == ETH_ADDRESS) {
                 _user.transfer((_amount - wholeDebt));
             } else {
-                IERC20(_borrowToken).safeTransfer(_user, (_amount - wholeDebt));
+                ERC20(_borrowToken).transfer(_user, (_amount - wholeDebt));
             }
 
             _amount = wholeDebt;
@@ -87,7 +83,7 @@ contract CompoundSaverHelper is DSMath {
         if (tokenAddr == ETH_ADDRESS) {
             WALLET_ADDR.transfer(feeAmount);
         } else {
-            IERC20(tokenAddr).safeTransfer(WALLET_ADDR, feeAmount);
+            ERC20(tokenAddr).transfer(WALLET_ADDR, feeAmount);
         }
     }
 
@@ -107,7 +103,7 @@ contract CompoundSaverHelper is DSMath {
     /// @param _cTokenAddr Address which will gain the approval
     function approveCToken(address _tokenAddr, address _cTokenAddr) internal {
         if (_tokenAddr != ETH_ADDRESS) {
-            IERC20(_tokenAddr).safeApprove(_cTokenAddr, uint(-1));
+            ERC20(_tokenAddr).approve(_cTokenAddr, uint(-1));
         }
     }
 
