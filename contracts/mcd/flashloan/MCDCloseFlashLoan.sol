@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 
 import "../../mcd/saver_proxy/MCDSaverProxy.sol";
-import "./FlashLoanReceiverBase.sol";
+import "../../utils/FlashLoanReceiverBase.sol";
 
 contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);

@@ -2,8 +2,8 @@ pragma solidity ^0.6.0;
 
 import "../../mcd/saver_proxy/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
-import "../FlashLoanLogger.sol";
-import "./ILendingPool.sol";
+import "../../loggers/FlashLoanLogger.sol";
+import "../../interfaces/ILendingPool.sol";
 
 abstract contract IMCDSubscriptions {
     function unsubscribe(uint256 _cdpId) external virtual ;

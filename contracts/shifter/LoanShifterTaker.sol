@@ -1,15 +1,14 @@
 pragma solidity ^0.6.0;
 
-import "../aave/ILendingPool.sol";
-import "../../interfaces/CTokenInterface.sol";
-import "../../mcd/maker/Vat.sol";
-import "../../mcd/maker/Manager.sol";
-import "../../DS/DSMath.sol";
-import "../../auth/ProxyPermission.sol";
-import "../FlashLoanLogger.sol";
+import "../interfaces/ILendingPool.sol";
+import "../interfaces/CTokenInterface.sol";
+import "../mcd/maker/Vat.sol";
+import "../mcd/maker/Manager.sol";
+import "../DS/DSMath.sol";
+import "../auth/ProxyPermission.sol";
+import "../loggers/FlashLoanLogger.sol";
 
-
-contract BridgeFlashLoanTaker is DSMath, ProxyPermission {
+contract LoanShifterTaker is DSMath, ProxyPermission {
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 

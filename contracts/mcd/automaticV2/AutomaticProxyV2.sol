@@ -2,7 +2,7 @@ pragma solidity ^0.6.0;
 
 import "../saver_proxy/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
-import "../../flashloan/FlashLoanLogger.sol";
+import "../../loggers/FlashLoanLogger.sol";
 
 
 abstract contract ILendingPool {

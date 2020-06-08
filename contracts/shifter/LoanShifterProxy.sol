@@ -1,12 +1,12 @@
 pragma solidity ^0.6.0;
 
-import "../../mcd/saver_proxy/MCDSaverProxy.sol";
+import "../mcd/saver_proxy/MCDSaverProxy.sol";
 
-import "../../interfaces/CTokenInterface.sol";
-import "../../interfaces/CEtherInterface.sol";
-import "../../interfaces/ComptrollerInterface.sol";
+import "../interfaces/CTokenInterface.sol";
+import "../interfaces/CEtherInterface.sol";
+import "../interfaces/ComptrollerInterface.sol";
 
-contract LoanMoverProxy is MCDSaverProxy {
+contract LoanShifterProxy is MCDSaverProxy {
 
     address public constant cDAI_ADDRESS = 0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643;
     address public constant CETH_ADDRESS = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;

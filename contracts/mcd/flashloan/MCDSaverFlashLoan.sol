@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 
 import "../../mcd/saver_proxy/MCDSaverProxy.sol";
-import "./FlashLoanReceiverBase.sol";
+import "../../utils/FlashLoanReceiverBase.sol";
 
 contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
     Manager public constant MANAGER = Manager(MANAGER_ADDRESS);

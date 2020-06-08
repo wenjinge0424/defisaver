@@ -3,8 +3,8 @@ pragma solidity ^0.6.0;
 import "../../utils/GasBurner.sol";
 import "../../auth/ProxyPermission.sol";
 
-import "../../flashloan/FlashLoanLogger.sol";
-import "../../flashloan/aave/ILendingPool.sol";
+import "../../loggers/FlashLoanLogger.sol";
+import "../../interfaces/ILendingPool.sol";
 import "../../interfaces/CTokenInterface.sol";
 import "../../interfaces/ProxyRegistryInterface.sol";
 

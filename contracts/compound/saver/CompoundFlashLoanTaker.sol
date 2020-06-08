@@ -1,9 +1,9 @@
 pragma solidity ^0.6.0;
 
 import "../../utils/GasBurner.sol";
-import "../../flashloan/aave/ILendingPool.sol";
+import "../../interfaces/ILendingPool.sol";
 import "./CompoundSaverProxy.sol";
-import "../../flashloan/FlashLoanLogger.sol";
+import "../../loggers/FlashLoanLogger.sol";
 import "../../auth/ProxyPermission.sol";
 
 /// @title Entry point for the FL Repay Boosts, called by DSProxy

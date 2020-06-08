@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 
-import "../../flashloan/aave/ILendingPool.sol";
-import "../../flashloan/FlashLoanLogger.sol";
+import "../../interfaces/ILendingPool.sol";
+import "../../loggers/FlashLoanLogger.sol";
 import "../helpers/CompoundSaverHelper.sol";
 import "../CompoundBasicProxy.sol";
 import "../../auth/ProxyPermission.sol";

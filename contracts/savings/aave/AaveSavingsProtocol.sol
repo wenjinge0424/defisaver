@@ -2,7 +2,7 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../ProtocolInterface.sol";
-import "../../flashloan/aave/ILendingPool.sol";
+import "../../interfaces/ILendingPool.sol";
 import "../../interfaces/ERC20.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../../DS/DSAuth.sol";
