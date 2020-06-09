@@ -5,7 +5,7 @@ abstract contract ILendingPool {
     function deposit(address _reserve, uint256 _amount, uint16 _referralCode) external virtual payable;
 	function setUserUseReserveAsCollateral(address _reserve, bool _useAsCollateral) external virtual;
 	function borrow(address _reserve, uint256 _amount, uint256 _interestRateMode, uint16 _referralCode) external virtual;
-	function repay( address _reserve, uint256 _amount, address payable _onBehalfOf) external virtual;
+	function repay( address _reserve, uint256 _amount, address payable _onBehalfOf) external virtual payable;
 	function getReserveData(address _reserve)
         external virtual
         view
