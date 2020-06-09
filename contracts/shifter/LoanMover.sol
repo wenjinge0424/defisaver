@@ -4,7 +4,7 @@ import "../utils/FlashLoanReceiverBase.sol";
 import "../interfaces/DSProxyInterface.sol";
 import "../interfaces/ERC20.sol";
 
-contract LoanShifter is FlashLoanReceiverBase {
+contract LoanMover is FlashLoanReceiverBase {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
