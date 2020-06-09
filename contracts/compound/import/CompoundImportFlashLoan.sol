@@ -11,9 +11,12 @@ contract CompoundImportFlashLoan is FlashLoanReceiverBase {
 
     address public constant COMPOUND_BASIC_PROXY = 0x76954813FE1DBc684fA5fd54269DC732219a0813;
 
+    address public owner;
+
     constructor()
         FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
         public {
+            owner = msg.sender;
     }
 
     /// @notice Called by Aave when sending back the FL amount
@@ -36,12 +39,15 @@ contract CompoundImportFlashLoan is FlashLoanReceiverBase {
         )
         = abi.decode(_params, (address,address,address,address));
 
+        // approve FL tokens so we can repay them
+        ERC20(_reserve).approve(cBorrowToken, uint(-1));
+
         // repay compound debt
-        CTokenInterface(cBorrowToken).repayBorrowBehalf(user, _amount);
+        require(CTokenInterface(cBorrowToken).repayBorrowBehalf(user, uint(-1)) == 0, "Repay borrow behalf fail");
 
         // transfer cTokens to proxy
         uint cTokenBalance =  CTokenInterface(cCollateralToken).balanceOf(user);
-        CTokenInterface(cCollateralToken).transferFrom(user, proxy, cTokenBalance);
+        require(CTokenInterface(cCollateralToken).transferFrom(user, proxy, cTokenBalance));
 
         // borrow
         bytes memory proxyData = getProxyData(_reserve, cBorrowToken, (_amount + _fee));
@@ -60,5 +66,15 @@ contract CompoundImportFlashLoan is FlashLoanReceiverBase {
         proxyData = abi.encodeWithSignature(
             "borrow(address,address,uint256,bool)",
             _borrowToken, _cBorrowToken, _amount, false);
+    }
+
+    function withdrawStuckFunds(address _tokenAddr, uint _amount) public {
+        require(owner == msg.sender, "Must be owner");
+
+        if (_tokenAddr == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
+            msg.sender.transfer(_amount);
+        } else {
+            ERC20(_tokenAddr).transfer(owner, _amount);
+        }
     }
 }
