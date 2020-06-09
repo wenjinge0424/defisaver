@@ -1,4 +1,5 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import "../interfaces/ILendingPool.sol";
 import "../interfaces/CTokenInterface.sol";
@@ -7,6 +8,7 @@ import "../mcd/maker/Manager.sol";
 import "../DS/DSMath.sol";
 import "../auth/ProxyPermission.sol";
 import "../loggers/FlashLoanLogger.sol";
+import "../exchange/SaverExchangeCore.sol";
 
 contract LoanShifterTaker is DSMath, ProxyPermission {
 
@@ -30,10 +32,10 @@ contract LoanShifterTaker is DSMath, ProxyPermission {
     );
 
     function compound2Maker(
-        uint[3] calldata amountData, // [cdpId, collAmount, debtAmount]
+        uint[3] memory amountData, // [cdpId, collAmount, debtAmount]
         address _joinAddr,
         address _cCollateralAddr
-    ) external {
+    ) public {
         bytes32 ilk = manager.ilks(amountData[0]);
         uint debtAmount = getAllDebtCompound();
 
@@ -49,10 +51,10 @@ contract LoanShifterTaker is DSMath, ProxyPermission {
     }
 
     function maker2Compound(
-        uint[3] calldata amountData, // [cdpId, collAmount, debtAmount]
+        uint[3] memory amountData, // [cdpId, collAmount, debtAmount]
         address _joinAddr,
         address _cCollateralAddr
-    ) external {
+    ) public {
         bytes32 ilk = manager.ilks(amountData[0]);
         uint wholeDebtAmount = getAllDebtCDP(VAT_ADDRESS, manager.urns(amountData[0]), manager.urns(amountData[0]), ilk);
 
@@ -65,6 +67,33 @@ contract LoanShifterTaker is DSMath, ProxyPermission {
         removePermission(LOAN_MOVER);
 
         logger.logFlashLoan("maker2Compound", wholeDebtAmount, amountData[0], DAI_ADDRESS);
+    }
+
+    function makerChangeColl(
+        uint _cdpId,
+        address _joinAddr,
+        SaverExchangeCore.ExchangeData memory exchangeData
+    ) public {
+        bytes32 ilk = manager.ilks(_cdpId);
+        uint wholeDebtAmount = getAllDebtCDP(VAT_ADDRESS, manager.urns(_cdpId), manager.urns(_cdpId), ilk);
+
+        bytes memory paramsData = abi.encode(_cdpId, _joinAddr, exchangeData, address(this));
+
+        givePermission(LOAN_MOVER);
+
+        lendingPool.flashLoan(LOAN_MOVER, DAI_ADDRESS, wholeDebtAmount, paramsData);
+
+        removePermission(LOAN_MOVER);
+
+        logger.logFlashLoan("makerChangeColl", wholeDebtAmount, _cdpId, DAI_ADDRESS);
+    }
+
+    function compoundChangeColl() public {
+
+    }
+
+    function compoundChangeDebt() public {
+
     }
 
     function getAllDebtCDP(address _vat, address _usr, address _urn, bytes32 _ilk) internal view returns (uint daiAmount) {
