@@ -94,6 +94,7 @@ const getBalance = async (web3, account, tokenAddress) => {
 
 const approve = async (web3, tokenAddress, from, to, amount) => {
     if (tokenAddress === ETH_ADDRESS) {
+        console.log('eth address - not approving');
         return;
     }
 
