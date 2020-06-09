@@ -12,6 +12,8 @@ contract AaveBasicProxy is GasBurner {
     address public constant AAVE_LENDING_POOL = 0x398eC7346DcD622eDc5ae82352F02bE94C62d119;
     address public constant AAVE_LENDING_POOL_CORE = 0x3dfd23A6c5E8BbcFc9581d2E864a68feb6a076d3;
 
+    uint16 public constant AAVE_REFERRAL_CODE = 64;
+
     /// @notice User deposits tokens to the Aave protocol
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     /// @param _tokenAddr The address of the token to be deposited
@@ -22,7 +24,7 @@ contract AaveBasicProxy is GasBurner {
             approveToken(_tokenAddr, AAVE_LENDING_POOL_CORE);
         }
         
-        ILendingPool(AAVE_LENDING_POOL).deposit{value: msg.value}(_tokenAddr, _amount, 0);
+        ILendingPool(AAVE_LENDING_POOL).deposit{value: msg.value}(_tokenAddr, _amount, AAVE_REFERRAL_CODE);
 
         ILendingPool(AAVE_LENDING_POOL).setUserUseReserveAsCollateral(_tokenAddr, true);
     }
@@ -31,10 +33,12 @@ contract AaveBasicProxy is GasBurner {
     /// @param _tokenAddr The address of the token to be withdrawn
     /// @param _aTokenAddr ATokens to be withdrawn
     /// @param _amount Amount of tokens to be withdrawn
-    function withdraw(address _tokenAddr, address _aTokenAddr, uint _amount) public burnGas(0) {
-        require(ERC20(_aTokenAddr).transferFrom(msg.sender, address(this), _amount));
+    /// @param _wholeAmount If true we will take the whole amount on chain
+    function withdraw(address _tokenAddr, address _aTokenAddr, uint _amount, bool _wholeAmount) public {
+        uint amount = _wholeAmount ? ERC20(_aTokenAddr).balanceOf(msg.sender) : _amount;
 
-        IAToken(_aTokenAddr).redeem(_amount);
+        require(ERC20(_aTokenAddr).transferFrom(msg.sender, address(this), amount), "Returns false");
+        IAToken(_aTokenAddr).redeem(amount);
 
         withdrawTokens(_tokenAddr);
     }
@@ -43,7 +47,7 @@ contract AaveBasicProxy is GasBurner {
     /// @param _tokenAddr The address of the token to be borrowed
     /// @param _amount Amount of tokens to be borrowed
     function borrow(address _tokenAddr, uint _amount) public burnGas(0) {
-        ILendingPool(AAVE_LENDING_POOL).borrow(_tokenAddr, _amount, 1, 0);
+        ILendingPool(AAVE_LENDING_POOL).borrow(_tokenAddr, _amount, 1, AAVE_REFERRAL_CODE);
         
         withdrawTokens(_tokenAddr);
     }
@@ -55,8 +59,11 @@ contract AaveBasicProxy is GasBurner {
     /// @param _amount Amount of tokens to be payed back
     /// @param _wholeDebt If true the _amount will be set to the whole amount of the debt
     function payback(address _tokenAddr, address _aTokenAddr, uint _amount, bool _wholeDebt) public burnGas(0) payable {
-        // if whole debt take balance of aToken
-        uint amount = _wholeDebt ? ERC20(_aTokenAddr).balanceOf(address(this)) : _amount;
+        uint amount = _amount;
+
+        if (_wholeDebt) {
+            (,amount,,,,,,,,) = ILendingPool(AAVE_LENDING_POOL).getUserReserveData(_aTokenAddr, address(this));
+        }
 
         if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).transferFrom(msg.sender, address(this), amount);
