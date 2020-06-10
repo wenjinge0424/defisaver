@@ -6,7 +6,9 @@ abstract contract ILendingPool {
 	function setUserUseReserveAsCollateral(address _reserve, bool _useAsCollateral) external virtual;
 	function borrow(address _reserve, uint256 _amount, uint256 _interestRateMode, uint16 _referralCode) external virtual;
 	function repay( address _reserve, uint256 _amount, address payable _onBehalfOf) external virtual payable;
-	function getReserveData(address _reserve)
+	
+    /// @param _reserve underlying token address
+    function getReserveData(address _reserve)
         external virtual
         view
         returns (
@@ -25,7 +27,8 @@ abstract contract ILendingPool {
             uint40 lastUpdateTimestamp            // timestamp of the last update of reserve data
         );
 
-    function getUserAccountData(address _reserve, address _user)
+    /// @param _user users address
+    function getUserAccountData(address _user)
         external virtual
         view
         returns (
@@ -39,6 +42,8 @@ abstract contract ILendingPool {
             uint256 healthFactor                  // user current Health Factor
     );    
 
+    /// @param _reserve underlying token address
+    /// @param _user users address
     function getUserReserveData(address _reserve, address _user)
         external virtual
         view

@@ -1,4 +1,5 @@
 const AaveBasicProxy = artifacts.require("./AaveBasicProxy.sol");
+const AaveSaverProxy = artifacts.require("./AaveSaverProxy.sol");
 
 require('dotenv').config();
 
@@ -7,6 +8,7 @@ module.exports = function(deployer, network, accounts) {
 
     deployer.then(async () => {
         await deployer.deploy(AaveBasicProxy, {gas: 3000000, overwrite: deployAgain});
+        await deployer.deploy(AaveSaverProxy, {gas: 3000000, overwrite: deployAgain});
     });
 };
 

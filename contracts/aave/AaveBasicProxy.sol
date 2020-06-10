@@ -18,7 +18,7 @@ contract AaveBasicProxy is GasBurner {
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     /// @param _tokenAddr The address of the token to be deposited
     /// @param _amount Amount of tokens to be deposited
-    function deposit(address _tokenAddr, uint _amount) public burnGas(0) payable {
+    function deposit(address _tokenAddr, uint256 _amount) public burnGas(0) payable {
         address lendingPoolCore = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 
@@ -37,8 +37,8 @@ contract AaveBasicProxy is GasBurner {
     /// @param _aTokenAddr ATokens to be withdrawn
     /// @param _amount Amount of tokens to be withdrawn
     /// @param _wholeAmount If true we will take the whole amount on chain
-    function withdraw(address _tokenAddr, address _aTokenAddr, uint _amount, bool _wholeAmount) public {
-        uint amount = _wholeAmount ? ERC20(_aTokenAddr).balanceOf(msg.sender) : _amount;
+    function withdraw(address _tokenAddr, address _aTokenAddr, uint256 _amount, bool _wholeAmount) public {
+        uint256 amount = _wholeAmount ? ERC20(_aTokenAddr).balanceOf(msg.sender) : _amount;
 
         require(ERC20(_aTokenAddr).transferFrom(msg.sender, address(this), amount), "Unable to transfer tokens from user");
         IAToken(_aTokenAddr).redeem(amount);
@@ -49,7 +49,7 @@ contract AaveBasicProxy is GasBurner {
     /// @notice User borrows tokens to the Aave protocol
     /// @param _tokenAddr The address of the token to be borrowed
     /// @param _amount Amount of tokens to be borrowed
-    function borrow(address _tokenAddr, uint _amount) public burnGas(0) {
+    function borrow(address _tokenAddr, uint256 _amount) public burnGas(0) {
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
         
         ILendingPool(lendingPool).borrow(_tokenAddr, _amount, 1, AAVE_REFERRAL_CODE);
@@ -63,11 +63,11 @@ contract AaveBasicProxy is GasBurner {
     /// @param _aTokenAddr ATokens to be paybacked
     /// @param _amount Amount of tokens to be payed back
     /// @param _wholeDebt If true the _amount will be set to the whole amount of the debt
-    function payback(address _tokenAddr, address _aTokenAddr, uint _amount, bool _wholeDebt) public burnGas(0) payable {
+    function payback(address _tokenAddr, address _aTokenAddr, uint256 _amount, bool _wholeDebt) public burnGas(0) payable {
         address lendingPoolCore = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 
-        uint amount = _amount;
+        uint256 amount = _amount;
 
         if (_wholeDebt) {
             (,amount,,,,,,,,) = ILendingPool(lendingPool).getUserReserveData(_aTokenAddr, address(this));
@@ -86,7 +86,7 @@ contract AaveBasicProxy is GasBurner {
     /// @notice Helper method to withdraw tokens from the DSProxy
     /// @param _tokenAddr Address of the token to be withdrawn
     function withdrawTokens(address _tokenAddr) public {
-        uint amount = _tokenAddr == ETH_ADDR ? address(this).balance : ERC20(_tokenAddr).balanceOf(address(this));
+        uint256 amount = _tokenAddr == ETH_ADDR ? address(this).balance : ERC20(_tokenAddr).balanceOf(address(this));
 
         if (amount > 0) {
             if (_tokenAddr != ETH_ADDR) {
@@ -110,7 +110,7 @@ contract AaveBasicProxy is GasBurner {
     /// @param _caller Address which will gain the approval
     function approveToken(address _tokenAddr, address _caller) internal {
         if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).approve(_caller, uint(-1));
+            ERC20(_tokenAddr).approve(_caller, uint256(-1));
         }
     }
 }

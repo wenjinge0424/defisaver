@@ -67,7 +67,7 @@ const fundIfNeeded = async (web3, fundAccAddress, accAddress, minBal=5, addBal=1
     }
 };
 
-const getProxy = async (registry, acc) => {
+const getProxy = async (registry, acc, web3) => {
     let proxyAddr = await registry.proxies(acc);
 
     if (proxyAddr === nullAddress) {
@@ -76,8 +76,13 @@ const getProxy = async (registry, acc) => {
     }
 
     proxy = await DSProxy.at(proxyAddr);
+    let web3proxy = null;
+    
+    if (web3 != null) {
+        web3proxy = new web3.eth.Contract(DSProxy.abi, proxyAddr);
+    }
 
-    return { proxy, proxyAddr };
+    return { proxy, proxyAddr, web3proxy };
 };
 
 const getBalance = async (web3, account, tokenAddress) => {
