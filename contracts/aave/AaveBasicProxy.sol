@@ -4,13 +4,13 @@ import "../utils/GasBurner.sol";
 import "../interfaces/ERC20.sol";
 import "../interfaces/IAToken.sol";
 import "../interfaces/ILendingPool.sol";
+import "../interfaces/ILendingPoolAddressesProvider.sol";
 
 /// @title Basic compound interactions through the DSProxy
 contract AaveBasicProxy is GasBurner {
 
     address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant AAVE_LENDING_POOL = 0x398eC7346DcD622eDc5ae82352F02bE94C62d119;
-    address public constant AAVE_LENDING_POOL_CORE = 0x3dfd23A6c5E8BbcFc9581d2E864a68feb6a076d3;
+    address public constant AAVE_LENDING_POOL_ADDRESSES = 0x24a42fD28C976A61Df5D00D0599C34c4f90748c8;
 
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
@@ -19,14 +19,17 @@ contract AaveBasicProxy is GasBurner {
     /// @param _tokenAddr The address of the token to be deposited
     /// @param _amount Amount of tokens to be deposited
     function deposit(address _tokenAddr, uint _amount) public burnGas(0) payable {
+        address lendingPoolCore = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
+        address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
+
         if (_tokenAddr != ETH_ADDR) {
             require(ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount), "Unable to transfer tokens from user");
-            approveToken(_tokenAddr, AAVE_LENDING_POOL_CORE);
+            approveToken(_tokenAddr, lendingPoolCore);
         }
         
-        ILendingPool(AAVE_LENDING_POOL).deposit{value: msg.value}(_tokenAddr, _amount, AAVE_REFERRAL_CODE);
+        ILendingPool(lendingPool).deposit{value: msg.value}(_tokenAddr, _amount, AAVE_REFERRAL_CODE);
 
-        ILendingPool(AAVE_LENDING_POOL).setUserUseReserveAsCollateral(_tokenAddr, true);
+        ILendingPool(lendingPool).setUserUseReserveAsCollateral(_tokenAddr, true);
     }
 
     /// @notice User withdraws tokens from the Aave protocol
@@ -47,7 +50,9 @@ contract AaveBasicProxy is GasBurner {
     /// @param _tokenAddr The address of the token to be borrowed
     /// @param _amount Amount of tokens to be borrowed
     function borrow(address _tokenAddr, uint _amount) public burnGas(0) {
-        ILendingPool(AAVE_LENDING_POOL).borrow(_tokenAddr, _amount, 1, AAVE_REFERRAL_CODE);
+        address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
+        
+        ILendingPool(lendingPool).borrow(_tokenAddr, _amount, 1, AAVE_REFERRAL_CODE);
         
         withdrawTokens(_tokenAddr);
     }
@@ -59,18 +64,21 @@ contract AaveBasicProxy is GasBurner {
     /// @param _amount Amount of tokens to be payed back
     /// @param _wholeDebt If true the _amount will be set to the whole amount of the debt
     function payback(address _tokenAddr, address _aTokenAddr, uint _amount, bool _wholeDebt) public burnGas(0) payable {
+        address lendingPoolCore = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
+        address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
+
         uint amount = _amount;
 
         if (_wholeDebt) {
-            (,amount,,,,,,,,) = ILendingPool(AAVE_LENDING_POOL).getUserReserveData(_aTokenAddr, address(this));
+            (,amount,,,,,,,,) = ILendingPool(lendingPool).getUserReserveData(_aTokenAddr, address(this));
         }
 
         if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).transferFrom(msg.sender, address(this), amount);
-            approveToken(_tokenAddr, AAVE_LENDING_POOL_CORE);
+            approveToken(_tokenAddr, lendingPoolCore);
         }
 
-        ILendingPool(AAVE_LENDING_POOL).repay{value: msg.value}(_tokenAddr, amount, payable(address(this)));
+        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, amount, payable(address(this)));
 
         withdrawTokens(_tokenAddr);
     }
@@ -93,7 +101,8 @@ contract AaveBasicProxy is GasBurner {
     /// @param _tokenAddr Address of token 
     /// @param _enable Bool that determines if we allow or disallow address as collateral
     function setAsColalteral(address _tokenAddr, bool _enable) public {
-        ILendingPool(AAVE_LENDING_POOL).setUserUseReserveAsCollateral(_tokenAddr, _enable);
+        address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
+        ILendingPool(lendingPool).setUserUseReserveAsCollateral(_tokenAddr, _enable);
     }
 
     /// @notice Approves token contract to pull underlying tokens from the DSProxy

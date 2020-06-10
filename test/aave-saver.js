@@ -18,7 +18,7 @@ const aaveBasicProxyAddr = "0x59d3631c86BbE35EF041872d502F218A39FBa150";
 
 const makerVersion = "1.0.6";
 
-describe("AaveBasic", () => {
+describe("AaveSaver", () => {
 
     let registry, proxy, proxyAddr, aaveBasicProxy, makerAddresses;
 
