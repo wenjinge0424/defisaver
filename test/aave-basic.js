@@ -14,7 +14,7 @@ const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 const AETH_ADDRESS = '0x3a3a65aab0dd2a17e3f1947ba16138cd37d08c04';
 const ADAI_ADDRESS = '0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d';
 
-const aaveBasicProxyAddr = "0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab";
+const aaveBasicProxyAddr = "0x59d3631c86BbE35EF041872d502F218A39FBa150";
 
 const makerVersion = "1.0.6";
 
@@ -56,7 +56,7 @@ describe("Aave Basic", () => {
     it('...should withdraw 0.5 Eth from Aave through proxy', async () => {
         const amount = web3.utils.toWei('0.5', 'ether');
 
-        await approve(web3, AETH_ADDRESS, accounts[0], proxyAddr, amount);
+        await approve(web3, AETH_ADDRESS, accounts[0], proxyAddr);
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(AaveBasicProxy, 'withdraw'),
           [ETH_ADDRESS, AETH_ADDRESS, amount, false]);

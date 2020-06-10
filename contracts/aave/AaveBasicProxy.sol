@@ -20,7 +20,7 @@ contract AaveBasicProxy is GasBurner {
     /// @param _amount Amount of tokens to be deposited
     function deposit(address _tokenAddr, uint _amount) public burnGas(0) payable {
         if (_tokenAddr != ETH_ADDR) {
-            require(ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount));
+            require(ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount), "Unable to transfer tokens from user");
             approveToken(_tokenAddr, AAVE_LENDING_POOL_CORE);
         }
         
@@ -37,7 +37,7 @@ contract AaveBasicProxy is GasBurner {
     function withdraw(address _tokenAddr, address _aTokenAddr, uint _amount, bool _wholeAmount) public {
         uint amount = _wholeAmount ? ERC20(_aTokenAddr).balanceOf(msg.sender) : _amount;
 
-        require(ERC20(_aTokenAddr).transferFrom(msg.sender, address(this), amount), "Returns false");
+        require(ERC20(_aTokenAddr).transferFrom(msg.sender, address(this), amount), "Unable to transfer tokens from user");
         IAToken(_aTokenAddr).redeem(amount);
 
         withdrawTokens(_tokenAddr);
