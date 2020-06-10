@@ -318,5 +318,5 @@ contract SaverExchangeCore is SaverExchangeHelper {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external payable {}
+    receive() external virtual payable {}
 }
