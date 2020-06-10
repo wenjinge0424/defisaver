@@ -61,7 +61,7 @@ contract CompoundBasicProxy is GasBurner {
     /// @param _tokenAddr The address of the token to be borrowed
     /// @param _cTokenAddr CTokens to be borrowed
     /// @param _amount Amount of tokens to be borrowed
-    /// @param _inMarket True if the tokend is already in market for that address
+    /// @param _inMarket True if the token is already in market for that address
     function borrow(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) public burnGas(0) {
         if (!_inMarket) {
             enterMarket(_cTokenAddr);

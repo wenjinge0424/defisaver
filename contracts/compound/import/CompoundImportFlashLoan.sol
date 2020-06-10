@@ -9,7 +9,7 @@ contract CompoundImportFlashLoan is FlashLoanReceiverBase {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
-    address public constant COMPOUND_BASIC_PROXY = 0x76954813FE1DBc684fA5fd54269DC732219a0813;
+    address public constant COMPOUND_BORROW_PROXY = 0xfc5eDfD9329dF2FD221B2BBAfA41CAA6b18783C6;
 
     address public owner;
 
@@ -46,26 +46,27 @@ contract CompoundImportFlashLoan is FlashLoanReceiverBase {
         require(CTokenInterface(cBorrowToken).repayBorrowBehalf(user, uint(-1)) == 0, "Repay borrow behalf fail");
 
         // transfer cTokens to proxy
-        uint cTokenBalance =  CTokenInterface(cCollateralToken).balanceOf(user);
+        uint cTokenBalance = CTokenInterface(cCollateralToken).balanceOf(user);
         require(CTokenInterface(cCollateralToken).transferFrom(user, proxy, cTokenBalance));
 
         // borrow
-        bytes memory proxyData = getProxyData(_reserve, cBorrowToken, (_amount + _fee));
-        DSProxyInterface(proxy).execute(COMPOUND_BASIC_PROXY, proxyData);
+        bytes memory proxyData = getProxyData(cCollateralToken, cBorrowToken, _reserve, (_amount + _fee));
+        DSProxyInterface(proxy).execute(COMPOUND_BORROW_PROXY, proxyData);
 
         // Repay the loan with the money DSProxy sent back
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
     }
 
     /// @notice Formats function data call so we can call it through DSProxy
-    /// @param _borrowToken Token address we will borrow
+    /// @param _cCollToken CToken address of collateral
     /// @param _cBorrowToken CToken address we will borrow
+    /// @param _borrowToken Token address we will borrow
     /// @param _amount Amount that will be borrowed
     /// @return proxyData Formated function call data
-    function getProxyData(address _borrowToken, address _cBorrowToken, uint _amount) internal pure returns (bytes memory proxyData) {
+    function getProxyData(address _cCollToken, address _cBorrowToken, address _borrowToken, uint _amount) internal pure returns (bytes memory proxyData) {
         proxyData = abi.encodeWithSignature(
-            "borrow(address,address,uint256,bool)",
-            _borrowToken, _cBorrowToken, _amount, false);
+            "borrow(address,address,address,uint256)",
+            _cCollToken, _cBorrowToken, _borrowToken, _amount);
     }
 
     function withdrawStuckFunds(address _tokenAddr, uint _amount) public {

@@ -8,9 +8,9 @@ import "../mcd/maker/Manager.sol";
 import "../DS/DSMath.sol";
 import "../auth/ProxyPermission.sol";
 import "../loggers/FlashLoanLogger.sol";
-import "../exchange/SaverExchangeCore.sol";
+import "../utils/ExchangeDataParser.sol";
 
-contract LoanShifterTaker is DSMath, ProxyPermission {
+contract LoanShifterTaker is DSMath, ExchangeDataParser, ProxyPermission {
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
@@ -71,13 +71,16 @@ contract LoanShifterTaker is DSMath, ProxyPermission {
 
     function makerChangeColl(
         uint _cdpId,
-        address _joinAddr,
+        address _joinAddrFrom,
+        address _joinAddrTo,
         SaverExchangeCore.ExchangeData memory exchangeData
     ) public {
         bytes32 ilk = manager.ilks(_cdpId);
         uint wholeDebtAmount = getAllDebtCDP(VAT_ADDRESS, manager.urns(_cdpId), manager.urns(_cdpId), ilk);
 
-        bytes memory paramsData = abi.encode(_cdpId, _joinAddr, exchangeData, address(this));
+        (address[3] memory exAddr, uint[5] memory exNum, bytes memory callData) = decodeExchangeData(exchangeData);
+
+        bytes memory paramsData = abi.encode(_cdpId, _joinAddrFrom, _joinAddrTo, exAddr, exNum, callData);
 
         givePermission(LOAN_MOVER);
 
