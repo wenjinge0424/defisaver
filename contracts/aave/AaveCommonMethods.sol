@@ -22,12 +22,14 @@ contract AaveCommonMethods is DSMath {
         (,uint256 totalCollateralETH, uint256 totalBorrowsETH,,,uint256 currentLiquidationThreshold,,) = ILendingPool(lendingPoolAddress).getUserAccountData(_user);
 		
 		// TODO: fix this, if more than one collateral, currentLiquidationThreshold changes
-        // TODO: check if this amount is higher than users collateral in that asset
         uint256 maxCollateralEth = div(sub(mul(currentLiquidationThreshold, totalCollateralETH), mul(totalBorrowsETH, 100)), currentLiquidationThreshold);
+        (uint256 userTokenCollateral,,,,,,,,, ) = ILendingPool(lendingPoolAddress).getUserReserveData(_collateralAddress, _user);
 
         uint256 collateralPrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_collateralAddress);
-		
-		return wmul(wdiv(maxCollateralEth, collateralPrice), NINETY_NINE_PERCENT_WEI);
+        uint256 tokenAmount = wmul(wdiv(maxCollateralEth, collateralPrice), NINETY_NINE_PERCENT_WEI);
+
+        /// @dev final amount can't be higher than users token balance
+		return tokenAmount > userTokenCollateral ? userTokenCollateral : tokenAmount;
 	}
 
 	/// @param _borrowAddress underlying token address
