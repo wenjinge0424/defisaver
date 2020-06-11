@@ -16,14 +16,15 @@ contract AaveCommonMethods is DSMath {
     /// @param _collateralAddress underlying token address
     /// @param _user users address
 	function getMaxCollateral(address _collateralAddress, address _user) public view returns (uint256) {
-        address lendingPoolAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
+        address lendingPoolAddressDataProvider = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolDataProvider();
+        address lendingPoolCoreAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
         address priceOracleAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getPriceOracle();
 
         // fetch all needed data
-        (,uint256 totalCollateralETH, uint256 totalBorrowsETH,,,uint256 currentLiquidationThreshold,,) = ILendingPool(lendingPoolAddress).getUserAccountData(_user);
-        (,uint256 tokenLiquidationThreshold,,,,,,) = ILendingPool(lendingPoolAddress).getReserveConfigurationData(_collateralAddress);
+        (,uint256 totalCollateralETH, uint256 totalBorrowsETH,,,uint256 currentLiquidationThreshold,,) = ILendingPool(lendingPoolAddressDataProvider).calculateUserGlobalData(_user);
+        (,,uint256 tokenLiquidationThreshold,) = ILendingPool(lendingPoolCoreAddress).getReserveConfiguration(_collateralAddress);
         uint256 collateralPrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_collateralAddress);
-		(uint256 userTokenBalance,,,,,,,,, ) = ILendingPool(lendingPoolAddress).getUserReserveData(_collateralAddress, _user);
+        uint256 userTokenBalance = ILendingPool(lendingPoolCoreAddress).getUserUnderlyingAssetBalance(_collateralAddress, _user);
         uint256 userTokenBalanceEth = wmul(userTokenBalance, collateralPrice);
 		
 		// if borrow is 0, return whole user balance

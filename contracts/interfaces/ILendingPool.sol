@@ -59,4 +59,44 @@ abstract contract ILendingPool {
             uint256 lastUpdateTimestamp,          // Timestamp of the last data update
             bool usageAsCollateralEnabled         // Whether the user's current reserve is enabled as a collateral
     );
+
+    function getReserveConfigurationData(address _reserve)
+        external virtual
+        view
+        returns (
+            uint256 ltv,
+            uint256 liquidationThreshold,
+            uint256 liquidationBonus,
+            address rateStrategyAddress,
+            bool usageAsCollateralEnabled,
+            bool borrowingEnabled,
+            bool stableBorrowRateEnabled,
+            bool isActive
+    );
+
+    // ------------------ LendingPoolCoreData ------------------------
+    function getReserveATokenAddress(address _reserve) public virtual view returns (address);
+    function getReserveConfiguration(address _reserve)
+        external virtual
+        view
+        returns (uint256, uint256, uint256, bool);
+    function getUserUnderlyingAssetBalance(address _reserve, address _user)
+        public virtual
+        view
+        returns (uint256);
+
+    // ---------------- LendingPoolDataProvider ---------------------
+    function calculateUserGlobalData(address _user)
+        public virtual
+        view
+        returns (
+            uint256 totalLiquidityBalanceETH,
+            uint256 totalCollateralBalanceETH,
+            uint256 totalBorrowBalanceETH,
+            uint256 totalFeesETH,
+            uint256 currentLtv,
+            uint256 currentLiquidationThreshold,
+            uint256 healthFactor,
+            bool healthFactorBelowThreshold
+        );
 }
