@@ -27,9 +27,13 @@ contract AaveBasicProxy is GasBurner {
             approveToken(_tokenAddr, lendingPoolCore);
         }
         
-        ILendingPool(lendingPool).deposit{value: msg.value}(_tokenAddr, _amount, AAVE_REFERRAL_CODE);
+        ILendingPool(lendingPool).deposit{value: _amount}(_tokenAddr, _amount, AAVE_REFERRAL_CODE);
 
-        ILendingPool(lendingPool).setUserUseReserveAsCollateral(_tokenAddr, true);
+        (,,,,,,,,,bool collateralEnabled) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, address(this));
+
+        if (!collateralEnabled) {
+            ILendingPool(lendingPool).setUserUseReserveAsCollateral(_tokenAddr, true);
+        }
     }
 
     /// @notice User withdraws tokens from the Aave protocol

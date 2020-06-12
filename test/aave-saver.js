@@ -11,14 +11,14 @@ const IPriceOracleGetterAave = contract.fromArtifact("IPriceOracleGetterAave");
 
 const { expect } = require('chai');
 
-const { getAbiFunction, loadAccounts, getAccounts, getProxy, getBalance, approve, fetchMakerAddresses } = require('./helper.js');
+const { getAbiFunction, loadAccounts, getAccounts, getProxy, getBalance, approve, fetchMakerAddresses, nullAddress } = require('./helper.js');
 
 const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 const AETH_ADDRESS = '0x3a3a65aab0dd2a17e3f1947ba16138cd37d08c04';
 const ADAI_ADDRESS = '0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d';
 
-const aaveBasicProxyAddr = "0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab";
-const aaveSaverProxyAddr = "0xFF6049B87215476aBf744eaA3a476cBAd46fB1cA";
+const aaveBasicProxyAddr = "0x2612Af3A521c2df9EAF28422Ca335b04AdF3ac66";
+const aaveSaverProxyAddr = "0xA94B7f0465E98609391C623d0560C5720a3f2D33";
 
 const makerVersion = "1.0.6";
 
@@ -46,14 +46,79 @@ describe("AaveSaver", () => {
         web3proxy = proxyInfo.web3proxy;
     });
 
-    it('...should be able to get max collateral and max borrow', async () => {
-        const accData = await lendingPool.methods.getUserAccountData(proxyAddr).call();
+    it('...should be able to fetch users position', async () => {
+        const position = await lendingPool.methods.getUserAccountData(proxyAddr).call();
 
-        const maxColl = await aaveSaverProxy.methods.getMaxCollateral(ETH_ADDRESS, proxyAddr).call();
-        const maxBorr = await aaveSaverProxy.methods.getMaxBorrow(makerAddresses["MCD_DAI"], proxyAddr).call();
+        console.log(position);
+    });
 
-        console.log("Max collateral: ", maxColl.toString());
-        console.log("Max borrow: ", maxBorr.toString());
-        console.log(accData);
+    it('...should be able to deposit and boost dai to eth', async () => {
+        const amount = web3.utils.toWei('2', 'ether');
+
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(AaveBasicProxy, 'deposit'),
+          [ETH_ADDRESS, amount]);
+
+        let value = amount;
+
+        const receipt = await proxy.methods['execute(address,bytes)'](aaveBasicProxyAddr, data, {
+            from: accounts[0], value});
+
+        console.log('2 eth deposited');
+
+        // address srcAddr;
+        // address destAddr;
+        // uint srcAmount;
+        // uint destAmount;
+        // uint minPrice;
+        // ExchangeType exchangeType;
+        // address exchangeAddr;
+        // bytes callData;
+        // uint256 price0x;
+
+        const exchangeData = [makerAddresses["MCD_DAI"], ETH_ADDRESS, web3.utils.toWei('100', 'ether'), '0', '0', 0, nullAddress, '0x00', '0'];
+        const gasCost = 0;
+        const boostData = web3.eth.abi.encodeFunctionCall(getAbiFunction(AaveSaverProxy, 'boost'),
+          [exchangeData, gasCost]);        
+
+        const boostReceipt = await proxy.methods['execute(address,bytes)'](aaveSaverProxyAddr, boostData, {
+            from: accounts[0], gas: 6000000});
+
+        console.log(boostReceipt);
+    });
+
+    it('...should be able to fetch users position', async () => {
+        const position = await lendingPool.methods.getUserAccountData(proxyAddr).call();
+
+        console.log(position);
+    });
+
+    it('...should be able to repay eth to dai', async () => {
+        const amount = web3.utils.toWei('0.3', 'ether');
+
+        // address srcAddr;
+        // address destAddr;
+        // uint srcAmount;
+        // uint destAmount;
+        // uint minPrice;
+        // ExchangeType exchangeType;
+        // address exchangeAddr;
+        // bytes callData;
+        // uint256 price0x;
+
+        const exchangeData = [ETH_ADDRESS, makerAddresses["MCD_DAI"], amount, '0', '0', 0, nullAddress, '0x00', '0'];
+        const gasCost = 0;
+        const repayData = web3.eth.abi.encodeFunctionCall(getAbiFunction(AaveSaverProxy, 'repay'),
+          [exchangeData, gasCost]);        
+
+        const repayReceipt = await proxy.methods['execute(address,bytes)'](aaveSaverProxyAddr, repayData, {
+            from: accounts[0], gas: 6000000});
+
+        console.log(repayReceipt);
+    });
+
+    it('...should be able to fetch users position', async () => {
+        const position = await lendingPool.methods.getUserAccountData(proxyAddr).call();
+
+        console.log(position);
     });
 });
