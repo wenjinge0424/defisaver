@@ -116,7 +116,7 @@ contract SaverExchangeCore is SaverExchangeHelper {
             }
         }
 
-        // require(getBalance(exData.destAddr) >= exData.destAmount, "Less then destAmount");
+        require(getBalance(exData.destAddr) >= exData.destAmount, "Less then destAmount");
 
         return (wrapper, getBalance(exData.destAddr));
     }
