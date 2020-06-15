@@ -31,42 +31,84 @@ contract LoanShifterTaker is DSMath, ExchangeDataParser, ProxyPermission {
         0xb9303686B0EE92F92f63973EF85f3105329D345c
     );
 
-    function compound2Maker(
-        uint[3] memory amountData, // [cdpId, collAmount, debtAmount]
-        address _joinAddr,
-        address _cCollateralAddr
-    ) public {
-        bytes32 ilk = manager.ilks(amountData[0]);
-        uint debtAmount = getAllDebtCompound();
+    enum Protocols { MCD, COMPOUND, AAVE }
 
-        bytes memory paramsData = abi.encode(amountData, _joinAddr, _cCollateralAddr, ilk, uint8(1), address(this));
-
-        givePermission(LOAN_MOVER);
-
-        lendingPool.flashLoan(LOAN_MOVER, DAI_ADDRESS, debtAmount, paramsData);
-
-        removePermission(LOAN_MOVER);
-
-        logger.logFlashLoan("compound2Maker", debtAmount, amountData[0], DAI_ADDRESS);
+    struct LoanShiftData {
+        Protocols fromProtocol;
+        Protocols toProtocol;
+        uint collAmount;
+        uint debtAmount;
+        address addrLoan1;
+        address addrLoan2;
+        uint id1;
+        uint id2;
     }
 
-    function maker2Compound(
-        uint[3] memory amountData, // [cdpId, collAmount, debtAmount]
-        address _joinAddr,
-        address _cCollateralAddr
+    // function compound2Maker(
+    //     uint[3] memory amountData, // [cdpId, collAmount, debtAmount]
+    //     address _joinAddr,
+    //     address _cCollateralAddr
+    // ) public {
+    //     bytes32 ilk = manager.ilks(amountData[0]);
+    //     uint debtAmount = getAllDebtCompound();
+
+    //     bytes memory paramsData = abi.encode(amountData, _joinAddr, _cCollateralAddr, ilk, uint8(1), address(this));
+
+    //     givePermission(LOAN_MOVER);
+
+    //     lendingPool.flashLoan(LOAN_MOVER, DAI_ADDRESS, debtAmount, paramsData);
+
+    //     removePermission(LOAN_MOVER);
+
+    //     logger.logFlashLoan("compound2Maker", debtAmount, amountData[0], DAI_ADDRESS);
+    // }
+
+    // function maker2Compound(
+    //     uint[3] memory amountData, // [cdpId, collAmount, debtAmount]
+    //     address _joinAddr,
+    //     address _cCollateralAddr
+    // ) public {
+    //     bytes32 ilk = manager.ilks(amountData[0]);
+    //     uint wholeDebtAmount = getAllDebtCDP(VAT_ADDRESS, manager.urns(amountData[0]), manager.urns(amountData[0]), ilk);
+
+    //     bytes memory paramsData = abi.encode(amountData, _joinAddr, _cCollateralAddr, ilk, uint8(2), address(this));
+
+    //     givePermission(LOAN_MOVER);
+
+    //     lendingPool.flashLoan(LOAN_MOVER, DAI_ADDRESS, wholeDebtAmount, paramsData);
+
+    //     removePermission(LOAN_MOVER);
+
+    //     logger.logFlashLoan("maker2Compound", wholeDebtAmount, amountData[0], DAI_ADDRESS);
+    // }
+
+    /// @notice Moves a Loan from one protocol to another, without changing the assets
+    function moveLoan(
+        LoanShiftData memory _loanShift
     ) public {
-        bytes32 ilk = manager.ilks(amountData[0]);
-        uint wholeDebtAmount = getAllDebtCDP(VAT_ADDRESS, manager.urns(amountData[0]), manager.urns(amountData[0]), ilk);
+        if (isSameTypeVaults(_loanShift)) {
+            if (_loanShift.id2 != 0) {
+                // _loanShift.id2 = manager.open(ilk, address(this));
+            }
 
-        bytes memory paramsData = abi.encode(amountData, _joinAddr, _cCollateralAddr, ilk, uint8(2), address(this));
+            manager.shift(_loanShift.id1, _loanShift.id2);
 
-        givePermission(LOAN_MOVER);
 
-        lendingPool.flashLoan(LOAN_MOVER, DAI_ADDRESS, wholeDebtAmount, paramsData);
+            return;
+        }
 
-        removePermission(LOAN_MOVER);
+        // Close Loan 1
 
-        logger.logFlashLoan("maker2Compound", wholeDebtAmount, amountData[0], DAI_ADDRESS);
+        // Get Back the Collateral to DSProxy
+
+        // Open Loan on the new Protocol or add to existing
+    }
+
+    function moveLoanAndSwap(
+        LoanShiftData memory _loanShift,
+        SaverExchangeCore.ExchangeData memory exchangeData
+    ) public {
+
     }
 
     function makerChangeColl(
@@ -108,6 +150,11 @@ contract LoanShifterTaker is DSMath, ExchangeDataParser, ProxyPermission {
         daiAmount = rad / RAY;
 
         daiAmount = mul(daiAmount, RAY) < rad ? daiAmount + 1 : daiAmount;
+    }
+
+    function isSameTypeVaults(LoanShiftData memory _loanShift) internal pure returns (bool) {
+        return _loanShift.fromProtocol == Protocols.MCD && _loanShift.toProtocol == Protocols.MCD
+                && _loanShift.addrLoan1 == _loanShift.addrLoan2;
     }
 
     function getAllDebtCompound() internal returns (uint daiAmount) {
