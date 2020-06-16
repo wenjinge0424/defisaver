@@ -42,9 +42,8 @@ contract AaveBasicProxy is GasBurner {
     /// @param _amount Amount of tokens to be withdrawn
     /// @param _wholeAmount If true we will take the whole amount on chain
     function withdraw(address _tokenAddr, address _aTokenAddr, uint256 _amount, bool _wholeAmount) public {
-        uint256 amount = _wholeAmount ? ERC20(_aTokenAddr).balanceOf(msg.sender) : _amount;
+        uint256 amount = _wholeAmount ? ERC20(_aTokenAddr).balanceOf(address(this)) : _amount;
 
-        require(ERC20(_aTokenAddr).transferFrom(msg.sender, address(this), amount), "Unable to transfer tokens from user");
         IAToken(_aTokenAddr).redeem(amount);
 
         withdrawTokens(_tokenAddr);
