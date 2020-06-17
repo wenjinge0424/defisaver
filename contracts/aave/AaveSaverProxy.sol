@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "./AaveCommonMethods.sol";
+import "./AaveHelper.sol";
 import "../utils/GasBurner.sol";
 import "../interfaces/ERC20.sol";
 import "../interfaces/IAToken.sol";
@@ -9,7 +9,7 @@ import "../interfaces/ILendingPool.sol";
 import "../exchange/SaverExchangeCore.sol";
 import "../loggers/DefisaverLogger.sol";
 
-contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveCommonMethods {
+contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 
 	address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 

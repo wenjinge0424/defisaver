@@ -9,7 +9,7 @@ import "../interfaces/ILendingPool.sol";
 import "../interfaces/ILendingPoolAddressesProvider.sol";
 import "../interfaces/IPriceOracleGetterAave.sol";
 
-contract AaveCommonMethods is DSMath {
+contract AaveHelper is DSMath {
     address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
