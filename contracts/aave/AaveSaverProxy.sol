@@ -2,12 +2,11 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "./AaveHelper.sol";
-import "../utils/GasBurner.sol";
-import "../interfaces/ERC20.sol";
+import "../exchange/SaverExchangeCore.sol";
 import "../interfaces/IAToken.sol";
 import "../interfaces/ILendingPool.sol";
-import "../exchange/SaverExchangeCore.sol";
 import "../loggers/DefisaverLogger.sol";
+import "../utils/GasBurner.sol";
 
 contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 
