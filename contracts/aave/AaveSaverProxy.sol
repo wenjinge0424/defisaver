@@ -56,7 +56,7 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveCommonMethods {
 		_data.srcAmount = _data.srcAmount > maxBorrow ? maxBorrow : _data.srcAmount;
 
 		// borrow amount
-		ILendingPool(lendingPool).borrow(_data.srcAddr, _data.srcAmount, 1, AAVE_REFERRAL_CODE);
+		ILendingPool(lendingPool).borrow(_data.srcAddr, _data.srcAmount, 0, AAVE_REFERRAL_CODE);
 		_data.srcAmount -= getFee(_data.srcAmount, user, _gasCost, _data.srcAddr);
 
 		// swap
