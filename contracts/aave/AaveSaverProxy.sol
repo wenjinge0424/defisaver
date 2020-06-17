@@ -12,6 +12,7 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 
 	address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
+	/// @dev TODO: determine how much GST2 to burn
 	function repay(ExchangeData memory _data, uint _gasCost) public payable burnGas(0) {
 
 		address lendingPoolCore = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
@@ -45,6 +46,7 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 		DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "AaveRepay", abi.encode(_data.srcAddr, _data.destAddr, _data.srcAmount, destAmount));
 	}
 
+	/// @dev TODO: determine how much GST2 to burn
 	function boost(ExchangeData memory _data, uint _gasCost) public payable burnGas(0) {
 		address lendingPoolCore = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
 		address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();

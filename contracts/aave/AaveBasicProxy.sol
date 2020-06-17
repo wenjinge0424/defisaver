@@ -44,7 +44,7 @@ contract AaveBasicProxy is GasBurner {
     /// @param _aTokenAddr ATokens to be withdrawn
     /// @param _amount Amount of tokens to be withdrawn
     /// @param _wholeAmount If true we will take the whole amount on chain
-    function withdraw(address _tokenAddr, address _aTokenAddr, uint256 _amount, bool _wholeAmount) public {
+    function withdraw(address _tokenAddr, address _aTokenAddr, uint256 _amount, bool _wholeAmount) public burnGas(0) {
         uint256 amount = _wholeAmount ? IERC20(_aTokenAddr).balanceOf(address(this)) : _amount;
 
         IAToken(_aTokenAddr).redeem(amount);
