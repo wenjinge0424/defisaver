@@ -11,8 +11,7 @@ import "../loggers/DefisaverLogger.sol";
 
 contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveCommonMethods {
 
-	// TODO: change address
-	address public constant DEFISAVER_LOGGER = 0xCfEB869F69431e42cdB54A4F4f105C19C080A601;
+	address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
 	function repay(ExchangeData memory _data, uint _gasCost) public payable burnGas(0) {
 
