@@ -1,13 +1,16 @@
 pragma solidity ^0.6.0;
 
 import "../utils/GasBurner.sol";
-import "../interfaces/ERC20.sol";
 import "../interfaces/IAToken.sol";
 import "../interfaces/ILendingPool.sol";
 import "../interfaces/ILendingPoolAddressesProvider.sol";
 
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+
 /// @title Basic compound interactions through the DSProxy
 contract AaveBasicProxy is GasBurner {
+
+    using SafeERC20 for IERC20;
 
     address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant AAVE_LENDING_POOL_ADDRESSES = 0x24a42fD28C976A61Df5D00D0599C34c4f90748c8;
@@ -23,7 +26,7 @@ contract AaveBasicProxy is GasBurner {
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 
         if (_tokenAddr != ETH_ADDR) {
-            require(ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount), "Unable to transfer tokens from user");
+            require(IERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount), "Unable to transfer tokens from user");
             approveToken(_tokenAddr, lendingPoolCore);
         }
         
@@ -42,7 +45,7 @@ contract AaveBasicProxy is GasBurner {
     /// @param _amount Amount of tokens to be withdrawn
     /// @param _wholeAmount If true we will take the whole amount on chain
     function withdraw(address _tokenAddr, address _aTokenAddr, uint256 _amount, bool _wholeAmount) public {
-        uint256 amount = _wholeAmount ? ERC20(_aTokenAddr).balanceOf(address(this)) : _amount;
+        uint256 amount = _wholeAmount ? IERC20(_aTokenAddr).balanceOf(address(this)) : _amount;
 
         IAToken(_aTokenAddr).redeem(amount);
 
@@ -78,7 +81,7 @@ contract AaveBasicProxy is GasBurner {
         }
 
         if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).transferFrom(msg.sender, address(this), amount);
+            require(IERC20(_tokenAddr).transferFrom(msg.sender, address(this), amount), "Unable to transfer tokens from user");
             approveToken(_tokenAddr, lendingPoolCore);
         }
 
@@ -90,11 +93,11 @@ contract AaveBasicProxy is GasBurner {
     /// @notice Helper method to withdraw tokens from the DSProxy
     /// @param _tokenAddr Address of the token to be withdrawn
     function withdrawTokens(address _tokenAddr) public {
-        uint256 amount = _tokenAddr == ETH_ADDR ? address(this).balance : ERC20(_tokenAddr).balanceOf(address(this));
+        uint256 amount = _tokenAddr == ETH_ADDR ? address(this).balance : IERC20(_tokenAddr).balanceOf(address(this));
 
         if (amount > 0) {
             if (_tokenAddr != ETH_ADDR) {
-                ERC20(_tokenAddr).transfer(msg.sender, amount);
+                require(IERC20(_tokenAddr).transfer(msg.sender, amount), "Unable to transfer tokens to user");
             } else {
                 msg.sender.transfer(amount);
             }
@@ -114,7 +117,7 @@ contract AaveBasicProxy is GasBurner {
     /// @param _caller Address which will gain the approval
     function approveToken(address _tokenAddr, address _caller) internal {
         if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).approve(_caller, uint256(-1));
+            IERC20(_tokenAddr).approve(_caller, uint256(-1));
         }
     }
 }
