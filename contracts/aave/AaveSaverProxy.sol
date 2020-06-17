@@ -49,7 +49,12 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 	function boost(ExchangeData memory _data, uint _gasCost) public payable burnGas(0) {
 		address lendingPoolCore = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
 		address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
-		address payable user = payable(getUserAddress());	
+		(,,,,,,,,,bool collateralEnabled) = ILendingPool(lendingPool).getUserReserveData(_data.destAddr, address(this));
+		address payable user = payable(getUserAddress());
+
+        if (!collateralEnabled) {
+            ILendingPool(lendingPool).setUserUseReserveAsCollateral(_data.destAddr, true);
+        }
 
 		uint256 maxBorrow = getMaxBorrow(_data.srcAddr, address(this));
 		_data.srcAmount = _data.srcAmount > maxBorrow ? maxBorrow : _data.srcAmount;
