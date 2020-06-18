@@ -62,7 +62,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo, GasBurner {
         address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes memory _callData,
         address _user
-    ) public payable onlyApproved burnGas(0) {
+    ) public payable onlyApproved burnGas(REPAY_GAS_TOKEN) {
 
         (bool isAllowed, uint ratioBefore) = canCall(Method.Repay, _user);
         require(isAllowed); // check if conditions are met
@@ -95,10 +95,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo, GasBurner {
         address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes memory _callData,
         address _user
-    ) public payable onlyApproved burnGas(0) {
-        if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
-            gasToken.free(REPAY_GAS_TOKEN);
-        }
+    ) public payable onlyApproved burnGas(BOOST_GAS_TOKEN) {
 
         (bool isAllowed, uint ratioBefore) = canCall(Method.Boost, _user);
         require(isAllowed); // check if conditions are met

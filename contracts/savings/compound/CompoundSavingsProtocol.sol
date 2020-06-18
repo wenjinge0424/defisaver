@@ -6,10 +6,8 @@ import "../../interfaces/CTokenInterface.sol";
 import "../../compound/helpers/Exponential.sol";
 import "../../interfaces/ERC20.sol";
 import "../../constants/ConstantAddresses.sol";
-import "../../DS/DSAuth.sol";
 
-
-contract CompoundSavingsProtocol is Exponential, ConstantAddresses, DSAuth {
+contract CompoundSavingsProtocol is ConstantAddresses {
 
     CTokenInterface public constant cDaiContract = CTokenInterface(NEW_CDAI_ADDRESS);
 

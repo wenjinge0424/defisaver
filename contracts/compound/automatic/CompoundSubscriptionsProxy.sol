@@ -9,7 +9,7 @@ import "../../interfaces/ICompoundSubscription.sol";
 contract CompoundSubscriptionsProxy is ConstantAddresses {
 
     address public constant MONITOR_PROXY_ADDRESS = 0x3Dfa84cF5856e01bc4E12355cAF7a61738509f53;
-    address public constant COMPOUND_SUBSCRIPTION_ADDRESS = 0x131beA5c6679B9dF528De29bA9B8f91Ced3919AF;
+    address public constant COMPOUND_SUBSCRIPTION_ADDRESS = 0x84BC0c6e8314658398679E59C4F3271DE71C9278;
 
     /// @notice Calls subscription contract and creates a DSGuard if non existent
     /// @param _minRatio Minimum ratio below which repay is triggered
