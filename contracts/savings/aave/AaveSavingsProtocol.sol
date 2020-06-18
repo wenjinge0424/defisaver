@@ -5,7 +5,6 @@ import "../ProtocolInterface.sol";
 import "../../interfaces/IAToken.sol";
 import "../../interfaces/ILendingPool.sol";
 import "../../interfaces/ERC20.sol";
-import "../../constants/ConstantAddresses.sol";
 import "../../DS/DSAuth.sol";
 
 

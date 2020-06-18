@@ -17,8 +17,8 @@ import "../../loggers/AutomaticLogger.sol";
 /// @title Implements logic that allows bots to call Boost and Repay
 contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
 
-    uint public REPAY_GAS_TOKEN = 30;
-    uint public BOOST_GAS_TOKEN = 19;
+    uint public REPAY_GAS_TOKEN = 35;
+    uint public BOOST_GAS_TOKEN = 25;
 
     uint constant public MAX_GAS_PRICE = 80000000000; // 80 gwei
 
@@ -65,8 +65,8 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
         address _exchangeAddress,
         bytes memory _callData
     ) public payable onlyApproved {
-        if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
-            gasToken.free(BOOST_GAS_TOKEN);
+        if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
+            gasToken.free(REPAY_GAS_TOKEN);
         }
 
         uint ratioBefore;
@@ -104,8 +104,8 @@ contract MCDMonitorV2 is AdminAuth, ConstantAddresses, DSMath, StaticV2 {
         address _exchangeAddress,
         bytes memory _callData
     ) public payable onlyApproved {
-        if (gasToken.balanceOf(address(this)) >= REPAY_GAS_TOKEN) {
-            gasToken.free(REPAY_GAS_TOKEN);
+        if (gasToken.balanceOf(address(this)) >= BOOST_GAS_TOKEN) {
+            gasToken.free(BOOST_GAS_TOKEN);
         }
 
         uint ratioBefore;

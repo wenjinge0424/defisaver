@@ -1,4 +1,3 @@
-const DefisaverLogger = artifacts.require("./DefisaverLogger.sol");
 const AaveBasicProxy = artifacts.require("./AaveBasicProxy.sol");
 const AaveSaverProxy = artifacts.require("./AaveSaverProxy.sol");
 
@@ -8,7 +7,6 @@ module.exports = function(deployer, network, accounts) {
     let deployAgain = (process.env.DEPLOY_AGAIN === 'true') ? true : false;
 
     deployer.then(async () => {
-    	// await deployer.deploy(DefisaverLogger, {gas: 3000000, overwrite: deployAgain});
         await deployer.deploy(AaveBasicProxy, {gas: 3000000, overwrite: deployAgain});
         await deployer.deploy(AaveSaverProxy, {gas: 5000000, overwrite: deployAgain});
     });

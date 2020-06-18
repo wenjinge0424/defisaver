@@ -3,13 +3,17 @@ pragma solidity ^0.6.0;
 import "../DS/DSMath.sol";
 import "../DS/DSProxy.sol";
 import "../mcd/Discount.sol";
-import "../interfaces/ERC20.sol";
 import "../interfaces/IAToken.sol";
 import "../interfaces/ILendingPool.sol";
 import "../interfaces/ILendingPoolAddressesProvider.sol";
 import "../interfaces/IPriceOracleGetterAave.sol";
 
-contract AaveCommonMethods is DSMath {
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+
+contract AaveHelper is DSMath {
+
+    using SafeERC20 for IERC20;
+
     address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
@@ -107,7 +111,7 @@ contract AaveCommonMethods is DSMath {
         if (_tokenAddr == ETH_ADDR) {
             WALLET_ADDR.transfer(feeAmount);
         } else {
-            ERC20(_tokenAddr).transfer(WALLET_ADDR, feeAmount);
+            require(IERC20(_tokenAddr).transfer(WALLET_ADDR, feeAmount), "Unable to take fee");
         }
     }
 
@@ -123,7 +127,7 @@ contract AaveCommonMethods is DSMath {
     /// @param _caller Address which will gain the approval
     function approveToken(address _tokenAddr, address _caller) internal {
         if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).approve(_caller, uint256(-1));
+            IERC20(_tokenAddr).approve(_caller, uint256(-1));
         }
     }
 }
