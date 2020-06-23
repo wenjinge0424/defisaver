@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "./SafeERC20.sol";
 
 interface IFlashLoanReceiver {
     function executeOperation(address _reserve, uint256 _amount, uint256 _fee, bytes calldata _params) external;
@@ -52,7 +52,7 @@ library EthAddressLib {
 
 abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
 
-    using SafeERC20 for IERC20;
+    using SafeERC20 for ERC20;
     using SafeMath for uint256;
 
     ILendingPoolAddressesProvider public addressesProvider;
@@ -77,7 +77,7 @@ abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
             return;
         }
 
-        IERC20(_reserve).safeTransfer(_destination, _amount);
+        ERC20(_reserve).safeTransfer(_destination, _amount);
 
 
     }
@@ -88,7 +88,7 @@ abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
             return _target.balance;
         }
 
-        return IERC20(_reserve).balanceOf(_target);
+        return ERC20(_reserve).balanceOf(_target);
 
     }
 }

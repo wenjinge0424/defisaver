@@ -1,5 +1,6 @@
 pragma solidity ^0.6.0;
 
+import "../../utils/SafeERC20.sol";
 import "../../mcd/saver_proxy/ExchangeHelper.sol";
 import "../../interfaces/CTokenInterface.sol";
 import "../../mcd/Discount.sol";
@@ -8,6 +9,8 @@ import "../../loggers/CompoundLogger.sol";
 
 /// @title Implements the actual logic of Repay/Boost with FL
 contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
+
+    using SafeERC20 for ERC20;
 
     /// @notice Repays the position and sends tokens back for FL
     /// @param _data Amount and exchange data [amount, minPrice, exchangeType, gasCost, 0xPrice]
@@ -123,7 +126,7 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
     /// @param _amount Amount to return
     function returnFlashLoan(address _tokenAddr, uint _amount) internal {
         if (_tokenAddr != ETH_ADDRESS) {
-            IERC20(_tokenAddr).safeTransfer(msg.sender, _amount);
+            ERC20(_tokenAddr).safeTransfer(msg.sender, _amount);
         }
 
         msg.sender.transfer(address(this).balance);
