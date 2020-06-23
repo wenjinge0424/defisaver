@@ -6,12 +6,12 @@ import "../../interfaces/SaverExchangeInterface.sol";
 
 import "../../constants/ConstantAddressesExchange.sol";
 
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "../../utils/SafeERC20.sol";
 
 /// @title Helper methods for integration with SaverExchange
 contract ExchangeHelper is ConstantAddressesExchange {
 
-    using SafeERC20 for IERC20;
+    using SafeERC20 for ERC20;
 
     /// @notice Swaps 2 tokens on the Saver Exchange
     /// @dev ETH is sent with Weth address
@@ -77,7 +77,7 @@ contract ExchangeHelper is ConstantAddressesExchange {
                     (tRet,) = ExchangeInterface(wrapper).swapEtherToToken{value: tokens[1]}(tokens[1], orderAddresses[2], uint(-1));
                     tokens[0] += tRet;
                 } else {
-                    IERC20(orderAddresses[1]).safeTransfer(wrapper, tokens[1]);
+                    ERC20(orderAddresses[1]).safeTransfer(wrapper, tokens[1]);
 
                     if (orderAddresses[2] == KYBER_ETH_ADDRESS) {
                         tokens[0] += ExchangeInterface(wrapper).swapTokenToEther(orderAddresses[1], tokens[1], uint(-1));

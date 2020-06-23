@@ -9,8 +9,12 @@ import "../../mcd/Discount.sol";
 import "../../DS/DSMath.sol";
 import "../../DS/DSProxy.sol";
 
+import "../../utils/SafeERC20.sol";
+
 /// @title Utlity functions for Compound contracts
 contract CompoundSaverHelper is DSMath {
+
+    using SafeERC20 for ERC20;
 
     address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
@@ -36,7 +40,7 @@ contract CompoundSaverHelper is DSMath {
             if (_borrowToken == ETH_ADDRESS) {
                 _user.transfer((_amount - wholeDebt));
             } else {
-                ERC20(_borrowToken).transfer(_user, (_amount - wholeDebt));
+                ERC20(_borrowToken).safeTransfer(_user, (_amount - wholeDebt));
             }
 
             _amount = wholeDebt;
@@ -83,7 +87,7 @@ contract CompoundSaverHelper is DSMath {
         if (tokenAddr == ETH_ADDRESS) {
             WALLET_ADDR.transfer(feeAmount);
         } else {
-            ERC20(tokenAddr).transfer(WALLET_ADDR, feeAmount);
+            ERC20(tokenAddr).safeTransfer(WALLET_ADDR, feeAmount);
         }
     }
 
