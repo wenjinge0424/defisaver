@@ -13,28 +13,18 @@ contract SaverExchangeHelper {
     address payable public constant WALLET_ID = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDRESS = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
 
-    // TODO: set to constant after testing
     address public constant KYBER_WRAPPER = 0x3d1D4D6Bb405b2366434cb7387803c7B662b8d71;
     address public constant UNISWAP_WRAPPER = 0xFF92ADA50cDC8009686867b4a470C8769bEdB22d;
     address public constant OASIS_WRAPPER = 0x9C499376B41A91349Ff93F99462a65962653e104;
     address public constant ERC20_PROXY_0X = 0x95E6F48254609A6ee006F7D493c8e5fB97094ceF;
+    address public constant ZRX_ALLOWLIST_ADDR = 0x019739e288973F92bDD3c1d87178E206E51fd911;
+
 
     function getDecimals(address _token) internal view returns (uint256) {
         if (_token == DGD_ADDRESS) return 9;
         if (_token == KYBER_ETH_ADDRESS) return 18;
 
         return ERC20(_token).decimals();
-    }
-
-    function pullTokens(address _tokenAddr, uint _amount) internal {
-        if (_tokenAddr == KYBER_ETH_ADDRESS) {
-            require(msg.value >= _amount, "msg.value smaller than amount");
-        } else {
-            require(
-                ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount),
-                "Not able to withdraw wanted amount"
-            );
-        }
     }
 
     function getBalance(address _tokenAddr) internal view returns (uint balance) {
