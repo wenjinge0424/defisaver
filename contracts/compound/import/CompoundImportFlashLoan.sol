@@ -3,9 +3,12 @@ pragma solidity ^0.6.0;
 import "../../utils/FlashLoanReceiverBase.sol";
 import "../../interfaces/ProxyRegistryInterface.sol";
 import "../../interfaces/CTokenInterface.sol";
+import "../../utils/SafeERC20.sol";
 
 /// @title Receives FL from Aave and imports the position to DSProxy
 contract CompoundImportFlashLoan is FlashLoanReceiverBase {
+
+    using SafeERC20 for ERC20;
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
@@ -40,7 +43,7 @@ contract CompoundImportFlashLoan is FlashLoanReceiverBase {
         = abi.decode(_params, (address,address,address,address));
 
         // approve FL tokens so we can repay them
-        ERC20(_reserve).approve(cBorrowToken, uint(-1));
+        ERC20(_reserve).safeApprove(cBorrowToken, uint(-1));
 
         // repay compound debt
         require(CTokenInterface(cBorrowToken).repayBorrowBehalf(user, uint(-1)) == 0, "Repay borrow behalf fail");
@@ -75,7 +78,7 @@ contract CompoundImportFlashLoan is FlashLoanReceiverBase {
         if (_tokenAddr == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
             msg.sender.transfer(_amount);
         } else {
-            ERC20(_tokenAddr).transfer(owner, _amount);
+            ERC20(_tokenAddr).safeTransfer(owner, _amount);
         }
     }
 }

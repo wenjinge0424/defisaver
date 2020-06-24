@@ -8,11 +8,11 @@ import "../interfaces/ILendingPool.sol";
 import "../interfaces/ILendingPoolAddressesProvider.sol";
 import "../interfaces/IPriceOracleGetterAave.sol";
 
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "../utils/SafeERC20.sol";
 
 contract AaveHelper is DSMath {
 
-    using SafeERC20 for IERC20;
+    using SafeERC20 for ERC20;
 
     address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
@@ -36,7 +36,7 @@ contract AaveHelper is DSMath {
         uint256 collateralPrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_collateralAddress);
         uint256 userTokenBalance = ILendingPool(lendingPoolCoreAddress).getUserUnderlyingAssetBalance(_collateralAddress, _user);
         uint256 userTokenBalanceEth = wmul(userTokenBalance, collateralPrice);
-		
+
 		// if borrow is 0, return whole user balance
         if (totalBorrowsETH == 0) {
         	return userTokenBalance;
@@ -63,7 +63,7 @@ contract AaveHelper is DSMath {
         	maxCollateralEth = maxCollateralEth > userTokenBalanceEth ? userTokenBalanceEth : maxCollateralEth;
         }
 
-        
+
 		return wmul(wdiv(maxCollateralEth, collateralPrice), NINETY_NINE_PERCENT_WEI);
 	}
 
@@ -111,7 +111,7 @@ contract AaveHelper is DSMath {
         if (_tokenAddr == ETH_ADDR) {
             WALLET_ADDR.transfer(feeAmount);
         } else {
-            require(IERC20(_tokenAddr).transfer(WALLET_ADDR, feeAmount), "Unable to take fee");
+            ERC20(_tokenAddr).safeTransfer(WALLET_ADDR, feeAmount);
         }
     }
 
@@ -127,7 +127,7 @@ contract AaveHelper is DSMath {
     /// @param _caller Address which will gain the approval
     function approveToken(address _tokenAddr, address _caller) internal {
         if (_tokenAddr != ETH_ADDR) {
-            IERC20(_tokenAddr).approve(_caller, uint256(-1));
+            ERC20(_tokenAddr).safeApprove(_caller, uint256(-1));
         }
     }
 }

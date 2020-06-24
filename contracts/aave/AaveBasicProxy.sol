@@ -5,12 +5,12 @@ import "../interfaces/IAToken.sol";
 import "../interfaces/ILendingPool.sol";
 import "../interfaces/ILendingPoolAddressesProvider.sol";
 
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "../utils/SafeERC20.sol";
 
 /// @title Basic compound interactions through the DSProxy
 contract AaveBasicProxy is GasBurner {
 
-    using SafeERC20 for IERC20;
+    using SafeERC20 for ERC20;
 
     address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant AAVE_LENDING_POOL_ADDRESSES = 0x24a42fD28C976A61Df5D00D0599C34c4f90748c8;
@@ -26,10 +26,10 @@ contract AaveBasicProxy is GasBurner {
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 
         if (_tokenAddr != ETH_ADDR) {
-            require(IERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount), "Unable to transfer tokens from user");
+            ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), _amount);
             approveToken(_tokenAddr, lendingPoolCore);
         }
-        
+
         ILendingPool(lendingPool).deposit{value: _amount}(_tokenAddr, _amount, AAVE_REFERRAL_CODE);
 
         (,,,,,,,,,bool collateralEnabled) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, address(this));
@@ -45,7 +45,7 @@ contract AaveBasicProxy is GasBurner {
     /// @param _amount Amount of tokens to be withdrawn
     /// @param _wholeAmount If true we will take the whole amount on chain
     function withdraw(address _tokenAddr, address _aTokenAddr, uint256 _amount, bool _wholeAmount) public burnGas(0) {
-        uint256 amount = _wholeAmount ? IERC20(_aTokenAddr).balanceOf(address(this)) : _amount;
+        uint256 amount = _wholeAmount ? ERC20(_aTokenAddr).balanceOf(address(this)) : _amount;
 
         IAToken(_aTokenAddr).redeem(amount);
 
@@ -58,9 +58,9 @@ contract AaveBasicProxy is GasBurner {
     /// @param _type Send 0 for variable rate and 1 for fixed rate
     function borrow(address _tokenAddr, uint256 _amount, uint256 _type) public burnGas(0) {
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
-        
+
         ILendingPool(lendingPool).borrow(_tokenAddr, _amount, _type, AAVE_REFERRAL_CODE);
-        
+
         withdrawTokens(_tokenAddr);
     }
 
@@ -81,7 +81,7 @@ contract AaveBasicProxy is GasBurner {
         }
 
         if (_tokenAddr != ETH_ADDR) {
-            require(IERC20(_tokenAddr).transferFrom(msg.sender, address(this), amount), "Unable to transfer tokens from user");
+            ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), amount);
             approveToken(_tokenAddr, lendingPoolCore);
         }
 
@@ -93,11 +93,11 @@ contract AaveBasicProxy is GasBurner {
     /// @notice Helper method to withdraw tokens from the DSProxy
     /// @param _tokenAddr Address of the token to be withdrawn
     function withdrawTokens(address _tokenAddr) public {
-        uint256 amount = _tokenAddr == ETH_ADDR ? address(this).balance : IERC20(_tokenAddr).balanceOf(address(this));
+        uint256 amount = _tokenAddr == ETH_ADDR ? address(this).balance : ERC20(_tokenAddr).balanceOf(address(this));
 
         if (amount > 0) {
             if (_tokenAddr != ETH_ADDR) {
-                require(IERC20(_tokenAddr).transfer(msg.sender, amount), "Unable to transfer tokens to user");
+                ERC20(_tokenAddr).safeTransfer(msg.sender, amount);
             } else {
                 msg.sender.transfer(amount);
             }
@@ -105,7 +105,7 @@ contract AaveBasicProxy is GasBurner {
     }
 
     /// @notice Enables or disables token to be used as collateral
-    /// @param _tokenAddr Address of token 
+    /// @param _tokenAddr Address of token
     /// @param _enable Bool that determines if we allow or disallow address as collateral
     function setAsColalteral(address _tokenAddr, bool _enable) public {
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
@@ -117,7 +117,7 @@ contract AaveBasicProxy is GasBurner {
     /// @param _caller Address which will gain the approval
     function approveToken(address _tokenAddr, address _caller) internal {
         if (_tokenAddr != ETH_ADDR) {
-            IERC20(_tokenAddr).approve(_caller, uint256(-1));
+            ERC20(_tokenAddr).safeApprove(_caller, uint256(-1));
         }
     }
 }

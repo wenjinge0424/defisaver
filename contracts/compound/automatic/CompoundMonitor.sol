@@ -13,6 +13,8 @@ import "../CompoundLoanInfo.sol";
 /// @title Contract implements logic of calling boost/repay in the automatic system
 contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo, GasBurner {
 
+    using SafeERC20 for ERC20;
+
     enum Method { Boost, Repay }
 
     uint public REPAY_GAS_TOKEN = 30;
@@ -214,7 +216,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo, GasBurner {
     /// @param _to Address of the receiver
     /// @param _amount The amount to be sent
     function transferERC20(address _tokenAddress, address _to, uint _amount) public onlyOwner {
-        ERC20(_tokenAddress).transfer(_to, _amount);
+        ERC20(_tokenAddress).safeTransfer(_to, _amount);
     }
 
     /// @notice If any Eth gets stuck in the contract owner can withdraw it
