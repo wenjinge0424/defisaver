@@ -5,8 +5,9 @@ import "../interfaces/GasTokenInterface.sol";
 import "./SaverExchangeCore.sol";
 import "../DS/DSMath.sol";
 import "../loggers/ExchangeLogger.sol";
+import "../auth/AdminAuth.sol";
 
-contract SaverExchange is SaverExchangeCore, DSMath {
+contract SaverExchange is SaverExchangeCore, DSMath, AdminAuth {
 
     uint256 public constant SERVICE_FEE = 800; // 0.125% Fee
 
@@ -14,26 +15,11 @@ contract SaverExchange is SaverExchangeCore, DSMath {
     ExchangeLogger public constant logger = ExchangeLogger(0xf7CE9aa00bc4f4c413E4B4a613e889C1Ad01883e);
     GasTokenInterface gasToken = GasTokenInterface(0x0000000000b3F879cb30FE243b4Dfee438691c04);
 
-    address public owner;
     uint public burnAmount;
 
     constructor() public {
-        owner = msg.sender;
         burnAmount = 10;
     }
-    
-    // for testing only
-    // function setWrapper(address _newWrapper, uint _type) public {
-    //     require(owner == msg.sender);
-        
-    //     if (_type == 1) {
-    //         OASIS_WRAPPER = _newWrapper;
-    //     } else if (_type == 2) {
-    //         KYBER_WRAPPER = _newWrapper;
-    //     } else {
-    //         UNISWAP_WRAPPER = _newWrapper;
-    //     }
-    // }
 
     /// @notice Takes a src amount of tokens and converts it into the dest token
     /// @dev Takes fee from the _srcAmount before the exchange
@@ -42,9 +28,6 @@ contract SaverExchange is SaverExchangeCore, DSMath {
         if (gasToken.balanceOf(address(this)) >= burnAmount) {
             gasToken.free(burnAmount);
         }
-
-        // transfer tokens from the user
-        pullTokens(exData.srcAddr, exData.srcAmount);
 
         // take fee
         uint dfsFee = takeFee(exData.srcAmount, exData.srcAddr);
@@ -67,9 +50,6 @@ contract SaverExchange is SaverExchangeCore, DSMath {
         if (gasToken.balanceOf(address(this)) >= burnAmount) {
             gasToken.free(burnAmount);
         }
-
-        // transfer tokens from the user
-        pullTokens(exData.srcAddr, exData.srcAmount);
 
         uint dfsFee = takeFee(exData.srcAmount, exData.srcAddr);
         exData.srcAmount = sub(exData.srcAmount, dfsFee);
@@ -98,7 +78,7 @@ contract SaverExchange is SaverExchangeCore, DSMath {
         if (fee == 0) {
             feeAmount = 0;
         } else {
-            feeAmount = _amount / SERVICE_FEE;
+            feeAmount = _amount / fee;
             if (_token == KYBER_ETH_ADDRESS) {
                 WALLET_ID.transfer(feeAmount);
             } else {

@@ -2,6 +2,7 @@ pragma solidity ^0.6.0;
 
 import "../interfaces/TokenInterface.sol";
 import "../interfaces/ExchangeInterfaceV2.sol";
+import "../utils/ZrxAllowlist.sol";
 import "./SaverExchangeHelper.sol";
 
 contract SaverExchangeCore is SaverExchangeHelper {
@@ -129,8 +130,11 @@ contract SaverExchangeCore is SaverExchangeHelper {
         uint256 _0xFee
     ) private returns (bool success, uint256, uint256) {
 
-        // solhint-disable-next-line avoid-call-value
-        (success, ) = _exData.exchangeAddr.call{value: _0xFee}(_exData.callData);
+        if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.exchangeAddr)) {
+            (success, ) = _exData.exchangeAddr.call{value: _0xFee}(_exData.callData);
+        } else {
+            success = false;
+        }
 
         uint256 tokensSwaped = 0;
         uint256 tokensLeft = _exData.srcAmount;

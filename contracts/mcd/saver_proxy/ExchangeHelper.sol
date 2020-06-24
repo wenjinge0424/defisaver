@@ -5,6 +5,7 @@ import "../../interfaces/TokenInterface.sol";
 import "../../interfaces/SaverExchangeInterface.sol";
 
 import "../../constants/ConstantAddressesExchange.sol";
+import "../../utils/ZrxAllowlist.sol";
 
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
@@ -12,6 +13,8 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 contract ExchangeHelper is ConstantAddressesExchange {
 
     using SafeERC20 for IERC20;
+
+    address public constant ZRX_ALLOWLIST_ADDR = 0x019739e288973F92bDD3c1d87178E206E51fd911;
 
     /// @notice Swaps 2 tokens on the Saver Exchange
     /// @dev ETH is sent with Weth address
@@ -99,7 +102,11 @@ contract ExchangeHelper is ConstantAddressesExchange {
     function takeOrder(address[3] memory _addresses, bytes memory _data, uint _value, uint _amount) private returns(bool, uint, uint) {
         bool success;
 
-        (success, ) = _addresses[0].call{value: _value}(_data);
+        if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_addresses[0])) {
+            (success, ) = _addresses[0].call{value: _value}(_data);
+        } else {
+            success = false;
+        }
 
         uint tokensLeft = _amount;
         uint tokensReturned = 0;

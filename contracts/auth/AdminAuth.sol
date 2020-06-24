@@ -38,4 +38,9 @@ contract AdminAuth {
 
         owner = _owner;
     }
+
+    /// @notice Destroy the contract
+    function kill() public onlyOwner {
+        selfdestruct(payable(owner));
+    }
 }
