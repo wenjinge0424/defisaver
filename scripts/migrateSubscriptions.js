@@ -100,7 +100,7 @@ const migrateVaults = async (subscribers) => {
 
 const removeAuthorities = async (addresses) => {
   console.log('Total addresses:', addresses.length);
-  const chunks1 = chunk(addresses, 40);
+  const chunks1 = chunk(addresses, 70);
 
   let totalGasUsed = 0;
   for (var i = chunks1.length-1; i >= 0; i--) {
