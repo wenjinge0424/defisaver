@@ -7,7 +7,7 @@ import "../DS/DSMath.sol";
 import "../loggers/ExchangeLogger.sol";
 import "../auth/AdminAuth.sol";
 
-contract SaverExchange is SaverExchangeCore, DSMath, AdminAuth {
+contract SaverExchange is SaverExchangeCore, AdminAuth {
 
     uint256 public constant SERVICE_FEE = 800; // 0.125% Fee
 
@@ -15,16 +15,13 @@ contract SaverExchange is SaverExchangeCore, DSMath, AdminAuth {
     ExchangeLogger public constant logger = ExchangeLogger(0xf7CE9aa00bc4f4c413E4B4a613e889C1Ad01883e);
     GasTokenInterface gasToken = GasTokenInterface(0x0000000000b3F879cb30FE243b4Dfee438691c04);
 
-    uint public burnAmount;
-
-    constructor() public {
-        burnAmount = 10;
-    }
+    uint public burnAmount = 10;
 
     /// @notice Takes a src amount of tokens and converts it into the dest token
     /// @dev Takes fee from the _srcAmount before the exchange
     /// @param exData [srcAddr, destAddr, srcAmount, destAmount, minPrice, exchangeType, exchangeAddr, callData, price0x]
-    function sell(ExchangeData memory exData) public payable {
+    /// @param _user User address who called the exchange
+    function sell(ExchangeData memory exData, address payable _user) public payable {
         if (gasToken.balanceOf(address(this)) >= burnAmount) {
             gasToken.free(burnAmount);
         }
@@ -37,7 +34,7 @@ contract SaverExchange is SaverExchangeCore, DSMath, AdminAuth {
         (address wrapper, uint destAmount) = _sell(exData);
 
         // send back any leftover ether or tokens
-        sendLeftover(exData.srcAddr, exData.destAddr, tx.origin);
+        sendLeftover(exData.srcAddr, exData.destAddr, _user);
 
         // log the event
         logger.logSwap(exData.srcAddr, exData.destAddr, exData.srcAmount, destAmount, wrapper);
@@ -46,7 +43,8 @@ contract SaverExchange is SaverExchangeCore, DSMath, AdminAuth {
     /// @notice Takes a dest amount of tokens and converts it from the src token
     /// @dev Send always more than needed for the swap, extra will be returned
     /// @param exData [srcAddr, destAddr, srcAmount, destAmount, minPrice, exchangeType, exchangeAddr, callData, price0x]
-    function buy(ExchangeData memory exData) public payable {
+    /// @param _user User address who called the exchange
+    function buy(ExchangeData memory exData, address payable _user) public payable {
         if (gasToken.balanceOf(address(this)) >= burnAmount) {
             gasToken.free(burnAmount);
         }
@@ -58,7 +56,7 @@ contract SaverExchange is SaverExchangeCore, DSMath, AdminAuth {
         (address wrapper, uint srcAmount) = _buy(exData);
 
         // send back any leftover ether or tokens
-        sendLeftover(exData.srcAddr, exData.destAddr, tx.origin);
+        sendLeftover(exData.srcAddr, exData.destAddr, _user);
 
         // log the event
         logger.logSwap(exData.srcAddr, exData.destAddr, srcAmount, exData.destAmount, wrapper);
