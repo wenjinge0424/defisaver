@@ -1,11 +1,12 @@
 pragma solidity ^0.6.0;
 
+import "../DS/DSMath.sol";
 import "../interfaces/TokenInterface.sol";
 import "../interfaces/ExchangeInterfaceV2.sol";
 import "../utils/ZrxAllowlist.sol";
 import "./SaverExchangeHelper.sol";
 
-contract SaverExchangeCore is SaverExchangeHelper {
+contract SaverExchangeCore is SaverExchangeHelper, DSMath {
 
     // first is empty to keep the legacy order in place
     enum ExchangeType { _, OASIS, KYBER, UNISWAP, ZEROX }
@@ -60,13 +61,15 @@ contract SaverExchangeCore is SaverExchangeHelper {
                 (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance);
             }
 
-            require(price > exData.minPrice, "On chain slippage hit");
-
             // 0x either had worse price or we tried and order fill failed, so call on chain swap
             if (tokensLeft > 0) {
+                require(price > exData.minPrice, "On chain slippage hit");
+
                 swapedTokens = saverSwap(exData, wrapper, ActionType.SELL);
             }
         }
+
+        require(getBalance(exData.destAddr) >= wmul(exData.minPrice, exData.srcAmount), "Double check min price");
 
         return (wrapper, swapedTokens);
     }
@@ -109,11 +112,11 @@ contract SaverExchangeCore is SaverExchangeHelper {
                 (success, swapedTokens,) = takeOrder(exData, address(this).balance);
             }
 
-            require(price < exData.minPrice, "On chain slippage hit");
-
             // 0x either had worse price or we tried and order fill failed, so call on chain swap
             if (getBalance(exData.destAddr) < exData.destAmount) {
-               swapedTokens = saverSwap(exData, wrapper, ActionType.BUY);
+                require(price < exData.minPrice, "On chain slippage hit");
+
+                swapedTokens = saverSwap(exData, wrapper, ActionType.BUY);
             }
         }
 

@@ -14,13 +14,13 @@ contract AllowanceProxy is AdminAuth {
     function callSell(SaverExchangeCore.ExchangeData memory exData) public payable {
         pullAndSendTokens(exData.srcAddr, exData.srcAmount);
 
-        saverExchange.sell{value: msg.value}(exData);
+        saverExchange.sell{value: msg.value}(exData, msg.sender);
     }
 
     function callBuy(SaverExchangeCore.ExchangeData memory exData) public payable {
         pullAndSendTokens(exData.srcAddr, exData.srcAmount);
 
-        saverExchange.buy{value: msg.value}(exData);
+        saverExchange.buy{value: msg.value}(exData, msg.sender);
     }
 
     function pullAndSendTokens(address _tokenAddr, uint _amount) internal {
@@ -28,11 +28,13 @@ contract AllowanceProxy is AdminAuth {
             require(msg.value >= _amount, "msg.value smaller than amount");
         } else {
             require(
-                ERC20(_tokenAddr).transferFrom(msg.sender, address(this), _amount),
+                ERC20(_tokenAddr).transferFrom(msg.sender, address(saverExchange), _amount),
                 "Not able to withdraw wanted amount"
             );
-
-            ERC20(_tokenAddr).transfer(address(saverExchange), _amount);
         }
+    }
+
+    function adminChangeExchange(address payable _newExchange) public onlyOwner {
+        saverExchange = SaverExchange(_newExchange);
     }
 }
