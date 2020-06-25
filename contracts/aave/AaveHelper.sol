@@ -130,4 +130,24 @@ contract AaveHelper is DSMath {
             ERC20(_tokenAddr).safeApprove(_caller, uint256(-1));
         }
     }
+
+    /// @notice Send specific amount from contract to specific user
+    /// @param _token Token we are trying to send
+    /// @param _user User that should receive funds
+    /// @param _amount Amount that should be sent
+    function sendContractBalance(address _token, address _user, uint _amount) public {
+        if (_token == ETH_ADDR) {
+            payable(_user).transfer(_amount);
+        } else {
+            ERC20(_token).safeTransfer(_user, _amount);
+        }
+    }
+
+    function sendFullContractBalance(address _token, address _user) public {
+        if (_token == ETH_ADDR) {
+            sendContractBalance(_token, _user, address(this).balance);
+        } else {
+            sendContractBalance(_token, _user, ERC20(_token).balanceOf(address(this)));
+        }
+    }
 }
