@@ -40,8 +40,10 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 			ILendingPool(lendingPool).repay(_data.destAddr, destAmount, payable(address(this)));
 		}
 		
-		// returning to msg.sender as it is the address that actually sent 0x fee
-		msg.sender.transfer(address(this).balance);
+		// first return 0x fee to msg.sender as it is the address that actually sent 0x fee
+		sendContractBalance(ETH_ADDR, msg.sender, msg.value);
+		// send all leftovers from dest addr to proxy owner
+		sendFullContractBalance(_data.destAddr, getUserAddress());
 
 		DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "AaveRepay", abi.encode(_data.srcAddr, _data.destAddr, _data.srcAmount, destAmount));
 	}
@@ -75,7 +77,7 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 		}
 
 		// returning to msg.sender as it is the address that actually sent 0x fee
-		msg.sender.transfer(address(this).balance);
+		sendContractBalance(ETH_ADDR, msg.sender, msg.value);
 
 		DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "AaveBoost", abi.encode(_data.srcAddr, _data.destAddr, _data.srcAmount, destAmount));
 	}
