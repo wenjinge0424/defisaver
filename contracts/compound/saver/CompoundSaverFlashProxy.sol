@@ -36,17 +36,23 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
         address collToken = getUnderlyingAddr(_addrData[0]);
         address borrowToken = getUnderlyingAddr(_addrData[1]);
 
-        // swap max coll + loanAmount
-        uint swapAmount = swap(
-            [(maxColl + _flashLoanData[0]), _data[1], _data[2], _data[4]], // collAmount, minPrice, exchangeType, 0xPrice
-            collToken,
-            borrowToken,
-            _addrData[2],
-            _callData
-        );
+        uint swapAmount = 0;
 
-        // get fee
-        swapAmount -= getFee(swapAmount, user, _data[3], _addrData[1]);
+        if (collToken != borrowToken) {
+            // swap max coll + loanAmount
+            swapAmount = swap(
+                [(maxColl + _flashLoanData[0]), _data[1], _data[2], _data[4]], // collAmount, minPrice, exchangeType, 0xPrice
+                collToken,
+                borrowToken,
+                _addrData[2],
+                _callData
+            );
+
+            // get fee
+            swapAmount -= getFee(swapAmount, user, _data[3], _addrData[1]);
+        } else {
+            swapAmount = (maxColl + _flashLoanData[0]);
+        }
 
         // payback debt
         paybackDebt(swapAmount, _addrData[1], borrowToken, user);
@@ -83,17 +89,23 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
         address collToken = getUnderlyingAddr(_addrData[0]);
         address borrowToken = getUnderlyingAddr(_addrData[1]);
 
-        // get dfs fee
-        borrowAmount -= getFee((borrowAmount + _flashLoanData[0]), user, _data[3], _addrData[1]);
+        uint swapAmount = 0;
 
-        // swap borrowed amount and fl loan amount
-        uint swapAmount = swap(
-            [(borrowAmount + _flashLoanData[0]), _data[1], _data[2], _data[4]], // collAmount, minPrice, exchangeType, 0xPrice
-            borrowToken,
-            collToken,
-            _addrData[2],
-            _callData
-        );
+        if (collToken != borrowToken) {
+            // get dfs fee
+            borrowAmount -= getFee((borrowAmount + _flashLoanData[0]), user, _data[3], _addrData[1]);
+
+            // swap borrowed amount and fl loan amount
+            swapAmount = swap(
+                [(borrowAmount + _flashLoanData[0]), _data[1], _data[2], _data[4]], // collAmount, minPrice, exchangeType, 0xPrice
+                borrowToken,
+                collToken,
+                _addrData[2],
+                _callData
+            );
+        } else {
+            swapAmount = (borrowAmount + _flashLoanData[0]);
+        }
 
         // deposit swaped collateral
         depositCollateral(collToken, _addrData[0], swapAmount);

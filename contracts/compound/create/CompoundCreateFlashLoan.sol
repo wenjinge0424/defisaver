@@ -57,7 +57,7 @@ contract CompoundCreateFlashLoan is FlashLoanReceiverBase {
     /// @param _fee Fee of the FL
     /// @param _params Saver proxy params
     /// @return proxyData Formated function call data
-    function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal returns (bytes memory proxyData, address payable) {
+    function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal pure  returns (bytes memory proxyData, address payable) {
         (
             uint[5] memory data, // amount, minPrice, exchangeType, gasCost, 0xPrice
             address[3] memory addrData, // cCollAddress, cBorrowAddress, exchangeAddress

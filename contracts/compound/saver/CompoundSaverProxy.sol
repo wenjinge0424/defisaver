@@ -30,15 +30,21 @@ contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
         address collToken = getUnderlyingAddr(_addrData[0]);
         address borrowToken = getUnderlyingAddr(_addrData[1]);
 
-        uint swapAmount = swap(
-            [collAmount, _data[1], _data[2], _data[4]], // collAmount, minPrice, exchangeType, 0xPrice
-            collToken,
-            borrowToken,
-            _addrData[2],
-            _callData
-        );
+        uint swapAmount = 0;
 
-        swapAmount -= getFee(swapAmount, user, _data[3], _addrData[1]);
+        if (collToken != borrowToken) {
+            swapAmount = swap(
+                [collAmount, _data[1], _data[2], _data[4]], // collAmount, minPrice, exchangeType, 0xPrice
+                collToken,
+                borrowToken,
+                _addrData[2],
+                _callData
+            );
+
+            swapAmount -= getFee(swapAmount, user, _data[3], _addrData[1]);
+        } else {
+            swapAmount = collAmount;
+        }
 
         paybackDebt(swapAmount, _addrData[1], borrowToken, user);
 
@@ -70,15 +76,21 @@ contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
         address collToken = getUnderlyingAddr(_addrData[0]);
         address borrowToken = getUnderlyingAddr(_addrData[1]);
 
-        borrowAmount -= getFee(borrowAmount, user, _data[3], _addrData[1]);
+        uint swapAmount = 0;
 
-        uint swapAmount = swap(
-            [borrowAmount, _data[1], _data[2], _data[4]], // collAmount, minPrice, exchangeType, 0xPrice
-            borrowToken,
-            collToken,
-            _addrData[2],
-            _callData
-        );
+        if (collToken != borrowToken) {
+            borrowAmount -= getFee(borrowAmount, user, _data[3], _addrData[1]);
+
+            swapAmount = swap(
+                [borrowAmount, _data[1], _data[2], _data[4]], // collAmount, minPrice, exchangeType, 0xPrice
+                borrowToken,
+                collToken,
+                _addrData[2],
+                _callData
+            );
+        } else {
+            swapAmount = borrowAmount;
+        }
 
         approveCToken(collToken, _addrData[0]);
 

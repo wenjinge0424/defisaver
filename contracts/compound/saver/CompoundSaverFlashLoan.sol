@@ -7,7 +7,7 @@ import "../../interfaces/DSProxyInterface.sol";
 contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
-    address payable public COMPOUND_SAVER_FLASH_PROXY;
+    address payable public COMPOUND_SAVER_FLASH_PROXY = 0x634EFEb11Bd9486AEd06aC039C76412Add3113Cd;
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address public owner;
@@ -85,15 +85,6 @@ contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
         }
 
         _proxy.transfer(address(this).balance);
-    }
-
-    /// @notice Sets the Saver flash proxy address
-    /// @dev Only callable once by the owner
-    /// @param _saverFlashProxy The flash proxy address
-    function setSaverFlashProxy(address payable _saverFlashProxy) public {
-        require(msg.sender == owner);
-
-        COMPOUND_SAVER_FLASH_PROXY = _saverFlashProxy;
     }
 
     receive() external override payable {}
