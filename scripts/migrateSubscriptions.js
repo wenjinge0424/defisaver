@@ -1,11 +1,11 @@
 const Web3 = require('web3');
 
 require('dotenv').config();
-const { loadAccounts, getAccounts, fundIfNeeded } = require('../test/helper.js');
+const { loadAccounts, getAccounts, fundIfNeeded, nullAddress } = require('../test/helper.js');
 const { time } = require('@openzeppelin/test-helpers');
 
 // configs
-const gasPrice = 33200000000;
+const gasPrice = 15200000000;
 
 const subscriptionsMigrationContractAddress = '0x13Aa9807Fb67737F9E99c5BF466ab5529607cd1a';
 
@@ -13,6 +13,13 @@ const MCDMonitorProxy = require("../build/contracts/MCDMonitorProxy.json");
 const Subscriptions = require("../build/contracts/Subscriptions.json");
 const SubscriptionsMigrations = require("../build/contracts/SubscriptionsMigration.json");
 const NewSubscriptions = require("../build/contracts/SubscriptionsV2.json");
+const DSAuth = require("../build/contracts/DSAuth.json");
+const DSGuard = require("../build/contracts/DSGuard.json");
+const fs = require('fs');
+
+const url = 'https://etherscan.io/tx/';
+
+const proxysWithAuthority = require("../data/addresses.json");
 
 function chunk (arr, len) {
 
@@ -27,6 +34,10 @@ function chunk (arr, len) {
   return chunks;
 }
 
+function onlyUnique(value, index, self) {
+    return self.indexOf(value) === index;
+}
+
 function removeZeroElements(arr) {
     var i = arr.length;
     while (i--) {
@@ -39,7 +50,7 @@ function removeZeroElements(arr) {
 
 const initContracts = async () => {
     // TODO: change to mainnet
-    web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_ENDPOINT));
+    web3 = new Web3(new Web3.providers.HttpProvider(process.env.ALCHEMY_NODE));
     web3 = loadAccounts(web3);
     accounts = getAccounts(web3);
 
@@ -89,13 +100,14 @@ const migrateVaults = async (subscribers) => {
   console.log("Subscriptions migrated")
 }
 
-const removeAuthorities = async (addresses) => {
+const removeAuthorities = async (addresses, nonce) => {
   console.log('Total addresses:', addresses.length);
   const chunks1 = chunk(addresses, 15);
 
+  let totalGasUsed = 0;
   for (var i = chunks1.length-1; i >= 0; i--) {
-      console.log(chunks1[i])
-      await subscriptionsMigrations.methods.removeAuthority(chunks1[i]).send({from: bot.address, gas: 4000000, gasPrice: gasPrice});
+      nonce+=1;
+      subscriptionsMigrations.methods.removeAuthority(chunks1[i]).send({from: bot.address, gas: 1000000, gasPrice: gasPrice, nonce}).on('transactionHash', function(transactionHash){ console.log(`${url}${transactionHash}`) })
   }
 
   console.log('Authorities removed'); 
@@ -110,6 +122,31 @@ const unsubscribeMoved = async (subscribers) => {
 
   const finalSubscribers = await subscriptionsContract.methods.getSubscribers().call();
   console.log('Final count:', removeZeroElements(finalSubscribers.length));
+} 
+
+const checkAuthority = async (web3, proxy, contractAddress) => {
+  const auth = new web3.eth.Contract(DSAuth.abi, proxy);
+  const guardAddress = await auth.methods.authority().call();
+
+  if (guardAddress == nullAddress) return false;
+
+  const guard = new web3.eth.Contract(DSGuard.abi, guardAddress);
+
+  return await guard.methods.canCall(contractAddress, proxy, "0x1cff79cd").call();
+}
+
+const getSubscribersUniqueAddresses = async () => {
+    console.log('fetching events');
+    const events = await subscriptionsContract.getPastEvents('Subscribed', {
+      fromBlock: 'earliest',
+      toBlock: 'latest',
+    });
+    console.log(events.length);
+    
+    const uniqueAddresses = events.map(e => e.returnValues.owner).filter(onlyUnique);
+    console.log(uniqueAddresses.length);
+
+    await fs.writeFileSync('/home/djoney/defisaver/contracts/data/addresses.json', JSON.stringify(uniqueAddresses));
 }
 
 (async () => {
@@ -128,18 +165,26 @@ const unsubscribeMoved = async (subscribers) => {
     // TODO: remove for mainnet
     // await time.increase(60*60*24*15);  
 
-    await confirmMonitorChangeAndAuthorizeBot();
-    const subscribersAll = await subscriptionsContract.methods.getSubscribers().call();
+    // await confirmMonitorChangeAndAuthorizeBot();
+    // const subscribersAll = await subscriptionsContract.methods.getSubscribers().call();
 
-    await migrateVaults(removeZeroElements(subscribersAll));
+    // await migrateVaults(removeZeroElements(subscribersAll));
 
     // should be changed to all addresses that ever had authority
-    const allAddresses = subscribersAll.map(sub => sub.owner);
-    await removeAuthorities(allAddresses);
+    // const allAddresses = subscribersAll.map(sub => sub.owner);
 
-    const leftSubscribers = await subscriptionsContract.methods.getSubscribers().call();
-    await unsubscribeMoved(removeZeroElements(leftSubscribers));
+    // await getSubscribersUniqueAddresses();
 
-    const endSubs = await subscriptionsV2.methods.getSubscribers().call();
-    console.log('New subs:', endSubs.length);
+    await removeAuthorities(proxysWithAuthority, 419);
+
+    // check if noone has authority anymore
+    // for (let i=0; i<removed.length; i++) {
+    //   console.log(i);
+    //   const canCall = await checkAuthority(web3, removed[i], '0x93Efcf86b6a7a33aE961A7Ec6C741F49bce11DA7');
+
+    //   if (canCall) console.log(removed[i]);
+    // }
+
+    console.log('done');
+
 })();

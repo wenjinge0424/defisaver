@@ -10,7 +10,7 @@ contract CompoundSubscriptionsProxy {
 
     address public constant FACTORY_ADDRESS = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
 
-    address public constant COMPOUND_SUBSCRIPTION_ADDRESS = 0x80f3A335b0D0f9604A4cd116B6f7bf036FCC7d8c;
+    address public constant COMPOUND_SUBSCRIPTION_ADDRESS = 0x84BC0c6e8314658398679E59C4F3271DE71C9278;
 
     /// @notice Calls subscription contract and creates a DSGuard if non existent
     /// @param _minRatio Minimum ratio below which repay is triggered
