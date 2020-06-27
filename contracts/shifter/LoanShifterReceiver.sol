@@ -1,23 +1,32 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import "./LoanShifterTaker.sol";
+import "../auth/AdminAuth.sol";
 import "../utils/FlashLoanReceiverBase.sol";
 import "../interfaces/DSProxyInterface.sol";
 import "../interfaces/ERC20.sol";
+import "../exchange/SaverExchangeCore.sol";
 
-contract LoanShifterReceiver is FlashLoanReceiverBase {
+
+contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminAuth {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    address payable public owner;
-
     LoanShifterTaker loanShifterTaker = LoanShifterTaker(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+
+    struct ParamData {
+        bytes proxyData1;
+        bytes proxyData2;
+        address proxy;
+        uint8 protocol1;
+        uint8 protocol2;
+    }
 
     constructor()
         FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
         public {
-            owner = msg.sender;
     }
 
     function executeOperation(
@@ -27,17 +36,27 @@ contract LoanShifterReceiver is FlashLoanReceiverBase {
         bytes calldata _params)
     external override {
         // Format the call data for DSProxy
-        (bytes memory proxyData, address payable proxyAddr, uint8 protocol)
-                                 = packFunctionCall(_amount, _fee, _params);
+        (ParamData memory paramData, ExchangeData memory exchangeData)
+                                 = packFunctionCall(_amount, _params);
 
-        address protocolAddr = loanShifterTaker.getProtocolAddr(LoanShifterTaker.Protocols(protocol));
-        require(protocolAddr != address(0), "Protocol addr not found");
+        address protocolAddr1 = loanShifterTaker.getProtocolAddr(LoanShifterTaker.Protocols(paramData.protocol1));
+        require(protocolAddr1 != address(0), "Protocol1 addr not found");
+
+        address protocolAddr2 = loanShifterTaker.getProtocolAddr(LoanShifterTaker.Protocols(paramData.protocol2));
+        require(protocolAddr2 != address(0), "Protocol2 addr not found");
 
         // Send Flash loan amount to DSProxy
-        sendLoanToProxy(proxyAddr, _reserve, _amount);
+        sendLoanToProxy(payable(paramData.proxy), _reserve, _amount);
 
-        // Execute the DSProxy call
-        DSProxyInterface(proxyAddr).execute(protocolAddr, proxyData);
+        // Execute the Close operation
+        DSProxyInterface(paramData.proxy).execute(protocolAddr1, paramData.proxyData1);
+
+        if (paramData.protocol1 != paramData.protocol2) {
+            _sell(exchangeData); // TODO: handle when sell, when buy
+        }
+
+        // Execute the Open operation
+        DSProxyInterface(paramData.proxy).execute(protocolAddr2, paramData.proxyData2);
 
         // Repay FL
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
@@ -48,26 +67,46 @@ contract LoanShifterReceiver is FlashLoanReceiverBase {
         }
     }
 
-    function packFunctionCall(uint _amount, uint _fee, bytes memory _params)
-        internal view returns (bytes memory proxyData, address payable, uint8) {
+    function packFunctionCall(uint _amount, bytes memory _params)
+        internal view returns (ParamData memory paramData, ExchangeData memory exchangeData) {
 
         (
-            uint8 protocol,
-            uint id1,
-            address addrLoan1,
-            uint collAmount,
-            uint debtAmount,
-            address payable proxyAddr
+            uint[8] memory numData, // collAmount, debtAmount, id1, id2, srcAmount, destAmount, minPrice, price0x
+            address[5] memory addrData, // addrLoan1, addrLoan2, srcAddr, destAddr, exchangeAddr
+            uint8[3] memory enumData, // fromProtocol, toProtocol, exchangeType
+            bytes memory callData,
+            address proxy
         )
-        = abi.decode(_params, (uint8,uint256,address,uint256,uint256,address));
+        = abi.decode(_params, (uint256[8],address[5],uint8[3],bytes,address));
 
-        if (protocol == uint8(LoanShifterTaker.Protocols.MCD)) {
-            proxyData = abi.encodeWithSignature(
-                "close(uint256,address,uint256,uint256,address)",
-                                    id1, addrLoan1, _amount, collAmount, address(loanShifterTaker));
-        }
+        bytes memory proxyData1 = abi.encodeWithSignature(
+            "close(uint256,address,uint256,uint256,address)",
+                                numData[2], addrData[0], _amount, numData[0], address(loanShifterTaker));
 
-        return (proxyData, proxyAddr, protocol);
+         bytes memory proxyData2 = abi.encodeWithSignature(
+            "open(uint256,address,uint256,uint256,address)",
+                                numData[3], addrData[1], _amount, numData[1], address(loanShifterTaker));
+
+        paramData = ParamData({
+            proxyData1: proxyData1,
+            proxyData2: proxyData2,
+            proxy: proxy,
+            protocol1: enumData[0],
+            protocol2: enumData[1]
+        });
+
+        exchangeData = SaverExchangeCore.ExchangeData({
+            srcAddr: addrData[2],
+            destAddr: addrData[3],
+            srcAmount: numData[4],
+            destAmount: numData[5],
+            minPrice: numData[6],
+            exchangeType: ExchangeType(enumData[2]),
+            exchangeAddr: addrData[4],
+            callData: callData,
+            price0x: numData[7]
+        });
+
     }
 
     function sendLoanToProxy(address payable _proxy, address _reserve, uint _amount) internal {
@@ -78,4 +117,5 @@ contract LoanShifterReceiver is FlashLoanReceiverBase {
         _proxy.transfer(address(this).balance);
     }
 
+    receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}
 }

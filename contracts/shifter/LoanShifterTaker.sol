@@ -13,7 +13,7 @@ import "../loggers/FlashLoanLogger.sol";
 import "../utils/ExchangeDataParser.sol";
 import "../exchange/SaverExchangeCore.sol";
 
-contract LoanShifterTaker is SaverExchangeCore, ExchangeDataParser, AdminAuth, ProxyPermission {
+contract LoanShifterTaker is AdminAuth, ProxyPermission {
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
@@ -47,34 +47,21 @@ contract LoanShifterTaker is SaverExchangeCore, ExchangeDataParser, AdminAuth, P
 
     /// @notice Moves a Loan from one protocol to another, without changing the assets
     function moveLoan(
-        LoanShiftData memory _loanShift
+        LoanShiftData memory _loanShift,
+        SaverExchangeCore.ExchangeData memory _exchangeData
     ) public {
         if (isSameTypeVaults(_loanShift)) {
             forkVault(_loanShift);
             return;
         }
 
-        // Close Loan 1
-        callClose(_loanShift);
-
-        // Open Loan on the new Protocol or add to existing
-        callOpen(_loanShift);
+        callCloseAndOpen(_loanShift, _exchangeData);
     }
 
-    function moveLoanAndSwap(
+    function callCloseAndOpen(
         LoanShiftData memory _loanShift,
-        SaverExchangeCore.ExchangeData memory exchangeData
-    ) public {
-         // Close Loan 1
-        callClose(_loanShift);
-
-        // Exchange
-
-        // Open
-        callOpen(_loanShift);
-    }
-
-    function callClose(LoanShiftData memory _loanShift) internal {
+        SaverExchangeCore.ExchangeData memory _exchangeData
+    ) internal {
         address protoAddr = getProtocolAddr(_loanShift.fromProtocol);
 
         uint loanAmount = _loanShift.debtAmount;
@@ -83,15 +70,17 @@ contract LoanShifterTaker is SaverExchangeCore, ExchangeDataParser, AdminAuth, P
             loanAmount = ILoanShifter(protoAddr).getLoanAmount(_loanShift.id1, _loanShift.addrLoan1);
         }
 
+        (
+            uint[8] memory numData,
+            address[5] memory addrData,
+            uint8[3] memory enumData,
+            bool wholeDebt,
+            bytes memory callData
+        )
+        = packData(_loanShift, _exchangeData);
+
         // encode data
-        bytes memory paramsData = abi.encode(
-            uint8(_loanShift.fromProtocol),
-            _loanShift.id1,
-            _loanShift.addrLoan1,
-            _loanShift.collAmount,
-            _loanShift.debtAmount,
-            address(this)
-        );
+        bytes memory paramsData = abi.encode(numData, addrData, enumData, callData, address(this));
 
         // call FL
         givePermission(LOAN_MOVER);
@@ -101,40 +90,6 @@ contract LoanShifterTaker is SaverExchangeCore, ExchangeDataParser, AdminAuth, P
 
         removePermission(LOAN_MOVER);
     }
-
-    function callOpen(LoanShiftData memory _loanShift) internal {
-        address protoAddr = getProtocolAddr(_loanShift.fromProtocol);
-
-        // send collateral to protoAddr
-
-        bytes memory proxyData = abi.encodeWithSignature(
-                "open(uint256,address,uint256,uint256)",
-                _loanShift.id2, _loanShift.id2, _loanShift.id2, _loanShift.id2);
-
-        DSProxyInterface(address(this)).execute(protoAddr, proxyData);
-    }
-
-    // function makerChangeColl(
-    //     uint _cdpId,
-    //     address _joinAddrFrom,
-    //     address _joinAddrTo,
-    //     SaverExchangeCore.ExchangeData memory exchangeData
-    // ) public {
-    //     bytes32 ilk = manager.ilks(_cdpId);
-    //     uint wholeDebtAmount = getAllDebtCDP(VAT_ADDRESS, manager.urns(_cdpId), manager.urns(_cdpId), ilk);
-
-    //     (address[3] memory exAddr, uint[5] memory exNum, bytes memory callData) = decodeExchangeData(exchangeData);
-
-    //     bytes memory paramsData = abi.encode(_cdpId, _joinAddrFrom, _joinAddrTo, exAddr, exNum, callData);
-
-    //     givePermission(LOAN_MOVER);
-
-    //     lendingPool.flashLoan(LOAN_MOVER, DAI_ADDRESS, wholeDebtAmount, paramsData);
-
-    //     removePermission(LOAN_MOVER);
-
-    //     logger.logFlashLoan("makerChangeColl", wholeDebtAmount, _cdpId, DAI_ADDRESS);
-    // }
 
     function getProtocolAddr(Protocols _proto) public view returns (address) {
         return contractAddresses[_proto];
@@ -151,7 +106,6 @@ contract LoanShifterTaker is SaverExchangeCore, ExchangeDataParser, AdminAuth, P
         } else {
             // TODO: partial shift
         }
-
     }
 
     function isSameTypeVaults(LoanShiftData memory _loanShift) internal pure returns (bool) {
@@ -161,6 +115,40 @@ contract LoanShifterTaker is SaverExchangeCore, ExchangeDataParser, AdminAuth, P
 
     function addProtocol(uint8 _protoType, address _protoAddr) public onlyOwner {
         contractAddresses[Protocols(_protoType)] = _protoAddr;
+    }
+
+    function packData(
+        LoanShiftData memory _loanShift,
+        SaverExchangeCore.ExchangeData memory exchangeData
+    ) internal pure returns (uint[8] memory numData, address[5] memory addrData, uint8[3] memory enumData, bool wholeDebt, bytes memory callData) {
+
+        numData = [
+            _loanShift.collAmount,
+            _loanShift.debtAmount,
+            _loanShift.id1,
+            _loanShift.id2,
+            exchangeData.srcAmount,
+            exchangeData.destAmount,
+            exchangeData.minPrice,
+            exchangeData.price0x
+        ];
+
+        addrData = [
+            _loanShift.addrLoan1,
+            _loanShift.addrLoan2,
+            exchangeData.srcAddr,
+            exchangeData.destAddr,
+            exchangeData.exchangeAddr
+        ];
+
+        enumData = [
+            uint8(_loanShift.fromProtocol),
+            uint8(_loanShift.toProtocol),
+            uint8(exchangeData.exchangeType)
+        ];
+
+        wholeDebt = _loanShift.wholeDebt;
+        callData = exchangeData.callData;
     }
 
 }
