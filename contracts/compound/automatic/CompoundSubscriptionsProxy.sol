@@ -1,16 +1,13 @@
 pragma solidity ^0.6.0;
 
-import "../../DS/DSGuard.sol";
-import "../../DS/DSAuth.sol";
-import "../../constants/ConstantAddresses.sol";
+import "../../auth/ProxyPermission.sol";
 import "../../interfaces/ICompoundSubscription.sol";
 
 /// @title SubscriptionsProxy handles authorization and interaction with the Subscriptions contract
-contract CompoundSubscriptionsProxy {
-
-    address public constant FACTORY_ADDRESS = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
+contract CompoundSubscriptionsProxy is ProxyPermission {
 
     address public constant COMPOUND_SUBSCRIPTION_ADDRESS = 0x84BC0c6e8314658398679E59C4F3271DE71C9278;
+    address public constant COMPOUND_MONITOR_PROXY = 0x80f3A335b0D0f9604A4cd116B6f7bf036FCC7d8c;
 
     /// @notice Calls subscription contract and creates a DSGuard if non existent
     /// @param _minRatio Minimum ratio below which repay is triggered
@@ -25,17 +22,7 @@ contract CompoundSubscriptionsProxy {
         uint128 _optimalRatioRepay,
         bool _boostEnabled
     ) public {
-
-        address currAuthority = address(DSAuth(address(this)).authority());
-        DSGuard guard = DSGuard(currAuthority);
-
-        if (currAuthority == address(0)) {
-            guard = DSGuardFactory(FACTORY_ADDRESS).newGuard();
-            DSAuth(address(this)).setAuthority(DSAuthority(address(guard)));
-        }
-
-        guard.permit(COMPOUND_SUBSCRIPTION_ADDRESS, address(this), bytes4(keccak256("execute(address,bytes)")));
-
+        givePermission(COMPOUND_MONITOR_PROXY);
         ICompoundSubscription(COMPOUND_SUBSCRIPTION_ADDRESS).subscribe(
             _minRatio, _maxRatio, _optimalRatioBoost, _optimalRatioRepay, _boostEnabled);
     }
@@ -59,6 +46,7 @@ contract CompoundSubscriptionsProxy {
 
     /// @notice Calls the subscription contract to unsubscribe the caller
     function unsubscribe() public {
+        removePermission(COMPOUND_MONITOR_PROXY);
         ICompoundSubscription(COMPOUND_SUBSCRIPTION_ADDRESS).unsubscribe();
     }
 }
