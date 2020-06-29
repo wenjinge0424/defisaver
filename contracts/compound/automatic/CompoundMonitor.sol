@@ -11,7 +11,7 @@ import "../../loggers/AutomaticLogger.sol";
 import "../CompoundLoanInfo.sol";
 
 /// @title Contract implements logic of calling boost/repay in the automatic system
-contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo, GasBurner {
+contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
 
     using SafeERC20 for ERC20;
 
@@ -145,7 +145,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo, GasBurner {
         // check if boost and boost allowed
         if (_method == Method.Boost && !holder.boostEnabled) return (false, 0);
 
-        uint currRatio = getRatio(_user);
+        uint currRatio = getSafetyRatio(_user);
 
         if (_method == Method.Repay) {
             return (currRatio < holder.minRatio, currRatio);
@@ -163,7 +163,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundLoanInfo, GasBurner {
 
         holder= subscriptionsContract.getHolder(_user);
 
-        uint currRatio = getRatio(_user);
+        uint currRatio = getSafetyRatio(_user);
 
         if (_method == Method.Repay) {
             return (currRatio < holder.maxRatio, currRatio);

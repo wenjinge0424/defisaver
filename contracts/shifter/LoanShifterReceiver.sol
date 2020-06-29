@@ -24,10 +24,7 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
         uint8 protocol2;
     }
 
-    constructor()
-        FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
-        public {
-    }
+    constructor() FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) public {}
 
     function executeOperation(
         address _reserve,
@@ -53,6 +50,7 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
 
         if (paramData.protocol1 != paramData.protocol2) {
             _sell(exchangeData); // TODO: handle when sell, when buy
+            // kada menjam borrow buy
         }
 
         // Execute the Open operation
@@ -80,12 +78,12 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
         = abi.decode(_params, (uint256[8],address[5],uint8[3],bytes,address));
 
         bytes memory proxyData1 = abi.encodeWithSignature(
-            "close(uint256,address,uint256,uint256,address)",
-                                numData[2], addrData[0], _amount, numData[0], address(loanShifterTaker));
+            "close(uint256,address,uint256,uint256)",
+                                numData[2], addrData[0], _amount, numData[0]);
 
          bytes memory proxyData2 = abi.encodeWithSignature(
-            "open(uint256,address,uint256,uint256,address)",
-                                numData[3], addrData[1], _amount, numData[1], address(loanShifterTaker));
+            "open(uint256,address,uint256,uint256)",
+                                numData[3], addrData[1], _amount, numData[1]);
 
         paramData = ParamData({
             proxyData1: proxyData1,

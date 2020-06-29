@@ -24,4 +24,5 @@ abstract contract Vat {
     function frob(bytes32, address, address, address, int, int) virtual public;
     function hope(address) virtual public;
     function move(address, address, uint) virtual public;
+    function fork(bytes32, address, address, int, int) virtual public;
 }

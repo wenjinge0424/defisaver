@@ -74,7 +74,6 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
             uint[8] memory numData,
             address[5] memory addrData,
             uint8[3] memory enumData,
-            bool wholeDebt,
             bytes memory callData
         )
         = packData(_loanShift, _exchangeData);
@@ -104,7 +103,13 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         if (_loanShift.wholeDebt) {
             manager.shift(_loanShift.id1, _loanShift.id2);
         } else {
-            // TODO: partial shift
+            Vat(VAT_ADDRESS).fork(
+                manager.ilks(_loanShift.id1),
+                manager.urns(_loanShift.id1),
+                manager.urns(_loanShift.id2),
+                int(_loanShift.collAmount),
+                int(_loanShift.debtAmount)
+            );
         }
     }
 
@@ -120,7 +125,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
     function packData(
         LoanShiftData memory _loanShift,
         SaverExchangeCore.ExchangeData memory exchangeData
-    ) internal pure returns (uint[8] memory numData, address[5] memory addrData, uint8[3] memory enumData, bool wholeDebt, bytes memory callData) {
+    ) internal pure returns (uint[8] memory numData, address[5] memory addrData, uint8[3] memory enumData, bytes memory callData) {
 
         numData = [
             _loanShift.collAmount,
@@ -147,7 +152,6 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
             uint8(exchangeData.exchangeType)
         ];
 
-        wholeDebt = _loanShift.wholeDebt;
         callData = exchangeData.callData;
     }
 
