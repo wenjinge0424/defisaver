@@ -8,7 +8,7 @@ import "../../interfaces/GasTokenInterface.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 import "../../loggers/AutomaticLogger.sol";
-import "../CompoundLoanInfo.sol";
+import "../CompoundSafetyRatio.sol";
 
 /// @title Contract implements logic of calling boost/repay in the automatic system
 contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
