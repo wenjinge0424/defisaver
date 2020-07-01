@@ -23,8 +23,7 @@ contract McdShifter is MCDSaverProxy {
         uint _cdpId,
         address _joinAddr,
         uint _loanAmount,
-        uint _collateral,
-        address payable _loanSiftTaker
+        uint _collateral
     ) public {
         address owner = getOwner(manager, _cdpId);
         bytes32 ilk = manager.ilks(_cdpId);
@@ -40,10 +39,10 @@ contract McdShifter is MCDSaverProxy {
 
         // send back to LoanShifterTaker
         if (_joinAddr == ETH_JOIN_ADDRESS) {
-            _loanSiftTaker.transfer(address(this).balance);
+            msg.sender.transfer(address(this).balance);
         } else {
             ERC20 collToken = ERC20(getCollateralAddr(_joinAddr));
-            collToken.transfer(_loanSiftTaker, collToken.balanceOf(address(this)));
+            collToken.transfer(msg.sender, collToken.balanceOf(address(this)));
         }
     }
 
@@ -53,6 +52,7 @@ contract McdShifter is MCDSaverProxy {
         uint _collAmount,
         uint _debtAmount
     ) public {
+        // TODO: what if existing CDP
         openAndWithdraw(_collAmount, _debtAmount, msg.sender, _joinAddr);
 
         if (address(this).balance > 0) {

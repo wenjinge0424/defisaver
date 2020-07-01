@@ -1,18 +1,13 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "../interfaces/ComptrollerInterface.sol";
+import "./CompoundSafetyRatio.sol";
 import "../interfaces/CTokenInterface.sol";
-import "./helpers/Exponential.sol";
 import "./helpers/CompoundSaverHelper.sol";
 
-/// @title Gets data about Compound positions
-contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
-    // solhint-disable-next-line const-name-snakecase
-    ComptrollerInterface public constant comp = ComptrollerInterface(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
 
-    // solhint-disable-next-line const-name-snakecase
-    CompoundOracleInterface public constant oracle = CompoundOracleInterface(0xDDc46a3B076aec7ab3Fc37420A8eDd2959764Ec4);
+/// @title Gets data about Compound positions
+contract CompoundLoanInfo is CompoundSafetyRatio, CompoundSaverHelper {
 
     struct LoanData {
         address user;
@@ -41,6 +36,7 @@ contract CompoundLoanInfo is Exponential, CompoundSaverHelper {
         uint collateralFactor;
         uint price;
     }
+
 
     /// @notice Calcualted the ratio of coll/debt for a compound user
     /// @param _user Address of the user
