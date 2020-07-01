@@ -2,7 +2,6 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "./CompoundSafetyRatio.sol";
-import "../interfaces/CTokenInterface.sol";
 import "./helpers/CompoundSaverHelper.sol";
 
 

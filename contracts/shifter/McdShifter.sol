@@ -35,9 +35,9 @@ contract McdShifter is MCDSaverProxy {
         maxColl = _collateral > maxColl ? maxColl : _collateral;
 
         // withdraw collateral from cdp
-        drawMaxCollateral(_cdpId, ilk, _joinAddr, maxColl);
+        drawMaxCollateral(_cdpId, _joinAddr, maxColl);
 
-        // send back to LoanShifterTaker
+        // send back to msg.sender
         if (_joinAddr == ETH_JOIN_ADDRESS) {
             msg.sender.transfer(address(this).balance);
         } else {
@@ -52,8 +52,17 @@ contract McdShifter is MCDSaverProxy {
         uint _collAmount,
         uint _debtAmount
     ) public {
-        // TODO: what if existing CDP
-        openAndWithdraw(_collAmount, _debtAmount, msg.sender, _joinAddr);
+        if (_cdpId == 0) {
+            openAndWithdraw(_collAmount, _debtAmount, msg.sender, _joinAddr);
+        } else {
+            // add collateral
+            addCollateral(_cdpId, _joinAddr, _collAmount);
+            // draw debt
+            drawDai(_cdpId, manager.ilks(_cdpId), _debtAmount);
+        }
+
+        // transfer to repay FL
+        ERC20(DAI_ADDRESS).transfer(msg.sender, ERC20(DAI_ADDRESS).balanceOf(address(this)));
 
         if (address(this).balance > 0) {
             tx.origin.transfer(address(this).balance);
@@ -91,7 +100,7 @@ contract McdShifter is MCDSaverProxy {
     }
 
 
-    function drawMaxCollateral(uint _cdpId, bytes32 _ilk, address _joinAddr, uint _amount) internal returns (uint) {
+    function drawMaxCollateral(uint _cdpId, address _joinAddr, uint _amount) internal returns (uint) {
         manager.frob(_cdpId, -toPositiveInt(_amount), 0);
         manager.flux(_cdpId, address(this), _amount);
 
