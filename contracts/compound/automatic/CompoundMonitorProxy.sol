@@ -127,7 +127,7 @@ contract CompoundMonitorProxy is AdminAuth {
     /// @param _token address of token to withdraw balance
     function withdrawToken(address _token) public onlyOwner {
         uint balance = ERC20(_token).balanceOf(address(this));
-        ERC20(_token).transfer(msg.sender, balance);
+        ERC20(_token).safeTransfer(msg.sender, balance);
     }
 
     /// @notice In case something is left in contract, owner is able to withdraw it
