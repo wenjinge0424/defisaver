@@ -42,39 +42,7 @@ contract CompoundLoanInfo is CompoundSafetyRatio, CompoundSaverHelper {
     /// @param _user Address of the user
     function getRatio(address _user) public view returns (uint) {
         // For each asset the account is in
-        address[] memory assets = comp.getAssetsIn(_user);
-
-        uint sumCollateral = 0;
-        uint sumBorrow = 0;
-
-        for (uint i = 0; i < assets.length; i++) {
-            address asset = assets[i];
-
-            (, uint cTokenBalance, uint borrowBalance, uint exchangeRateMantissa)
-                                        = CTokenInterface(asset).getAccountSnapshot(_user);
-
-            Exp memory oraclePrice;
-
-            if (cTokenBalance != 0 || borrowBalance != 0) {
-                oraclePrice = Exp({mantissa: oracle.getUnderlyingPrice(asset)});
-            }
-
-            // Sum up collateral in Eth
-            if (cTokenBalance != 0) {
-                Exp memory exchangeRate = Exp({mantissa: exchangeRateMantissa});
-                (, Exp memory tokensToEther) = mulExp(exchangeRate, oraclePrice);
-                (, sumCollateral) = mulScalarTruncateAddUInt(tokensToEther, cTokenBalance, sumCollateral);
-            }
-
-            // Sum up debt in Eth
-            if (borrowBalance != 0) {
-                (, sumBorrow) = mulScalarTruncateAddUInt(oraclePrice, borrowBalance, sumBorrow);
-            }
-        }
-
-        if (sumBorrow == 0) return 0;
-
-        return (sumCollateral * 10**18) / sumBorrow;
+        return getSafetyRatio(_user);
     }
 
     /// @notice Fetches Compound prices for tokens
@@ -193,7 +161,7 @@ contract CompoundLoanInfo is CompoundSafetyRatio, CompoundSaverHelper {
         ratios = new uint[](_users.length);
 
         for (uint i = 0; i < _users.length; ++i) {
-            ratios[i] = getRatio(_users[i]);
+            ratios[i] = getSafetyRatio(_users[i]);
         }
     }
 
