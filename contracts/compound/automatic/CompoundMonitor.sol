@@ -7,7 +7,7 @@ import "./CompoundSubscriptions.sol";
 import "../../interfaces/GasTokenInterface.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
-import "../../loggers/AutomaticLogger.sol";
+import "../../loggers/DefisaverLogger.sol";
 import "../CompoundSafetyRatio.sol";
 
 /// @title Contract implements logic of calling boost/repay in the automatic system
@@ -26,13 +26,13 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
     uint public BOOST_GAS_COST = 1500000;
 
     address public constant GAS_TOKEN_INTERFACE_ADDRESS = 0x0000000000b3F879cb30FE243b4Dfee438691c04;
-    address public constant AUTOMATIC_LOGGER_ADDRESS = 0xAD32Ce09DE65971fFA8356d7eF0B783B82Fd1a9A;
+    address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
     CompoundMonitorProxy public compoundMonitorProxy;
     CompoundSubscriptions public subscriptionsContract;
     address public compoundFlashLoanTakerAddress;
 
-    AutomaticLogger public logger = AutomaticLogger(AUTOMATIC_LOGGER_ADDRESS);
+    DefisaverLogger public logger = DefisaverLogger(DEFISAVER_LOGGER);
 
     /// @dev Addresses that are able to call methods for repay and boost
     mapping(address => bool) public approvedCallers;
@@ -69,8 +69,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
         (bool isAllowed, uint ratioBefore) = canCall(Method.Repay, _user);
         require(isAllowed); // check if conditions are met
 
-        uint gasCost = calcGasCost(REPAY_GAS_COST);
-        _data[4] = gasCost;
+        _data[4] = calcGasCost(REPAY_GAS_COST);
 
         compoundMonitorProxy.callExecute{value: msg.value}(
             _user,
@@ -83,7 +82,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
 
         returnEth();
 
-        logger.logRepay(0, msg.sender, _data[0], ratioBefore, ratioAfter);
+        logger.Log(address(this), msg.sender, "AutomaticCompoundRepay", abi.encode(ratioBefore, ratioAfter));
     }
 
     /// @notice Bots call this method to boost for user when conditions are met
@@ -102,8 +101,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
         (bool isAllowed, uint ratioBefore) = canCall(Method.Boost, _user);
         require(isAllowed); // check if conditions are met
 
-        uint gasCost = calcGasCost(BOOST_GAS_COST);
-        _data[4] = gasCost;
+        _data[4] = calcGasCost(BOOST_GAS_COST);
 
         compoundMonitorProxy.callExecute{value: msg.value}(
             _user,
@@ -117,7 +115,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
 
         returnEth();
 
-        logger.logBoost(0, msg.sender, _data[0], ratioBefore, ratioAfter);
+        logger.Log(address(this), msg.sender, "AutomaticCompoundBoost", abi.encode(ratioBefore, ratioAfter));
     }
 
 /******************* INTERNAL METHODS ********************************/
