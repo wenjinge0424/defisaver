@@ -91,6 +91,31 @@ contract CompoundSaverHelper is DSMath {
         }
     }
 
+    /// @notice Calculates the gas cost of transaction and send it to wallet
+    /// @param _amount Amount that is converted
+    /// @param _gasCost Ether amount of gas we are spending for tx
+    /// @param _cTokenAddr CToken addr. of token we are getting for the fee
+    /// @return feeAmount The amount we took for the fee
+    function getGasCost(uint _amount, uint _gasCost, address _cTokenAddr) internal returns (uint feeAmount) {
+        address tokenAddr = getUnderlyingAddr(_cTokenAddr);
+
+        if (_gasCost != 0) {
+            uint ethTokenPrice = CompoundOracleInterface(COMPOUND_ORACLE).getUnderlyingPrice(_cTokenAddr);
+            feeAmount = rmul(_gasCost, ethTokenPrice);
+        }
+
+        // fee can't go over 20% of the whole amount
+        if (feeAmount > (_amount / 5)) {
+            feeAmount = _amount / 5;
+        }
+
+        if (tokenAddr == ETH_ADDRESS) {
+            WALLET_ADDR.transfer(feeAmount);
+        } else {
+            ERC20(tokenAddr).safeTransfer(WALLET_ADDR, feeAmount);
+        }
+    }
+
     /// @notice Enters the market for the collatera and borrow tokens
     /// @param _cTokenAddrColl Collateral address we are entering the market in
     /// @param _cTokenAddrBorrow Borrow address we are entering the market in

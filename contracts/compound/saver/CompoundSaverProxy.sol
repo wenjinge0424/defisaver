@@ -44,6 +44,7 @@ contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
             swapAmount -= getFee(swapAmount, user, _data[3], _addrData[1]);
         } else {
             swapAmount = collAmount;
+            swapAmount -= getGasCost(swapAmount, _data[3], _addrData[1]);
         }
 
         paybackDebt(swapAmount, _addrData[1], borrowToken, user);
@@ -90,6 +91,7 @@ contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
             );
         } else {
             swapAmount = borrowAmount;
+            swapAmount -= getGasCost(borrowAmount, _data[3], _addrData[1]);
         }
 
         approveCToken(collToken, _addrData[0]);
