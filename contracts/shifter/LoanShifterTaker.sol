@@ -37,6 +37,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         bool wholeDebt;
         uint collAmount;
         uint debtAmount;
+        address debtAddr;
         address addrLoan1;
         address addrLoan2;
         uint id1;
@@ -45,7 +46,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
 
     mapping (Protocols => address) public contractAddresses;
 
-    /// @notice Moves a Loan from one protocol to another, without changing the assets
+    /// @notice Main entry point, it will move or transform a loan
     function moveLoan(
         LoanShiftData memory _loanShift,
         SaverExchangeCore.ExchangeData memory _exchangeData
@@ -56,6 +57,11 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         }
 
         callCloseAndOpen(_loanShift, _exchangeData);
+    }
+
+    /// @notice An admin only function to add/change a protocols address
+    function addProtocol(uint8 _protoType, address _protoAddr) public onlyOwner {
+        contractAddresses[Protocols(_protoType)] = _protoAddr;
     }
 
     function callCloseAndOpen(
@@ -72,7 +78,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
 
         (
             uint[8] memory numData,
-            address[5] memory addrData,
+            address[6] memory addrData,
             uint8[3] memory enumData,
             bytes memory callData
         )
@@ -84,8 +90,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         // call FL
         givePermission(LOAN_MOVER);
 
-        // TODO: DAI_ADDRESS
-        lendingPool.flashLoan(LOAN_MOVER, DAI_ADDRESS, loanAmount, paramsData);
+        lendingPool.flashLoan(LOAN_MOVER, _loanShift.debtAddr, loanAmount, paramsData);
 
         removePermission(LOAN_MOVER);
     }
@@ -118,14 +123,10 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
                 && _loanShift.addrLoan1 == _loanShift.addrLoan2;
     }
 
-    function addProtocol(uint8 _protoType, address _protoAddr) public onlyOwner {
-        contractAddresses[Protocols(_protoType)] = _protoAddr;
-    }
-
     function packData(
         LoanShiftData memory _loanShift,
         SaverExchangeCore.ExchangeData memory exchangeData
-    ) internal pure returns (uint[8] memory numData, address[5] memory addrData, uint8[3] memory enumData, bytes memory callData) {
+    ) internal pure returns (uint[8] memory numData, address[6] memory addrData, uint8[3] memory enumData, bytes memory callData) {
 
         numData = [
             _loanShift.collAmount,
@@ -141,6 +142,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         addrData = [
             _loanShift.addrLoan1,
             _loanShift.addrLoan2,
+            _loanShift.debtAddr,
             exchangeData.srcAddr,
             exchangeData.destAddr,
             exchangeData.exchangeAddr
