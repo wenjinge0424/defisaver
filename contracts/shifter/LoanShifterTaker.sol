@@ -13,6 +13,7 @@ import "../loggers/FlashLoanLogger.sol";
 import "../utils/ExchangeDataParser.sol";
 import "../exchange/SaverExchangeCore.sol";
 
+/// @title LoanShifterTaker Entry point for using the shifting operation
 contract LoanShifterTaker is AdminAuth, ProxyPermission {
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
@@ -22,7 +23,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address public constant cDAI_ADDRESS = 0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643;
 
-    address payable public constant LOAN_MOVER = 0x1ccd1b13b7473Cdcc9b1b858CB813de95b465E79;
+    address payable public constant LOAN_SHIFTER_RECEIVER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
@@ -47,16 +48,17 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
     mapping (Protocols => address) public contractAddresses;
 
     /// @notice Main entry point, it will move or transform a loan
+    /// @dev If the operation doesn't require exchange send empty data
     function moveLoan(
         LoanShiftData memory _loanShift,
         SaverExchangeCore.ExchangeData memory _exchangeData
     ) public {
-        if (isSameTypeVaults(_loanShift)) {
-            forkVault(_loanShift);
+        if (_isSameTypeVaults(_loanShift)) {
+            _forkVault(_loanShift);
             return;
         }
 
-        callCloseAndOpen(_loanShift, _exchangeData);
+        _callCloseAndOpen(_loanShift, _exchangeData);
     }
 
     /// @notice An admin only function to add/change a protocols address
@@ -64,7 +66,13 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         contractAddresses[Protocols(_protoType)] = _protoAddr;
     }
 
-    function callCloseAndOpen(
+    function getProtocolAddr(Protocols _proto) public view returns (address) {
+        return contractAddresses[_proto];
+    }
+
+    //////////////////////// INTERNAL FUNCTIONS //////////////////////////
+
+    function _callCloseAndOpen(
         LoanShiftData memory _loanShift,
         SaverExchangeCore.ExchangeData memory _exchangeData
     ) internal {
@@ -82,24 +90,20 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
             uint8[3] memory enumData,
             bytes memory callData
         )
-        = packData(_loanShift, _exchangeData);
+        = _packData(_loanShift, _exchangeData);
 
         // encode data
         bytes memory paramsData = abi.encode(numData, addrData, enumData, callData, address(this));
 
         // call FL
-        givePermission(LOAN_MOVER);
+        givePermission(LOAN_SHIFTER_RECEIVER);
 
-        lendingPool.flashLoan(LOAN_MOVER, _loanShift.debtAddr, loanAmount, paramsData);
+        lendingPool.flashLoan(LOAN_SHIFTER_RECEIVER, _loanShift.debtAddr, loanAmount, paramsData);
 
-        removePermission(LOAN_MOVER);
+        removePermission(LOAN_SHIFTER_RECEIVER);
     }
 
-    function getProtocolAddr(Protocols _proto) public view returns (address) {
-        return contractAddresses[_proto];
-    }
-
-    function forkVault(LoanShiftData memory _loanShift) internal {
+    function _forkVault(LoanShiftData memory _loanShift) internal {
         // Create new Vault to move to
         if (_loanShift.id2 == 0) {
             _loanShift.id2 = manager.open(manager.ilks(_loanShift.id1), address(this));
@@ -118,12 +122,12 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         }
     }
 
-    function isSameTypeVaults(LoanShiftData memory _loanShift) internal pure returns (bool) {
+    function _isSameTypeVaults(LoanShiftData memory _loanShift) internal pure returns (bool) {
         return _loanShift.fromProtocol == Protocols.MCD && _loanShift.toProtocol == Protocols.MCD
                 && _loanShift.addrLoan1 == _loanShift.addrLoan2;
     }
 
-    function packData(
+    function _packData(
         LoanShiftData memory _loanShift,
         SaverExchangeCore.ExchangeData memory exchangeData
     ) internal pure returns (uint[8] memory numData, address[6] memory addrData, uint8[3] memory enumData, bytes memory callData) {

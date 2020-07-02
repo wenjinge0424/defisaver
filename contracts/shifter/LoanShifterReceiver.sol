@@ -81,13 +81,30 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
         )
         = abi.decode(_params, (uint256[8],address[6],uint8[3],bytes,address));
 
-        bytes memory proxyData1 = abi.encodeWithSignature(
+        bytes memory proxyData1;
+        bytes memory proxyData2;
+
+        if (enumData[0] == uint8(LoanShifterTaker.Protocols.MCD)) {
+            proxyData1 = abi.encodeWithSignature(
             "close(uint256,address,uint256,uint256)",
                                 numData[2], addrData[0], _amount, numData[0]);
 
-         bytes memory proxyData2 = abi.encodeWithSignature(
+            proxyData2 = abi.encodeWithSignature(
             "open(uint256,address,uint256,uint256)",
                                 numData[3], addrData[1], _amount, numData[1]);
+        } else if(enumData[0] == uint8(LoanShifterTaker.Protocols.COMPOUND)) {
+            proxyData1 = abi.encodeWithSignature(
+            "close(address,address,uint256,uint256)",
+                                addrData[0], addrData[2], numData[0], numData[1]);
+
+            // TODO: check this?
+            address debtAddr2 = addrData[4] == addrData[2] ? addrData[2] : addrData[4];
+
+            proxyData2 = abi.encodeWithSignature(
+            "open(address,address,uint256,uint256)",
+                                addrData[1], debtAddr2, numData[0], numData[1]);
+        }
+
 
         paramData = ParamData({
             proxyData1: proxyData1,
