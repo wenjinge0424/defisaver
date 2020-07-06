@@ -137,5 +137,9 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
         _proxy.transfer(address(this).balance);
     }
 
+    function setLoanShiftTaker(address _loanShiftTaker) onlyOwner public {
+        loanShifterTaker = LoanShifterTaker(_loanShiftTaker);
+    }
+
     receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}
 }
