@@ -1,12 +1,13 @@
 pragma solidity ^0.6.0;
 
+import "../DS/DSMath.sol";
 import "../interfaces/CompoundOracleInterface.sol";
 import "../interfaces/ComptrollerInterface.sol";
 import "../interfaces/CTokenInterface.sol";
 import "./helpers/Exponential.sol";
 
 
-contract CompoundSafetyRatio is Exponential {
+contract CompoundSafetyRatio is Exponential, DSMath {
     // solhint-disable-next-line const-name-snakecase
     ComptrollerInterface public constant comp = ComptrollerInterface(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
 
@@ -54,8 +55,9 @@ contract CompoundSafetyRatio is Exponential {
             }
         }
 
-        if (sumBorrow == 0) return 0;
+        if (sumBorrow == 0) return uint(-1);
 
-        return (sumBorrow * 10**18) / sumCollateral;
+        uint borrowPowerUsed = (sumBorrow * 10**18) / sumCollateral;
+        return wdiv(1e18, borrowPowerUsed);
     }
 }
