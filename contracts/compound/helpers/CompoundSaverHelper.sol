@@ -165,10 +165,12 @@ contract CompoundSaverHelper is DSMath {
 
         if (liquidityInEth == 0) return usersBalance;
 
+        CTokenInterface(_cCollAddress).accrueInterest();
+
         if (_cCollAddress == CETH_ADDRESS) {
             if (liquidityInEth > usersBalance) return usersBalance;
 
-            return liquidityInEth;
+            return sub(liquidityInEth, (liquidityInEth / 100));
         }
 
         uint ethPrice = CompoundOracleInterface(COMPOUND_ORACLE).getUnderlyingPrice(_cCollAddress);
@@ -184,10 +186,12 @@ contract CompoundSaverHelper is DSMath {
     /// @param _cBorrowAddress Borrow token we are getting the max value of
     /// @param _account Users account
     /// @return Returns the max. borrow amount in that token
-    function getMaxBorrow(address _cBorrowAddress, address _account) public view returns (uint) {
+    function getMaxBorrow(address _cBorrowAddress, address _account) public returns (uint) {
         (, uint liquidityInEth, ) = ComptrollerInterface(COMPTROLLER).getAccountLiquidity(_account);
 
-        if (_cBorrowAddress == CETH_ADDRESS) return liquidityInEth;
+        CTokenInterface(_cBorrowAddress).accrueInterest();
+
+        if (_cBorrowAddress == CETH_ADDRESS) return sub(liquidityInEth, (liquidityInEth / 100));
 
         uint ethPrice = CompoundOracleInterface(COMPOUND_ORACLE).getUnderlyingPrice(_cBorrowAddress);
         uint liquidityInToken = wdiv(liquidityInEth, ethPrice);

@@ -7,6 +7,8 @@ abstract contract CTokenInterface is ERC20 {
 
     function mint() external virtual payable;
 
+    function accrueInterest() public virtual returns (uint);
+
     function redeem(uint256 redeemTokens) external virtual returns (uint256);
 
     function redeemUnderlying(uint256 redeemAmount) external virtual returns (uint256);
