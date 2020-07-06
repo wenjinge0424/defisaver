@@ -6,8 +6,8 @@ import "../../interfaces/ICompoundSubscription.sol";
 /// @title SubscriptionsProxy handles authorization and interaction with the Subscriptions contract
 contract CompoundSubscriptionsProxy is ProxyPermission {
 
-    address public constant COMPOUND_SUBSCRIPTION_ADDRESS = 0x84BC0c6e8314658398679E59C4F3271DE71C9278;
-    address public constant COMPOUND_MONITOR_PROXY = 0x80f3A335b0D0f9604A4cd116B6f7bf036FCC7d8c;
+    address public constant COMPOUND_SUBSCRIPTION_ADDRESS = 0x52015EFFD577E08f498a0CCc11905925D58D6207;
+    address public constant COMPOUND_MONITOR_PROXY = 0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a;
 
     /// @notice Calls subscription contract and creates a DSGuard if non existent
     /// @param _minRatio Minimum ratio below which repay is triggered
