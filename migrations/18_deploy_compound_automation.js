@@ -8,14 +8,14 @@ require('dotenv').config();
 module.exports = function(deployer, network, accounts) {
     let deployAgain = (process.env.DEPLOY_AGAIN === 'true') ? true : false;
 
-    const compoundFlashLoanTakerAddress = '';
+    const compoundFlashLoanTakerAddress = '0x1c214eCB456D0D4403984E5593BE7992CF8B9eB8';
     const changePeriod = 0;
 
     deployer.then(async () => {
 
     	// -------------------- first deploy this -----------------------------
     	await deployer.deploy(CompoundSubscriptions, {gas: 4000000, overwrite: deployAgain});
-    	await deployer.deploy(CompoundMonitorProxy, changePeriod, {gas: 700000, overwrite: deployAgain});
+    	await deployer.deploy(CompoundMonitorProxy, changePeriod, {gas: 2000000, overwrite: deployAgain});
 
 
     	// ------------------- second part ----------------------
