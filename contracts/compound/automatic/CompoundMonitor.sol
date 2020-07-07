@@ -69,7 +69,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
         (bool isAllowed, uint ratioBefore) = canCall(Method.Repay, _user);
         require(isAllowed); // check if conditions are met
 
-        _data[4] = calcGasCost(REPAY_GAS_COST);
+        _data[3] = calcGasCost(REPAY_GAS_COST);
 
         compoundMonitorProxy.callExecute{value: msg.value}(
             _user,
@@ -101,7 +101,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
         (bool isAllowed, uint ratioBefore) = canCall(Method.Boost, _user);
         require(isAllowed); // check if conditions are met
 
-        _data[4] = calcGasCost(BOOST_GAS_COST);
+        _data[3] = calcGasCost(BOOST_GAS_COST);
 
         compoundMonitorProxy.callExecute{value: msg.value}(
             _user,
