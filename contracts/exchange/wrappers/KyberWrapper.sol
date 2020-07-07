@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-import "../../interfaces/ERC20.sol";
+import "../../utils/SafeERC20.sol";
 import "../../interfaces/KyberNetworkProxyInterface.sol";
 import "../../interfaces/ExchangeInterface.sol";
 import "../../interfaces/ExchangeInterfaceV2.sol";
@@ -8,6 +8,8 @@ import "../../constants/ConstantAddresses.sol";
 import "../../DS/DSMath.sol";
 
 contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
+
+    using SafeERC20 for ERC20;
 
     /// @notice Sells a _srcAmount of tokens at Kyber
     /// @param _srcAddr From token
@@ -121,7 +123,7 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
         if (_srcAddr == KYBER_ETH_ADDRESS) {
             msg.sender.transfer(address(this).balance);
         } else {
-            ERC20(_srcAddr).transfer(msg.sender, ERC20(_srcAddr).balanceOf(address(this)));
+            ERC20(_srcAddr).safeTransfer(msg.sender, ERC20(_srcAddr).balanceOf(address(this)));
         }
     }
 

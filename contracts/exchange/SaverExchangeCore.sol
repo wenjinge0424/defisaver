@@ -42,6 +42,8 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
 
             (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance);
 
+            require(success, "0x order failed");
+
             wrapper = exData.exchangeAddr;
         }
 
@@ -90,8 +92,9 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         if (exData.exchangeType == ExchangeType.ZEROX) {
             approve0xProxy(exData.srcAddr, exData.srcAmount);
 
-            // TODO: should we use address(this).balance?
             (success, swapedTokens,) = takeOrder(exData, address(this).balance);
+
+            require(success, "0x order failed");
 
             wrapper = exData.exchangeAddr;
         }
@@ -127,14 +130,18 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
 
     /// @notice Takes order from 0x and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    /// @param _0xFee Ether fee needed for 0x order
+    /// @param _ethAmount Ether fee needed for 0x order
     function takeOrder(
         ExchangeData memory _exData,
-        uint256 _0xFee
+        uint256 _ethAmount
     ) private returns (bool success, uint256, uint256) {
 
+        if (_exData.srcAmount != 0) {
+            writeUint256(_exData.callData, 36, _exData.srcAmount);
+        }
+
         if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.exchangeAddr)) {
-            (success, ) = _exData.exchangeAddr.call{value: _0xFee}(_exData.callData);
+            (success, ) = _exData.exchangeAddr.call{value: _ethAmount}(_exData.callData);
         } else {
             success = false;
         }
@@ -256,7 +263,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         if (exData.srcAddr == KYBER_ETH_ADDRESS) {
             ethValue = exData.srcAmount;
         } else {
-            ERC20(exData.srcAddr).transfer(_wrapper, ERC20(exData.srcAddr).balanceOf(address(this)));
+            ERC20(exData.srcAddr).safeTransfer(_wrapper, ERC20(exData.srcAddr).balanceOf(address(this)));
         }
 
         if (_type == ActionType.SELL) {
@@ -276,7 +283,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         uint _expectedRateKyber,
         uint _expectedRateUniswap,
         uint _expectedRateOasis
-    ) internal view returns (address, uint) {
+    ) internal pure returns (address, uint) {
         if (
             (_expectedRateUniswap >= _expectedRateKyber) && (_expectedRateUniswap >= _expectedRateOasis)
         ) {
@@ -304,7 +311,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         uint _expectedRateKyber,
         uint _expectedRateUniswap,
         uint _expectedRateOasis
-    ) internal view returns (address, uint) {
+    ) internal pure returns (address, uint) {
         if (
             (_expectedRateUniswap <= _expectedRateKyber) && (_expectedRateUniswap <= _expectedRateOasis)
         ) {
@@ -321,6 +328,21 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             (_expectedRateOasis <= _expectedRateKyber) && (_expectedRateOasis <= _expectedRateUniswap)
         ) {
             return (OASIS_WRAPPER, _expectedRateOasis);
+        }
+    }
+
+    function writeUint256(bytes memory _b, uint256 _index, uint _input) internal pure {
+        if (_b.length < _index + 32) {
+            revert("Incorrent lengt while writting bytes32");
+        }
+
+        bytes32 input = bytes32(_input);
+
+        _index += 32;
+
+        // Read the bytes32 from array memory
+        assembly {
+            mstore(add(_b, _index), input)
         }
     }
 
