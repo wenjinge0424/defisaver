@@ -82,7 +82,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
 
         returnEth();
 
-        logger.Log(address(this), msg.sender, "AutomaticCompoundRepay", abi.encode(ratioBefore, ratioAfter));
+        logger.Log(address(this), _user, "AutomaticCompoundRepay", abi.encode(ratioBefore, ratioAfter));
     }
 
     /// @notice Bots call this method to boost for user when conditions are met
@@ -115,7 +115,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
 
         returnEth();
 
-        logger.Log(address(this), msg.sender, "AutomaticCompoundBoost", abi.encode(ratioBefore, ratioAfter));
+        logger.Log(address(this), _user, "AutomaticCompoundBoost", abi.encode(ratioBefore, ratioAfter));
     }
 
 /******************* INTERNAL METHODS ********************************/
