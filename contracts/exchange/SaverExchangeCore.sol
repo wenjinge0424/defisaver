@@ -40,7 +40,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         if (exData.exchangeType == ExchangeType.ZEROX) {
             approve0xProxy(exData.srcAddr, exData.srcAmount);
 
-            (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance);
+            (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance, ActionType.SELL);
 
             require(success, "0x order failed");
 
@@ -60,7 +60,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             if (exData.price0x >= price && exData.exchangeType != ExchangeType.ZEROX) {
                 approve0xProxy(exData.srcAddr, exData.srcAmount);
 
-                (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance);
+                (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance, ActionType.SELL);
             }
 
             // 0x either had worse price or we tried and order fill failed, so call on chain swap
@@ -92,7 +92,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         if (exData.exchangeType == ExchangeType.ZEROX) {
             approve0xProxy(exData.srcAddr, exData.srcAmount);
 
-            (success, swapedTokens,) = takeOrder(exData, address(this).balance);
+            (success, swapedTokens,) = takeOrder(exData, address(this).balance, ActionType.BUY);
 
             require(success, "0x order failed");
 
@@ -112,7 +112,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             if (exData.price0x != 0 && exData.price0x <= price && exData.exchangeType != ExchangeType.ZEROX) {
                 approve0xProxy(exData.srcAddr, exData.srcAmount);
 
-                (success, swapedTokens,) = takeOrder(exData, address(this).balance);
+                (success, swapedTokens,) = takeOrder(exData, address(this).balance, ActionType.BUY);
             }
 
             // 0x either had worse price or we tried and order fill failed, so call on chain swap
@@ -133,11 +133,15 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
     /// @param _ethAmount Ether fee needed for 0x order
     function takeOrder(
         ExchangeData memory _exData,
-        uint256 _ethAmount
+        uint256 _ethAmount,
+        ActionType _type
     ) private returns (bool success, uint256, uint256) {
 
-        if (_exData.srcAmount != 0) {
+        // write in the exact amount we are selling/buing in an order
+        if (_type == ActionType.SELL) {
             writeUint256(_exData.callData, 36, _exData.srcAmount);
+        } else {
+            writeUint256(_exData.callData, 36, _exData.destAmount);
         }
 
         if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.exchangeAddr)) {

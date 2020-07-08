@@ -72,9 +72,36 @@ describe("Shifter", accounts => {
 
     });
 
-    it('... should merge 2 Vaults of the same type', async () => {
+    // it('... should merge 2 Vaults of the same type', async () => {
 
-        await createVault();
+    //     await createVault();
+    //     await createVault();
+
+    //     const cdpsAfter = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
+
+    //     const numVaults = cdpsAfter.ids.length - 1;
+
+    //     const infoBefore = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults].toString());
+    //     console.log(infoBefore.collateral.toString(), infoBefore.debt.toString());
+
+    //     const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
+    //     [
+    //      [0, 0, true, web3.utils.toWei('2', 'ether'), web3.utils.toWei('100', 'ether'), makerAddresses["MCD_DAI"], mcdEthJoin, mcdEthJoin, cdpsAfter.ids[numVaults - 1].toString(), cdpsAfter.ids[numVaults].toString()],
+    //      [nullAddress, nullAddress, 0, 0, 0, 0, nullAddress, "0x0", 0]
+    //     ]);
+
+    //     await web3Proxy.methods['execute(address,bytes)']
+    //      (loanShifterTakerAddr, moveData).send({from: accounts[0], gas: 3500000});
+
+    //     const infoAfter = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults].toString());
+    //     console.log(infoAfter.collateral.toString(), infoAfter.debt.toString());
+
+    //     expect(infoAfter.debt.toString() / 1e18).to.be.gt(infoBefore.debt.toString() / 1e18);
+
+    // });
+
+    it('... should change the collateral type of a CDP', async () => {
+
         await createVault();
 
         const cdpsAfter = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
