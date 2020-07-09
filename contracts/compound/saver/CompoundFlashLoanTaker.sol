@@ -10,7 +10,7 @@ import "../../auth/ProxyPermission.sol";
 contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurner {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
-    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0x0c6C9da337Eb670749071BF70F317AaF541F4954;
+    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0x49E149c658219f6520Ed57205561e0e7362a7A7D;
 
     // solhint-disable-next-line const-name-snakecase
     FlashLoanLogger public constant logger = FlashLoanLogger(

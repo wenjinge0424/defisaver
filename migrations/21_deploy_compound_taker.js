@@ -9,9 +9,9 @@ module.exports = function(deployer, network, accounts) {
 
     deployer.then(async () => {
 
-        await deployer.deploy(CompoundSaverFlashProxy, {gas: 2800000, overwrite: deployAgain});
-    	// await deployer.deploy(CompoundSaverFlashLoan, {gas: 1000000, overwrite: deployAgain});
-     //    await deployer.deploy(CompoundFlashLoanTaker, {gas: 3600000, overwrite: deployAgain});
+        await deployer.deploy(CompoundSaverFlashProxy, {gas: 3500000, overwrite: deployAgain});
+    	// await deployer.deploy(CompoundSaverFlashLoan, {gas: 2000000, overwrite: deployAgain});
+        // await deployer.deploy(CompoundFlashLoanTaker, {gas: 7000000, overwrite: deployAgain});
     });
 };
 
