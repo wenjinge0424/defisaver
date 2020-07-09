@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-import "../../interfaces/ERC20.sol";
+import "../../utils/SafeERC20.sol";
 import "../../interfaces/KyberNetworkProxyInterface.sol";
 import "../../interfaces/ExchangeInterfaceV2.sol";
 import "../../interfaces/UniswapExchangeInterface.sol";
@@ -9,6 +9,8 @@ import "../../DS/DSMath.sol";
 import "../../constants/ConstantAddresses.sol";
 
 contract UniswapWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
+
+    using SafeERC20 for ERC20;
 
     /// @notice Sells a _srcAmount of tokens at Uniswap
     /// @param _srcAddr From token
@@ -33,7 +35,7 @@ contract UniswapWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
         else if (_destAddr == WETH_ADDRESS) {
             uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
 
-            ERC20(_srcAddr).approve(uniswapExchangeAddr, _srcAmount);
+            ERC20(_srcAddr).safeApprove(uniswapExchangeAddr, _srcAmount);
 
             destAmount = UniswapExchangeInterface(uniswapExchangeAddr).
                 tokenToEthTransferInput(_srcAmount, 1, block.timestamp + 1, msg.sender);
@@ -42,7 +44,7 @@ contract UniswapWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
         else {
             uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
 
-            ERC20(_srcAddr).approve(uniswapExchangeAddr, _srcAmount);
+            ERC20(_srcAddr).safeApprove(uniswapExchangeAddr, _srcAmount);
 
             destAmount = UniswapExchangeInterface(uniswapExchangeAddr).
                 tokenToTokenTransferInput(_srcAmount, 1, 1, block.timestamp + 1, msg.sender, _destAddr);
@@ -74,7 +76,7 @@ contract UniswapWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
         else if (_destAddr == WETH_ADDRESS) {
             uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
 
-            ERC20(_srcAddr).approve(uniswapExchangeAddr, uint(-1));
+            ERC20(_srcAddr).safeApprove(uniswapExchangeAddr, uint(-1));
 
             srcAmount = UniswapExchangeInterface(uniswapExchangeAddr).
                 tokenToEthTransferOutput(_destAmount, uint(-1), block.timestamp + 1, msg.sender);
@@ -83,7 +85,7 @@ contract UniswapWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
         else {
             uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
 
-            ERC20(_srcAddr).approve(uniswapExchangeAddr, uint(-1));
+            ERC20(_srcAddr).safeApprove(uniswapExchangeAddr, uint(-1));
 
             srcAmount = UniswapExchangeInterface(uniswapExchangeAddr).
                 tokenToTokenTransferOutput(_destAmount, uint(-1), uint(-1), block.timestamp + 1, msg.sender, _destAddr);
@@ -143,7 +145,7 @@ contract UniswapWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
         if (_srcAddr == WETH_ADDRESS) {
             msg.sender.transfer(address(this).balance);
         } else {
-            ERC20(_srcAddr).transfer(msg.sender, ERC20(_srcAddr).balanceOf(address(this)));
+            ERC20(_srcAddr).safeTransfer(msg.sender, ERC20(_srcAddr).balanceOf(address(this)));
         }
     }
 

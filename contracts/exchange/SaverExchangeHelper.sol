@@ -1,9 +1,11 @@
 pragma solidity ^0.6.0;
 
-import "../interfaces/ERC20.sol";
+import "../utils/SafeERC20.sol";
 import "../mcd/Discount.sol";
 
 contract SaverExchangeHelper {
+
+    using SafeERC20 for ERC20;
 
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -36,7 +38,7 @@ contract SaverExchangeHelper {
 
     function approve0xProxy(address _tokenAddr, uint _amount) internal {
         if (_tokenAddr != KYBER_ETH_ADDRESS) {
-            ERC20(_tokenAddr).approve(address(ERC20_PROXY_0X), _amount);
+            ERC20(_tokenAddr).safeApprove(address(ERC20_PROXY_0X), _amount);
         }
     }
 
@@ -47,11 +49,11 @@ contract SaverExchangeHelper {
         }
 
         if (getBalance(_srcAddr) > 0) {
-            ERC20(_srcAddr).transfer(_to, getBalance(_srcAddr));
+            ERC20(_srcAddr).safeTransfer(_to, getBalance(_srcAddr));
         }
 
         if (getBalance(_destAddr) > 0) {
-            ERC20(_destAddr).transfer(_to, getBalance(_destAddr));
+            ERC20(_destAddr).safeTransfer(_to, getBalance(_destAddr));
         }
     }
 

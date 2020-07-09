@@ -2,12 +2,14 @@ pragma solidity ^0.6.0;
 
 import "../../interfaces/ExchangeInterfaceV2.sol";
 import "../../interfaces/OasisInterface.sol";
-import "../../interfaces/ERC20.sol";
 import "../../interfaces/TokenInterface.sol";
 import "../../DS/DSMath.sol";
+import "../../utils/SafeERC20.sol";
 
 contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2 {
-    
+
+    using SafeERC20 for ERC20;
+
     address public constant OTC_ADDRESS = 0x794e6e91555438aFc3ccF1c5076A74F42133d08D;
     address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -21,7 +23,7 @@ contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2 {
         address srcAddr = ethToWethAddr(_srcAddr);
         address destAddr = ethToWethAddr(_destAddr);
 
-        require(ERC20(srcAddr).approve(OTC_ADDRESS, _srcAmount), "Approve src token");
+        ERC20(srcAddr).safeApprove(OTC_ADDRESS, _srcAmount);
 
         // convert eth -> weth
         if (srcAddr == WETH_ADDRESS) {
@@ -35,7 +37,7 @@ contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2 {
             TokenInterface(WETH_ADDRESS).withdraw(destAmount);
             msg.sender.transfer(destAmount);
         } else {
-            ERC20(destAddr).transfer(msg.sender, destAmount);
+            ERC20(destAddr).safeTransfer(msg.sender, destAmount);
         }
 
         return destAmount;
@@ -50,7 +52,7 @@ contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2 {
         address srcAddr = ethToWethAddr(_srcAddr);
         address destAddr = ethToWethAddr(_destAddr);
 
-        require(ERC20(srcAddr).approve(OTC_ADDRESS, uint(-1)), "Approve src token");
+        ERC20(srcAddr).safeApprove(OTC_ADDRESS, uint(-1));
 
         // convert eth -> weth
         if (srcAddr == WETH_ADDRESS) {
@@ -64,7 +66,7 @@ contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2 {
             TokenInterface(WETH_ADDRESS).withdraw(_destAmount);
             msg.sender.transfer(_destAmount);
         } else {
-            ERC20(destAddr).transfer(msg.sender, _destAmount);
+            ERC20(destAddr).safeTransfer(msg.sender, _destAmount);
         }
 
         // Send the leftover from the source token back
@@ -106,7 +108,7 @@ contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2 {
         if (srcAddr == WETH_ADDRESS) {
             msg.sender.transfer(address(this).balance);
         } else {
-            ERC20(srcAddr).transfer(msg.sender, ERC20(srcAddr).balanceOf(address(this)));
+            ERC20(srcAddr).safeTransfer(msg.sender, ERC20(srcAddr).balanceOf(address(this)));
         }
     }
 
