@@ -8,7 +8,7 @@ import "../helpers/CompoundSaverHelper.sol";
 import "../../loggers/CompoundLogger.sol";
 
 /// @title Implements the actual logic of Repay/Boost with FL
-contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
+contract CompoundSaverFlashProxy is ExchangeHelper, CompoundSaverHelper  {
 
     using SafeERC20 for ERC20;
 
