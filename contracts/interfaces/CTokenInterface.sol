@@ -39,7 +39,7 @@ abstract contract CTokenInterface is ERC20 {
 
     function reserveFactorMantissa() external virtual returns (uint256);
 
-    function borrowBalanceCurrent(address account) external view virtual returns (uint256);
+    function borrowBalanceCurrent(address account) external virtual returns (uint256);
 
     function totalBorrowsCurrent() external virtual returns (uint256);
 
