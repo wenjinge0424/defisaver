@@ -10,7 +10,7 @@ import "../../auth/ProxyPermission.sol";
 contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurner {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
-    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0x1550c86e6223b0F4BcDc65fC0315898DFce417D5;
+    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0xC0EFedf59d047ceA6c66C806B300C1e9E7bFF085;
 
     // solhint-disable-next-line const-name-snakecase
     FlashLoanLogger public constant logger = FlashLoanLogger(
@@ -25,7 +25,7 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurne
         uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes calldata _callData
-    ) external payable burnGas(25) {
+    ) external payable burnGas(0) {
         uint maxColl = getMaxCollateral(_addrData[0], address(this));
 
         if (_data[0] <= maxColl) {
@@ -55,7 +55,7 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurne
         uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
         address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes calldata _callData
-    ) external payable burnGas(20) {
+    ) external payable burnGas(0) {
         uint maxBorrow = getMaxBorrow(_addrData[1], address(this));
 
         if (_data[0] <= maxBorrow) {
