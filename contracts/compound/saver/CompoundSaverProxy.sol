@@ -55,7 +55,7 @@ contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
         user.transfer(address(this).balance);
 
         // log amount, collToken, borrowToken
-        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "CompoundRepay", abi.encode(_data[0], collToken, borrowToken));
+        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "CompoundRepay", abi.encode(_data[0], swapAmount, collToken, borrowToken));
     }
 
     /// @notice Borrows token, converts to collateral, and adds to position
@@ -94,7 +94,7 @@ contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
             );
         } else {
             swapAmount = borrowAmount;
-            swapAmount -= getGasCost(borrowAmount, _data[3], _addrData[1]);
+            swapAmount -= getGasCost(swapAmount, _data[3], _addrData[1]);
         }
 
         approveCToken(collToken, _addrData[0]);
@@ -109,7 +109,7 @@ contract CompoundSaverProxy is CompoundSaverHelper, ExchangeHelper {
         user.transfer(address(this).balance);
 
         // log amount, collToken, borrowToken
-        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "CompoundBoost", abi.encode(_data[0], collToken, borrowToken));
+        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "CompoundBoost", abi.encode(_data[0], swapAmount, collToken, borrowToken));
     }
 
 }
