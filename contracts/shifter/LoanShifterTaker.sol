@@ -9,9 +9,8 @@ import "../mcd/maker/Vat.sol";
 import "../mcd/maker/Manager.sol";
 import "../auth/AdminAuth.sol";
 import "../auth/ProxyPermission.sol";
-import "../loggers/FlashLoanLogger.sol";
-import "../utils/ExchangeDataParser.sol";
 import "../exchange/SaverExchangeCore.sol";
+import "./ShifterRegistry.sol";
 
 /// @title LoanShifterTaker Entry point for using the shifting operation
 contract LoanShifterTaker is AdminAuth, ProxyPermission {
@@ -23,14 +22,13 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address public constant cDAI_ADDRESS = 0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643;
 
-    address payable public constant LOAN_SHIFTER_RECEIVER = 0xA94B7f0465E98609391C623d0560C5720a3f2D33;
-
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
 
     Manager public constant manager = Manager(MANAGER_ADDRESS);
+    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xD280c91397C1f8826a82a9432D65e4215EF22e55);
 
-    enum Protocols { MCD, COMPOUND, AAVE }
+    enum Protocols { MCD, COMPOUND }
 
     struct LoanShiftData {
         Protocols fromProtocol;
@@ -44,8 +42,6 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         uint id1;
         uint id2;
     }
-
-    mapping (Protocols => address) public contractAddresses;
 
     /// @notice Main entry point, it will move or transform a loan
     /// @dev If the operation doesn't require exchange send empty data
@@ -61,22 +57,13 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         _callCloseAndOpen(_loanShift, _exchangeData);
     }
 
-    /// @notice An admin only function to add/change a protocols address
-    function addProtocol(uint8 _protoType, address _protoAddr) public onlyOwner {
-        contractAddresses[Protocols(_protoType)] = _protoAddr;
-    }
-
-    function getProtocolAddr(Protocols _proto) public view returns (address) {
-        return contractAddresses[_proto];
-    }
-
     //////////////////////// INTERNAL FUNCTIONS //////////////////////////
 
     function _callCloseAndOpen(
         LoanShiftData memory _loanShift,
         SaverExchangeCore.ExchangeData memory _exchangeData
     ) internal {
-        address protoAddr = getProtocolAddr(_loanShift.fromProtocol);
+        address protoAddr = shifterRegistry.getAddr(getNameByProtocol(uint8(_loanShift.fromProtocol)));
 
         uint loanAmount = _loanShift.debtAmount;
 
@@ -95,12 +82,14 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         // encode data
         bytes memory paramsData = abi.encode(numData, addrData, enumData, callData, address(this));
 
+        address payable loanShifterReceiverAddr = payable(shifterRegistry.getAddr("LOAN_SHIFTER_RECEIVER"));
+
         // call FL
-        givePermission(LOAN_SHIFTER_RECEIVER);
+        givePermission(loanShifterReceiverAddr);
 
-        lendingPool.flashLoan(LOAN_SHIFTER_RECEIVER, _loanShift.debtAddr, loanAmount, paramsData);
+        lendingPool.flashLoan(loanShifterReceiverAddr, _loanShift.debtAddr, loanAmount, paramsData);
 
-        removePermission(LOAN_SHIFTER_RECEIVER);
+        removePermission(loanShifterReceiverAddr);
     }
 
     function _forkVault(LoanShiftData memory _loanShift) internal {
@@ -111,20 +100,20 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
 
         if (_loanShift.wholeDebt) {
             manager.shift(_loanShift.id1, _loanShift.id2);
-        } else {
-            Vat(VAT_ADDRESS).fork(
-                manager.ilks(_loanShift.id1),
-                manager.urns(_loanShift.id1),
-                manager.urns(_loanShift.id2),
-                int(_loanShift.collAmount),
-                int(_loanShift.debtAmount)
-            );
         }
     }
 
     function _isSameTypeVaults(LoanShiftData memory _loanShift) internal pure returns (bool) {
         return _loanShift.fromProtocol == Protocols.MCD && _loanShift.toProtocol == Protocols.MCD
                 && _loanShift.addrLoan1 == _loanShift.addrLoan2;
+    }
+
+    function getNameByProtocol(uint8 _proto) internal pure returns (string memory) {
+        if (_proto == 0) {
+            return "MCD_SHIFTER";
+        } else if (_proto == 1) {
+            return "COMP_SHIFTER";
+        }
     }
 
     function _packData(

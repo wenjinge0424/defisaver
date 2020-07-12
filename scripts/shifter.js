@@ -14,12 +14,14 @@ const BAT_ILK = '0x4241542d41000000000000000000000000000000000000000000000000000
 
 const nullAddress = '0x0000000000000000000000000000000000000000';
 
-const loanShifterTakerAddr = '0x51826e32c322634120ef9f3f2d3b62cfdc31e80b';
+const loanShifterTakerAddr = '0x038698e3BAe6b3e30D6b94202299192bfE69c692';
 const mcdEthJoin = '0x2F0b23f53734252Bda2277357e97e1517d6B042A';
-
+const mcdBatJoin = '0x3D0B1912B66114d4096F48A8CEe3A56C231772cA';
 
 const {
     fetchMakerAddresses,
+    ETH_ADDRESS,
+    BAT_ADDRESS,
 } = require('../test/helper.js');
 
 const getTokenJoinAddr = (type) => {
@@ -55,7 +57,8 @@ function getAbiFunction(contract, functionName) {
 (async () => {
     await initContracts();
 
-    await mergeVaults();
+    // await mergeVaults();
+    await changeMcdColl();
 })();
 
 const mergeVaults = async () => {
@@ -71,5 +74,20 @@ const mergeVaults = async () => {
 
     await proxy.methods['execute(address,bytes)']
      (loanShifterTakerAddr, moveData).send({from: account.address, gas: 500000, gasPrice: 46100000000});
+};
+
+const changeMcdColl = async () => {
+
+    const vaultId = '6629';
+
+    const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
+    [
+     [0, 0, false, web3.utils.toWei('0.1', 'ether'), web3.utils.toWei('10', 'ether'), makerAddresses["MCD_DAI"], mcdEthJoin, mcdBatJoin, vaultId, '0'],
+     [ETH_ADDRESS, BAT_ADDRESS, web3.utils.toWei('0.1', 'ether'), 0, 0, 3, nullAddress, "0x0", 0]
+    ]);
+
+    const tx = await proxy.methods['execute(address,bytes)']
+    (loanShifterTakerAddr, moveData).send({from: account.address, gas: 2200000, gasPrice: 26100000000});
+
 };
 

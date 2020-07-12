@@ -1,20 +1,18 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "./LoanShifterTaker.sol";
 import "../auth/AdminAuth.sol";
 import "../utils/FlashLoanReceiverBase.sol";
 import "../interfaces/DSProxyInterface.sol";
-import "../interfaces/ERC20.sol";
 import "../exchange/SaverExchangeCore.sol";
-
+import "./ShifterRegistry.sol";
 
 contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminAuth {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    LoanShifterTaker loanShifterTaker = LoanShifterTaker(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xD280c91397C1f8826a82a9432D65e4215EF22e55);
 
     struct ParamData {
         bytes proxyData1;
@@ -37,10 +35,10 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
         (ParamData memory paramData, ExchangeData memory exchangeData)
                                  = packFunctionCall(_amount, _params);
 
-        address protocolAddr1 = loanShifterTaker.getProtocolAddr(LoanShifterTaker.Protocols(paramData.protocol1));
+        address protocolAddr1 = shifterRegistry.getAddr(getNameByProtocol(paramData.protocol1));
         require(protocolAddr1 != address(0), "Protocol1 addr not found");
 
-        address protocolAddr2 = loanShifterTaker.getProtocolAddr(LoanShifterTaker.Protocols(paramData.protocol2));
+        address protocolAddr2 = shifterRegistry.getAddr(getNameByProtocol(paramData.protocol2));
         require(protocolAddr2 != address(0), "Protocol2 addr not found");
 
         // Send Flash loan amount to DSProxy
@@ -49,13 +47,17 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
         // Execute the Close operation
         DSProxyInterface(paramData.proxy).execute(protocolAddr1, paramData.proxyData1);
 
-        if (paramData.protocol1 != paramData.protocol2) {
+        // TODO: handle full debt swap
+
+        if (exchangeData.srcAddr != address(0) && exchangeData.destAddr != address(0)) {
             if (paramData.debtAddr == exchangeData.srcAddr) {
                 _buy(exchangeData);
             } else {
                 _sell(exchangeData);
             }
         }
+
+        //TODO: Send swap amount to DSProxy
 
         // Execute the Open operation
         DSProxyInterface(paramData.proxy).execute(protocolAddr2, paramData.proxyData2);
@@ -84,7 +86,7 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
         bytes memory proxyData1;
         bytes memory proxyData2;
 
-        if (enumData[0] == uint8(LoanShifterTaker.Protocols.MCD)) {
+        if (enumData[0] == 0) { // MAKER
             proxyData1 = abi.encodeWithSignature(
             "close(uint256,address,uint256,uint256)",
                                 numData[2], addrData[0], _amount, numData[0]);
@@ -92,7 +94,7 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
             proxyData2 = abi.encodeWithSignature(
             "open(uint256,address,uint256,uint256)",
                                 numData[3], addrData[1], _amount, numData[1]);
-        } else if(enumData[0] == uint8(LoanShifterTaker.Protocols.COMPOUND)) {
+        } else if(enumData[0] == 1) { // COMPOUND
             proxyData1 = abi.encodeWithSignature(
             "close(address,address,uint256,uint256)",
                                 addrData[0], addrData[2], numData[0], numData[1]);
@@ -131,14 +133,18 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
 
     function sendLoanToProxy(address payable _proxy, address _reserve, uint _amount) internal {
         if (_reserve != ETH_ADDRESS) {
-            ERC20(_reserve).transfer(_proxy, _amount);
+            ERC20(_reserve).safeTransfer(_proxy, _amount);
         }
 
         _proxy.transfer(address(this).balance);
     }
 
-    function setLoanShiftTaker(address _loanShiftTaker) onlyOwner public {
-        loanShifterTaker = LoanShifterTaker(_loanShiftTaker);
+    function getNameByProtocol(uint8 _proto) internal pure returns (string memory) {
+        if (_proto == 0) {
+            return "MCD_SHIFTER";
+        } else if (_proto == 1) {
+            return "COMP_SHIFTER";
+        }
     }
 
     receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}
