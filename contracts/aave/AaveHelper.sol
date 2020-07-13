@@ -31,8 +31,9 @@ contract AaveHelper is DSMath {
         address priceOracleAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getPriceOracle();
 
         // fetch all needed data
-        (,uint256 totalCollateralETH, uint256 totalBorrowsETH,,,uint256 currentLiquidationThreshold,,) = ILendingPool(lendingPoolAddressDataProvider).calculateUserGlobalData(_user);
-        (,,uint256 tokenLiquidationThreshold,) = ILendingPool(lendingPoolCoreAddress).getReserveConfiguration(_collateralAddress);
+        // using LTV as tokenLiquidationThreshold
+        (,uint256 totalCollateralETH, uint256 totalBorrowsETH,,uint256 currentLiquidationThreshold,,,) = ILendingPool(lendingPoolAddressDataProvider).calculateUserGlobalData(_user);
+        (,uint256 tokenLiquidationThreshold,,) = ILendingPool(lendingPoolCoreAddress).getReserveConfiguration(_collateralAddress);
         uint256 collateralPrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_collateralAddress);
         uint256 userTokenBalance = ILendingPool(lendingPoolCoreAddress).getUserUnderlyingAssetBalance(_collateralAddress, _user);
         uint256 userTokenBalanceEth = wmul(userTokenBalance, collateralPrice);
