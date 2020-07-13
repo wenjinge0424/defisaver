@@ -74,7 +74,7 @@ contract CompoundSaverHelper is DSMath {
 
         if (_gasCost != 0) {
             uint ethTokenPrice = CompoundOracleInterface(COMPOUND_ORACLE).getUnderlyingPrice(_cTokenAddr);
-            _gasCost = rmul(_gasCost, ethTokenPrice);
+            _gasCost = wdiv(_gasCost, ethTokenPrice);
 
             feeAmount = add(feeAmount, _gasCost);
         }
