@@ -64,16 +64,16 @@ contract AaveLoanInfo is AaveSafetyRatio {
         }
     }
 
-    function getTokenBalances(address _user, address[] memory _aTokens) public view returns (uint256[] memory balances, uint256[] memory borrows) {
+    function getTokenBalances(address _user, address[] memory _tokens) public view returns (uint256[] memory balances, uint256[] memory borrows) {
     	address lendingPoolAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 
-        balances = new uint256[](_aTokens.length);
-        borrows = new uint256[](_aTokens.length);
+        balances = new uint256[](_tokens.length);
+        borrows = new uint256[](_tokens.length);
 
-        for (uint256 i = 0; i < _aTokens.length; i++) {
-            address asset = _aTokens[i];
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            address asset = _tokens[i];
 
-            (balances[i], borrows[i],,,,,,,,) = ILendingPool(lendingPoolAddress).getUserReserveData(_user, asset);
+            (balances[i], borrows[i],,,,,,,,) = ILendingPool(lendingPoolAddress).getUserReserveData(asset, _user);
         }
     }
 
@@ -141,7 +141,6 @@ contract AaveLoanInfo is AaveSafetyRatio {
     /// @return data LoanData information
     function getLoanData(address _user) public view returns (LoanData memory data) {
         address lendingPoolAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
-        address lendingPoolCoreAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
         address priceOracleAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getPriceOracle();
 
         address[] memory reserves = ILendingPool(lendingPoolAddress).getReserves();
@@ -161,7 +160,7 @@ contract AaveLoanInfo is AaveSafetyRatio {
         for (uint64 i = 0; i < reserves.length; i++) {
             address reserve = reserves[i];
 
-            (uint256 aTokenBalance, uint256 borrowBalance,,,,,,,,) = ILendingPool(lendingPoolAddress).getUserReserveData(_user, reserve);
+            (uint256 aTokenBalance, uint256 borrowBalance,,,,,,,,) = ILendingPool(lendingPoolAddress).getUserReserveData(reserve, _user);
             uint256 price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(reserves[i]);
 
             if (aTokenBalance > 0) {
