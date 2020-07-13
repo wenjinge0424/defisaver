@@ -7,6 +7,8 @@ abstract contract ILendingPool {
 	function borrow(address _reserve, uint256 _amount, uint256 _interestRateMode, uint16 _referralCode) external virtual;
 	function repay( address _reserve, uint256 _amount, address payable _onBehalfOf) external virtual payable;
 	
+    function getReserves() external virtual view returns(address[] memory);
+
     /// @param _reserve underlying token address
     function getReserveData(address _reserve)
         external virtual
@@ -16,7 +18,7 @@ abstract contract ILendingPool {
             uint256 availableLiquidity,           // reserve available liquidity for borrowing
             uint256 totalBorrowsStable,           // total amount of outstanding borrows at Stable rate
             uint256 totalBorrowsVariable,         // total amount of outstanding borrows at Variable rate
-            uint256 liquidityRate,                // current deposit APY of the reservefor depositors, in Ray units.
+            uint256 liquidityRate,                // current deposit APY of the reserve for depositors, in Ray units.
             uint256 variableBorrowRate,           // current variable rate APY of the reserve pool, in Ray units.
             uint256 stableBorrowRate,             // current stable rate APY of the reserve pool, in Ray units.
             uint256 averageStableBorrowRate,      // current average stable borrow rate
@@ -81,6 +83,27 @@ abstract contract ILendingPool {
         view
         returns (uint256, uint256, uint256, bool);
     function getUserUnderlyingAssetBalance(address _reserve, address _user)
+        public virtual
+        view
+        returns (uint256);
+
+    function getReserveCurrentLiquidityRate(address _reserve)
+        public virtual
+        view
+        returns (uint256);
+    function getReserveCurrentVariableBorrowRate(address _reserve)
+        public virtual
+        view
+        returns (uint256);
+    function getReserveTotalLiquidity(address _reserve)
+        public virtual
+        view
+        returns (uint256);
+    function getReserveAvailableLiquidity(address _reserve)
+        public virtual
+        view
+        returns (uint256);
+    function getReserveTotalBorrowsVariable(address _reserve)
         public virtual
         view
         returns (uint256);
