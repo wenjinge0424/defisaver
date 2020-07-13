@@ -29,10 +29,12 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
     ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xD280c91397C1f8826a82a9432D65e4215EF22e55);
 
     enum Protocols { MCD, COMPOUND }
+    enum SwapType { NO_SWAP, COLL_SWAP, DEBT_SWAP }
 
     struct LoanShiftData {
         Protocols fromProtocol;
         Protocols toProtocol;
+        SwapType swapType;
         bool wholeDebt;
         uint collAmount;
         uint debtAmount;
@@ -74,7 +76,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         (
             uint[8] memory numData,
             address[6] memory addrData,
-            uint8[3] memory enumData,
+            uint8[4] memory enumData,
             bytes memory callData
         )
         = _packData(_loanShift, _exchangeData);
@@ -119,7 +121,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
     function _packData(
         LoanShiftData memory _loanShift,
         SaverExchangeCore.ExchangeData memory exchangeData
-    ) internal pure returns (uint[8] memory numData, address[6] memory addrData, uint8[3] memory enumData, bytes memory callData) {
+    ) internal pure returns (uint[8] memory numData, address[6] memory addrData, uint8[4] memory enumData, bytes memory callData) {
 
         numData = [
             _loanShift.collAmount,
@@ -144,6 +146,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         enumData = [
             uint8(_loanShift.fromProtocol),
             uint8(_loanShift.toProtocol),
+            uint8(_loanShift.swapType),
             uint8(exchangeData.exchangeType)
         ];
 

@@ -31,7 +31,7 @@ const DSSProxyActions = contract.fromArtifact('DssProxyActions');
 const LoanShifterTaker = contract.fromArtifact('LoanShifterTaker');
 const MCDSaverProxy = contract.fromArtifact('MCDSaverProxy');
 
-const loanShifterTakerAddr = '0x038698e3BAe6b3e30D6b94202299192bfE69c692';
+const loanShifterTakerAddr = '0x7a941556F91FD54a224b36376C512A9883eDD859';
 const compoundLoanInfoAddr = '0x4D32ECeC25d722C983f974134d649a20e78B1417';
 const uniswapWrapperAddr = '0x1e30124FDE14533231216D95F7798cD0061e5cf8';
 const comptrollerAddr = '0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b';
