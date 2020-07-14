@@ -17,6 +17,8 @@ contract McdShifter is MCDSaverProxy {
 
         uint rad = sub(mul(art, rate), dai);
         loanAmount = rad / RAY;
+
+        loanAmount = mul(loanAmount, RAY) < rad ? loanAmount + 1 : loanAmount;
     }
 
     function close(
@@ -49,14 +51,22 @@ contract McdShifter is MCDSaverProxy {
     function open(
         uint _cdpId,
         address _joinAddr,
-        uint _collAmount,
         uint _debtAmount
     ) public {
+
+        uint collAmount = 0;
+
+        if (_joinAddr == ETH_JOIN_ADDRESS) {
+            collAmount = address(this).balance;
+        } else {
+            collAmount = ERC20(address(Join(_joinAddr).gem())).balanceOf(address(this));
+        }
+
         if (_cdpId == 0) {
-            openAndWithdraw(_collAmount, _debtAmount, msg.sender, _joinAddr);
+            openAndWithdraw(collAmount, _debtAmount, address(this), _joinAddr);
         } else {
             // add collateral
-            addCollateral(_cdpId, _joinAddr, _collAmount);
+            addCollateral(_cdpId, _joinAddr, collAmount);
             // draw debt
             drawDai(_cdpId, manager.ilks(_cdpId), _debtAmount);
         }

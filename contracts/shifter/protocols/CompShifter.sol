@@ -40,14 +40,21 @@ contract CompShifter is CompoundSaverHelper {
     function open(
         address _cCollAddr,
         address _cBorrowAddr,
-        uint _collAmount,
         uint _debtAmount
     ) public {
 
         address collAddr = getUnderlyingAddr(_cCollAddr);
         address borrowAddr = getUnderlyingAddr(_cBorrowAddr);
 
-        depositCompound(collAddr, _cCollAddr, _collAmount);
+        uint collAmount = 0;
+
+        if (collAddr == ETH_ADDRESS) {
+            collAmount = address(this).balance;
+        } else {
+            collAmount = ERC20(collAddr).balanceOf(address(this));
+        }
+
+        depositCompound(collAddr, _cCollAddr, collAmount);
 
         // draw debt
         borrowCompound(_cBorrowAddr, _debtAmount);
