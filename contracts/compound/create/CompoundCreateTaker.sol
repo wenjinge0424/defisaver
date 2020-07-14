@@ -1,47 +1,77 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import "../../interfaces/ILendingPool.sol";
-import "../../loggers/FlashLoanLogger.sol";
+import "../../loggers/DefisaverLogger.sol";
 import "../helpers/CompoundSaverHelper.sol";
 import "../CompoundBasicProxy.sol";
 import "../../auth/ProxyPermission.sol";
+import "../../exchange/SaverExchangeCore.sol";
 
 /// @title Opens compound positions with a leverage
-contract CompoundCreateTaker is CompoundSaverHelper, CompoundBasicProxy, ProxyPermission {
-
+contract CompoundCreateTaker is ProxyPermission {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
-    address payable public constant COMPOUND_CREATE_FLASH_LOAN = 0x0D5Ec207D7B29525Cc25963347903958C98a66d3;
-
     // solhint-disable-next-line const-name-snakecase
-    FlashLoanLogger public constant logger = FlashLoanLogger(
-        0xb9303686B0EE92F92f63973EF85f3105329D345c
-    );
+    DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
+
+    struct CreateInfo {
+        address cCollAddress;
+        address cBorrowAddress;
+    }
 
     function openLeveragedLoan(
-        uint[6] calldata _data, // amountColl, amountDebt, minPrice, exchangeType, gasCost, 0xPrice
-        address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
-        bytes calldata _callData
-    ) external payable {
-        address tokenAddr = getUnderlyingAddr(_addrData[0]);
+        CreateInfo memory _createInfo,
+        SaverExchangeCore.ExchangeData memory _exchangeData,
+        address payable _compoundReceiver
+    ) public payable {
 
-        deposit(tokenAddr, _addrData[0], _data[0], true);
+        uint loanAmount = _exchangeData.srcAmount;
 
-        uint maxDebt = getMaxBorrow(_addrData[1], address(this));
+        (
+            uint[4] memory numData,
+            address[5] memory addrData,
+            uint8 enumData,
+            bytes memory callData
+        )
+        = _packData(_createInfo, _exchangeData);
 
-        if (_data[1] <= maxDebt) {
-            // convert that debt and deposit back
-        } else {
-            uint loanAmount = (_data[1] - maxDebt);
-            bytes memory paramsData = abi.encode(_data, _addrData, _callData, true, address(this));
+        bytes memory paramsData = abi.encode(numData, addrData, enumData, callData, address(this));
 
-            givePermission(COMPOUND_CREATE_FLASH_LOAN);
+        givePermission(_compoundReceiver);
 
-            lendingPool.flashLoan(COMPOUND_CREATE_FLASH_LOAN, getUnderlyingAddr(_addrData[1]), loanAmount, paramsData);
+        lendingPool.flashLoan(_compoundReceiver, _exchangeData.srcAddr, loanAmount, paramsData);
 
-            removePermission(COMPOUND_CREATE_FLASH_LOAN);
+        removePermission(_compoundReceiver);
 
-            logger.logFlashLoan("CompoundLeveragedLoan", loanAmount, _data[0], _addrData[0]);
-        }
+        logger.Log(address(this), msg.sender, "CompoundLeveragedLoan",
+            abi.encode(_exchangeData.srcAddr, _exchangeData.destAddr, _exchangeData.srcAmount, _exchangeData.destAmount));
+
+    }
+
+    function _packData(
+        CreateInfo memory _createInfo,
+        SaverExchangeCore.ExchangeData memory exchangeData
+    ) internal pure returns (uint[4] memory numData, address[5] memory addrData, uint8 enumData, bytes memory callData) {
+
+        numData = [
+            exchangeData.srcAmount,
+            exchangeData.destAmount,
+            exchangeData.minPrice,
+            exchangeData.price0x
+        ];
+
+        addrData = [
+            _createInfo.cCollAddress,
+            _createInfo.cBorrowAddress,
+            exchangeData.srcAddr,
+            exchangeData.destAddr,
+            exchangeData.exchangeAddr
+        ];
+
+        enumData = uint8(exchangeData.exchangeType);
+
+        callData = exchangeData.callData;
+
     }
 }
