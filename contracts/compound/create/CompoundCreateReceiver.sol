@@ -28,19 +28,20 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
         bytes calldata _params)
     external override {
         // Format the call data for DSProxy
-        // (address payable proxyAddr, bytes memory proxyData, ExchangeData memory exchangeData)
-        //                          = packFunctionCall(_amount, _fee, _params);
+        (address payable proxyAddr, bytes memory proxyData, ExchangeData memory exchangeData)
+                                 = packFunctionCall(_amount, _fee, _params);
 
-        // // Swap
-        // _sell(exchangeData);
+        // Swap
+        exchangeData.srcAmount -= _fee;
+        _sell(exchangeData);
 
-        // // Send amount to DSProxy
-        // sendToProxy(proxyAddr, exchangeData.destAddr, ERC20(exchangeData.destAddr).balanceOf(address(this)));
+        // Send amount to DSProxy
+        sendToProxy(proxyAddr, exchangeData.destAddr);
 
-        // address compOpenProxy = shifterRegistry.getAddr("COMP_SHIFTER");
+        address compOpenProxy = shifterRegistry.getAddr("COMP_SHIFTER");
 
-        // // Execute the DSProxy call
-        // DSProxyInterface(proxyAddr).execute(compOpenProxy, proxyData);
+        // Execute the DSProxy call
+        DSProxyInterface(proxyAddr).execute(0x4d040B247949a76cB8134203Da822Da50C674557, proxyData);
 
         // Repay the loan with the money DSProxy sent back
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
@@ -66,7 +67,7 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
         = abi.decode(_params, (uint256[4],address[5],uint8,bytes,address));
 
         proxyData = abi.encodeWithSignature(
-            "open(uint256,address,uint256)",
+            "open(address,address,uint256)",
                                 addrData[0], addrData[1], (_amount + _fee));
 
          exchangeData = SaverExchangeCore.ExchangeData({
@@ -87,10 +88,9 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
     /// @notice Send the FL funds received to DSProxy
     /// @param _proxy DSProxy address
     /// @param _reserve Token address
-    /// @param _amount Amount of tokens
-    function sendToProxy(address payable _proxy, address _reserve, uint _amount) internal {
+    function sendToProxy(address payable _proxy, address _reserve) internal {
         if (_reserve != ETH_ADDRESS) {
-            ERC20(_reserve).safeTransfer(_proxy, _amount);
+            ERC20(_reserve).safeTransfer(_proxy, ERC20(_reserve).balanceOf(address(this)));
         }
 
         _proxy.transfer(address(this).balance);

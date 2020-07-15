@@ -92,4 +92,6 @@ contract CompShifter is CompoundSaverHelper {
         ComptrollerInterface(COMPTROLLER_ADDR).enterMarkets(markets);
     }
 
+    // receive() external payable {}
+
 }

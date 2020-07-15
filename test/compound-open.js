@@ -29,15 +29,16 @@ const ExchangeInterface = contract.fromArtifact('ExchangeInterface');
 const CTokenInterface = contract.fromArtifact('CTokenInterface');
 const ComptrollerInterface = contract.fromArtifact('ComptrollerInterface');
 const CompoundCreateTaker = contract.fromArtifact('CompoundCreateTaker');
+const CompoundCreateReceiver = contract.fromArtifact('CompoundCreateReceiver');
 const ERC20 = contract.fromArtifact('ERC20');
 
 const compoundBasicProxyAddr = '0x0F1e33A36fA6a33Ea01460F04c6D8F1FAc2186E3';
 const compoundLoanInfoAddr = '0x4D32ECeC25d722C983f974134d649a20e78B1417';
 const uniswapWrapperAddr = '0x1e30124FDE14533231216D95F7798cD0061e5cf8';
 const comptrollerAddr = '0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b';
-const compoundCreateTakerAddr = '0x2612Af3A521c2df9EAF28422Ca335b04AdF3ac66';
-const compoundCreateReceiverAddr = '0xD86C8F0327494034F60e25074420BcCF560D5610';
 
+const compoundCreateTakerAddr = '0x466cbd8c8EB83Cd86ec2eE624E76D928507FcA68';
+const compoundCreateReceiverAddr = '0xa69F4c9F17e4C90138c55279aAF1917352D435C7';
 
 const makerVersion = "1.0.6";
 
@@ -69,6 +70,8 @@ describe("Compound-Open", accounts => {
         web3Exchange = new web3.eth.Contract(ExchangeInterface.abi, uniswapWrapperAddr);
         daiToken = new web3.eth.Contract(ERC20.abi, makerAddresses["MCD_DAI"]);
 
+        compoundReceiver = new web3.eth.Contract(CompoundCreateReceiver.abi, compoundCreateReceiverAddr);
+
         collToken = ETH_ADDRESS;
         borrowToken = makerAddresses["MCD_DAI"];
         cCollAddr = C_ETH_ADDRESS;
@@ -79,27 +82,42 @@ describe("Compound-Open", accounts => {
 
     });
 
-    it('... should buy a token', async () => {
-        const ethAmount = web3.utils.toWei('5', 'ether');
-        await web3Exchange.methods.swapEtherToToken(ethAmount, WETH_ADDRESS, '0').send({from: accounts[0], value: ethAmount, gas: 800000});
+    // it('... should buy a token', async () => {
+    //     const ethAmount = web3.utils.toWei('2', 'ether');
+    //     await web3Exchange.methods.swapEtherToToken(ethAmount, borrowToken, '0').send({from: accounts[0], value: ethAmount, gas: 800000});
 
-        const tokenBalance = await getBalance(web3, accounts[0], collToken);
-        console.log(tokenBalance/ 1e18);
-        expect(tokenBalance).to.be.bignumber.is.above('0');
+    //     await daiToken.methods.transfer(compoundCreateReceiverAddr, web3.utils.toWei('200', 'ether')).send({from: accounts[0], gas: 200000});
 
-        await daiToken.methods.transfer(compoundCreateReceiverAddr, web3.utils.toWei('1000', 'ether'));
-    });
+    //     const tokenBalance = await getBalance(web3, accounts[0], borrowToken);
+    //     console.log(tokenBalance/ 1e18);
+    //     expect(tokenBalance).to.be.bignumber.is.above('0');
+    // });
 
-    it('... should open a leveraged position', async () => {
+    // it('... should open a leveraged long position', async () => {
 
-        let srcAmount = web3.utils.toWei('1', 'ether');
-        let destAmount = web3.utils.toWei('100', 'ether');
+    //     let srcAmount = web3.utils.toWei('1', 'ether');
+    //     let destAmount = web3.utils.toWei('100', 'ether');
+
+    //     const createData = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundCreateTaker, 'openLeveragedLoan'),
+    //     [[cCollAddr, cBorrowAddr], [borrowToken, collToken, destAmount, 0, 0, 3, ZERO_ADDRESS, "0x0", 0], compoundCreateReceiverAddr]);
+
+    //    await web3Proxy.methods['execute(address,bytes)']
+    //     (compoundCreateTakerAddr, createData).send({from: accounts[0], gas: 3500000, value: srcAmount});
+
+    // });
+
+    it('... should open a leveraged short position', async () => {
+
+        await approve(web3, borrowToken, accounts[0], compoundCreateTakerAddr);
+
+        let srcAmount = web3.utils.toWei('100', 'ether');
+        let destAmount = web3.utils.toWei('1', 'ether');
 
         const createData = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundCreateTaker, 'openLeveragedLoan'),
-        [[cCollAddr, cBorrowAddr], [borrowToken, collToken, destAmount, 0, 0, 3, ZERO_ADDRESS, "0x0", 0], compoundCreateReceiverAddr]);
+        [[cBorrowAddr, cCollAddr], [collToken, borrowToken, destAmount, srcAmount, 0, 3, ZERO_ADDRESS, "0x0", 0], compoundCreateReceiverAddr]);
 
        await web3Proxy.methods['execute(address,bytes)']
-        (compoundCreateTakerAddr, createData).send({from: accounts[0], gas: 3500000, value: srcAmount});
+        (compoundCreateTakerAddr, createData).send({from: accounts[0], gas: 3500000 });
 
     });
 
