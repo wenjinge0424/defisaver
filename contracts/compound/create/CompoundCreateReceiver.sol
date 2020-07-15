@@ -7,14 +7,14 @@ import "../../exchange/SaverExchangeCore.sol";
 import "../../shifter/ShifterRegistry.sol";
 
 /// @title Contract that receives the FL from Aave for Creating loans
-contract CompoundCreateFlashLoan is FlashLoanReceiverBase, SaverExchangeCore {
+contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
     ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xD280c91397C1f8826a82a9432D65e4215EF22e55);
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    constructor(address payable _compoundCreateFlashProxy) FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) public {}
+    constructor() FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) public {}
 
     /// @notice Called by Aave when sending back the FL amount
     /// @param _reserve The address of the borrowed token
@@ -28,19 +28,19 @@ contract CompoundCreateFlashLoan is FlashLoanReceiverBase, SaverExchangeCore {
         bytes calldata _params)
     external override {
         // Format the call data for DSProxy
-        (address payable proxyAddr, bytes memory proxyData, ExchangeData memory exchangeData)
-                                 = packFunctionCall(_amount, _fee, _params);
+        // (address payable proxyAddr, bytes memory proxyData, ExchangeData memory exchangeData)
+        //                          = packFunctionCall(_amount, _fee, _params);
 
-        // Swap
-        _sell(exchangeData);
+        // // Swap
+        // _sell(exchangeData);
 
-        // Send amount to DSProxy
-        sendToProxy(proxyAddr, exchangeData.destAddr, ERC20(exchangeData.destAddr).balanceOf(address(this)));
+        // // Send amount to DSProxy
+        // sendToProxy(proxyAddr, exchangeData.destAddr, ERC20(exchangeData.destAddr).balanceOf(address(this)));
 
-        address compOpenProxy = shifterRegistry.getAddr("COMP_SHIFTER");
+        // address compOpenProxy = shifterRegistry.getAddr("COMP_SHIFTER");
 
-        // Execute the DSProxy call
-        DSProxyInterface(proxyAddr).execute(compOpenProxy, proxyData);
+        // // Execute the DSProxy call
+        // DSProxyInterface(proxyAddr).execute(compOpenProxy, proxyData);
 
         // Repay the loan with the money DSProxy sent back
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));

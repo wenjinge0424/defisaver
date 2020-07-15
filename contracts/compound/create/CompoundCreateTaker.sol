@@ -40,6 +40,8 @@ contract CompoundCreateTaker is ProxyPermission {
 
         givePermission(_compoundReceiver);
 
+        // send _srcAmount to contract
+
         lendingPool.flashLoan(_compoundReceiver, _exchangeData.srcAddr, loanAmount, paramsData);
 
         removePermission(_compoundReceiver);
