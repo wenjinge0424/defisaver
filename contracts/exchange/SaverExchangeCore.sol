@@ -37,12 +37,14 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         uint tokensLeft = exData.srcAmount;
 
         // Try 0x first and then fallback on specific wrapper
-        approve0xProxy(exData.srcAddr, exData.srcAmount);
+        if (exData.price0x > 0) {
+            approve0xProxy(exData.srcAddr, exData.srcAmount);
 
-        (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance, ActionType.SELL);
+            (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance, ActionType.SELL);
 
-        if (success) {
-            wrapper = exData.exchangeAddr;
+            if (success) {
+                wrapper = exData.exchangeAddr;
+            }
         }
 
         // check if we have already swapped with 0x, or tried swapping but failed
@@ -68,12 +70,14 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
 
         require(exData.destAmount != 0, "Dest amount must be specified");
 
-        approve0xProxy(exData.srcAddr, exData.srcAmount);
+        if (exData.price0x > 0) { 
+            approve0xProxy(exData.srcAddr, exData.srcAmount);
 
-        (success, swapedTokens,) = takeOrder(exData, address(this).balance, ActionType.BUY);
+            (success, swapedTokens,) = takeOrder(exData, address(this).balance, ActionType.BUY);
 
-        if (success) {
-            wrapper = exData.exchangeAddr;
+            if (success) {
+                wrapper = exData.exchangeAddr;
+            }
         }
 
         // check if we have already swapped with 0x, or tried swapping but failed
