@@ -75,8 +75,8 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
 
         (
             uint[8] memory numData,
-            address[6] memory addrData,
-            uint8[4] memory enumData,
+            address[7] memory addrData,
+            uint8[3] memory enumData,
             bytes memory callData
         )
         = _packData(_loanShift, _exchangeData);
@@ -121,7 +121,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
     function _packData(
         LoanShiftData memory _loanShift,
         SaverExchangeCore.ExchangeData memory exchangeData
-    ) internal pure returns (uint[8] memory numData, address[6] memory addrData, uint8[4] memory enumData, bytes memory callData) {
+    ) internal pure returns (uint[8] memory numData, address[7] memory addrData, uint8[3] memory enumData, bytes memory callData) {
 
         numData = [
             _loanShift.collAmount,
@@ -140,14 +140,14 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
             _loanShift.debtAddr,
             exchangeData.srcAddr,
             exchangeData.destAddr,
-            exchangeData.exchangeAddr
+            exchangeData.exchangeAddr,
+            exchangeData.wrapper
         ];
 
         enumData = [
             uint8(_loanShift.fromProtocol),
             uint8(_loanShift.toProtocol),
-            uint8(_loanShift.swapType),
-            uint8(exchangeData.exchangeType)
+            uint8(_loanShift.swapType)
         ];
 
         callData = exchangeData.callData;
