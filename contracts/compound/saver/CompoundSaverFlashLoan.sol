@@ -7,7 +7,7 @@ import "../../interfaces/DSProxyInterface.sol";
 contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
-    address payable public COMPOUND_SAVER_FLASH_PROXY = 0x77B03a422eF5bF581E946677e385f31e1E45D37f;
+    address payable public COMPOUND_SAVER_FLASH_PROXY = 0xe12A042b5Fc0cc2B8e598b36C4E87d8b723eB5ca;
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address public owner;

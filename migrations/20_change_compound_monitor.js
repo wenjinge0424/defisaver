@@ -16,7 +16,7 @@ module.exports = function(deployer, network, accounts) {
     	const subscriptionsAddress = '0x52015EFFD577E08f498a0CCc11905925D58D6207'; //(await CompoundSubscriptions.deployed()).address;
 
         // await deployer.deploy(CompoundMonitor, compoundMonitorProxyAddress, subscriptionsAddress, compoundFlashLoanTakerAddress, {gas: 4000000, overwrite: deployAgain});
-    	const compoundMonitorAddress = '0x683b4485436dDcd3F86314b02191b8470200E12A'; //(await CompoundMonitor.deployed()).address;
+    	const compoundMonitorAddress = '0x1352E62B062616f0208cB7681803f44e7aD0cF54'; //(await CompoundMonitor.deployed()).address;
 
         console.log('adding caller');
         const monitor = await CompoundMonitor.at(compoundMonitorAddress);
