@@ -17,7 +17,7 @@ const deploy = async (contractName, resendCount, nonce, ...args) => {
 		}
 
 		const options = {gasPrice: ethers.BigNumber.from(newGasPrice.toString()), nonce: nonce};
-		
+
 		let contract;
 		if (args.length == 1 && args[0].length == 0) {
 			contract = await Contract.deploy(options);
@@ -41,15 +41,18 @@ const deploy = async (contractName, resendCount, nonce, ...args) => {
 
 const deployWithResend = (contractName, resendCount, nonce, ...args) => new Promise((resolve) => {
 	let deployPromise = deploy(contractName, resendCount, nonce, args);
-	const timeoutId = setTimeout(() => resolve(deployWithResend(contractName, resendCount+1, nonce, ...args)),  1 * 10 * 1000);
+	const timeoutId = setTimeout(() => resolve(deployWithResend(contractName, resendCount+1, nonce, ...args)),  1 * 30 * 1000);
 	deployPromise.then((contract) => {
 		clearTimeout(timeoutId);
-		return contract;
+
+		if (contract !== null) resolve(contract);
+
+		return;
 	})
 })
 
 const deployContract = async (contractName, ...args) => {
-	const address = '0x6c259ea1fCa0D1883e3FFFdDeb8a0719E1D7265f'; //process.env.OWNER_ADDRESS;
+	const address = '0x0a80C3C540eEF99811f4579fa7b1A0617294e06f'; //process.env.OWNER_ADDRESS;
 	const nonce = await bre.ethers.provider.getTransactionCount(address);
 
 	return deployWithResend(contractName, 0, nonce, ...args);
