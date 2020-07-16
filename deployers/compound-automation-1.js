@@ -7,7 +7,7 @@ const { deployContract } = require("./deployer");
 
 async function main() {
  	await deployContract("CompoundSubscriptions");
-  	await deployContract("CompoundMonitorProxy", 0);
+  	// await deployContract("CompoundMonitorProxy", 0);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
