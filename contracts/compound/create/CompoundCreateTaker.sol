@@ -7,9 +7,13 @@ import "../helpers/CompoundSaverHelper.sol";
 import "../CompoundBasicProxy.sol";
 import "../../auth/ProxyPermission.sol";
 import "../../exchange/SaverExchangeCore.sol";
+import "../../utils/SafeERC20.sol";
 
 /// @title Opens compound positions with a leverage
 contract CompoundCreateTaker is ProxyPermission {
+    using SafeERC20 for ERC20;
+
+    address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
     // solhint-disable-next-line const-name-snakecase
@@ -28,6 +32,10 @@ contract CompoundCreateTaker is ProxyPermission {
 
         uint loanAmount = _exchangeData.srcAmount;
 
+        if (_exchangeData.destAddr != ETH_ADDRESS) {
+            ERC20(_exchangeData.destAddr).safeTransferFrom(msg.sender, address(this), _exchangeData.destAmount);
+        }
+
         (
             uint[4] memory numData,
             address[5] memory addrData,
@@ -40,6 +48,8 @@ contract CompoundCreateTaker is ProxyPermission {
 
         givePermission(_compoundReceiver);
 
+        sendSrcAmount(_compoundReceiver, _exchangeData.destAddr);
+
         lendingPool.flashLoan(_compoundReceiver, _exchangeData.srcAddr, loanAmount, paramsData);
 
         removePermission(_compoundReceiver);
@@ -47,6 +57,14 @@ contract CompoundCreateTaker is ProxyPermission {
         logger.Log(address(this), msg.sender, "CompoundLeveragedLoan",
             abi.encode(_exchangeData.srcAddr, _exchangeData.destAddr, _exchangeData.srcAmount, _exchangeData.destAmount));
 
+    }
+
+    function sendSrcAmount(address payable _compoundReceiver, address _token) internal {
+        if (_token != ETH_ADDRESS) {
+            ERC20(_token).safeTransfer(_compoundReceiver, ERC20(_token).balanceOf(address(this)));
+        }
+
+        _compoundReceiver.transfer(address(this).balance);
     }
 
     function _packData(

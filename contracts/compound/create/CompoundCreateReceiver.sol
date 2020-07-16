@@ -7,14 +7,14 @@ import "../../exchange/SaverExchangeCore.sol";
 import "../../shifter/ShifterRegistry.sol";
 
 /// @title Contract that receives the FL from Aave for Creating loans
-contract CompoundCreateFlashLoan is FlashLoanReceiverBase, SaverExchangeCore {
+contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
     ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xD280c91397C1f8826a82a9432D65e4215EF22e55);
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    constructor(address payable _compoundCreateFlashProxy) FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) public {}
+    constructor() FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) public {}
 
     /// @notice Called by Aave when sending back the FL amount
     /// @param _reserve The address of the borrowed token
@@ -32,15 +32,16 @@ contract CompoundCreateFlashLoan is FlashLoanReceiverBase, SaverExchangeCore {
                                  = packFunctionCall(_amount, _fee, _params);
 
         // Swap
+        exchangeData.srcAmount -= _fee;
         _sell(exchangeData);
 
         // Send amount to DSProxy
-        sendToProxy(proxyAddr, exchangeData.destAddr, ERC20(exchangeData.destAddr).balanceOf(address(this)));
+        sendToProxy(proxyAddr, exchangeData.destAddr);
 
         address compOpenProxy = shifterRegistry.getAddr("COMP_SHIFTER");
 
         // Execute the DSProxy call
-        DSProxyInterface(proxyAddr).execute(compOpenProxy, proxyData);
+        DSProxyInterface(proxyAddr).execute(0x4d040B247949a76cB8134203Da822Da50C674557, proxyData);
 
         // Repay the loan with the money DSProxy sent back
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
@@ -66,7 +67,7 @@ contract CompoundCreateFlashLoan is FlashLoanReceiverBase, SaverExchangeCore {
         = abi.decode(_params, (uint256[4],address[5],uint8,bytes,address));
 
         proxyData = abi.encodeWithSignature(
-            "open(uint256,address,uint256)",
+            "open(address,address,uint256)",
                                 addrData[0], addrData[1], (_amount + _fee));
 
          exchangeData = SaverExchangeCore.ExchangeData({
@@ -87,10 +88,9 @@ contract CompoundCreateFlashLoan is FlashLoanReceiverBase, SaverExchangeCore {
     /// @notice Send the FL funds received to DSProxy
     /// @param _proxy DSProxy address
     /// @param _reserve Token address
-    /// @param _amount Amount of tokens
-    function sendToProxy(address payable _proxy, address _reserve, uint _amount) internal {
+    function sendToProxy(address payable _proxy, address _reserve) internal {
         if (_reserve != ETH_ADDRESS) {
-            ERC20(_reserve).safeTransfer(_proxy, _amount);
+            ERC20(_reserve).safeTransfer(_proxy, ERC20(_reserve).balanceOf(address(this)));
         }
 
         _proxy.transfer(address(this).balance);

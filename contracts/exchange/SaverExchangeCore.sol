@@ -267,7 +267,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         if (exData.srcAddr == KYBER_ETH_ADDRESS) {
             ethValue = exData.srcAmount;
         } else {
-            ERC20(exData.srcAddr).safeTransfer(_wrapper, ERC20(exData.srcAddr).balanceOf(address(this)));
+            ERC20(exData.srcAddr).safeTransfer(_wrapper, exData.srcAmount);
         }
 
         if (_type == ActionType.SELL) {
