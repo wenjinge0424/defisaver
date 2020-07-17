@@ -20,7 +20,7 @@ module.exports = {
         kovan: {
             url: process.env.KOVAN_INFURA_ENDPOINT,
             accounts: [process.env.PRIV_KEY_KOVAN],
-            gasPrice: 1000000000
+            gasPrice: 1600000000
         },
     },
     solc: {
