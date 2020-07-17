@@ -114,7 +114,7 @@ describe("Compound-Open", accounts => {
         let destAmount = web3.utils.toWei('1', 'ether');
 
         const createData = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundCreateTaker, 'openLeveragedLoan'),
-        [[cBorrowAddr, cCollAddr], [collToken, borrowToken, destAmount, srcAmount, 0, 3, ZERO_ADDRESS, "0x0", 0], compoundCreateReceiverAddr]);
+        [[cBorrowAddr, cCollAddr, srcAmount], [collToken, borrowToken, destAmount, 0, 0, 3, ZERO_ADDRESS, "0x0", 0], compoundCreateReceiverAddr]);
 
        await web3Proxy.methods['execute(address,bytes)']
         (compoundCreateTakerAddr, createData).send({from: accounts[0], gas: 3500000 });

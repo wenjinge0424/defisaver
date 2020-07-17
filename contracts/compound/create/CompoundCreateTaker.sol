@@ -22,6 +22,7 @@ contract CompoundCreateTaker is ProxyPermission {
     struct CreateInfo {
         address cCollAddress;
         address cBorrowAddress;
+        uint debtAmount;
     }
 
     function openLeveragedLoan(
@@ -33,7 +34,7 @@ contract CompoundCreateTaker is ProxyPermission {
         uint loanAmount = _exchangeData.srcAmount;
 
         if (_exchangeData.destAddr != ETH_ADDRESS) {
-            ERC20(_exchangeData.destAddr).safeTransferFrom(msg.sender, address(this), _exchangeData.destAmount);
+            ERC20(_exchangeData.destAddr).safeTransferFrom(msg.sender, address(this), _createInfo.debtAmount);
         }
 
         (
