@@ -5,6 +5,7 @@ import "../interfaces/TokenInterface.sol";
 import "../interfaces/ExchangeInterfaceV2.sol";
 import "../utils/ZrxAllowlist.sol";
 import "./SaverExchangeHelper.sol";
+import "./SaverExchangeRegistry.sol";
 
 contract SaverExchangeCore is SaverExchangeHelper, DSMath {
 
@@ -19,7 +20,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         uint srcAmount;
         uint destAmount;
         uint minPrice;
-        ExchangeType exchangeType;
+        address wrapper;
         address exchangeAddr;
         bytes callData;
         uint256 price0x;
@@ -36,42 +37,24 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         bool success;
         uint tokensLeft = exData.srcAmount;
 
-        // if 0x is selected try first the 0x order
-        if (exData.exchangeType == ExchangeType.ZEROX) {
+        // Try 0x first and then fallback on specific wrapper
+        if (exData.price0x > 0) {
             approve0xProxy(exData.srcAddr, exData.srcAmount);
 
             (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance, ActionType.SELL);
 
-            require(success, "0x order failed");
-
-            wrapper = exData.exchangeAddr;
+            if (success) {
+                wrapper = exData.exchangeAddr;
+            }
         }
 
         // check if we have already swapped with 0x, or tried swapping but failed
         if (tokensLeft > 0) {
-            uint price;
-
-            (wrapper, price)
-                = getBestPrice(exData.srcAmount, exData.srcAddr, exData.destAddr, exData.exchangeType, ActionType.SELL);
-
-            require(price > exData.minPrice || exData.price0x > exData.minPrice, "Slippage hit");
-
-            // if 0x has better prices use 0x
-            if (exData.price0x >= price && exData.exchangeType != ExchangeType.ZEROX) {
-                approve0xProxy(exData.srcAddr, exData.srcAmount);
-
-                (success, swapedTokens, tokensLeft) = takeOrder(exData, address(this).balance, ActionType.SELL);
-            }
-
-            // 0x either had worse price or we tried and order fill failed, so call on chain swap
-            if (tokensLeft > 0) {
-                require(price > exData.minPrice, "On chain slippage hit");
-
-                swapedTokens = saverSwap(exData, wrapper, ActionType.SELL);
-            }
+            swapedTokens = saverSwap(exData, ActionType.SELL);
+            wrapper = exData.wrapper;
         }
 
-        require(getBalance(exData.destAddr) >= wmul(exData.minPrice, exData.srcAmount), "Double check min price");
+        require(getBalance(exData.destAddr) >= wmul(exData.minPrice, exData.srcAmount), "Final amount isn't correct");
 
         return (wrapper, swapedTokens);
     }
@@ -88,42 +71,23 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
 
         require(exData.destAmount != 0, "Dest amount must be specified");
 
-        // if 0x is selected try first the 0x order
-        if (exData.exchangeType == ExchangeType.ZEROX) {
+        if (exData.price0x > 0) { 
             approve0xProxy(exData.srcAddr, exData.srcAmount);
 
             (success, swapedTokens,) = takeOrder(exData, address(this).balance, ActionType.BUY);
 
-            require(success, "0x order failed");
-
-            wrapper = exData.exchangeAddr;
+            if (success) {
+                wrapper = exData.exchangeAddr;
+            }
         }
 
         // check if we have already swapped with 0x, or tried swapping but failed
         if (getBalance(exData.destAddr) < exData.destAmount) {
-            uint price;
-
-            (wrapper, price)
-                = getBestPrice(exData.destAmount, exData.srcAddr, exData.destAddr, exData.exchangeType, ActionType.BUY);
-
-            require(price < exData.minPrice || exData.price0x < exData.minPrice, "Slippage hit");
-
-            // if 0x has better prices use 0x
-            if (exData.price0x != 0 && exData.price0x <= price && exData.exchangeType != ExchangeType.ZEROX) {
-                approve0xProxy(exData.srcAddr, exData.srcAmount);
-
-                (success, swapedTokens,) = takeOrder(exData, address(this).balance, ActionType.BUY);
-            }
-
-            // 0x either had worse price or we tried and order fill failed, so call on chain swap
-            if (getBalance(exData.destAddr) < exData.destAmount) {
-                require(price < exData.minPrice, "On chain slippage hit");
-
-                swapedTokens = saverSwap(exData, wrapper, ActionType.BUY);
-            }
+            swapedTokens = saverSwap(exData, ActionType.BUY);
+            wrapper = exData.wrapper;
         }
 
-        require(getBalance(exData.destAddr) >= exData.destAmount, "Less then destAmount");
+        require(getBalance(exData.destAddr) >= exData.destAmount, "Final amount isn't correct");
 
         return (wrapper, getBalance(exData.destAddr));
     }
@@ -257,25 +221,26 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
     }
 
     /// @notice Calls wraper contract for exchage to preform an on-chain swap
-    /// @param exData Exchange data struct
-    /// @param _wrapper Address of exchange wrapper
+    /// @param _exData Exchange data struct
     /// @param _type Type of action SELL|BUY
     /// @return swapedTokens For Sell that the destAmount, for Buy thats the srcAmount
-    function saverSwap(ExchangeData memory exData, address _wrapper, ActionType _type) internal returns (uint swapedTokens) {
+    function saverSwap(ExchangeData memory _exData, ActionType _type) internal returns (uint swapedTokens) {
+        require(SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.wrapper), "Wrapper is not valid");
+
         uint ethValue = 0;
 
-        if (exData.srcAddr == KYBER_ETH_ADDRESS) {
-            ethValue = exData.srcAmount;
+        if (_exData.srcAddr == KYBER_ETH_ADDRESS) {
+            ethValue = _exData.srcAmount;
         } else {
-            ERC20(exData.srcAddr).safeTransfer(_wrapper, exData.srcAmount);
+            ERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
         }
 
         if (_type == ActionType.SELL) {
-            swapedTokens = ExchangeInterfaceV2(_wrapper).
-                    sell{value: ethValue}(exData.srcAddr, exData.destAddr, exData.srcAmount);
+            swapedTokens = ExchangeInterfaceV2(_exData.wrapper).
+                    sell{value: ethValue}(_exData.srcAddr, _exData.destAddr, _exData.srcAmount);
         } else {
-            swapedTokens = ExchangeInterfaceV2(_wrapper).
-                    buy{value: ethValue}(exData.srcAddr, exData.destAddr, exData.destAmount);
+            swapedTokens = ExchangeInterfaceV2(_exData.wrapper).
+                    buy{value: ethValue}(_exData.srcAddr, _exData.destAddr, _exData.destAmount);
         }
     }
 
