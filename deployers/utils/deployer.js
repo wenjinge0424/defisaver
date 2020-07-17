@@ -1,6 +1,7 @@
 const bre = require("@nomiclabs/buidler");
 const ethers = require("ethers");
 const dotenv = require('dotenv').config();
+const { write } = require('./writer');
 
 const getGasPrice = async (exGasPrice) => {
 	if (exGasPrice.gt("0")) {
@@ -28,7 +29,7 @@ const deploy = async (contractName, action, gasPrice, nonce, ...args) => {
 		const options = {gasPrice, nonce};
 
 		let contract;
-		if (args.length == 1 && args[0].length == 0) {
+		if (args.length == 0) {
 			contract = await Contract.deploy(options);
 		} else {
 			contract = await Contract.deploy(...args, options);
@@ -42,6 +43,8 @@ const deploy = async (contractName, action, gasPrice, nonce, ...args) => {
 
 	  	console.log(`Gas used: ${tx.gasUsed}`);
 	  	console.log(`${contractName} deployed to:`, contract.address);
+
+	  	await write(contractName, bre.network.name, contract.address, ...args);
 	  	console.log('-------------------------------------------------------------');
 	  	return contract;
 	} catch (e) {
@@ -51,7 +54,7 @@ const deploy = async (contractName, action, gasPrice, nonce, ...args) => {
 
 const deployWithResend = (contractName, action, exGasPrice, nonce, ...args) => new Promise((resolve) => {
 	getGasPrice(exGasPrice).then((gasPrice) => {
-		let deployPromise = deploy(contractName, action, gasPrice, nonce, args);
+		let deployPromise = deploy(contractName, action, gasPrice, nonce, ...args);
 		const timeoutId = setTimeout(() => resolve(deployWithResend(contractName, 'Resending', gasPrice, nonce, ...args)),  parseFloat(process.env.TIMEOUT_MINUTES) * 60 * 1000);
 		
 		deployPromise.then((contract) => {

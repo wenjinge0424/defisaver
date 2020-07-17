@@ -9,7 +9,8 @@
     "test": "npx mocha --exit --recursive --timeout 60000",
     "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol",
     "flatten-all": "sol-merger@3.1.0 \"./contracts/*.sol\" ./build",
-    "flatten": "npx sol-merger@3.1.0"
+    "flatten": "npx sol-merger@3.1.0",
+    "verify": "node deployers/utils/verifier.js"
   },
   "repository": {
     "type": "git",

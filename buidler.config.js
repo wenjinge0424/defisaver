@@ -27,11 +27,11 @@ module.exports = {
         version: "0.6.6",
         optimizer: {
             enabled: true,
-            runs: 20000
+            runs: 200
         }
     },
     etherscan: {
-        url: "https://api.etherscan.io/api",
+        url: "https://api-kovan.etherscan.io/api",
         apiKey: process.env.ETHERSCAN_API_KEY
     }
 };
