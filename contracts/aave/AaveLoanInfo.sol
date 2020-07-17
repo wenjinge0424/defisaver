@@ -64,16 +64,17 @@ contract AaveLoanInfo is AaveSafetyRatio {
         }
     }
 
-    function getTokenBalances(address _user, address[] memory _tokens) public view returns (uint256[] memory balances, uint256[] memory borrows) {
+    function getTokenBalances(address _user, address[] memory _tokens) public view returns (uint256[] memory balances, uint256[] memory borrows, bool[] memory enabledAsCollateral) {
     	address lendingPoolAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 
         balances = new uint256[](_tokens.length);
         borrows = new uint256[](_tokens.length);
+        enabledAsCollateral = new bool[](_tokens.length);
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             address asset = _tokens[i];
 
-            (balances[i], borrows[i],,,,,,,,) = ILendingPool(lendingPoolAddress).getUserReserveData(asset, _user);
+            (balances[i], borrows[i],,,,,,,,enabledAsCollateral[i]) = ILendingPool(lendingPoolAddress).getUserReserveData(asset, _user);
         }
     }
 

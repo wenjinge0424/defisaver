@@ -9,7 +9,7 @@ const {
     ETH_ADDRESS
 } = require('../test/helper.js');
 
-const aaveLoanInfoAddr = '0xCfEB869F69431e42cdB54A4F4f105C19C080A601';
+const aaveLoanInfoAddr = '0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab';
 
 const makerVersion = "1.0.6";
 const userAddr = '0x52b398e75eec28a97b115af39a91cbd5a31eef6e';
