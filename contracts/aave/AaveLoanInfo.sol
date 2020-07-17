@@ -31,6 +31,7 @@ contract AaveLoanInfo is AaveSafetyRatio {
         uint256 totalBorrow;
         uint256 collateralFactor;
         uint256 price;
+        bool usageAsCollateralEnabled;
     }
 
     /// @notice Calcualted the ratio of coll/debt for a compound user
@@ -120,7 +121,7 @@ contract AaveLoanInfo is AaveSafetyRatio {
         tokens = new TokenInfoFull[](_tokenAddresses.length);
 
         for (uint256 i = 0; i < _tokenAddresses.length; ++i) {
-        	(,uint256 ltv,,) = ILendingPool(lendingPoolCoreAddress).getReserveConfiguration(_tokenAddresses[i]);
+        	(,uint256 ltv,,bool usageAsCollateralEnabled) = ILendingPool(lendingPoolCoreAddress).getReserveConfiguration(_tokenAddresses[i]);
 
             tokens[i] = TokenInfoFull({
             	aTokenAddress: ILendingPool(lendingPoolCoreAddress).getReserveATokenAddress(_tokenAddresses[i]),
@@ -131,7 +132,8 @@ contract AaveLoanInfo is AaveSafetyRatio {
                 availableLiquidity: ILendingPool(lendingPoolCoreAddress).getReserveAvailableLiquidity(_tokenAddresses[i]),
                 totalBorrow: ILendingPool(lendingPoolCoreAddress).getReserveTotalBorrowsVariable(_tokenAddresses[i]),
                 collateralFactor: ltv,
-                price: IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddresses[i])
+                price: IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddresses[i]),
+                usageAsCollateralEnabled: usageAsCollateralEnabled
             });
         }
     }
