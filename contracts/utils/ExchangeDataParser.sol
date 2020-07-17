@@ -6,16 +6,16 @@ import "../exchange/SaverExchangeCore.sol";
 contract ExchangeDataParser {
      function decodeExchangeData(
         SaverExchangeCore.ExchangeData memory exchangeData
-    ) internal pure returns (address[3] memory, uint[5] memory, bytes memory) {
+    ) internal pure returns (address[4] memory, uint[4] memory, bytes memory) {
         return (
-         [exchangeData.srcAddr, exchangeData.destAddr, exchangeData.exchangeAddr],
-         [exchangeData.srcAmount, exchangeData.destAmount, exchangeData.minPrice, exchangeData.price0x, uint256(exchangeData.exchangeType)],
+         [exchangeData.srcAddr, exchangeData.destAddr, exchangeData.exchangeAddr, exchangeData.wrapper],
+         [exchangeData.srcAmount, exchangeData.destAmount, exchangeData.minPrice, exchangeData.price0x],
          exchangeData.callData
         );
     }
 
     function encodeExchangeData(
-        address[3] memory exAddr, uint[5] memory exNum, bytes memory callData
+        address[4] memory exAddr, uint[4] memory exNum, bytes memory callData
     ) internal pure returns (SaverExchangeCore.ExchangeData memory) {
         return SaverExchangeCore.ExchangeData({
             srcAddr: exAddr[0],
@@ -23,7 +23,7 @@ contract ExchangeDataParser {
             srcAmount: exNum[0],
             destAmount: exNum[1],
             minPrice: exNum[2],
-            exchangeType: SaverExchangeCore.ExchangeType(exNum[4]),
+            wrapper: exAddr[3],
             exchangeAddr: exAddr[2],
             callData: callData,
             price0x: exNum[3]

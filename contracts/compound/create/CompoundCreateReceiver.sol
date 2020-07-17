@@ -59,12 +59,11 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
     function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal pure  returns (address payable, bytes memory proxyData, ExchangeData memory exchangeData) {
         (
             uint[4] memory numData, // srcAmount, destAmount, minPrice, price0x
-            address[5] memory addrData, // cCollAddr, cDebtAddr, srcAddr, destAddr, exchangeAddr
-            uint8 enumData, // exchangeType
+            address[6] memory addrData, // cCollAddr, cDebtAddr, srcAddr, destAddr, exchangeAddr, wrapper
             bytes memory callData,
             address proxy
         )
-        = abi.decode(_params, (uint256[4],address[5],uint8,bytes,address));
+        = abi.decode(_params, (uint256[4],address[6],bytes,address));
 
         proxyData = abi.encodeWithSignature(
             "open(address,address,uint256)",
@@ -76,7 +75,7 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
             srcAmount: numData[0],
             destAmount: numData[1],
             minPrice: numData[2],
-            exchangeType: ExchangeType(enumData),
+            wrapper: addrData[5],
             exchangeAddr: addrData[4],
             callData: callData,
             price0x: numData[3]

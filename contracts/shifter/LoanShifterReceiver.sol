@@ -77,12 +77,12 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
 
         (
             uint[8] memory numData, // collAmount, debtAmount, id1, id2, srcAmount, destAmount, minPrice, price0x
-            address[6] memory addrData, // addrLoan1, addrLoan2, debtAddr, srcAddr, destAddr, exchangeAddr
-            uint8[4] memory enumData, // fromProtocol, toProtocol, swapType, exchangeType
+            address[7] memory addrData, // addrLoan1, addrLoan2, debtAddr, srcAddr, destAddr, exchangeAddr, wrapper
+            uint8[3] memory enumData, // fromProtocol, toProtocol, swapType
             bytes memory callData,
             address proxy
         )
-        = abi.decode(_params, (uint256[8],address[6],uint8[4],bytes,address));
+        = abi.decode(_params, (uint256[8],address[7],uint8[3],bytes,address));
 
         bytes memory proxyData1;
         bytes memory proxyData2;
@@ -130,7 +130,7 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
             srcAmount: numData[4],
             destAmount: numData[5],
             minPrice: numData[6],
-            exchangeType: ExchangeType(enumData[3]),
+            wrapper: addrData[6],
             exchangeAddr: addrData[5],
             callData: callData,
             price0x: numData[7]
