@@ -5,6 +5,7 @@ import "../interfaces/TokenInterface.sol";
 import "../interfaces/ExchangeInterfaceV2.sol";
 import "../utils/ZrxAllowlist.sol";
 import "./SaverExchangeHelper.sol";
+import "./SaverExchangeRegistry.sol";
 
 contract SaverExchangeCore is SaverExchangeHelper, DSMath {
 
@@ -224,12 +225,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
     /// @param _type Type of action SELL|BUY
     /// @return swapedTokens For Sell that the destAmount, for Buy thats the srcAmount
     function saverSwap(ExchangeData memory _exData, ActionType _type) internal returns (uint swapedTokens) {
-        require(
-            _exData.wrapper == OASIS_WRAPPER ||
-            _exData.wrapper == KYBER_WRAPPER ||
-            _exData.wrapper == UNISWAP_WRAPPER,
-            "Wrapper is not valid"
-        );
+        require(SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.wrapper), "Wrapper is not valid");
 
         uint ethValue = 0;
 
