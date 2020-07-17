@@ -42,8 +42,6 @@ const deploy = async (contractName, action, gasPrice, nonce, ...args) => {
 	  	console.log('-------------------------------------------------------------');
 	  	return contract;
 	} catch (e) {
-		// console.log(e);
-		console.log('odje ima errora');
 		return null;
 	}	
 }

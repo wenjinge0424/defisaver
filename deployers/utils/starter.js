@@ -2,12 +2,14 @@
 // and properly handle errors.
 const bre = require("@nomiclabs/buidler");
 const readline = require("readline");
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+
 
 const start = (main) => {
+	const rl = readline.createInterface({
+	    input: process.stdin,
+	    output: process.stdout
+	});
+
 	console.log('-------------------------------------------------------------');
 	rl.question(`Network: ${bre.network.name}\nGas price: ${parseInt(bre.network.config.gasPrice)/1e9} gwei\nCONFIRM [y]/n: `, function(answer) {
 		if (answer === 'y' || answer === '') {
@@ -21,12 +23,12 @@ const start = (main) => {
 			rl.close();
 		}
 	});
-}
 
-rl.on("close", function() {
-    console.log("\nFinished");
-    process.exit(0);
-});
+	rl.on("close", function() {
+	    console.log("\nFinished");
+	    process.exit(0);
+	});
+}
 
 module.exports = {
 	start
