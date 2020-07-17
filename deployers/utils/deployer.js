@@ -34,7 +34,7 @@ const deploy = async (contractName, action, gasPrice, nonce, ...args) => {
 			contract = await Contract.deploy(...args, options);
 		}
 
-	  	console.log(`${action} ${contractName}: ${contract.deployTransaction.hash} with gasPrice: ${gasPrice.toString()}`);
+	  	console.log(`${action} ${contractName}: ${contract.deployTransaction.hash} with gasPrice: ${parseInt(gasPrice.toString())/1e9}`);
 	  	
 	  	await contract.deployed();
 

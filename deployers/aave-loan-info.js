@@ -4,16 +4,10 @@
 // Runtime Environment's members available in the global scope.
 const bre = require("@nomiclabs/buidler");
 const { deployContract } = require("./utils/deployer");
+const { start } = require('./utils/starter');
 
 async function main() {
  	await deployContract("AaveLoanInfo");
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main()
-  .then(() => process.exit(0))
-  .catch(error => {
-    console.error(error);
-    process.exit(1);
-  });
+start(main);

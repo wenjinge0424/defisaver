@@ -1,0 +1,33 @@
+// We recommend this pattern to be able to use async/await everywhere
+// and properly handle errors.
+const bre = require("@nomiclabs/buidler");
+const readline = require("readline");
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+const start = (main) => {
+	console.log('-------------------------------------------------------------');
+	rl.question(`Network: ${bre.network.name}\nGas price: ${parseInt(bre.network.config.gasPrice)/1e9} gwei\nCONFIRM [y]/n: `, function(answer) {
+		if (answer === 'y' || answer === '') {
+			main()
+			  .then(() => rl.close())
+			  .catch(error => {
+			    console.error(error);
+			    rl.close();
+			  });
+		} else {
+			rl.close();
+		}
+	});
+}
+
+rl.on("close", function() {
+    console.log("\nFinished");
+    process.exit(0);
+});
+
+module.exports = {
+	start
+}

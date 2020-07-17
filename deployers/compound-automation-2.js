@@ -3,6 +3,7 @@
 // When running the script with `buidler run <script>` you'll find the Buidler
 // Runtime Environment's members available in the global scope.
 const {deploy} = require("./utils/deployer");
+const { start } = require('./utils/starter');
 
 async function main() {
 
@@ -26,11 +27,4 @@ async function main() {
   await monitor.addCaller('0x6c259ea1fCa0D1883e3FFFdDeb8a0719E1D7265f');
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main()
-  .then(() => process.exit(0))
-  .catch(error => {
-    console.error(error);
-    process.exit(1);
-  });
+start(main);
