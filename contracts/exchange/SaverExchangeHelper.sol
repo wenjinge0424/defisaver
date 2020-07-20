@@ -13,7 +13,7 @@ contract SaverExchangeHelper {
 
     address payable public constant WALLET_ID = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDRESS = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
-    address public constant SAVER_EXCHANGE_REGISTRY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant SAVER_EXCHANGE_REGISTRY = 0x9b1f7F645351AF3631a656421eD2e40f2802E6c0;
 
     address public constant KYBER_WRAPPER = 0x3d1D4D6Bb405b2366434cb7387803c7B662b8d71;
     address public constant UNISWAP_WRAPPER = 0xFF92ADA50cDC8009686867b4a470C8769bEdB22d;
