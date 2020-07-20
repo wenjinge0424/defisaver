@@ -10,11 +10,12 @@ const ProxyRegistryInterface = contract.fromArtifact("ProxyRegistryInterface");
 const SaverExchange = contract.fromArtifact('SaverExchange');
 const ExchangeInterfaceV2 = contract.fromArtifact('ExchangeInterfaceV2');
 const ExchangeInterface = contract.fromArtifact('ExchangeInterface');
+const AllowanceProxy = contract.fromArtifact('AllowanceProxy');
 
 const makerVersion = "1.0.6";
 
-const oasisWrapperAddress = '0x9C499376B41A91349Ff93F99462a65962653e104';
-const OasisWrapperAddressOld = '0x891f5A171f865031b0f3Eb9723bb8f68C901c9FE';
+const wrapperAddress = '0xF6aFcd935c28365CCe278Fed78b26Fe2BC9ae518'; 
+const allowanceProxyAddress = '0x21a59654176f2689d12E828B77a783072CD26680';
 
 let tokenName = "MCD_DAI"; // ["MCD_DAI", "BAT", "USCD", "WBTC"]
 
@@ -36,14 +37,11 @@ describe("Exchange", accounts => {
 
         exchange = await SaverExchange.at(saverExchangeAddress);
         web3Exchange = new web3.eth.Contract(SaverExchange.abi, saverExchangeAddress);
-        web3OasisWrapper = new web3.eth.Contract(ExchangeInterfaceV2.abi, oasisWrapperAddress);
-        web3OasisWrapperOld = new web3.eth.Contract(ExchangeInterface.abi, OasisWrapperAddressOld);
+        allowanceProxy = new web3.eth.Contract(AllowanceProxy.abi, allowanceProxyAddress);
     });
 
     it('... should check sell rate', async () => {
         const value = web3.utils.toWei('1', 'ether');
-
-        // const wrapperRate = await web3OasisWrapper.methods.getSellRate(ETH_ADDRESS, makerAddresses[tokenName], value).call();
 
         const sellRate = await web3Exchange.methods.getBestPrice(value, ETH_ADDRESS, makerAddresses[tokenName],  3, 1).call();
 
@@ -59,8 +57,8 @@ describe("Exchange", accounts => {
 
         console.log(ethBalanceBefore.toString());
 
-        await web3Exchange.methods.sell(
-            [ETH_ADDRESS, makerAddresses[tokenName], value, 0, 0, oasisWrapperAddress, nullAddress, "0x0", 0], accounts[0]).send({from: accounts[0], value, gas: 3000000});
+        await allowanceProxy.methods.callSell(
+            [ETH_ADDRESS, makerAddresses[tokenName], value, 0, 0, wrapperAddress, nullAddress, "0x0", 0]).send({from: accounts[0], value, gas: 3000000});
 
         const daiBalanceAfter = await getBalance(web3, accounts[0], makerAddresses[tokenName]);
 
@@ -70,9 +68,7 @@ describe("Exchange", accounts => {
     it(`... should sell ${tokenName} for Ether`, async () => {
         const value = web3.utils.toWei('10', 'ether');
 
-        // await approve(web3, makerAddresses[tokenName], accounts[0], saverExchangeAddress);
-
-        await transferToken(web3, makerAddresses[tokenName], accounts[0], saverExchangeAddress, value);
+        await approve(web3, makerAddresses[tokenName], accounts[0], allowanceProxyAddress);
 
         const etherBalanceBefore = await getBalance(web3, accounts[0], ETH_ADDRESS);
         console.log('ETH balance: ', etherBalanceBefore/1e18);
@@ -80,8 +76,8 @@ describe("Exchange", accounts => {
         const daiBalanceBefore = await getBalance(web3, accounts[0], makerAddresses[tokenName]);
         console.log(`${tokenName} balance: `, daiBalanceBefore/1e18);
 
-        await web3Exchange.methods.sell(
-            [makerAddresses[tokenName], ETH_ADDRESS, value, 0, 0, oasisWrapperAddress, nullAddress, "0x0", 0], accounts[0]).send({from: accounts[0], value: 0, gas: 5000000});
+        await allowanceProxy.methods.callSell(
+            [makerAddresses[tokenName], ETH_ADDRESS, value, 0, 0, wrapperAddress, nullAddress, "0x0", 0]).send({from: accounts[0], value: 0, gas: 5000000});
 
         const daiBalanceAfter = await getBalance(web3, accounts[0], makerAddresses[tokenName]);
         console.log(`${tokenName} balance: `, daiBalanceAfter/1e18);
@@ -96,18 +92,16 @@ describe("Exchange", accounts => {
         const srcAmount = web3.utils.toWei('200', 'ether');
         const destAmount = web3.utils.toWei('0.5', 'ether');
 
-        // await approve(web3, makerAddresses[tokenName], accounts[0], saverExchangeAddress);
-
-        await transferToken(web3, makerAddresses[tokenName], accounts[0], saverExchangeAddress, srcAmount);
+        await approve(web3, makerAddresses[tokenName], accounts[0], allowanceProxyAddress);
         const etherBalanceBefore = await getBalance(web3, accounts[0], ETH_ADDRESS);
         console.log('Eth balance: ',etherBalanceBefore/1e18);
 
         const daiBalanceBefore = await getBalance(web3, accounts[0], makerAddresses[tokenName]);
         console.log(`${tokenName} balance: `, daiBalanceBefore/1e18);
 
-        await web3Exchange.methods.buy(
+        await allowanceProxy.methods.callBuy(
             [makerAddresses[tokenName], ETH_ADDRESS, srcAmount, destAmount,
-             MAX_UINT, oasisWrapperAddress, nullAddress, "0x0", 0], accounts[0])
+             MAX_UINT, wrapperAddress, nullAddress, "0x0", 0])
              .send({from: accounts[0], gas: 5000000});
 
         const etherBalanceAfter = await getBalance(web3, accounts[0], ETH_ADDRESS);
@@ -129,9 +123,9 @@ describe("Exchange", accounts => {
         const daiBalanceBefore = await getBalance(web3, accounts[0], makerAddresses[tokenName]);
         console.log(`${tokenName} balance: `, daiBalanceBefore/1e18);
 
-        await web3Exchange.methods.buy(
+        await allowanceProxy.methods.callBuy(
             [ETH_ADDRESS, makerAddresses[tokenName], value, destAmount,
-             MAX_UINT, oasisWrapperAddress, nullAddress, "0x0", 0], accounts[0])
+             MAX_UINT, wrapperAddress, nullAddress, "0x0", 0])
              .send({from: accounts[0], value, gas: 5000000});
 
         const etherBalanceAfter = await getBalance(web3, accounts[0], ETH_ADDRESS);

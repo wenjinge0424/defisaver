@@ -59,7 +59,7 @@ contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2 {
             TokenInterface(WETH_ADDRESS).deposit{value: msg.value}();
         }
 
-        uint srcAmount = OasisInterface(OTC_ADDRESS).buyAllAmount(srcAddr, _destAmount, destAddr, uint(-1));
+        uint srcAmount = OasisInterface(OTC_ADDRESS).buyAllAmount(destAddr, _destAmount, srcAddr, uint(-1));
 
         // convert weth -> eth and send back
         if (destAddr == WETH_ADDRESS) {
