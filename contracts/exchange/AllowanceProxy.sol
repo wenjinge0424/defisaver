@@ -34,7 +34,7 @@ contract AllowanceProxy is AdminAuth {
         }
     }
 
-    function adminChangeExchange(address payable _newExchange) public onlyOwner {
+    function ownerChangeExchange(address payable _newExchange) public onlyOwner {
         saverExchange = SaverExchange(_newExchange);
     }
 }
