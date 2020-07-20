@@ -119,9 +119,9 @@ contract CompoundLoanInfo is CompoundSafetyRatio, CompoundSaverHelper {
             }
         }
 
-        if (sumBorrow == 0) return data;
+        data.ratio = uint128(getSafetyRatio(_user));
 
-        data.ratio = uint128((sumCollateral * 10**18) / sumBorrow);
+        return data;
     }
 
     function getTokenBalances(address _user, address[] memory _cTokens) public view returns (uint[] memory balances, uint[] memory borrows) {

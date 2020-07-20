@@ -94,7 +94,7 @@ contract DydxSavingsProtocol is ProtocolInterface, ConstantAddresses, DSAuth {
         return parBalances[daiMarketId];
     }
 
-    function getAccount(address _user, uint _index) public view returns(Account.Info memory) {
+    function getAccount(address _user, uint _index) public pure returns(Account.Info memory) {
         Account.Info memory account = Account.Info({
             owner: _user,
             number: _index

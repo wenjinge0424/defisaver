@@ -17,13 +17,13 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
 
     enum Method { Boost, Repay }
 
-    uint public REPAY_GAS_TOKEN = 30;
-    uint public BOOST_GAS_TOKEN = 19;
+    uint public REPAY_GAS_TOKEN = 25;
+    uint public BOOST_GAS_TOKEN = 20;
 
     uint constant public MAX_GAS_PRICE = 80000000000; // 80 gwei
 
     uint public REPAY_GAS_COST = 2200000;
-    uint public BOOST_GAS_COST = 1500000;
+    uint public BOOST_GAS_COST = 1700000;
 
     address public constant GAS_TOKEN_INTERFACE_ADDRESS = 0x0000000000b3F879cb30FE243b4Dfee438691c04;
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
@@ -69,7 +69,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
         (bool isAllowed, uint ratioBefore) = canCall(Method.Repay, _user);
         require(isAllowed); // check if conditions are met
 
-        _data[4] = calcGasCost(REPAY_GAS_COST);
+        _data[3] = calcGasCost(REPAY_GAS_COST);
 
         compoundMonitorProxy.callExecute{value: msg.value}(
             _user,
@@ -82,7 +82,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
 
         returnEth();
 
-        logger.Log(address(this), msg.sender, "AutomaticCompoundRepay", abi.encode(ratioBefore, ratioAfter));
+        logger.Log(address(this), _user, "AutomaticCompoundRepay", abi.encode(ratioBefore, ratioAfter));
     }
 
     /// @notice Bots call this method to boost for user when conditions are met
@@ -101,7 +101,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
         (bool isAllowed, uint ratioBefore) = canCall(Method.Boost, _user);
         require(isAllowed); // check if conditions are met
 
-        _data[4] = calcGasCost(BOOST_GAS_COST);
+        _data[3] = calcGasCost(BOOST_GAS_COST);
 
         compoundMonitorProxy.callExecute{value: msg.value}(
             _user,
@@ -115,7 +115,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
 
         returnEth();
 
-        logger.Log(address(this), msg.sender, "AutomaticCompoundBoost", abi.encode(ratioBefore, ratioAfter));
+        logger.Log(address(this), _user, "AutomaticCompoundBoost", abi.encode(ratioBefore, ratioAfter));
     }
 
 /******************* INTERNAL METHODS ********************************/

@@ -5,10 +5,12 @@ import "../../mcd/saver_proxy/ExchangeHelper.sol";
 import "../../interfaces/CTokenInterface.sol";
 import "../../mcd/Discount.sol";
 import "../helpers/CompoundSaverHelper.sol";
-import "../../loggers/CompoundLogger.sol";
+import "../../loggers/DefisaverLogger.sol";
 
 /// @title Implements the actual logic of Repay/Boost with FL
-contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
+contract CompoundSaverFlashProxy is ExchangeHelper, CompoundSaverHelper  {
+
+    address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
     using SafeERC20 for ERC20;
 
@@ -52,6 +54,7 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
             swapAmount -= getFee(swapAmount, user, _data[3], _addrData[1]);
         } else {
             swapAmount = (maxColl + _flashLoanData[0]);
+            swapAmount -= getGasCost(swapAmount, _data[3], _addrData[1]);
         }
 
         // payback debt
@@ -63,7 +66,7 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
         // repay flash loan
         returnFlashLoan(collToken, flashBorrowed);
 
-        CompoundLogger(COMPOUND_LOGGER).LogRepay(user, _data[0], swapAmount, collToken, borrowToken);
+        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "CompoundRepay", abi.encode(_data[0], swapAmount, collToken, borrowToken));
     }
 
     /// @notice Boosts the position and sends tokens back for FL
@@ -105,6 +108,7 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
             );
         } else {
             swapAmount = (borrowAmount + _flashLoanData[0]);
+            swapAmount -= getGasCost(swapAmount, _data[3], _addrData[1]);
         }
 
         // deposit swaped collateral
@@ -116,7 +120,7 @@ contract CompoundFlashSaverProxy is ExchangeHelper, CompoundSaverHelper  {
         // repay flash loan
         returnFlashLoan(borrowToken, flashBorrowed);
 
-        CompoundLogger(COMPOUND_LOGGER).LogBoost(user, _data[0], swapAmount, collToken, borrowToken);
+        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "CompoundBoost", abi.encode(_data[0], swapAmount, collToken, borrowToken));
     }
 
     /// @notice Helper method to deposit tokens in Compound
