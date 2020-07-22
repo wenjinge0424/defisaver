@@ -1,5 +1,6 @@
 let { contract } = require('@openzeppelin/test-environment');
 const DSProxy = contract.fromArtifact("DSProxy");
+const DebugInfo = contract.fromArtifact("DebugInfo");
 const axios = require('axios');
 
 const nullAddress = "0x0000000000000000000000000000000000000000";
@@ -22,6 +23,8 @@ const C_ZRX_ADDRESS = '0xb3319f5d18bc0d84dd1b4825dcde5d5f7266d407';
 
 const saverExchangeAddress = "0x67B5656d60a809915323Bf2C40A8bEF15A152e3e";
 const mcdSaverProxyAddress = "0xa292832ACF0b0226E378E216A982fA966eaA7EBc";
+
+const debugContractAddr = '0xe982E462b094850F12AF94d21D470e21bE9D0E9C';
 
 const MAX_UINT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
@@ -77,7 +80,7 @@ const getProxy = async (registry, acc, web3) => {
 
     proxy = await DSProxy.at(proxyAddr);
     let web3proxy = null;
-    
+
     if (web3 != null) {
         web3proxy = new web3.eth.Contract(DSProxy.abi, proxyAddr);
     }
@@ -122,6 +125,23 @@ const transferToken = async (web3, tokenAddress, from, to, amount) => {
     console.log('Tokens transfered');
 };
 
+const getDebugInfo = async (id, type) => {
+    const debugContract = await DebugInfo.at(debugContractAddr);
+
+    if (type === 'uint') {
+        return (await debugContract.uintValues(id));
+    } else if (type === 'addr') {
+        return (await debugContract.addrValues(id));
+    } else if (type === 'string') {
+        return (await debugContract.stringValues(id));
+    } else if (type === 'bytes32') {
+        return (await debugContract.bytes32Values(id));
+    }
+
+
+
+}
+
 module.exports = {
     getAbiFunction,
     loadAccounts,
@@ -131,6 +151,7 @@ module.exports = {
     getProxy,
     fetchMakerAddresses,
     fundIfNeeded,
+    getDebugInfo,
     nullAddress,
     saverExchangeAddress,
     mcdSaverProxyAddress,
