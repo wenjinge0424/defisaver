@@ -5,7 +5,7 @@ import "./ERC20.sol";
 abstract contract CTokenInterface is ERC20 {
     function mint(uint256 mintAmount) external virtual returns (uint256);
 
-    function mint() external virtual payable;
+    // function mint() external virtual payable;
 
     function accrueInterest() public virtual returns (uint);
 

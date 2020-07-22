@@ -41,7 +41,7 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
         address compOpenProxy = shifterRegistry.getAddr("COMP_SHIFTER");
 
         // Execute the DSProxy call
-        DSProxyInterface(proxyAddr).execute(0x4d040B247949a76cB8134203Da822Da50C674557, proxyData);
+        DSProxyInterface(proxyAddr).execute(0x25AF99b922857C37282f578F428CB7f34335B379, proxyData);
 
         // Repay the loan with the money DSProxy sent back
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
@@ -90,9 +90,9 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
     function sendToProxy(address payable _proxy, address _reserve) internal {
         if (_reserve != ETH_ADDRESS) {
             ERC20(_reserve).safeTransfer(_proxy, ERC20(_reserve).balanceOf(address(this)));
+        } else {
+            _proxy.transfer(address(this).balance);
         }
-
-        _proxy.transfer(address(this).balance);
     }
 
     receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}

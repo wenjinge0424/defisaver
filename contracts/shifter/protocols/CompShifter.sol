@@ -1,6 +1,7 @@
 pragma solidity ^0.6.0;
 
 import "../../compound/helpers/CompoundSaverHelper.sol";
+import "../../utils/DebugInfo.sol";
 
 contract CompShifter is CompoundSaverHelper {
 
@@ -65,6 +66,7 @@ contract CompShifter is CompoundSaverHelper {
         } else {
             ERC20(borrowAddr).transfer(msg.sender, ERC20(borrowAddr).balanceOf(address(this)));
         }
+
     }
 
     function depositCompound(address _tokenAddr, address _cTokenAddr, uint _amount) internal {
@@ -73,7 +75,7 @@ contract CompShifter is CompoundSaverHelper {
         enterMarket(_cTokenAddr);
 
         if (_tokenAddr != ETH_ADDRESS) {
-            require(CTokenInterface(_cTokenAddr).mint(_amount) == 0);
+            require(CTokenInterface(_cTokenAddr).mint(_amount) == 0, "mint error");
         } else {
             CEtherInterface(_cTokenAddr).mint{value: _amount}();
         }
@@ -91,7 +93,5 @@ contract CompShifter is CompoundSaverHelper {
 
         ComptrollerInterface(COMPTROLLER_ADDR).enterMarkets(markets);
     }
-
-    // receive() external payable {}
 
 }
