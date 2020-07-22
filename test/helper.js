@@ -128,12 +128,14 @@ const transferToken = async (web3, tokenAddress, from, to, amount) => {
 const getDebugInfo = async (id, type) => {
     const debugContract = await DebugInfo.at(debugContractAddr);
 
-    console
-
     if (type === 'uint') {
         return (await debugContract.uintValues(id));
     } else if (type === 'addr') {
         return (await debugContract.addrValues(id));
+    } else if (type === 'string') {
+        return (await debugContract.stringValues(id));
+    } else if (type === 'bytes32') {
+        return (await debugContract.bytes32Values(id));
     }
 
 
