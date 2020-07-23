@@ -18,6 +18,8 @@ const {
     C_BAT_ADDRESS,
     C_DAI_ADDRESS,
     nullAddress,
+    USDC_ADDRESS,
+    C_USDC_ADDRESS
 } = require('./helper.js');
 
 const DSProxy = contract.fromArtifact("DSProxy");
@@ -30,17 +32,30 @@ const ComptrollerInterface = contract.fromArtifact('ComptrollerInterface');
 const DSSProxyActions = contract.fromArtifact('DssProxyActions');
 const LoanShifterTaker = contract.fromArtifact('LoanShifterTaker');
 const MCDSaverProxy = contract.fromArtifact('MCDSaverProxy');
+const ShifterRegistry = contract.fromArtifact('ShifterRegistry');
+const ERC20 = contract.fromArtifact('ERC20');
 
-const loanShifterTakerAddr = '0x7a941556F91FD54a224b36376C512A9883eDD859';
+const shifterRegistryAddr = '0xA2bF3F0729D9A95599DB31660eb75836a4740c5F';
+const loanShifterTakerAddr = '0xaaF0CCef0C0C355Ee764B3d36bcCF257C527269B';
+
 const compoundLoanInfoAddr = '0x4D32ECeC25d722C983f974134d649a20e78B1417';
-const uniswapWrapperAddr = '0x1e30124FDE14533231216D95F7798cD0061e5cf8';
 const comptrollerAddr = '0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b';
+const uniswapWrapperAddr = '0xB9bdBAEc07751F6d54d19A6B9995708873F3DE18';
+const oldUniswapWrapperAddr = '0x1e30124FDE14533231216D95F7798cD0061e5cf8';
+
 
 const mcdDaiJoin = '0x9759A6Ac90977b93B58547b4A71c78317f391A28';
 const mcdEthJoin = '0x2F0b23f53734252Bda2277357e97e1517d6B042A';
 const mcdBatJoin = '0x3D0B1912B66114d4096F48A8CEe3A56C231772cA';
 
 const makerVersion = "1.0.6";
+
+const MCD_PROTOCOL = 0;
+const COMP_PROTOCOL = 1;
+
+const NO_SWAP = 0;
+const COLL_SWAP = 1;
+const DEBT_SWAP = 2;
 
 describe("Shifter", accounts => {
     let registry, proxy, proxyAddr, makerAddresses,
@@ -68,9 +83,23 @@ describe("Shifter", accounts => {
         web3Proxy = new web3.eth.Contract(DSProxy.abi, proxyAddr);
         comptroller = new web3.eth.Contract(ComptrollerInterface.abi, comptrollerAddr);
         web3LoanInfo = new web3.eth.Contract(CompoundLoanInfo.abi, compoundLoanInfoAddr);
-        web3Exchange = new web3.eth.Contract(ExchangeInterface.abi, uniswapWrapperAddr);
+        web3Exchange = new web3.eth.Contract(ExchangeInterface.abi, oldUniswapWrapperAddr);
         mcdSaverProxy = await MCDSaverProxy.at(mcdSaverProxyAddress);
+        shifterRegistry = await ShifterRegistry.at(shifterRegistryAddr);
+        daiToken = new web3.eth.Contract(ERC20.abi, makerAddresses["MCD_DAI"]);
 
+    });
+
+    it('... should buy a token', async () => {
+
+        const res = await shifterRegistry.contractAddresses("LOAN_SHIFTER_RECEIVER");
+
+        const ethAmount = web3.utils.toWei('2', 'ether');
+        await web3Exchange.methods.swapEtherToToken(ethAmount, makerAddresses["MCD_DAI"], '0').send({from: accounts[0], value: ethAmount, gas: 800000});
+
+        await daiToken.methods.transfer(res, web3.utils.toWei('400', 'ether')).send({from: accounts[0], gas: 200000});
+
+        // await send.ether(accounts[0], compoundCreateReceiverAddr, web3.utils.toWei('2', 'ether'));
     });
 
     // it('... should merge 2 Vaults of the same type', async () => {
@@ -101,40 +130,116 @@ describe("Shifter", accounts => {
 
     // });
 
-    it('... should change the collateral type of a CDP', async () => {
+    // it('... should change the collateral type of a CDP', async () => {
 
-        await createVault('ETH');
-        await createVault('BAT');
+    //     await createVault('ETH');
+    //     await createVault('BAT');
 
-        const cdpsAfter = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
+    //     const cdpsAfter = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
 
-        const numVaults = cdpsAfter.ids.length - 1;
+    //     const numVaults = cdpsAfter.ids.length - 1;
 
-        const infoBefore = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults - 1].toString());
-        console.log(infoBefore.collateral.toString(), infoBefore.debt.toString());
+    //     const infoBefore = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults - 1].toString());
+    //     console.log(infoBefore.collateral.toString(), infoBefore.debt.toString());
 
-        const infoBefore2 = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults].toString());
-        console.log(infoBefore2.collateral.toString(), infoBefore2.debt.toString());
+    //     const infoBefore2 = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults].toString());
+    //     console.log(infoBefore2.collateral.toString(), infoBefore2.debt.toString());
 
-        const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
-        [
-         [0, 0, true, web3.utils.toWei('2', 'ether'), web3.utils.toWei('100', 'ether'), makerAddresses["MCD_DAI"], mcdEthJoin, mcdBatJoin, cdpsAfter.ids[numVaults - 1].toString(), cdpsAfter.ids[numVaults].toString()],
-         [nullAddress, nullAddress, 0, 0, 0, 0, nullAddress, "0x0", 0]
-        ]);
+    //     const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
+    //     [
+    //      [0, 0, true, web3.utils.toWei('2', 'ether'), web3.utils.toWei('100', 'ether'), makerAddresses["MCD_DAI"], mcdEthJoin, mcdBatJoin, cdpsAfter.ids[numVaults - 1].toString(), cdpsAfter.ids[numVaults].toString()],
+    //      [nullAddress, nullAddress, 0, 0, 0, 0, nullAddress, "0x0", 0]
+    //     ]);
 
-        try {
-            const tx = await web3Proxy.methods['execute(address,bytes)']
-            (loanShifterTakerAddr, moveData).send({from: accounts[0], gas: 3500000});
+    //     try {
+    //         const tx = await web3Proxy.methods['execute(address,bytes)']
+    //         (loanShifterTakerAddr, moveData).send({from: accounts[0], gas: 3500000});
 
-            console.log(tx);
-        } catch (err) {
-            console.log(err);
-        }
+    //         console.log(tx);
+    //     } catch (err) {
+    //         console.log(err);
+    //     }
 
-        const infoAfter = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults].toString());
-        console.log(infoAfter.collateral.toString(), infoAfter.debt.toString());
+    //     const infoAfter = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults].toString());
+    //     console.log(infoAfter.collateral.toString(), infoAfter.debt.toString());
 
-        expect(infoAfter.debt.toString() / 1e18).to.be.gt(infoBefore.debt.toString() / 1e18);
+    //     expect(infoAfter.debt.toString() / 1e18).to.be.gt(infoBefore.debt.toString() / 1e18);
+
+    // });
+
+    // it('... should move a CDP to Compound', async () => {
+
+    //     await createVault('ETH');
+
+    //     const cdpsAfter = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
+    //     const numVaults = cdpsAfter.ids.length - 1;
+
+    //     const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
+    //     [
+    //      [MCD_PROTOCOL, COMP_PROTOCOL, NO_SWAP, true, web3.utils.toWei('2', 'ether'), web3.utils.toWei('100', 'ether'), makerAddresses["MCD_DAI"], C_DAI_ADDRESS, mcdEthJoin, C_ETH_ADDRESS, cdpsAfter.ids[numVaults].toString(), 0],
+    //      [ETH_ADDRESS, nullAddress, 0, 0, 0, nullAddress, nullAddress, "0x0", 0]
+    //     ]);
+
+    //     const tx = await web3Proxy.methods['execute(address,bytes)']
+    //     (loanShifterTakerAddr, moveData).send({from: accounts[0], gas: 3500000});
+
+    //     // const infoAfter = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults].toString());
+    //     // console.log(infoAfter.collateral.toString(), infoAfter.debt.toString());
+
+    // });
+
+    // it('... should move a Compound to Cdp', async () => {
+
+    //     const cdpsAfter = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
+    //     const numVaults = cdpsAfter.ids.length - 1;
+
+    //     console.log(cdpsAfter.ids[numVaults].toString());
+
+    //     const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
+    //     [
+    //      [COMP_PROTOCOL, MCD_PROTOCOL, NO_SWAP, false, web3.utils.toWei('1', 'ether'), web3.utils.toWei('50', 'ether'), C_DAI_ADDRESS, makerAddresses["MCD_DAI"], C_ETH_ADDRESS, mcdEthJoin, 0, cdpsAfter.ids[numVaults].toString()],
+    //      [ETH_ADDRESS, nullAddress, 0, 0, 0, nullAddress, nullAddress, "0x0", 0]
+    //     ]);
+
+    //     await web3Proxy.methods['execute(address,bytes)']
+    //     (loanShifterTakerAddr, moveData).send({from: accounts[0], gas: 3500000});
+
+    //     // const infoAfter = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults].toString());
+    //     // console.log(infoAfter.collateral.toString(), infoAfter.debt.toString());
+
+    // });
+
+    //  it('... should change Compound collateral', async () => {
+
+    //     const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
+    //     [
+    //      [COMP_PROTOCOL, COMP_PROTOCOL, COLL_SWAP, false, web3.utils.toWei('1', 'ether'), web3.utils.toWei('50', 'ether'), C_DAI_ADDRESS, C_DAI_ADDRESS, C_ETH_ADDRESS, C_BAT_ADDRESS, 0, 0],
+    //      [ETH_ADDRESS, BAT_ADDRESS, web3.utils.toWei('1', 'ether'), 0, 0, uniswapWrapperAddr, nullAddress, "0x0", 0]
+    //     ]);
+
+    //     await web3Proxy.methods['execute(address,bytes)']
+    //     (loanShifterTakerAddr, moveData).send({from: accounts[0], gas: 3500000});
+
+    //     // const infoAfter = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults].toString());
+    //     // console.log(infoAfter.collateral.toString(), infoAfter.debt.toString());
+
+    // });
+
+
+    it('... should change Compound debt', async () => {
+
+        const res = await shifterRegistry.contractAddresses("LOAN_SHIFTER_RECEIVER");
+        const tokenBalance = await getBalance(web3, res, makerAddresses["MCD_DAI"]);
+        console.log('DAI: ', tokenBalance/ 1e18);
+
+        // const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
+        // [
+        //  [COMP_PROTOCOL, COMP_PROTOCOL, DEBT_SWAP, false, web3.utils.toWei('1', 'ether'), web3.utils.toWei('50', 'ether'), C_DAI_ADDRESS, C_USDC_ADDRESS, C_ETH_ADDRESS, C_ETH_ADDRESS, 0, 0],
+        //  [USDC_ADDRESS, makerAddresses["MCD_DAI"], web3.utils.toWei('55', 'ether') / 1e12, web3.utils.toWei('50', 'ether'), 0, uniswapWrapperAddr, nullAddress, "0x0", 0]
+        // ]);
+
+        // await web3Proxy.methods['execute(address,bytes)']
+        // (loanShifterTakerAddr, moveData).send({from: accounts[0], gas: 3500000});
 
     });
 

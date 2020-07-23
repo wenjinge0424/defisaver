@@ -18,15 +18,12 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant CETH_ADDRESS = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address public constant cDAI_ADDRESS = 0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643;
 
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
-    address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
 
     Manager public constant manager = Manager(MANAGER_ADDRESS);
-    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xD280c91397C1f8826a82a9432D65e4215EF22e55);
+    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xA2bF3F0729D9A95599DB31660eb75836a4740c5F);
 
     enum Protocols { MCD, COMPOUND }
     enum SwapType { NO_SWAP, COLL_SWAP, DEBT_SWAP }
@@ -38,7 +35,8 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         bool wholeDebt;
         uint collAmount;
         uint debtAmount;
-        address debtAddr;
+        address debtAddr1;
+        address debtAddr2;
         address addrLoan1;
         address addrLoan2;
         uint id1;
@@ -75,7 +73,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
 
         (
             uint[8] memory numData,
-            address[7] memory addrData,
+            address[8] memory addrData,
             uint8[3] memory enumData,
             bytes memory callData
         )
@@ -89,7 +87,8 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         // call FL
         givePermission(loanShifterReceiverAddr);
 
-        lendingPool.flashLoan(loanShifterReceiverAddr, _loanShift.debtAddr, loanAmount, paramsData);
+        lendingPool.flashLoan(loanShifterReceiverAddr,
+           getLoanAddr(_loanShift.debtAddr1, _loanShift.fromProtocol), loanAmount, paramsData);
 
         removePermission(loanShifterReceiverAddr);
     }
@@ -118,10 +117,20 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         }
     }
 
+    function getLoanAddr(address _address, Protocols _fromProtocol) internal returns (address) {
+        if (_fromProtocol == Protocols.COMPOUND) {
+            return CTokenInterface(_address).underlying();
+        } else if (_fromProtocol == Protocols.MCD) {
+            return DAI_ADDRESS;
+        } else {
+            return address(0);
+        }
+    }
+
     function _packData(
         LoanShiftData memory _loanShift,
         SaverExchangeCore.ExchangeData memory exchangeData
-    ) internal pure returns (uint[8] memory numData, address[7] memory addrData, uint8[3] memory enumData, bytes memory callData) {
+    ) internal pure returns (uint[8] memory numData, address[8] memory addrData, uint8[3] memory enumData, bytes memory callData) {
 
         numData = [
             _loanShift.collAmount,
@@ -137,7 +146,8 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         addrData = [
             _loanShift.addrLoan1,
             _loanShift.addrLoan2,
-            _loanShift.debtAddr,
+            _loanShift.debtAddr1,
+            _loanShift.debtAddr2,
             exchangeData.srcAddr,
             exchangeData.destAddr,
             exchangeData.exchangeAddr,

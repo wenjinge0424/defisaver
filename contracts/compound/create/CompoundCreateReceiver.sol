@@ -10,7 +10,7 @@ import "../../shifter/ShifterRegistry.sol";
 contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
-    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xD280c91397C1f8826a82a9432D65e4215EF22e55);
+    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xA2bF3F0729D9A95599DB31660eb75836a4740c5F);
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
@@ -41,7 +41,7 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
         address compOpenProxy = shifterRegistry.getAddr("COMP_SHIFTER");
 
         // Execute the DSProxy call
-        DSProxyInterface(proxyAddr).execute(0x959306A913D041D4f634310f6aD3789cBF0e9b18, proxyData);
+        DSProxyInterface(proxyAddr).execute(compOpenProxy, proxyData);
 
         // Repay the loan with the money DSProxy sent back
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));

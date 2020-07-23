@@ -13,7 +13,7 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xD280c91397C1f8826a82a9432D65e4215EF22e55);
+    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xA2bF3F0729D9A95599DB31660eb75836a4740c5F);
 
     struct ParamData {
         bytes proxyData1;
@@ -35,7 +35,7 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
     external override {
         // Format the call data for DSProxy
         (ParamData memory paramData, ExchangeData memory exchangeData)
-                                 = packFunctionCall(_amount, _fee, _params);
+                                 = packFunctionCall(_amount, _fee, _reserve, _params);
 
         address protocolAddr1 = shifterRegistry.getAddr(getNameByProtocol(paramData.protocol1));
         address protocolAddr2 = shifterRegistry.getAddr(getNameByProtocol(paramData.protocol2));
@@ -59,7 +59,7 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
         DSProxyInterface(paramData.proxy).execute(protocolAddr2, paramData.proxyData2);
 
         if (paramData.swapType == 2) { // DEBT_SWAP
-            exchangeData.destAmount = getBalance(exchangeData.destAddr);
+            exchangeData.destAmount = (_amount + _fee);
             _buy(exchangeData);
         }
 
@@ -72,17 +72,17 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
         }
     }
 
-    function packFunctionCall(uint _amount, uint _fee, bytes memory _params)
+    function packFunctionCall(uint _amount, uint _fee, address _reserve, bytes memory _params)
         internal pure returns (ParamData memory paramData, ExchangeData memory exchangeData) {
 
         (
             uint[8] memory numData, // collAmount, debtAmount, id1, id2, srcAmount, destAmount, minPrice, price0x
-            address[7] memory addrData, // addrLoan1, addrLoan2, debtAddr, srcAddr, destAddr, exchangeAddr, wrapper
+            address[8] memory addrData, // addrLoan1, addrLoan2, debtAddr1, debtAddr2, srcAddr, destAddr, exchangeAddr, wrapper
             uint8[3] memory enumData, // fromProtocol, toProtocol, swapType
             bytes memory callData,
             address proxy
         )
-        = abi.decode(_params, (uint256[8],address[7],uint8[3],bytes,address));
+        = abi.decode(_params, (uint256[8],address[8],uint8[3],bytes,address));
 
         bytes memory proxyData1;
         bytes memory proxyData2;
@@ -92,46 +92,38 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
             openDebtAmount =  numData[4]; // srcAmount
         }
 
-        if (enumData[0] == 0) { // MAKER
+        if (enumData[0] == 0) { // MAKER FROM
+            proxyData1 = abi.encodeWithSignature("close(uint256,address,uint256,uint256)", numData[2], addrData[0], _amount, numData[0]);
+
+        } else if(enumData[0] == 1) { // COMPOUND FROM
             proxyData1 = abi.encodeWithSignature(
-            "close(uint256,address,uint256,uint256)",
-                                numData[2], addrData[0], _amount, numData[0]);
-
-            proxyData2 = abi.encodeWithSignature(
-            "open(uint256,address,uint256)",
-                                numData[3], addrData[1], openDebtAmount);
-        } else if(enumData[0] == 1) { // COMPOUND
-            proxyData1 = abi.encodeWithSignature(
-            "close(address,address,uint256,uint256)",
-                                addrData[0], addrData[2], numData[0], numData[1]);
-
-            // Figures out the debt token of the second loan
-            address debtAddr2 = addrData[4] == address(0) ? addrData[2] : addrData[4];
-
-            proxyData2 = abi.encodeWithSignature(
-            "open(address,address,uint256)",
-                                addrData[1], debtAddr2, openDebtAmount);
+            "close(address,address,uint256,uint256)", addrData[0], addrData[2], numData[0], numData[1]);
         }
 
+        if (enumData[1] == 0) { // MAKER TO
+            proxyData2 = abi.encodeWithSignature("open(uint256,address,uint256)", numData[3], addrData[1], openDebtAmount);
+        } else if(enumData[1] == 1) { // COMPOUND TO
+            proxyData2 = abi.encodeWithSignature("open(address,address,uint256)", addrData[1], addrData[3], openDebtAmount);
+        }
 
         paramData = ParamData({
             proxyData1: proxyData1,
             proxyData2: proxyData2,
-            debtAddr: addrData[2],
             proxy: proxy,
-            swapType: enumData[2],
+            debtAddr: addrData[2],
             protocol1: enumData[0],
-            protocol2: enumData[1]
+            protocol2: enumData[1],
+            swapType: enumData[2]
         });
 
         exchangeData = SaverExchangeCore.ExchangeData({
-            srcAddr: addrData[3],
-            destAddr: addrData[4],
+            srcAddr: addrData[4],
+            destAddr: addrData[5],
             srcAmount: numData[4],
             destAmount: numData[5],
             minPrice: numData[6],
-            wrapper: addrData[6],
-            exchangeAddr: addrData[5],
+            wrapper: addrData[7],
+            exchangeAddr: addrData[6],
             callData: callData,
             price0x: numData[7]
         });

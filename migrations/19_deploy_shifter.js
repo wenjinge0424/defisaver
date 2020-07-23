@@ -3,6 +3,9 @@ const McdShifter = artifacts.require("./McdShifter.sol");
 
 const LoanShifterTaker = artifacts.require("./LoanShifterTaker.sol");
 const LoanShifterReceiver = artifacts.require("./LoanShifterReceiver.sol");
+
+const ShifterRegistry = artifacts.require("./ShifterRegistry.sol");
+
 require('dotenv').config();
 
 module.exports = function(deployer, network, accounts) {
@@ -10,26 +13,32 @@ module.exports = function(deployer, network, accounts) {
 
     deployer.then(async () => {
 
+        // STEP 1 (zameni u kodu novu adresu)
+        // await deployer.deploy(ShifterRegistry, {gas: 5000000, overwrite: deployAgain});
 
-        // STEP 1
-        // await deployer.deploy(LoanShifterReceiver, {gas: 5000000, overwrite: deployAgain});
 
-        // STEP 2 (Add LoanShifterReceiver address to the Taker contract)
-        // await deployer.deploy(CompShifter, {gas: 5000000, overwrite: deployAgain});
-        // await deployer.deploy(McdShifter, {gas: 5000000, overwrite: deployAgain});
-        // const compShifterAddress = (await CompShifter.deployed()).address;
-        // const mcdShifterAddress = (await McdShifter.deployed()).address;
+        // STEP 2 (ubaci ovde registry adresu)
+        await deployer.deploy(LoanShifterTaker, {gas: 5000000, overwrite: deployAgain});
+        await deployer.deploy(LoanShifterReceiver, {gas: 5000000, overwrite: deployAgain});
+        await deployer.deploy(CompShifter, {gas: 5000000, overwrite: deployAgain});
+        await deployer.deploy(McdShifter, {gas: 6700000, overwrite: deployAgain});
 
-        // await deployer.deploy(LoanShifterTaker, {gas: 5000000, overwrite: deployAgain});
-        // const loanShifterTakerAddress = (await LoanShifterTaker.deployed()).address;
+        const loanShifterReceiverAddress = (await LoanShifterReceiver.deployed()).address;
+        const compShifterAddress = (await CompShifter.deployed()).address;
+        const mcdShifterAddress = (await McdShifter.deployed()).address;
 
-        // const taker = await LoanShifterTaker.at(loanShifterTakerAddress);
-        // await taker.addProtocol(0, mcdShifterAddress);
-        // await taker.addProtocol(1, compShifterAddress);
+        console.log('loanShifterReceiverAddress', loanShifterReceiverAddress);
+        console.log('compShifterAddress', compShifterAddress);
+        console.log('mcdShifterAddress', mcdShifterAddress);
 
-        // STEP 3 (Set LoanShiftReceiver address here)
-        const receiver = await LoanShifterReceiver.at('0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb');
-        await receiver.setLoanShiftTaker('0x5b9b42d6e4B2e4Bf8d42Eba32D46918e10899B66'); // (Set LoanShiftTaker address here)
+        const registry = await ShifterRegistry.at('0xA2bF3F0729D9A95599DB31660eb75836a4740c5F');
+        await registry.changeContractAddr('MCD_SHIFTER', mcdShifterAddress);
+        await registry.changeContractAddr('COMP_SHIFTER', compShifterAddress);
+        await registry.changeContractAddr('LOAN_SHIFTER_RECEIVER', loanShifterReceiverAddress);
+
+        const loanShifterTakerAddr = (await LoanShifterTaker.deployed()).address;
+        console.log('loanShifterTakerAddr: ', loanShifterTakerAddr);
+
     });
 };
 

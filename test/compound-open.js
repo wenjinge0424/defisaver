@@ -105,7 +105,7 @@ describe("Compound-Open", accounts => {
     it('... should open a leveraged long position', async () => {
 
         let srcAmount = web3.utils.toWei('1', 'ether');
-        let destAmount = web3.utils.toWei('100', 'ether') / 1e12;
+        let destAmount = web3.utils.toWei('100', 'ether');
 
         const createData = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundCreateTaker, 'openLeveragedLoan'),
         [[cCollAddr, cBorrowAddr, 0], [borrowToken, collToken, destAmount, 0, 0, uniswapWrapperAddr, ZERO_ADDRESS, "0x0", 0], compoundCreateReceiverAddr]);
@@ -122,7 +122,7 @@ describe("Compound-Open", accounts => {
 
         await approve(web3, borrowToken, accounts[0], proxyAddr);
 
-        let srcAmount = web3.utils.toWei('100', 'ether') / 1e12;
+        let srcAmount = web3.utils.toWei('100', 'ether');
         let destAmount = web3.utils.toWei('1', 'ether');
 
         const createData = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundCreateTaker, 'openLeveragedLoan'),
