@@ -36,7 +36,7 @@ const ShifterRegistry = contract.fromArtifact('ShifterRegistry');
 const ERC20 = contract.fromArtifact('ERC20');
 
 const shifterRegistryAddr = '0xA2bF3F0729D9A95599DB31660eb75836a4740c5F';
-const loanShifterTakerAddr = '0xaaF0CCef0C0C355Ee764B3d36bcCF257C527269B';
+const loanShifterTakerAddr = '0x9972d7Ab5ceBeb955317735bD35fEb861B96F9E0';
 
 const compoundLoanInfoAddr = '0x4D32ECeC25d722C983f974134d649a20e78B1417';
 const comptrollerAddr = '0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b';
@@ -232,14 +232,14 @@ describe("Shifter", accounts => {
         const tokenBalance = await getBalance(web3, res, makerAddresses["MCD_DAI"]);
         console.log('DAI: ', tokenBalance/ 1e18);
 
-        // const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
-        // [
-        //  [COMP_PROTOCOL, COMP_PROTOCOL, DEBT_SWAP, false, web3.utils.toWei('1', 'ether'), web3.utils.toWei('50', 'ether'), C_DAI_ADDRESS, C_USDC_ADDRESS, C_ETH_ADDRESS, C_ETH_ADDRESS, 0, 0],
-        //  [USDC_ADDRESS, makerAddresses["MCD_DAI"], web3.utils.toWei('55', 'ether') / 1e12, web3.utils.toWei('50', 'ether'), 0, uniswapWrapperAddr, nullAddress, "0x0", 0]
-        // ]);
+        const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
+        [
+         [COMP_PROTOCOL, COMP_PROTOCOL, DEBT_SWAP, false, web3.utils.toWei('1', 'ether'), web3.utils.toWei('50', 'ether'), C_DAI_ADDRESS, C_USDC_ADDRESS, C_ETH_ADDRESS, C_ETH_ADDRESS, 0, 0],
+         [USDC_ADDRESS, makerAddresses["MCD_DAI"], web3.utils.toWei('55', 'ether') / 1e12, web3.utils.toWei('50', 'ether'), 0, uniswapWrapperAddr, nullAddress, "0x0", 0]
+        ]);
 
-        // await web3Proxy.methods['execute(address,bytes)']
-        // (loanShifterTakerAddr, moveData).send({from: accounts[0], gas: 3500000});
+        await web3Proxy.methods['execute(address,bytes)']
+        (loanShifterTakerAddr, moveData).send({from: accounts[0], gas: 3500000});
 
     });
 

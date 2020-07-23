@@ -43,8 +43,8 @@ const uniswapWrapperAddr = '0xB9bdBAEc07751F6d54d19A6B9995708873F3DE18';
 const oldUniswapWrapperAddr = '0x1e30124FDE14533231216D95F7798cD0061e5cf8';
 const comptrollerAddr = '0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b';
 
-const compoundCreateTakerAddr = '0x40b13914f9886E234E1e00435E76D558FA8cf5ba';
-const compoundCreateReceiverAddr = '0x74E33B80BC77cdB5d49861a53913A8301CB72B4D';
+const compoundCreateTakerAddr = '0x0d7DF7b4565FF5F5B27ee6CD0Bf16D7A6EcC91C0';
+const compoundCreateReceiverAddr = '0xbd1b07F9dacAF809aFfB873D8BaDF0409a9a224a';
 
 const makerVersion = "1.0.6";
 
@@ -79,9 +79,9 @@ describe("Compound-Open", accounts => {
 
         compoundReceiver = new web3.eth.Contract(CompoundCreateReceiver.abi, compoundCreateReceiverAddr);
 
-        collToken = BAT_ADDRESS;
+        collToken = ETH_ADDRESS;
         borrowToken = makerAddresses["MCD_DAI"];
-        cCollAddr = C_BAT_ADDRESS;
+        cCollAddr = C_ETH_ADDRESS;
         cBorrowAddr = C_DAI_ADDRESS;
 
         cCollToken = new web3.eth.Contract(CTokenInterface.abi, cCollAddr);
@@ -93,7 +93,7 @@ describe("Compound-Open", accounts => {
         const ethAmount = web3.utils.toWei('2', 'ether');
         await web3Exchange.methods.swapEtherToToken(ethAmount, BAT_ADDRESS, '0').send({from: accounts[0], value: ethAmount, gas: 800000});
 
-        // await daiToken.methods.transfer(compoundCreateReceiverAddr, web3.utils.toWei('200', 'ether')).send({from: accounts[0], gas: 200000});
+        await daiToken.methods.transfer(compoundCreateReceiverAddr, web3.utils.toWei('200', 'ether')).send({from: accounts[0], gas: 200000});
 
         // await send.ether(accounts[0], compoundCreateReceiverAddr, web3.utils.toWei('2', 'ether'));
 
@@ -115,56 +115,56 @@ describe("Compound-Open", accounts => {
 
     });
 
-    it('... should open a leveraged short position', async () => {
+    // it('... should open a leveraged short position', async () => {
 
-        const tokenBalance = await getBalance(web3, accounts[0], borrowToken);
-        console.log(tokenBalance/ 1e18);
+    //     const tokenBalance = await getBalance(web3, accounts[0], borrowToken);
+    //     console.log(tokenBalance/ 1e18);
 
-        await approve(web3, borrowToken, accounts[0], proxyAddr);
+    //     await approve(web3, borrowToken, accounts[0], proxyAddr);
 
-        let srcAmount = web3.utils.toWei('100', 'ether');
-        let destAmount = web3.utils.toWei('1', 'ether');
+    //     let srcAmount = web3.utils.toWei('100', 'ether');
+    //     let destAmount = web3.utils.toWei('1', 'ether');
 
-        const createData = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundCreateTaker, 'openLeveragedLoan'),
-        [[cBorrowAddr, cCollAddr, srcAmount], [collToken, borrowToken, destAmount, 0, 0, uniswapWrapperAddr, ZERO_ADDRESS, "0x0", 0], compoundCreateReceiverAddr]);
+    //     const createData = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundCreateTaker, 'openLeveragedLoan'),
+    //     [[cBorrowAddr, cCollAddr, srcAmount], [collToken, borrowToken, destAmount, 0, 0, uniswapWrapperAddr, ZERO_ADDRESS, "0x0", 0], compoundCreateReceiverAddr]);
 
-       await web3Proxy.methods['execute(address,bytes)']
-        (compoundCreateTakerAddr, createData).send({from: accounts[0], gas: 3500000 });
+    //    await web3Proxy.methods['execute(address,bytes)']
+    //     (compoundCreateTakerAddr, createData).send({from: accounts[0], gas: 3500000 });
 
-    });
+    // });
 
 
-    it('... should open a leveraged long position with a token as collateral', async () => {
+    // it('... should open a leveraged long position with a token as collateral', async () => {
 
-        let srcAmount = web3.utils.toWei('200', 'ether');
-        let destAmount = web3.utils.toWei('10', 'ether');
+    //     let srcAmount = web3.utils.toWei('200', 'ether');
+    //     let destAmount = web3.utils.toWei('10', 'ether');
 
-        await approve(web3, collToken, accounts[0], proxyAddr);
+    //     await approve(web3, collToken, accounts[0], proxyAddr);
 
-        const createData = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundCreateTaker, 'openLeveragedLoan'),
-        [[cCollAddr, cBorrowAddr, srcAmount], [borrowToken, collToken, destAmount, 0, 0, uniswapWrapperAddr, ZERO_ADDRESS, "0x0", 0], compoundCreateReceiverAddr]);
+    //     const createData = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundCreateTaker, 'openLeveragedLoan'),
+    //     [[cCollAddr, cBorrowAddr, srcAmount], [borrowToken, collToken, destAmount, 0, 0, uniswapWrapperAddr, ZERO_ADDRESS, "0x0", 0], compoundCreateReceiverAddr]);
 
-       await web3Proxy.methods['execute(address,bytes)']
-        (compoundCreateTakerAddr, createData).send({from: accounts[0], gas: 3500000 });
+    //    await web3Proxy.methods['execute(address,bytes)']
+    //     (compoundCreateTakerAddr, createData).send({from: accounts[0], gas: 3500000 });
 
-    });
+    // });
 
-    it('... should open a leveraged short position with a token as collateral', async () => {
+    // it('... should open a leveraged short position with a token as collateral', async () => {
 
-        const tokenBalance = await getBalance(web3, accounts[0], borrowToken);
-        console.log(tokenBalance/ 1e18);
+    //     const tokenBalance = await getBalance(web3, accounts[0], borrowToken);
+    //     console.log(tokenBalance/ 1e18);
 
-        await approve(web3, borrowToken, accounts[0], proxyAddr);
+    //     await approve(web3, borrowToken, accounts[0], proxyAddr);
 
-        let srcAmount = web3.utils.toWei('10', 'ether');
-        let destAmount = web3.utils.toWei('200', 'ether');
+    //     let srcAmount = web3.utils.toWei('10', 'ether');
+    //     let destAmount = web3.utils.toWei('200', 'ether');
 
-        const createData = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundCreateTaker, 'openLeveragedLoan'),
-        [[cBorrowAddr, cCollAddr, srcAmount], [collToken, borrowToken, destAmount, 0, 0, uniswapWrapperAddr, ZERO_ADDRESS, "0x0", 0], compoundCreateReceiverAddr]);
+    //     const createData = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundCreateTaker, 'openLeveragedLoan'),
+    //     [[cBorrowAddr, cCollAddr, srcAmount], [collToken, borrowToken, destAmount, 0, 0, uniswapWrapperAddr, ZERO_ADDRESS, "0x0", 0], compoundCreateReceiverAddr]);
 
-       await web3Proxy.methods['execute(address,bytes)']
-        (compoundCreateTakerAddr, createData).send({from: accounts[0], gas: 3500000 });
+    //    await web3Proxy.methods['execute(address,bytes)']
+    //     (compoundCreateTakerAddr, createData).send({from: accounts[0], gas: 3500000 });
 
-    });
+    // });
 
 });

@@ -38,6 +38,29 @@ contract CompShifter is CompoundSaverHelper {
         }
     }
 
+    function changeDebt(
+        address _cBorrowAddrOld,
+        address _cBorrowAddrNew,
+        uint _debtAmountOld,
+        uint _debtAmountNew
+    ) public {
+
+        address borrowAddrNew = getUnderlyingAddr(_cBorrowAddrNew);
+
+        // payback debt in one token
+        paybackDebt(_debtAmountOld, _cBorrowAddrOld, getUnderlyingAddr(_cBorrowAddrOld), tx.origin);
+
+        // draw debt in another one
+        borrowCompound(_cBorrowAddrNew, _debtAmountNew);
+
+        // Send back money to repay FL
+        if (borrowAddrNew == ETH_ADDRESS) {
+            msg.sender.transfer(address(this).balance);
+        } else {
+            ERC20(borrowAddrNew).transfer(msg.sender, ERC20(borrowAddrNew).balanceOf(address(this)));
+        }
+    }
+
     function open(
         address _cCollAddr,
         address _cBorrowAddr,
