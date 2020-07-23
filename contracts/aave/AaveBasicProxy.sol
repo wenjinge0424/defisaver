@@ -21,7 +21,7 @@ contract AaveBasicProxy is GasBurner {
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     /// @param _tokenAddr The address of the token to be deposited
     /// @param _amount Amount of tokens to be deposited
-    function deposit(address _tokenAddr, uint256 _amount) public burnGas(0) payable {
+    function deposit(address _tokenAddr, uint256 _amount) public burnGas(5) payable {
         address lendingPoolCore = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 
@@ -44,7 +44,7 @@ contract AaveBasicProxy is GasBurner {
     /// @param _aTokenAddr ATokens to be withdrawn
     /// @param _amount Amount of tokens to be withdrawn
     /// @param _wholeAmount If true we will take the whole amount on chain
-    function withdraw(address _tokenAddr, address _aTokenAddr, uint256 _amount, bool _wholeAmount) public burnGas(0) {
+    function withdraw(address _tokenAddr, address _aTokenAddr, uint256 _amount, bool _wholeAmount) public burnGas(8) {
         uint256 amount = _wholeAmount ? ERC20(_aTokenAddr).balanceOf(address(this)) : _amount;
 
         IAToken(_aTokenAddr).redeem(amount);
@@ -56,7 +56,7 @@ contract AaveBasicProxy is GasBurner {
     /// @param _tokenAddr The address of the token to be borrowed
     /// @param _amount Amount of tokens to be borrowed
     /// @param _type Send 0 for variable rate and 1 for fixed rate
-    function borrow(address _tokenAddr, uint256 _amount, uint256 _type) public burnGas(0) {
+    function borrow(address _tokenAddr, uint256 _amount, uint256 _type) public burnGas(8) {
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 
         ILendingPool(lendingPool).borrow(_tokenAddr, _amount, _type, AAVE_REFERRAL_CODE);
@@ -70,7 +70,7 @@ contract AaveBasicProxy is GasBurner {
     /// @param _aTokenAddr ATokens to be paybacked
     /// @param _amount Amount of tokens to be payed back
     /// @param _wholeDebt If true the _amount will be set to the whole amount of the debt
-    function payback(address _tokenAddr, address _aTokenAddr, uint256 _amount, bool _wholeDebt) public burnGas(0) payable {
+    function payback(address _tokenAddr, address _aTokenAddr, uint256 _amount, bool _wholeDebt) public burnGas(3) payable {
         address lendingPoolCore = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 
