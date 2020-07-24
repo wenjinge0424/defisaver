@@ -14,7 +14,8 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    constructor() FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) public {}
+    // solhint-disable-next-line no-empty-blocks
+    constructor() public FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) {}
 
     /// @notice Called by Aave when sending back the FL amount
     /// @param _reserve The address of the borrowed token
@@ -48,6 +49,7 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
 
         // if there is some eth left (0x fee), return it to user
         if (address(this).balance > 0) {
+            // solhint-disable-next-line avoid-tx-origin
             tx.origin.transfer(address(this).balance);
         }
     }
@@ -95,5 +97,6 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
         }
     }
 
+    // solhint-disable-next-line no-empty-blocks
     receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}
 }

@@ -19,47 +19,48 @@ contract CompoundCreateTaker is ProxyPermission {
     // solhint-disable-next-line const-name-snakecase
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
 
+    address payable public constant COMPOUND_RECEIVER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
     struct CreateInfo {
         address cCollAddress;
         address cBorrowAddress;
         uint depositAmount;
     }
 
+    /// @notice Main function which will take a FL and open a leverage position
+    /// @dev Call through DSProxy, if _exchangeData.destAddr is a token approve DSProxy
+    /// @param _createInfo [cCollAddress, cBorrowAddress, depositAmount]
+    /// @param _exchangeData Exchange data struct
     function openLeveragedLoan(
         CreateInfo memory _createInfo,
-        SaverExchangeCore.ExchangeData memory _exchangeData,
-        address payable _compoundReceiver
+        SaverExchangeCore.ExchangeData memory _exchangeData
     ) public payable {
-
         uint loanAmount = _exchangeData.srcAmount;
 
+        // Pull tokens from user
         if (_exchangeData.destAddr != ETH_ADDRESS) {
             ERC20(_exchangeData.destAddr).safeTransferFrom(msg.sender, address(this), _createInfo.depositAmount);
         }
 
-        (
-            uint[4] memory numData,
-            address[6] memory addrData,
-            bytes memory callData
-        )
-        = _packData(_createInfo, _exchangeData);
+        // Send tokens to FL receiver
+        sendDeposit(COMPOUND_RECEIVER, _exchangeData.destAddr);
 
+        // Pack the struct data
+        (uint[4] memory numData, address[6] memory addrData, bytes memory callData)
+                                            = _packData(_createInfo, _exchangeData);
         bytes memory paramsData = abi.encode(numData, addrData, callData, address(this));
 
-        givePermission(_compoundReceiver);
+        givePermission(COMPOUND_RECEIVER);
 
-        sendSrcAmount(_compoundReceiver, _exchangeData.destAddr);
+        lendingPool.flashLoan(COMPOUND_RECEIVER, _exchangeData.srcAddr, loanAmount, paramsData);
 
-        lendingPool.flashLoan(_compoundReceiver, _exchangeData.srcAddr, loanAmount, paramsData);
-
-        removePermission(_compoundReceiver);
+        removePermission(COMPOUND_RECEIVER);
 
         logger.Log(address(this), msg.sender, "CompoundLeveragedLoan",
             abi.encode(_exchangeData.srcAddr, _exchangeData.destAddr, _exchangeData.srcAmount, _exchangeData.destAmount));
-
     }
 
-    function sendSrcAmount(address payable _compoundReceiver, address _token) internal {
+    function sendDeposit(address payable _compoundReceiver, address _token) internal {
         if (_token != ETH_ADDRESS) {
             ERC20(_token).safeTransfer(_compoundReceiver, ERC20(_token).balanceOf(address(this)));
         }
