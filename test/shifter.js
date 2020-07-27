@@ -40,7 +40,7 @@ const loanShifterTakerAddr = '0x9972d7Ab5ceBeb955317735bD35fEb861B96F9E0';
 
 const compoundLoanInfoAddr = '0x4D32ECeC25d722C983f974134d649a20e78B1417';
 const comptrollerAddr = '0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b';
-const uniswapWrapperAddr = '0xB9bdBAEc07751F6d54d19A6B9995708873F3DE18';
+const uniswapWrapperAddr = '0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B';
 const oldUniswapWrapperAddr = '0x1e30124FDE14533231216D95F7798cD0061e5cf8';
 
 

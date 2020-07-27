@@ -13,7 +13,7 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xA2bF3F0729D9A95599DB31660eb75836a4740c5F);
+    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xaD888d0Ade988EbEe74B8D4F39BF29a8d0fe8A8D);
 
     struct ParamData {
         bytes proxyData1;

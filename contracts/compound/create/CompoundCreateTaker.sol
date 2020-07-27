@@ -19,7 +19,7 @@ contract CompoundCreateTaker is ProxyPermission {
     // solhint-disable-next-line const-name-snakecase
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
 
-    address payable public constant COMPOUND_RECEIVER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    //address payable public constant COMPOUND_RECEIVER = 0x9b1f7F645351AF3631a656421eD2e40f2802E6c0;
 
     struct CreateInfo {
         address cCollAddress;
@@ -33,7 +33,8 @@ contract CompoundCreateTaker is ProxyPermission {
     /// @param _exchangeData Exchange data struct
     function openLeveragedLoan(
         CreateInfo memory _createInfo,
-        SaverExchangeCore.ExchangeData memory _exchangeData
+        SaverExchangeCore.ExchangeData memory _exchangeData,
+        address payable _compReceiver
     ) public payable {
         uint loanAmount = _exchangeData.srcAmount;
 
@@ -43,18 +44,18 @@ contract CompoundCreateTaker is ProxyPermission {
         }
 
         // Send tokens to FL receiver
-        sendDeposit(COMPOUND_RECEIVER, _exchangeData.destAddr);
+        sendDeposit(_compReceiver, _exchangeData.destAddr);
 
         // Pack the struct data
         (uint[4] memory numData, address[6] memory addrData, bytes memory callData)
                                             = _packData(_createInfo, _exchangeData);
         bytes memory paramsData = abi.encode(numData, addrData, callData, address(this));
 
-        givePermission(COMPOUND_RECEIVER);
+        givePermission(_compReceiver);
 
-        lendingPool.flashLoan(COMPOUND_RECEIVER, _exchangeData.srcAddr, loanAmount, paramsData);
+        lendingPool.flashLoan(_compReceiver, _exchangeData.srcAddr, loanAmount, paramsData);
 
-        removePermission(COMPOUND_RECEIVER);
+        removePermission(_compReceiver);
 
         logger.Log(address(this), msg.sender, "CompoundLeveragedLoan",
             abi.encode(_exchangeData.srcAddr, _exchangeData.destAddr, _exchangeData.srcAmount, _exchangeData.destAmount));

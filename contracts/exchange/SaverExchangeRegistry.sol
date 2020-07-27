@@ -7,9 +7,9 @@ contract SaverExchangeRegistry is AdminAuth {
 	mapping(address => bool) private wrappers;
 
 	constructor() public {
-		wrappers[0x3d1D4D6Bb405b2366434cb7387803c7B662b8d71] = true;
-		wrappers[0xFF92ADA50cDC8009686867b4a470C8769bEdB22d] = true;
-		wrappers[0x9C499376B41A91349Ff93F99462a65962653e104] = true;
+		wrappers[0x5b1869D9A4C187F2EAa108f3062412ecf0526b24] = true;
+		wrappers[0xCfEB869F69431e42cdB54A4F4f105C19C080A601] = true;
+		wrappers[0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B] = true;
 	}
 
 	function addWrapper(address _wrapper) public onlyOwner {

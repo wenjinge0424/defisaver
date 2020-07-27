@@ -4,9 +4,9 @@
 
 - Compound
 
-  - [Create](compound/create.md)
+  - [Create](compound/README.md)
 
 
 - Automatization
 
-  - [System](deploy.md)
+  - [System](compound/create.md)

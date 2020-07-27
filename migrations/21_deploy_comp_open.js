@@ -13,7 +13,7 @@ module.exports = function(deployer, network, accounts) {
     deployer.then(async () => {
         // await deployer.deploy(DebugInfo, {gas: 5000000, overwrite: deployAgain});
 
-        await deployer.deploy(CompShifter, {gas: 5000000, overwrite: deployAgain});
+        // await deployer.deploy(CompShifter, {gas: 5000000, overwrite: deployAgain});
 
         await deployer.deploy(CompoundCreateTaker, {gas: 5000000, overwrite: deployAgain});
         await deployer.deploy(CompoundCreateReceiver, {gas: 5000000, overwrite: deployAgain});

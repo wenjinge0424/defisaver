@@ -6,13 +6,13 @@ import "../../utils/SafeERC20.sol";
 import "../../exchange/SaverExchangeCore.sol";
 import "../../shifter/ShifterRegistry.sol";
 
+import "../helpers/CompoundSaverHelper.sol";
+
 /// @title Contract that receives the FL from Aave for Creating loans
-contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
+contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore, CompoundSaverHelper {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
-    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xA2bF3F0729D9A95599DB31660eb75836a4740c5F);
-
-    address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xaD888d0Ade988EbEe74B8D4F39BF29a8d0fe8A8D);
 
     // solhint-disable-next-line no-empty-blocks
     constructor() public FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) {}
@@ -29,15 +29,17 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
         bytes calldata _params)
     external override {
         // Format the call data for DSProxy
-        (address payable proxyAddr, bytes memory proxyData, ExchangeData memory exchangeData)
+        (address payable proxyAddr, address cDebtAddr, bytes memory proxyData, ExchangeData memory exchangeData)
                                  = packFunctionCall(_amount, _fee, _params);
 
         // Swap
-        exchangeData.srcAmount -= _fee;
-        _sell(exchangeData);
+        exchangeData.srcAmount -= _fee; // leave _fee so we can repay Aave FL
+        (, uint sellAmount) = _sell(exchangeData);
+
+        // getFee(sellAmount, getUser(proxyAddr), 0, cDebtAddr); // DFS fee
 
         // Send amount to DSProxy
-        sendToProxy(proxyAddr, exchangeData.destAddr);
+        sendToProxy(proxyAddr, exchangeData.destAddr, sellAmount);
 
         address compOpenProxy = shifterRegistry.getAddr("COMP_SHIFTER");
 
@@ -58,7 +60,7 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
     /// @param _amount Amount of FL
     /// @param _fee Fee of the FL
     /// @param _params Saver proxy params
-    function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal pure  returns (address payable, bytes memory proxyData, ExchangeData memory exchangeData) {
+    function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal pure  returns (address payable, address, bytes memory proxyData, ExchangeData memory exchangeData) {
         (
             uint[4] memory numData, // srcAmount, destAmount, minPrice, price0x
             address[6] memory addrData, // cCollAddr, cDebtAddr, srcAddr, destAddr, exchangeAddr, wrapper
@@ -83,18 +85,26 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
             price0x: numData[3]
         });
 
-        return (payable(proxy), proxyData, exchangeData);
+        return (payable(proxy), addrData[1], proxyData, exchangeData);
     }
 
     /// @notice Send the FL funds received to DSProxy
     /// @param _proxy DSProxy address
     /// @param _reserve Token address
-    function sendToProxy(address payable _proxy, address _reserve) internal {
+    function sendToProxy(address payable _proxy, address _reserve, uint _amount) internal {
         if (_reserve != ETH_ADDRESS) {
-            ERC20(_reserve).safeTransfer(_proxy, ERC20(_reserve).balanceOf(address(this)));
+            ERC20(_reserve).safeTransfer(_proxy, _amount);
         } else {
             _proxy.transfer(address(this).balance);
         }
+    }
+
+    /// @notice Gets the owner of the DSProxy
+    /// @param _proxy The DSProxy address
+    function getUser(address _proxy) internal view returns (address) {
+        DSProxy proxy = DSProxy(payable(_proxy));
+
+        return proxy.owner();
     }
 
     // solhint-disable-next-line no-empty-blocks
