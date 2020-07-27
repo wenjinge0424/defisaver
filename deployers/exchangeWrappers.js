@@ -7,20 +7,20 @@ const { deployContract } = require("./utils/deployer");
 const { start } = require('./utils/starter');
 
 async function main() {
-    const registry = await deployContract("SaverExchangeRegistry");
-//  	const kyber = await deployContract("KyberWrapper");
-//  	const oasis = await deployContract("OasisTradeWrapper");
-//  	const uniswap = await deployContract("UniswapWrapper");
+ //   const registry = await deployContract("SaverExchangeRegistry");
+ 	const kyber = await deployContract("KyberWrapper");
+ 	const oasis = await deployContract("OasisTradeWrapper");
+ 	const uniswap = await deployContract("UniswapWrapper");
 
-//  	const SaverExchangeRegistry = await ethers.getContractFactory("SaverExchangeRegistry");
-//   	const registry = await SaverExchangeRegistry.attach('0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab');
+ 	const SaverExchangeRegistry = await ethers.getContractFactory("SaverExchangeRegistry");
+  	const registry = await SaverExchangeRegistry.attach('0xe982E462b094850F12AF94d21D470e21bE9D0E9C');
 
-//  	console.log('setting kyber');
-//  	await registry.addWrapper(kyber.address);
-//  	console.log('setting oasis');
-//  	await registry.addWrapper(oasis.address);
-//  	console.log('setting uniswap');
-//  	await registry.addWrapper(uniswap.address);
+ 	console.log('setting kyber');
+ 	await registry.addWrapper(kyber.address);
+ 	console.log('setting oasis');
+ 	await registry.addWrapper(oasis.address);
+ 	console.log('setting uniswap');
+ 	await registry.addWrapper(uniswap.address);
 }
 
 start(main);

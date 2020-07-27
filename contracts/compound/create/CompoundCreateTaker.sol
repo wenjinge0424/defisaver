@@ -41,6 +41,8 @@ contract CompoundCreateTaker is ProxyPermission {
         // Pull tokens from user
         if (_exchangeData.destAddr != ETH_ADDRESS) {
             ERC20(_exchangeData.destAddr).safeTransferFrom(msg.sender, address(this), _createInfo.depositAmount);
+        } else {
+            require(msg.value >= _createInfo.depositAmount, "Must send correct amount of eth");
         }
 
         // Send tokens to FL receiver

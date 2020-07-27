@@ -36,10 +36,10 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
                                  = packFunctionCall(_amount, _fee, _params);
 
         // Swap
-        // (, uint sellAmount) = _sell(exchangeData);
+        (, uint sellAmount) = _sell(exchangeData);
 
         // DFS fee
-        // getFee(sellAmount, exchangeData.destAddr, proxyAddr);
+        getFee(sellAmount, exchangeData.destAddr, proxyAddr);
 
         // Send amount to DSProxy
         sendToProxy(proxyAddr, exchangeData.destAddr);
@@ -47,7 +47,7 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
         address compOpenProxy = shifterRegistry.getAddr("COMP_SHIFTER");
 
         // Execute the DSProxy call
-        DSProxyInterface(proxyAddr).execute(0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1, proxyData);
+        DSProxyInterface(proxyAddr).execute(compOpenProxy, proxyData);
 
         // Repay the loan with the money DSProxy sent back
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));

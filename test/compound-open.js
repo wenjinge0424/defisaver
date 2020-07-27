@@ -39,12 +39,12 @@ const ERC20 = contract.fromArtifact('ERC20');
 
 const compoundBasicProxyAddr = '0x0F1e33A36fA6a33Ea01460F04c6D8F1FAc2186E3';
 const compoundLoanInfoAddr = '0x4D32ECeC25d722C983f974134d649a20e78B1417';
-const uniswapWrapperAddr = '0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B';
+const uniswapWrapperAddr = '0x0B6fc157C83a9A5a64776E2183959f75180eFF27';
 const oldUniswapWrapperAddr = '0x1e30124FDE14533231216D95F7798cD0061e5cf8';
 const comptrollerAddr = '0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b';
 
-const compoundCreateTakerAddr = '0xfC059aBD0407c6cBF2bD76C940FDa27B51f1187d';
-const compoundCreateReceiverAddr = '0x464c94ea90fc7D0D08Bb956cffB9AcfE3AAA5313';
+const compoundCreateTakerAddr = '0xf51B62641D4c472E6EC0DB7Ea50382aE66Ff092e';
+const compoundCreateReceiverAddr = '0x7B83908271437c08EAc9AfBA56d7080b8D94038C';
 
 const makerVersion = "1.0.6";
 
@@ -90,12 +90,12 @@ describe("Compound-Open", accounts => {
     });
 
     it('... should buy a token', async () => {
-        const ethAmount = web3.utils.toWei('2', 'ether');
-        await web3Exchange.methods.swapEtherToToken(ethAmount, makerAddresses["MCD_DAI"], '0').send({from: accounts[0], value: ethAmount, gas: 800000});
+        // const ethAmount = web3.utils.toWei('2', 'ether');
+        // await web3Exchange.methods.swapEtherToToken(ethAmount, makerAddresses["MCD_DAI"], '0').send({from: accounts[0], value: ethAmount, gas: 800000});
 
         // await daiToken.methods.transfer(compoundCreateReceiverAddr, web3.utils.toWei('200', 'ether')).send({from: accounts[0], gas: 200000});
 
-       await send.ether(accounts[0], compoundCreateReceiverAddr, web3.utils.toWei('2', 'ether'));
+       // await send.ether(accounts[0], compoundCreateReceiverAddr, web3.utils.toWei('2', 'ether'));
 
         // const tokenBalance = await getBalance(web3, accounts[0], borrowToken);
         // console.log(tokenBalance/ 1e18);
@@ -132,7 +132,6 @@ describe("Compound-Open", accounts => {
         (compoundCreateTakerAddr, createData).send({from: accounts[0], gas: 3500000 });
 
     });
-
 
     // it('... should open a leveraged long position with a token as collateral', async () => {
 
