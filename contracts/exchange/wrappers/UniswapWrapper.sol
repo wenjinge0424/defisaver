@@ -24,15 +24,8 @@ contract UniswapWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
         _srcAddr = ethToWethAddr(_srcAddr);
         _destAddr = ethToWethAddr(_destAddr);
 
-        // // if we are selling ether
-        if (_srcAddr == WETH_ADDRESS) {
-            uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_destAddr);
-
-            destAmount = UniswapExchangeInterface(uniswapExchangeAddr).
-                ethToTokenTransferInput{value: _srcAmount}(1, block.timestamp + 1, msg.sender);
-        }
         // if we are buying ether
-        else if (_destAddr == WETH_ADDRESS) {
+        if (_destAddr == WETH_ADDRESS) {
             uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
 
             ERC20(_srcAddr).safeApprove(uniswapExchangeAddr, _srcAmount);
@@ -65,15 +58,8 @@ contract UniswapWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
         _srcAddr = ethToWethAddr(_srcAddr);
         _destAddr = ethToWethAddr(_destAddr);
 
-        // if we are selling ether
-        if (_srcAddr == WETH_ADDRESS) {
-            uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_destAddr);
-
-            srcAmount = UniswapExchangeInterface(uniswapExchangeAddr).
-                ethToTokenTransferOutput{value: msg.value}(_destAmount, block.timestamp + 1, msg.sender);
-        }
          // if we are buying ether
-        else if (_destAddr == WETH_ADDRESS) {
+        if (_destAddr == WETH_ADDRESS) {
             uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
 
             ERC20(_srcAddr).safeApprove(uniswapExchangeAddr, uint(-1));

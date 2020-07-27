@@ -25,11 +25,6 @@ contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2 {
 
         ERC20(srcAddr).safeApprove(OTC_ADDRESS, _srcAmount);
 
-        // convert eth -> weth
-        if (srcAddr == WETH_ADDRESS) {
-            TokenInterface(WETH_ADDRESS).deposit{value: _srcAmount}();
-        }
-
         uint destAmount = OasisInterface(OTC_ADDRESS).sellAllAmount(srcAddr, _srcAmount, destAddr, 0);
 
         // convert weth -> eth and send back
@@ -53,11 +48,6 @@ contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2 {
         address destAddr = ethToWethAddr(_destAddr);
 
         ERC20(srcAddr).safeApprove(OTC_ADDRESS, uint(-1));
-
-        // convert eth -> weth
-        if (srcAddr == WETH_ADDRESS) {
-            TokenInterface(WETH_ADDRESS).deposit{value: msg.value}();
-        }
 
         uint srcAmount = OasisInterface(OTC_ADDRESS).buyAllAmount(destAddr, _destAmount, srcAddr, uint(-1));
 

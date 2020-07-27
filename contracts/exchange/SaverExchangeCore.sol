@@ -37,6 +37,12 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         bool success;
         uint tokensLeft = exData.srcAmount;
 
+        // if selling eth, convert to weth
+        if (exData.srcAddr == KYBER_ETH_ADDRESS) {
+            exData.srcAddr = ethToWethAddr(exData.srcAddr);
+            TokenInterface(WETH_ADDRESS).deposit.value(exData.srcAmount)();
+        }
+
         // Try 0x first and then fallback on specific wrapper
         if (exData.price0x > 0) {
             approve0xProxy(exData.srcAddr, exData.srcAmount);
@@ -70,6 +76,12 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         bool success;
 
         require(exData.destAmount != 0, "Dest amount must be specified");
+
+        // if selling eth, convert to weth
+        if (exData.srcAddr == KYBER_ETH_ADDRESS) {
+            exData.srcAddr = ethToWethAddr(exData.srcAddr);
+            TokenInterface(WETH_ADDRESS).deposit.value(exData.srcAmount)();
+        }
 
         if (exData.price0x > 0) { 
             approve0xProxy(exData.srcAddr, exData.srcAmount);
@@ -229,12 +241,8 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
 
         uint ethValue = 0;
 
-        if (_exData.srcAddr == KYBER_ETH_ADDRESS) {
-            ethValue = _exData.srcAmount;
-        } else {
-            ERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
-        }
-
+        ERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
+        
         if (_type == ActionType.SELL) {
             swapedTokens = ExchangeInterfaceV2(_exData.wrapper).
                     sell{value: ethValue}(_exData.srcAddr, _exData.destAddr, _exData.srcAmount);
@@ -313,6 +321,12 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         assembly {
             mstore(add(_b, _index), input)
         }
+    }
+
+    /// @notice Converts Kybers Eth address -> Weth
+    /// @param _src Input address
+    function ethToWethAddr(address _src) internal pure returns (address) {
+        return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
     }
 
     // solhint-disable-next-line no-empty-blocks
