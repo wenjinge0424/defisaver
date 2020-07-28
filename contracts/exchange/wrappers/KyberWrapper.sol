@@ -21,7 +21,6 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
         ERC20 destToken = ERC20(_destAddr);
 
         KyberNetworkProxyInterface kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
-        (, uint minRate) = kyberNetworkProxy.getExpectedRate(srcToken, destToken, _srcAmount);
 
         if (_srcAddr != KYBER_ETH_ADDRESS) {
             srcToken.safeApprove(address(kyberNetworkProxy), _srcAmount);
@@ -33,7 +32,7 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
             destToken,
             msg.sender,
             uint(-1),
-            minRate,
+            0,
             WALLET_ID
         );
 
@@ -57,7 +56,6 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
         }
 
         KyberNetworkProxyInterface kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
-        (, uint minRate) = kyberNetworkProxy.getExpectedRate(srcToken, destToken, srcAmount);
 
         if (_srcAddr != KYBER_ETH_ADDRESS) {
             srcToken.safeApprove(address(kyberNetworkProxy), srcAmount);
@@ -69,7 +67,7 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
             destToken,
             msg.sender,
             _destAmount,
-            minRate,
+            0,
             WALLET_ID
         );
 
