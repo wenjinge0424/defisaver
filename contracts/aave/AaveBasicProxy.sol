@@ -25,12 +25,15 @@ contract AaveBasicProxy is GasBurner {
         address lendingPoolCore = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 
+        uint ethValue = _amount;
+
         if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), _amount);
             approveToken(_tokenAddr, lendingPoolCore);
+            ethValue = 0;
         }
 
-        ILendingPool(lendingPool).deposit{value: _amount}(_tokenAddr, _amount, AAVE_REFERRAL_CODE);
+        ILendingPool(lendingPool).deposit{value: ethValue}(_tokenAddr, _amount, AAVE_REFERRAL_CODE);
 
         (,,,,,,,,,bool collateralEnabled) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, address(this));
 

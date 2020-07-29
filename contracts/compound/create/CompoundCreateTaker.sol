@@ -3,8 +3,6 @@ pragma experimental ABIEncoderV2;
 
 import "../../interfaces/ILendingPool.sol";
 import "../../loggers/DefisaverLogger.sol";
-import "../helpers/CompoundSaverHelper.sol";
-import "../CompoundBasicProxy.sol";
 import "../../auth/ProxyPermission.sol";
 import "../../exchange/SaverExchangeCore.sol";
 import "../../utils/SafeERC20.sol";
@@ -18,8 +16,6 @@ contract CompoundCreateTaker is ProxyPermission {
 
     // solhint-disable-next-line const-name-snakecase
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
-
-    //address payable public constant COMPOUND_RECEIVER = 0x9b1f7F645351AF3631a656421eD2e40f2802E6c0;
 
     struct CreateInfo {
         address cCollAddress;
