@@ -54,8 +54,8 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             }
         }
 
-        // check if we have already swapped with 0x, or tried swapping but failed
-        if (tokensLeft > 0) {
+        // fallback to desired wrapper if 0x failed
+        if (!success) {
             swapedTokens = saverSwap(exData, ActionType.SELL);
             wrapper = exData.wrapper;
         }
@@ -93,8 +93,8 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             }
         }
 
-        // check if we have already swapped with 0x, or tried swapping but failed
-        if (getBalance(exData.destAddr) < exData.destAmount) {
+        // fallback to desired wrapper if 0x failed
+        if (!success) {
             swapedTokens = saverSwap(exData, ActionType.BUY);
             wrapper = exData.wrapper;
         }
