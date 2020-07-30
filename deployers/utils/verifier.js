@@ -1,7 +1,7 @@
 const { exec } = require("child_process");
 
-const contractName = process.argv[2];
-const networkName = process.argv[3];
+const networkName = process.argv[2];
+const contractName = process.argv[3];
 
 if (!contractName || !networkName) {
 	console.log('You need to provide contract name and network name');
