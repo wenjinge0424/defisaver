@@ -19,7 +19,7 @@ There is only one public function which will be used to create a leverage short/
     ) public payable`
 
 ### Params
-    The first parameter is a struct for the create related info.
+The first parameter is a struct for the create related info.
 
    `struct CreateInfo {
         address cCollAddress; // collateral address must be compound token (cEth for example)
