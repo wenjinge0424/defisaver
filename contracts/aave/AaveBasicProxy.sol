@@ -58,7 +58,7 @@ contract AaveBasicProxy is GasBurner {
     /// @notice User borrows tokens to the Aave protocol
     /// @param _tokenAddr The address of the token to be borrowed
     /// @param _amount Amount of tokens to be borrowed
-    /// @param _type Send 0 for variable rate and 1 for fixed rate
+    /// @param _type Send 1 for variable rate and 2 for fixed rate
     function borrow(address _tokenAddr, uint256 _amount, uint256 _type) public burnGas(8) {
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 
@@ -89,6 +89,32 @@ contract AaveBasicProxy is GasBurner {
         }
 
         ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, amount, payable(address(this)));
+
+        withdrawTokens(_tokenAddr);
+    }
+
+    /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
+    /// @notice User paybacks tokens to the Aave protocol
+    /// @param _tokenAddr The address of the token to be paybacked
+    /// @param _aTokenAddr ATokens to be paybacked
+    /// @param _amount Amount of tokens to be payed back
+    /// @param _wholeDebt If true the _amount will be set to the whole amount of the debt
+    function paybackOnBehalf(address _tokenAddr, address _aTokenAddr, uint256 _amount, bool _wholeDebt, address payable _onBehalf) public burnGas(3) payable {
+        address lendingPoolCore = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
+        address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
+
+        uint256 amount = _amount;
+
+        if (_wholeDebt) {
+            (,amount,,,,,,,,) = ILendingPool(lendingPool).getUserReserveData(_aTokenAddr, address(this));
+        }
+
+        if (_tokenAddr != ETH_ADDR) {
+            ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), amount);
+            approveToken(_tokenAddr, lendingPoolCore);
+        }
+
+        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, amount, _onBehalf);
 
         withdrawTokens(_tokenAddr);
     }

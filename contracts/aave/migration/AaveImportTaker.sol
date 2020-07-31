@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "../../utils/GasBurner.sol";
 import "../../auth/AdminAuth.sol";
+import "../../auth/ProxyPermission.sol";
 import "../../utils/DydxFlashLoanBase.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../../interfaces/ProxyRegistryInterface.sol";
@@ -18,7 +19,7 @@ import "../../interfaces/ERC20.sol";
 
 /// @title Import Aave position from account to wallet
 /// @dev Contract needs to have enough wei in WETH for all transactions (2 WETH wei per transaction)
-contract AaveImportTaker is GasBurner, DydxFlashLoanBase, AdminAuth {
+contract AaveImportTaker is GasBurner, DydxFlashLoanBase, AdminAuth, ProxyPermission {
 
     address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address payable public constant AAVE_IMPORT = 0xc0b3B62DD0400E4baa721DdEc9B8A384147b23fF;
@@ -28,10 +29,10 @@ contract AaveImportTaker is GasBurner, DydxFlashLoanBase, AdminAuth {
     /// @notice Starts the process to move users position 1 collateral and 1 borrow
     /// @dev User must send 2 wei with this transaction
     /// @dev User must approve AaveImport to pull _aCollateralToken
-    /// @param _aCollateralToken Collateral we are moving to DSProxy
-    /// @param _aBorrowToken Borrow token we are moving to DSProxy
+    /// @param _collateralToken Collateral token we are moving to DSProxy
+    /// @param _borrowToken Borrow token we are moving to DSProxy
     /// @param _ethAmount ETH amount that needs to be pulled from dydx
-    function importLoan(address _aCollateralToken, address _aBorrowToken, uint _ethAmount) public {
+    function importLoan(address _collateralToken, address _borrowToken, uint _ethAmount) public {
         address proxy = getProxy();
 
         ISoloMargin solo = ISoloMargin(SOLO_MARGIN_ADDRESS);
@@ -48,7 +49,7 @@ contract AaveImportTaker is GasBurner, DydxFlashLoanBase, AdminAuth {
 
         operations[0] = _getWithdrawAction(marketId, _ethAmount, AAVE_IMPORT);
         operations[1] = _getCallAction(
-            abi.encode(_aCollateralToken, _aBorrowToken, msg.sender, proxy, repayAmount),
+            abi.encode(_collateralToken, _borrowToken, msg.sender, proxy),
             AAVE_IMPORT
         );
         operations[2] = _getDepositAction(marketId, repayAmount, address(this));
@@ -56,9 +57,11 @@ contract AaveImportTaker is GasBurner, DydxFlashLoanBase, AdminAuth {
         Account.Info[] memory accountInfos = new Account.Info[](1);
         accountInfos[0] = _getAccountInfo();
 
+        givePermission(AAVE_IMPORT);
         solo.operate(accountInfos, operations);
+        removePermission(AAVE_IMPORT);
 
-        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "AaveImport", abi.encode(_aCollateralToken, _aBorrowToken));
+        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "AaveImport", abi.encode(_collateralToken, _borrowToken));
     }
 
     /// @notice Gets proxy address, if user doesn't has DSProxy build it
