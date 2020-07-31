@@ -62,6 +62,13 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
 
         require(getBalance(exData.destAddr) >= wmul(exData.minPrice, exData.srcAmount), "Final amount isn't correct");
 
+        // if anything is left in weth, pull it to user as eth
+        if (getBalance(WETH_ADDRESS) > 0) {
+            TokenInterface(WETH_ADDRESS).withdraw(
+                TokenInterface(WETH_ADDRESS).balanceOf(address(this))
+            );
+        }            
+
         return (wrapper, swapedTokens);
     }
 
@@ -100,6 +107,13 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         }
 
         require(getBalance(exData.destAddr) >= exData.destAmount, "Final amount isn't correct");
+
+        // if anything is left in weth, pull it to user as eth
+        if (getBalance(WETH_ADDRESS) > 0) {
+            TokenInterface(WETH_ADDRESS).withdraw(
+                TokenInterface(WETH_ADDRESS).balanceOf(address(this))
+            );
+        }
 
         return (wrapper, getBalance(exData.destAddr));
     }
