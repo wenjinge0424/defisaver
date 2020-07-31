@@ -1,10 +1,7 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 import "../savings/dydx/ISoloMargin.sol";
-
 
 contract DydxFlashLoanBase {
     using SafeMath for uint256;

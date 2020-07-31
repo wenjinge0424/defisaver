@@ -2,9 +2,12 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../../utils/GasBurner.sol";
+import "../../auth/AdminAuth.sol";
 import "../../utils/DydxFlashLoanBase.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../../interfaces/ProxyRegistryInterface.sol";
+import "../../interfaces/TokenInterface.sol";
+import "../../interfaces/ERC20.sol";
 
 // take weth
 // send weth to AaveImport
@@ -14,7 +17,8 @@ import "../../interfaces/ProxyRegistryInterface.sol";
 // log
 
 /// @title Import Aave position from account to wallet
-contract AaveImportTaker is GasBurner, DydxFlashLoanBase {
+/// @dev Contract needs to have enough wei in WETH for all transactions (2 WETH wei per transaction)
+contract AaveImportTaker is GasBurner, DydxFlashLoanBase, AdminAuth {
 
     address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address payable public constant AAVE_IMPORT = 0xc0b3B62DD0400E4baa721DdEc9B8A384147b23fF;
@@ -27,8 +31,7 @@ contract AaveImportTaker is GasBurner, DydxFlashLoanBase {
     /// @param _aCollateralToken Collateral we are moving to DSProxy
     /// @param _aBorrowToken Borrow token we are moving to DSProxy
     /// @param _ethAmount ETH amount that needs to be pulled from dydx
-    function importLoan(address _aCollateralToken, address _aBorrowToken, uint _ethAmount) public payable {
-        require(msg.value >= 2);
+    function importLoan(address _aCollateralToken, address _aBorrowToken, uint _ethAmount) public {
         address proxy = getProxy();
 
         ISoloMargin solo = ISoloMargin(SOLO_MARGIN_ADDRESS);
@@ -39,7 +42,7 @@ contract AaveImportTaker is GasBurner, DydxFlashLoanBase {
         // Calculate repay amount (_amount + (2 wei))
         // Approve transfer from
         uint256 repayAmount = _getRepaymentAmountInternal(_ethAmount);
-        IERC20(WETH_ADDR).approve(SOLO_MARGIN_ADDRESS, repayAmount);
+        ERC20(WETH_ADDR).approve(SOLO_MARGIN_ADDRESS, repayAmount);
 
         Actions.ActionArgs[] memory operations = new Actions.ActionArgs[](3);
 
@@ -53,7 +56,6 @@ contract AaveImportTaker is GasBurner, DydxFlashLoanBase {
         Account.Info[] memory accountInfos = new Account.Info[](1);
         accountInfos[0] = _getAccountInfo();
 
-        AAVE_IMPORT.transfer(msg.value);
         solo.operate(accountInfos, operations);
 
         DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "AaveImport", abi.encode(_aCollateralToken, _aBorrowToken));
@@ -67,5 +69,11 @@ contract AaveImportTaker is GasBurner, DydxFlashLoanBase {
         if (proxy == address(0)) {
             proxy = ProxyRegistryInterface(PROXY_REGISTRY_ADDRESS).build(msg.sender);
         }
+    }
+
+    /// @dev if contract receive eth, convert it to WETH
+    receive() external payable {
+        // deposit eth and get weth 
+        TokenInterface(WETH_ADDR).deposit.value(address(this).balance)();
     }
 }

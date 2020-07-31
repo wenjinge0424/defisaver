@@ -5,7 +5,6 @@ import "../../savings/dydx/ISoloMargin.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../interfaces/TokenInterface.sol";
 
-
 // weth->eth 
 // deposit eth for users proxy
 // borrow users token from proxy
@@ -31,11 +30,8 @@ contract AaveImport {
         );
 
 
-
         // deposit eth, get weth and return to sender
         TokenInterface(WETH_ADDRESS).deposit.value(address(this).balance)();
         IERC20(WETH_ADDRESS).transfer(sender, IERC20(WETH_ADDRESS).balanceOf(address(this)));
     }
-
-    receive() external payable {}
 }
