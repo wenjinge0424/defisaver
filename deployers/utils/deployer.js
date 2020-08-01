@@ -5,7 +5,7 @@ const { write } = require('./writer');
 
 const getGasPrice = async (exGasPrice) => {
 	if (exGasPrice.gt("0")) {
-		newGasPrice = exGasPrice.add(exGasPrice.div("3"));
+		newGasPrice = exGasPrice.add(exGasPrice.div("8"));
 	} else {
 		const defaultGasPrice = ethers.BigNumber.from(bre.network.config.gasPrice);
 		newGasPrice = defaultGasPrice.gt("0") ? defaultGasPrice : await provider.getGasPrice();
