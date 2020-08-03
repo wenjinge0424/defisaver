@@ -44,7 +44,7 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 		// first return 0x fee to msg.sender as it is the address that actually sent 0x fee
 		sendContractBalance(ETH_ADDR, msg.sender, msg.value);
 		// send all leftovers from dest addr to proxy owner
-		sendFullContractBalance(_data.destAddr, getUserAddress());
+		sendFullContractBalance(_data.destAddr, user);
 
 		DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "AaveRepay", abi.encode(_data.srcAddr, _data.destAddr, _data.srcAmount, destAmount));
 	}
