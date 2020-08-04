@@ -2,6 +2,7 @@ let { contract } = require('@openzeppelin/test-environment');
 const DSProxy = contract.fromArtifact("DSProxy");
 const DebugInfo = contract.fromArtifact("DebugInfo");
 const axios = require('axios');
+const Dec = require('decimal.js');
 
 const nullAddress = "0x0000000000000000000000000000000000000000";
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
@@ -39,6 +40,18 @@ const fetchMakerAddresses = async (version, params = {}) => {
 
     return res.data;
 };
+
+const wdiv = (a, b) => {
+    const wad = Dec(1e18);
+
+    return Dec(a).mul(wad).add(Dec(b).div('2')).div(b);
+}
+
+const wmul = (a, b) => {
+    const wad = Dec(1e18);
+
+    return Dec(a).mul(b).add(wad.div('2')).div(wad);
+}
 
 const loadAccounts = (web3) => {
     const account = web3.eth.accounts.privateKeyToAccount('0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d');
@@ -172,5 +185,7 @@ module.exports = {
     C_ZRX_ADDRESS,
     WETH_ADDRESS,
     transferToken,
-    MAX_UINT
+    MAX_UINT,
+    wmul,
+    wdiv
 };
