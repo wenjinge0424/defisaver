@@ -9,7 +9,6 @@ contract Prices is DSMath {
 
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    address public constant DGD_ADDRESS = 0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A;
 
     address public constant KYBER_WRAPPER = 0x42A9237b872368E1bec4Ca8D26A928D7d39d338C;
     address public constant UNISWAP_WRAPPER = 0x880A845A85F843a5c67DB2061623c6Fc3bB4c511;
@@ -157,7 +156,6 @@ contract Prices is DSMath {
     }
 
     function getDecimals(address _token) internal view returns (uint256) {
-        if (_token == DGD_ADDRESS) return 9;
         if (_token == KYBER_ETH_ADDRESS) return 18;
 
         return ERC20(_token).decimals();

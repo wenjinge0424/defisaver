@@ -9,8 +9,6 @@ import "../../DS/DSMath.sol";
 
 contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
 
-    address public constant DGD_ADDRESS = 0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A;
-
     using SafeERC20 for ERC20;
 
     /// @notice Sells a _srcAmount of tokens at Kyber
@@ -132,7 +130,6 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
     receive() payable external {}
 
     function getDecimals(address _token) internal view returns (uint256) {
-        if (_token == DGD_ADDRESS) return 9;
         if (_token == KYBER_ETH_ADDRESS) return 18;
 
         return ERC20(_token).decimals();
