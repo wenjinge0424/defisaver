@@ -7,7 +7,7 @@ const { wdiv, wmul, getBalance, approve, loadAccounts, getAccounts, getProxy, fe
 
 const Prices = contract.fromArtifact("Prices");
 
-const pricesAddress = '0xDb56f2e9369E0D7bD191099125a3f6C370F8ed15';
+const pricesAddress = '0x359D1E0E6DE68e2960D9b3acF8385d07c33c9620';
 
 const usdc = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 const usdt = '0xdac17f958d2ee523a2206206994597c13d831ec7';
