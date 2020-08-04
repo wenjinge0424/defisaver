@@ -4,9 +4,8 @@
 
 - Compound
 
-  - [Create](compound/README.md)
+  - [Create](comp_create.md)
 
+- Shifter
+    - [Shifter](shifter.md)
 
-- Automatization
-
-  - [System](compound/create.md)

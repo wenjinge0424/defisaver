@@ -12,6 +12,8 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 
 	address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
+    uint public constant VARIABLE_RATE = 2;
+
 	function repay(ExchangeData memory _data, uint _gasCost) public payable burnGas(20) {
 
 		address lendingPoolCore = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
@@ -40,9 +42,9 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 		}
 
 		// first return 0x fee to msg.sender as it is the address that actually sent 0x fee
-		sendContractBalance(ETH_ADDR, msg.sender, msg.value);
+		sendContractBalance(ETH_ADDR, msg.sender, min(address(this).balance, msg.value));
 		// send all leftovers from dest addr to proxy owner
-		sendFullContractBalance(_data.destAddr, getUserAddress());
+		sendFullContractBalance(_data.destAddr, user);
 
 		DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "AaveRepay", abi.encode(_data.srcAddr, _data.destAddr, _data.srcAmount, destAmount));
 	}
@@ -61,7 +63,7 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 		_data.srcAmount = _data.srcAmount > maxBorrow ? maxBorrow : _data.srcAmount;
 
 		// borrow amount
-		ILendingPool(lendingPool).borrow(_data.srcAddr, _data.srcAmount, 0, AAVE_REFERRAL_CODE);
+		ILendingPool(lendingPool).borrow(_data.srcAddr, _data.srcAmount, VARIABLE_RATE, AAVE_REFERRAL_CODE);
 		_data.srcAmount -= getFee(_data.srcAmount, user, _gasCost, _data.srcAddr);
 
 		// swap
@@ -75,7 +77,9 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 		}
 
 		// returning to msg.sender as it is the address that actually sent 0x fee
-		sendContractBalance(ETH_ADDR, msg.sender, msg.value);
+		sendContractBalance(ETH_ADDR, msg.sender, min(address(this).balance, msg.value));
+		// send all leftovers from dest addr to proxy owner
+		sendFullContractBalance(_data.destAddr, user);
 
 		DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "AaveBoost", abi.encode(_data.srcAddr, _data.destAddr, _data.srcAmount, destAmount));
 	}

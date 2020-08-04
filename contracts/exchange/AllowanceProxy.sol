@@ -12,7 +12,7 @@ contract AllowanceProxy is AdminAuth {
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     // TODO: Real saver exchange address
-    SaverExchange saverExchange = SaverExchange(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    SaverExchange saverExchange = SaverExchange(0x235abFAd01eb1BDa28Ef94087FBAA63E18074926);
 
     function callSell(SaverExchangeCore.ExchangeData memory exData) public payable {
         pullAndSendTokens(exData.srcAddr, exData.srcAmount);

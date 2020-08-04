@@ -95,6 +95,11 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
     function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount) public override view returns (uint rate) {
         (rate, ) = KyberNetworkProxyInterface(KYBER_INTERFACE)
             .getExpectedRate(ERC20(_srcAddr), ERC20(_destAddr), _srcAmount);
+
+        // multiply with decimal difference in src token
+        rate = rate * (10**(18 - getDecimals(_srcAddr)));
+        // divide with decimal difference in dest token
+        rate = rate / (10**(18 - getDecimals(_destAddr)));
     }
 
     /// @notice Return a rate for which we can buy an amount of tokens
@@ -103,13 +108,10 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
     /// @param _destAmount To amount
     /// @return rate Rate
     function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount) public override view returns (uint rate) {
-        (uint srcRate, ) = KyberNetworkProxyInterface(KYBER_INTERFACE)
-            .getExpectedRate(ERC20(_destAddr), ERC20(_srcAddr), _destAmount);
+        uint256 srcRate = getSellRate(_srcAddr, _destAddr, _destAmount);
+        uint256 srcAmount = wmul(_destAmount, srcRate);
 
-        uint srcAmount = wdiv(_destAmount, srcRate);
-
-        (rate, ) = KyberNetworkProxyInterface(KYBER_INTERFACE)
-            .getExpectedRate(ERC20(_srcAddr), ERC20(_destAddr), srcAmount);
+        rate = getSellRate(_destAddr, _srcAddr, srcAmount);
 
         // increase rate by 3% too account for inaccuracy between sell/buy conversion
         rate = rate + (rate / 30);
@@ -126,4 +128,10 @@ contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
     }
 
     receive() payable external {}
+
+    function getDecimals(address _token) internal view returns (uint256) {
+        if (_token == KYBER_ETH_ADDRESS) return 18;
+
+        return ERC20(_token).decimals();
+    }
 }

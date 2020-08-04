@@ -52,7 +52,6 @@ contract AaveHelper is DSMath {
         	return totalCollateralETH;
         }
 
-        // TODO: name variable
         // get sum of all other reserves multiplied with their liquidation thresholds by reversing formula
         uint256 a = sub(wmul(currentLiquidationThreshold, totalCollateralETH), wmul(tokenLiquidationThreshold, userTokenBalanceEth));
         // add new collateral amount multiplied by its threshold, and then divide with new total collateral

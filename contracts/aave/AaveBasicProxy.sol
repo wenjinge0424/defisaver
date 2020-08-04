@@ -133,14 +133,6 @@ contract AaveBasicProxy is GasBurner {
         }
     }
 
-    /// @notice Enables or disables token to be used as collateral
-    /// @param _tokenAddr Address of token
-    /// @param _enable Bool that determines if we allow or disallow address as collateral
-    function setAsColalteral(address _tokenAddr, bool _enable) public {
-        address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
-        ILendingPool(lendingPool).setUserUseReserveAsCollateral(_tokenAddr, _enable);
-    }
-
     /// @notice Approves token contract to pull underlying tokens from the DSProxy
     /// @param _tokenAddr Token we are trying to approve
     /// @param _caller Address which will gain the approval
