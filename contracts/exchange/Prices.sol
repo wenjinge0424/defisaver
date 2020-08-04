@@ -10,9 +10,9 @@ contract Prices is DSMath {
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
-    address public constant KYBER_WRAPPER = 0x42A9237b872368E1bec4Ca8D26A928D7d39d338C;
+    address public constant KYBER_WRAPPER = 0x69f822ac6A5980aB50616A035d4246dC7c8ADF7e;
     address public constant UNISWAP_WRAPPER = 0x880A845A85F843a5c67DB2061623c6Fc3bB4c511;
-    address public constant OASIS_WRAPPER = 0x4c9B55f2083629A1F7aDa257ae984E03096eCD25;
+    address public constant OASIS_WRAPPER = 0xF023bC4BD9745EDd1c5D033d2B53eB68f1897D66;
 
     // first is empty to keep the legacy order in place
     enum ExchangeType { _, OASIS, KYBER, UNISWAP, ZEROX }
