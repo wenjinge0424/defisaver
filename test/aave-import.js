@@ -17,8 +17,8 @@ const ADAI_ADDRESS = '0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d';
 const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 
 const aaveBasicProxyAddr = "0x2B816BFeD57bD7f36280CAaD292220dCA5004a6a";
-const aaveImportTakerAddr = "0xFC628dd79137395F3C9744e33b1c5DE554D94882";
-const aaveImportAddr = '0xb09bCc172050fBd4562da8b229Cf3E45Dc3045A6';
+const aaveImportTakerAddr = "0x4bf749ec68270027C5910220CEAB30Cc284c7BA2";
+const aaveImportAddr = '0x86072CbFF48dA3C1F01824a6761A03F105BCC697';
 
 const makerVersion = "1.0.6";
 

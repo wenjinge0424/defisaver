@@ -40,7 +40,7 @@ contract AaveImport is AaveHelper {
         = abi.decode(data, (address,address,uint256,address,address));
 
         // withdraw eth
-        // TokenInterface(WETH_ADDRESS).withdraw(ethAmount);
+        TokenInterface(WETH_ADDRESS).withdraw(ethAmount);
 
         // address lendingPoolCoreAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
         // address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
@@ -62,7 +62,7 @@ contract AaveImport is AaveHelper {
         // DSProxy(proxy).execute(BASIC_PROXY, abi.encodeWithSignature("withdraw(address,address,uint256,bool)", ETH_ADDR, AETH_ADDRESS, ethAmount, false));
 
         // deposit eth, get weth and return to sender
-        // TokenInterface(WETH_ADDRESS).deposit.value(address(this).balance)();
+        TokenInterface(WETH_ADDRESS).deposit.value(address(this).balance)();
         ERC20(WETH_ADDRESS).safeTransfer(proxy, ethAmount+2);
     }
 

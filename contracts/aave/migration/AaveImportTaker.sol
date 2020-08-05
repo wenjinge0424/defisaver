@@ -19,10 +19,10 @@ import "../../interfaces/ERC20.sol";
 
 /// @title Import Aave position from account to wallet
 /// @dev Contract needs to have enough wei in WETH for all transactions (2 WETH wei per transaction)
-contract AaveImportTaker is DydxFlashLoanBase {
+contract AaveImportTaker is DydxFlashLoanBase, ProxyPermission {
 
     address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    address payable public constant AAVE_IMPORT = 0xb09bCc172050fBd4562da8b229Cf3E45Dc3045A6;
+    address payable public constant AAVE_IMPORT = 0x86072CbFF48dA3C1F01824a6761A03F105BCC697;
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
     address public constant PROXY_REGISTRY_ADDRESS = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
 
@@ -55,9 +55,9 @@ contract AaveImportTaker is DydxFlashLoanBase {
         Account.Info[] memory accountInfos = new Account.Info[](1);
         accountInfos[0] = _getAccountInfo();
 
-        // givePermission(AAVE_IMPORT);
+        givePermission(AAVE_IMPORT);
         solo.operate(accountInfos, operations);
-        // removePermission(AAVE_IMPORT);
+        removePermission(AAVE_IMPORT);
 
         // DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "AaveImport", abi.encode(_collateralToken, _borrowToken));
     }
