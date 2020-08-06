@@ -106,7 +106,7 @@ contract AaveBasicProxy is GasBurner {
         uint256 amount = _amount;
 
         if (_wholeDebt) {
-            (,amount,,,,,,,,) = ILendingPool(lendingPool).getUserReserveData(_aTokenAddr, address(this));
+            (,amount,,,,,,,,) = ILendingPool(lendingPool).getUserReserveData(_aTokenAddr, _onBehalf);
         }
 
         if (_tokenAddr != ETH_ADDR) {
