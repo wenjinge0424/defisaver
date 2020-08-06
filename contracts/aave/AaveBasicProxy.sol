@@ -35,11 +35,7 @@ contract AaveBasicProxy is GasBurner {
 
         ILendingPool(lendingPool).deposit{value: ethValue}(_tokenAddr, _amount, AAVE_REFERRAL_CODE);
 
-        (,,,,,,,,,bool collateralEnabled) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, address(this));
-
-        if (!collateralEnabled) {
-            ILendingPool(lendingPool).setUserUseReserveAsCollateral(_tokenAddr, true);
-        }
+        setUserUseReserveAsCollateral(_tokenAddr);
     }
 
     /// @notice User withdraws tokens from the Aave protocol
@@ -139,6 +135,15 @@ contract AaveBasicProxy is GasBurner {
     function approveToken(address _tokenAddr, address _caller) internal {
         if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).safeApprove(_caller, uint256(-1));
+        }
+    }
+
+    function setUserUseReserveAsCollateral(address _tokenAddr) public {
+        address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
+        (,,,,,,,,,bool collateralEnabled) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, address(this));
+
+        if (!collateralEnabled) {
+            ILendingPool(lendingPool).setUserUseReserveAsCollateral(_tokenAddr, true);
         }
     }
 }

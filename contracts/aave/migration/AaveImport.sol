@@ -60,9 +60,10 @@ contract AaveImport is AaveHelper, AdminAuth {
         DSProxy(payableProxy).execute(BASIC_PROXY, abi.encodeWithSignature("paybackOnBehalf(address,address,uint256,bool,address)", borrowToken, aBorrowToken, 0, true, user));
         // pull tokens from user to proxy
         uint256 collateralAmount = ERC20(aCollateralToken).balanceOf(user);
-        ERC20(aCollateralToken).safeTransferFrom(user, address(this), collateralAmount);
+        ERC20(aCollateralToken).safeTransferFrom(user, proxy, collateralAmount);
 
         // enable as collateral
+        DSProxy(payableProxy).execute(BASIC_PROXY, abi.encodeWithSignature("setUserUseReserveAsCollateral(address)", collateralToken));
 
         // withdraw deposited eth
         DSProxy(payableProxy).execute(BASIC_PROXY, abi.encodeWithSignature("withdraw(address,address,uint256,bool)", ETH_ADDR, AETH_ADDRESS, ethAmount, false));
