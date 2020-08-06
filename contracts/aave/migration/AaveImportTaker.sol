@@ -22,7 +22,7 @@ import "../../interfaces/ERC20.sol";
 contract AaveImportTaker is DydxFlashLoanBase, ProxyPermission {
 
     address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    address payable public constant AAVE_IMPORT = 0xCf441C87D18cD1EB4B118ED5a7923b01B49A30B8;
+    address payable public constant AAVE_IMPORT = 0x9BcBeefd4a11C6EbCCAA396D09dF2A4c7d81Ec67;
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
     address public constant PROXY_REGISTRY_ADDRESS = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
 

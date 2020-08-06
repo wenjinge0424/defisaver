@@ -22,7 +22,7 @@ contract AaveImport is AaveHelper, AdminAuth {
     using SafeERC20 for ERC20;
 
     address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    address public constant BASIC_PROXY = 0xE1C572C4168FCFCb36dE05EE71497d16A27b5A5C;
+    address public constant BASIC_PROXY = 0x8CA5191575b30e39F39dFAB96E072496FbF8244e;
     address public constant AETH_ADDRESS = 0x3a3A65aAb0dd2A17E3F1947bA16138cd37d08c04;
 
     function callFunction(
@@ -61,6 +61,9 @@ contract AaveImport is AaveHelper, AdminAuth {
         // pull tokens from user to proxy
         uint256 collateralAmount = ERC20(aCollateralToken).balanceOf(user);
         ERC20(aCollateralToken).safeTransferFrom(user, address(this), collateralAmount);
+
+        // enable as collateral
+
         // withdraw deposited eth
         DSProxy(payableProxy).execute(BASIC_PROXY, abi.encodeWithSignature("withdraw(address,address,uint256,bool)", ETH_ADDR, AETH_ADDRESS, ethAmount, false));
 
