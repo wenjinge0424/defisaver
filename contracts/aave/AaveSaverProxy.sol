@@ -55,10 +55,6 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 		(,,,,,,,,,bool collateralEnabled) = ILendingPool(lendingPool).getUserReserveData(_data.destAddr, address(this));
 		address payable user = payable(getUserAddress());
 
-        if (!collateralEnabled) {
-            ILendingPool(lendingPool).setUserUseReserveAsCollateral(_data.destAddr, true);
-        }
-
 		uint256 maxBorrow = getMaxBorrow(_data.srcAddr, address(this));
 		_data.srcAmount = _data.srcAmount > maxBorrow ? maxBorrow : _data.srcAmount;
 
@@ -75,6 +71,10 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 			approveToken(_data.destAddr, lendingPoolCore);
 			ILendingPool(lendingPool).deposit(_data.destAddr, destAmount, AAVE_REFERRAL_CODE);
 		}
+
+		if (!collateralEnabled) {
+            ILendingPool(lendingPool).setUserUseReserveAsCollateral(_data.destAddr, true);
+        }
 
 		// returning to msg.sender as it is the address that actually sent 0x fee
 		sendContractBalance(ETH_ADDR, msg.sender, min(address(this).balance, msg.value));
