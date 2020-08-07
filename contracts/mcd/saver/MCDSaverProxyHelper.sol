@@ -2,9 +2,9 @@ pragma solidity ^0.6.0;
 
 import "../../DS/DSMath.sol";
 import "../../DS/DSProxy.sol";
-import "../maker/Manager.sol";
-import "../maker/Join.sol";
-import "../maker/Vat.sol";
+import "../../interfaces/Manager.sol";
+import "../../interfaces/Join.sol";
+import "../../interfaces/Vat.sol";
 
 /// @title Helper methods for MCDSaverProxy
 contract MCDSaverProxyHelper is DSMath {

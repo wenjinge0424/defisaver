@@ -5,10 +5,10 @@ import "../../interfaces/ExchangeInterface.sol";
 import "../../loggers/SaverLogger.sol";
 import "../../utils/Discount.sol";
 
-import "../maker/Spotter.sol";
-import "../maker/Jug.sol";
-import "../maker/DaiJoin.sol";
-import "../maker/Join.sol";
+import "../../interfaces/Spotter.sol";
+import "../../interfaces/Jug.sol";
+import "../../interfaces/DaiJoin.sol";
+import "../../interfaces/Join.sol";
 
 import "./ExchangeHelper.sol";
 import "./MCDSaverProxyHelper.sol";

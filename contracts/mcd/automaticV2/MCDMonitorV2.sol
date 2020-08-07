@@ -7,9 +7,9 @@ import "./MCDMonitorProxyV2.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../../interfaces/GasTokenInterface.sol";
 import "../../DS/DSMath.sol";
-import "../maker/Manager.sol";
-import "../maker/Vat.sol";
-import "../maker/Spotter.sol";
+import "../../interfaces/Manager.sol";
+import "../../interfaces/Vat.sol";
+import "../../interfaces/Spotter.sol";
 import "../../auth/AdminAuth.sol";
 import "../../loggers/AutomaticLogger.sol";
 

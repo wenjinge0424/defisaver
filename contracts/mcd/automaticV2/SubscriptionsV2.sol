@@ -1,12 +1,12 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "../maker/Manager.sol";
+import "../../interfaces/Manager.sol";
 import "./StaticV2.sol";
 import "../saver/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
-import "../maker/Vat.sol";
-import "../maker/Spotter.sol";
+import "../../interfaces/Vat.sol";
+import "../../interfaces/Spotter.sol";
 import "../../auth/AdminAuth.sol";
 
 /// @title Handles subscriptions for automatic monitoring

@@ -1,10 +1,10 @@
 pragma solidity ^0.6.0;
 
-import "../maker/Join.sol";
+import "../../interfaces/Join.sol";
 import "../../interfaces/ERC20.sol";
-import "../maker/Vat.sol";
-import "../maker/Flipper.sol";
-import "../maker/Gem.sol";
+import "../../interfaces/Vat.sol";
+import "../../interfaces/Flipper.sol";
+import "../../interfaces/Gem.sol";
 import "../saver/ExchangeHelper.sol";
 
 
