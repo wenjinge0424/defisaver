@@ -7,13 +7,8 @@ const { deployContract } = require("./utils/deployer");
 const { start } = require('./utils/starter');
 
 async function main() {
- 	const exchange = await deployContract("SaverExchange");
-
- 	const AllowanceProxy = await ethers.getContractFactory("AllowanceProxy");
-  	const exchangeAllowance = await AllowanceProxy.attach('0xdd8e19f63844e433c80117b402e36b62eff3ec0a');
- 	
- 	console.log('Set exchange address in AllowanceProxy');
- 	await exchangeAllowance.ownerChangeExchange(exchange.address);
+ 	// await deployContract("AaveImport");
+ 	await deployContract("AaveImportTaker");
 }
 
 start(main);

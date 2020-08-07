@@ -42,7 +42,7 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 		}
 
 		// first return 0x fee to msg.sender as it is the address that actually sent 0x fee
-		sendContractBalance(ETH_ADDR, msg.sender, msg.value);
+		sendContractBalance(ETH_ADDR, msg.sender, min(address(this).balance, msg.value));
 		// send all leftovers from dest addr to proxy owner
 		sendFullContractBalance(_data.destAddr, user);
 
@@ -54,10 +54,6 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 		address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 		(,,,,,,,,,bool collateralEnabled) = ILendingPool(lendingPool).getUserReserveData(_data.destAddr, address(this));
 		address payable user = payable(getUserAddress());
-
-        if (!collateralEnabled) {
-            ILendingPool(lendingPool).setUserUseReserveAsCollateral(_data.destAddr, true);
-        }
 
 		uint256 maxBorrow = getMaxBorrow(_data.srcAddr, address(this));
 		_data.srcAmount = _data.srcAmount > maxBorrow ? maxBorrow : _data.srcAmount;
@@ -76,8 +72,14 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 			ILendingPool(lendingPool).deposit(_data.destAddr, destAmount, AAVE_REFERRAL_CODE);
 		}
 
+		if (!collateralEnabled) {
+            ILendingPool(lendingPool).setUserUseReserveAsCollateral(_data.destAddr, true);
+        }
+
 		// returning to msg.sender as it is the address that actually sent 0x fee
-		sendContractBalance(ETH_ADDR, msg.sender, msg.value);
+		sendContractBalance(ETH_ADDR, msg.sender, min(address(this).balance, msg.value));
+		// send all leftovers from dest addr to proxy owner
+		sendFullContractBalance(_data.destAddr, user);
 
 		DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "AaveBoost", abi.encode(_data.srcAddr, _data.destAddr, _data.srcAmount, destAmount));
 	}
