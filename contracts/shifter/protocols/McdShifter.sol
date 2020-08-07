@@ -1,8 +1,8 @@
 pragma solidity ^0.6.0;
 
 import "../../interfaces/ILoanShifter.sol";
-import "../../mcd/saver_proxy/MCDSaverProxy.sol";
-import "../../mcd/flashloan/MCDOpenProxyActions.sol";
+import "../../mcd/saver/MCDSaverProxy.sol";
+import "../../mcd/create/MCDOpenProxyActions.sol";
 
 contract McdShifter is MCDSaverProxy {
 

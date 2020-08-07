@@ -5,7 +5,7 @@ import "../../interfaces/CompoundOracleInterface.sol";
 import "../../interfaces/CTokenInterface.sol";
 import "../../interfaces/ComptrollerInterface.sol";
 
-import "../../mcd/Discount.sol";
+import "../../utils/Discount.sol";
 import "../../DS/DSMath.sol";
 import "../../DS/DSProxy.sol";
 

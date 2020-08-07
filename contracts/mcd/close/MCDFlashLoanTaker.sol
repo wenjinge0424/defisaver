@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-import "../../mcd/saver_proxy/MCDSaverProxy.sol";
+import "../../mcd/saver/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../../loggers/FlashLoanLogger.sol";
 import "../../interfaces/ILendingPool.sol";
@@ -12,7 +12,7 @@ abstract contract IMCDSubscriptions {
 }
 
 
-contract MCDFlashLoanTaker is ConstantAddresses, SaverProxyHelper {
+contract MCDFlashLoanTaker is ConstantAddresses, MCDSaverProxyHelper {
 
     address payable public constant MCD_SAVER_FLASH_LOAN = 0xCcFb21Ced87762a1d8425F867a7F8Ec2dFfaBE92;
     address payable public constant MCD_CLOSE_FLASH_LOAN = 0xfCF3e72445D105c38C0fDC1a0687BDEeb8947a93;

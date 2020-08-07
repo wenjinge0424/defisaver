@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-import "../saver_proxy/MCDSaverProxy.sol";
+import "../saver/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../../loggers/FlashLoanLogger.sol";
 

@@ -1,9 +1,9 @@
 pragma solidity ^0.6.0;
 
 import "../../utils/SafeERC20.sol";
-import "../../mcd/saver_proxy/ExchangeHelper.sol";
+import "../../mcd/saver/ExchangeHelper.sol";
 import "../../interfaces/CTokenInterface.sol";
-import "../../mcd/Discount.sol";
+import "../../utils/Discount.sol";
 import "../helpers/CompoundSaverHelper.sol";
 import "../../loggers/DefisaverLogger.sol";
 

@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "../maker/Manager.sol";
 import "./StaticV2.sol";
-import "../saver_proxy/MCDSaverProxy.sol";
+import "../saver/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../maker/Vat.sol";
 import "../maker/Spotter.sol";

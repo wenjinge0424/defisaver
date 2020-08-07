@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-import "../../mcd/saver_proxy/ExchangeHelper.sol";
+import "../../mcd/saver/ExchangeHelper.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../helpers/CompoundSaverHelper.sol";
 

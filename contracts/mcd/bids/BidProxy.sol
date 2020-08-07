@@ -5,7 +5,7 @@ import "../../interfaces/ERC20.sol";
 import "../maker/Vat.sol";
 import "../maker/Flipper.sol";
 import "../maker/Gem.sol";
-import "../saver_proxy/ExchangeHelper.sol";
+import "../saver/ExchangeHelper.sol";
 
 
 contract BidProxy is ExchangeHelper {

@@ -7,7 +7,7 @@ import "../maker/Join.sol";
 import "../maker/Vat.sol";
 
 /// @title Helper methods for MCDSaverProxy
-contract SaverProxyHelper is DSMath {
+contract MCDSaverProxyHelper is DSMath {
 
     /// @notice Returns a normalized debt _amount based on the current rate
     /// @param _amount Amount of dai to be normalized
@@ -29,7 +29,7 @@ contract SaverProxyHelper is DSMath {
     /// @notice Converts a number to 18 decimal percision
     /// @param _joinAddr Join address of the collateral
     /// @param _amount Number to be converted
-    function convertTo18(address _joinAddr, uint256 _amount) internal returns (uint256) {
+    function convertTo18(address _joinAddr, uint256 _amount) internal view returns (uint256) {
         return mul(_amount, 10 ** (18 - Join(_joinAddr).dec()));
     }
 
@@ -72,7 +72,7 @@ contract SaverProxyHelper is DSMath {
 
     /// @notice Gets the token address from the Join contract
     /// @param _joinAddr Address of the Join contract
-    function getCollateralAddr(address _joinAddr) internal returns (address) {
+    function getCollateralAddr(address _joinAddr) internal view returns (address) {
         return address(Join(_joinAddr).gem());
     }
 

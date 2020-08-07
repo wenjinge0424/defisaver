@@ -3,7 +3,7 @@ pragma solidity ^0.6.0;
 import "../../interfaces/ExchangeInterface.sol";
 
 import "../../loggers/SaverLogger.sol";
-import "../Discount.sol";
+import "../../utils/Discount.sol";
 
 import "../maker/Spotter.sol";
 import "../maker/Jug.sol";
@@ -11,11 +11,11 @@ import "../maker/DaiJoin.sol";
 import "../maker/Join.sol";
 
 import "./ExchangeHelper.sol";
-import "./SaverProxyHelper.sol";
+import "./MCDSaverProxyHelper.sol";
 
 
 /// @title Implements Boost and Repay for MCD CDPs
-contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
+contract MCDSaverProxy is MCDSaverProxyHelper, ExchangeHelper {
 
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
     bytes32 public constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;

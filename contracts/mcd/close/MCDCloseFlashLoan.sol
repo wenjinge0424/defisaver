@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-import "../../mcd/saver_proxy/MCDSaverProxy.sol";
+import "../../mcd/saver/MCDSaverProxy.sol";
 import "../../utils/FlashLoanReceiverBase.sol";
 
 contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {

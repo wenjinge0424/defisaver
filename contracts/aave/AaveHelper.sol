@@ -2,7 +2,7 @@ pragma solidity ^0.6.0;
 
 import "../DS/DSMath.sol";
 import "../DS/DSProxy.sol";
-import "../mcd/Discount.sol";
+import "../utils/Discount.sol";
 import "../interfaces/IAToken.sol";
 import "../interfaces/ILendingPool.sol";
 import "../interfaces/ILendingPoolAddressesProvider.sol";
