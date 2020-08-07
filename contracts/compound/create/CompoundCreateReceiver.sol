@@ -3,7 +3,6 @@ pragma solidity ^0.6.0;
 import "../../DS/DSProxy.sol";
 import "../../utils/FlashLoanReceiverBase.sol";
 import "../../interfaces/DSProxyInterface.sol";
-import "../../utils/SafeERC20.sol";
 import "../../exchange/SaverExchangeCore.sol";
 import "../../shifter/ShifterRegistry.sol";
 
@@ -11,7 +10,7 @@ import "../../shifter/ShifterRegistry.sol";
 contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
-    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0xaD888d0Ade988EbEe74B8D4F39BF29a8d0fe8A8D);
+    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0x2E82103bD91053C781aaF39da17aE58ceE39d0ab);
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;

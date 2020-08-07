@@ -1,7 +1,6 @@
 pragma solidity ^0.6.0;
 
 import "../../compound/helpers/CompoundSaverHelper.sol";
-import "../../utils/DebugInfo.sol";
 
 contract CompShifter is CompoundSaverHelper {
 

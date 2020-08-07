@@ -31,7 +31,7 @@ module.exports = function(deployer, network, accounts) {
         console.log('compShifterAddress', compShifterAddress);
         console.log('mcdShifterAddress', mcdShifterAddress);
 
-        const registry = await ShifterRegistry.at('0xaD888d0Ade988EbEe74B8D4F39BF29a8d0fe8A8D');
+        const registry = await ShifterRegistry.at('0x988B6CFBf3332FF98FFBdED665b1F53a61f92612');
         await registry.changeContractAddr('MCD_SHIFTER', mcdShifterAddress);
         await registry.changeContractAddr('COMP_SHIFTER', compShifterAddress);
         await registry.changeContractAddr('LOAN_SHIFTER_RECEIVER', loanShifterReceiverAddress);

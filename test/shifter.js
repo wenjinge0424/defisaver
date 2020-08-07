@@ -35,12 +35,12 @@ const MCDSaverProxy = contract.fromArtifact('MCDSaverProxy');
 const ShifterRegistry = contract.fromArtifact('ShifterRegistry');
 const ERC20 = contract.fromArtifact('ERC20');
 
-const shifterRegistryAddr = '0xA2bF3F0729D9A95599DB31660eb75836a4740c5F';
-const loanShifterTakerAddr = '0x9972d7Ab5ceBeb955317735bD35fEb861B96F9E0';
+const shifterRegistryAddr = '0x988B6CFBf3332FF98FFBdED665b1F53a61f92612';
+const loanShifterTakerAddr = '0x180D179Bbf473A30183Fe858E8416351D2170Fd2';
 
 const compoundLoanInfoAddr = '0x4D32ECeC25d722C983f974134d649a20e78B1417';
 const comptrollerAddr = '0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b';
-const uniswapWrapperAddr = '0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B';
+const uniswapWrapperAddr = '0x880A845A85F843a5c67DB2061623c6Fc3bB4c511';
 const oldUniswapWrapperAddr = '0x1e30124FDE14533231216D95F7798cD0061e5cf8';
 
 
@@ -108,64 +108,65 @@ describe("Shifter", accounts => {
     //     await createVault('ETH');
 
     //     const cdpsAfter = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
-
     //     const numVaults = cdpsAfter.ids.length - 1;
 
-    //     const infoBefore = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults - 1].toString());
+    //     const cdp1 = cdpsAfter.ids[numVaults - 1].toString();
+    //     const cdp2 = cdpsAfter.ids[numVaults].toString()
+
+    //     const infoBefore = await mcdSaverProxy.getCdpDetailedInfo(cdp2);
     //     console.log(infoBefore.collateral.toString(), infoBefore.debt.toString());
 
     //     const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
     //     [
-    //      [0, 0, false, web3.utils.toWei('0.1', 'ether'), web3.utils.toWei('10', 'ether'), makerAddresses["MCD_DAI"], mcdEthJoin, mcdEthJoin, cdpsAfter.ids[numVaults - 1].toString(), cdpsAfter.ids[numVaults].toString()],
-    //      [nullAddress, nullAddress, 0, 0, 0, 0, nullAddress, "0x0", 0]
+    //      [MCD_PROTOCOL, MCD_PROTOCOL, NO_SWAP, true, web3.utils.toWei('0.1', 'ether'), web3.utils.toWei('10', 'ether'), makerAddresses["MCD_DAI"], makerAddresses["MCD_DAI"], mcdEthJoin, mcdEthJoin, cdp1, cdp2],
+    //      [nullAddress, nullAddress, 0, 0, 0, nullAddress, nullAddress, "0x0", 0]
     //     ]);
 
     //     await web3Proxy.methods['execute(address,bytes)']
     //      (loanShifterTakerAddr, moveData).send({from: accounts[0], gas: 3500000});
 
-    //     const infoAfter = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults].toString());
+    //     const infoAfter = await mcdSaverProxy.getCdpDetailedInfo(cdp2);
     //     console.log(infoAfter.collateral.toString(), infoAfter.debt.toString());
 
     //     expect(infoAfter.debt.toString() / 1e18).to.be.gt(infoBefore.debt.toString() / 1e18);
 
     // });
 
-    // it('... should change the collateral type of a CDP', async () => {
+    it('... should change the collateral type of a CDP', async () => {
 
-    //     await createVault('ETH');
-    //     await createVault('BAT');
+        await createVault('ETH');
+        await createVault('BAT');
 
-    //     const cdpsAfter = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
+        const cdpsAfter = await getCdps.getCdpsAsc(makerAddresses['CDP_MANAGER'], proxyAddr);
+        const numVaults = cdpsAfter.ids.length - 1;
 
-    //     const numVaults = cdpsAfter.ids.length - 1;
+        const cdp1 = cdpsAfter.ids[numVaults - 1].toString();
+        const cdp2 = cdpsAfter.ids[numVaults].toString()
 
-    //     const infoBefore = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults - 1].toString());
-    //     console.log(infoBefore.collateral.toString(), infoBefore.debt.toString());
+        const infoBefore = await mcdSaverProxy.getCdpDetailedInfo(cdp2.toString());
+        console.log(infoBefore.collateral.toString(), infoBefore.debt.toString());
 
-    //     const infoBefore2 = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults].toString());
-    //     console.log(infoBefore2.collateral.toString(), infoBefore2.debt.toString());
+        const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
+        [
+         [MCD_PROTOCOL, MCD_PROTOCOL, COLL_SWAP, true, web3.utils.toWei('2', 'ether'), web3.utils.toWei('100', 'ether'), makerAddresses["MCD_DAI"], makerAddresses["MCD_DAI"], mcdEthJoin, mcdBatJoin, cdp1, cdp2],
+         [ETH_ADDRESS, BAT_ADDRESS, web3.utils.toWei('2', 'ether'), 0, 0, uniswapWrapperAddr, nullAddress, "0x0", 0]
+        ]);
 
-    //     const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
-    //     [
-    //      [0, 0, true, web3.utils.toWei('2', 'ether'), web3.utils.toWei('100', 'ether'), makerAddresses["MCD_DAI"], mcdEthJoin, mcdBatJoin, cdpsAfter.ids[numVaults - 1].toString(), cdpsAfter.ids[numVaults].toString()],
-    //      [nullAddress, nullAddress, 0, 0, 0, 0, nullAddress, "0x0", 0]
-    //     ]);
+        try {
+            const tx = await web3Proxy.methods['execute(address,bytes)']
+            (loanShifterTakerAddr, moveData).send({from: accounts[0], gas: 3500000});
 
-    //     try {
-    //         const tx = await web3Proxy.methods['execute(address,bytes)']
-    //         (loanShifterTakerAddr, moveData).send({from: accounts[0], gas: 3500000});
+            console.log(tx);
+        } catch (err) {
+            console.log(err);
+        }
 
-    //         console.log(tx);
-    //     } catch (err) {
-    //         console.log(err);
-    //     }
+        const infoAfter = await mcdSaverProxy.getCdpDetailedInfo(cdp2.toString());
+        console.log(infoAfter.collateral.toString(), infoAfter.debt.toString());
 
-    //     const infoAfter = await mcdSaverProxy.getCdpDetailedInfo(cdpsAfter.ids[numVaults].toString());
-    //     console.log(infoAfter.collateral.toString(), infoAfter.debt.toString());
+        expect(infoAfter.debt.toString() / 1e18).to.be.gt(infoBefore.debt.toString() / 1e18);
 
-    //     expect(infoAfter.debt.toString() / 1e18).to.be.gt(infoBefore.debt.toString() / 1e18);
-
-    // });
+    });
 
     // it('... should move a CDP to Compound', async () => {
 
@@ -226,22 +227,22 @@ describe("Shifter", accounts => {
     // });
 
 
-    it('... should change Compound debt', async () => {
+    // it('... should change Compound debt', async () => {
 
-        const res = await shifterRegistry.contractAddresses("LOAN_SHIFTER_RECEIVER");
-        const tokenBalance = await getBalance(web3, res, makerAddresses["MCD_DAI"]);
-        console.log('DAI: ', tokenBalance/ 1e18);
+    //     const res = await shifterRegistry.contractAddresses("LOAN_SHIFTER_RECEIVER");
+    //     const tokenBalance = await getBalance(web3, res, makerAddresses["MCD_DAI"]);
+    //     console.log('DAI: ', tokenBalance/ 1e18);
 
-        const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
-        [
-         [COMP_PROTOCOL, COMP_PROTOCOL, DEBT_SWAP, false, web3.utils.toWei('1', 'ether'), web3.utils.toWei('50', 'ether'), C_DAI_ADDRESS, C_USDC_ADDRESS, C_ETH_ADDRESS, C_ETH_ADDRESS, 0, 0],
-         [USDC_ADDRESS, makerAddresses["MCD_DAI"], web3.utils.toWei('55', 'ether') / 1e12, web3.utils.toWei('50', 'ether'), 0, uniswapWrapperAddr, nullAddress, "0x0", 0]
-        ]);
+    //     const moveData = web3.eth.abi.encodeFunctionCall(getAbiFunction(LoanShifterTaker, 'moveLoan'),
+    //     [
+    //      [COMP_PROTOCOL, COMP_PROTOCOL, DEBT_SWAP, false, web3.utils.toWei('1', 'ether'), web3.utils.toWei('50', 'ether'), C_DAI_ADDRESS, C_USDC_ADDRESS, C_ETH_ADDRESS, C_ETH_ADDRESS, 0, 0],
+    //      [USDC_ADDRESS, makerAddresses["MCD_DAI"], web3.utils.toWei('55', 'ether') / 1e12, web3.utils.toWei('50', 'ether'), 0, uniswapWrapperAddr, nullAddress, "0x0", 0]
+    //     ]);
 
-        await web3Proxy.methods['execute(address,bytes)']
-        (loanShifterTakerAddr, moveData).send({from: accounts[0], gas: 3500000});
+    //     await web3Proxy.methods['execute(address,bytes)']
+    //     (loanShifterTakerAddr, moveData).send({from: accounts[0], gas: 3500000});
 
-    });
+    // });
 
     const createVault  = async (type) => {
 
