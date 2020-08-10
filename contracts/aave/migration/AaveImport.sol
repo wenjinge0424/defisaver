@@ -53,8 +53,8 @@ contract AaveImport is AaveHelper, AdminAuth {
         // deposit eth on behalf of proxy
         DSProxy(payableProxy).execute{value: ethAmount}(BASIC_PROXY, abi.encodeWithSignature("deposit(address,uint256)", ETH_ADDR, ethAmount));
         // borrow needed amount to repay users borrow
-        (,uint256 borrowAmount,,,,,,,,) = ILendingPool(lendingPool).getUserReserveData(borrowToken, user);
-        DSProxy(payableProxy).execute(BASIC_PROXY, abi.encodeWithSignature("borrow(address,uint256,uint256)", borrowToken, borrowAmount, 1));
+        (,uint256 borrowAmount,,uint256 borrowRateMode,,,,,,) = ILendingPool(lendingPool).getUserReserveData(borrowToken, user);
+        DSProxy(payableProxy).execute(BASIC_PROXY, abi.encodeWithSignature("borrow(address,uint256,uint256)", borrowToken, borrowAmount, borrowRateMode));
         // payback on behalf of user
         ERC20(borrowToken).safeApprove(proxy, borrowAmount);
         DSProxy(payableProxy).execute(BASIC_PROXY, abi.encodeWithSignature("paybackOnBehalf(address,address,uint256,bool,address)", borrowToken, aBorrowToken, 0, true, user));
