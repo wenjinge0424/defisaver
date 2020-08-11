@@ -35,7 +35,7 @@ contract AaveBasicProxy is GasBurner {
 
         ILendingPool(lendingPool).deposit{value: ethValue}(_tokenAddr, _amount, AAVE_REFERRAL_CODE);
 
-        setUserUseReserveAsCollateral(_tokenAddr);
+        setUserUseReserveAsCollateralIfNeeded(_tokenAddr);
     }
 
     /// @notice User withdraws tokens from the Aave protocol
@@ -138,12 +138,24 @@ contract AaveBasicProxy is GasBurner {
         }
     }
 
-    function setUserUseReserveAsCollateral(address _tokenAddr) public {
+    function setUserUseReserveAsCollateralIfNeeded(address _tokenAddr) public {
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
         (,,,,,,,,,bool collateralEnabled) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, address(this));
-
+ 
         if (!collateralEnabled) {
             ILendingPool(lendingPool).setUserUseReserveAsCollateral(_tokenAddr, true);
         }
+    }
+
+    function setUserUseReserveAsCollateral(address _tokenAddr, bool _true) public {
+        address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
+
+        ILendingPool(lendingPool).setUserUseReserveAsCollateral(_tokenAddr, _true);
+    }
+
+    function swapBorrowRateMode(address _reserve) public {
+        address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
+
+        ILendingPool(lendingPool).swapBorrowRateMode(_reserve);
     }
 }
