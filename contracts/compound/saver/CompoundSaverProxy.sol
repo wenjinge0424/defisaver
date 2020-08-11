@@ -79,6 +79,7 @@ contract CompoundSaverProxy is CompoundSaverHelper, SaverExchangeCore {
         if (collToken != borrowToken) {
             borrowAmount -= getFee(borrowAmount, user, _gasCost, _addrData[1]);
 
+            _exData.srcAmount = borrowAmount;
             (,swapAmount) = _sell(_exData);
         } else {
             swapAmount = borrowAmount;

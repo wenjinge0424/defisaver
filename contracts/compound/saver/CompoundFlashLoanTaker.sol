@@ -11,7 +11,7 @@ import "../../auth/ProxyPermission.sol";
 contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurner {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
-    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0xb0a59B7fC1c92c76b3c6AB52097f38611A492b1C;
+    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0x5b1869D9A4C187F2EAa108f3062412ecf0526b24;
 
     // solhint-disable-next-line const-name-snakecase
     FlashLoanLogger public constant logger = FlashLoanLogger(
@@ -36,8 +36,8 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurne
             COMPOUND_SAVER_FLASH_LOAN.transfer(msg.value);
 
             uint loanAmount = (_exData.srcAmount - maxColl);
-            // bytes memory encoded = packExchangeData(_exData);
-            bytes memory paramsData;// = abi.encode(encoded, _addrData, _gasCost, true, address(this));
+            bytes memory encoded = packExchangeData(_exData);
+            bytes memory paramsData = abi.encode(encoded, _addrData, _gasCost, true, address(this));
 
             givePermission(COMPOUND_SAVER_FLASH_LOAN);
 
@@ -67,8 +67,7 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurne
             COMPOUND_SAVER_FLASH_LOAN.transfer(msg.value);
 
             uint loanAmount = (_exData.srcAmount - maxBorrow);
-            bytes memory encoded = packExchangeData(_exData);
-            bytes memory paramsData = abi.encode(encoded, _addrData, _gasCost, false, address(this));
+            bytes memory paramsData = abi.encode(packExchangeData(_exData), _addrData, _gasCost, false, address(this));
 
             givePermission(COMPOUND_SAVER_FLASH_LOAN);
 

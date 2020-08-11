@@ -2,7 +2,7 @@
 // but useful for running the script in a standalone fashion through `node <script>`.
 // When running the script with `buidler run <script>` you'll find the Buidler
 // Runtime Environment's members available in the global scope.
-const {deploy} = require("./utils/deployer");
+const { deployContract } = require("./utils/deployer");
 const { start } = require('./utils/starter');
 
 async function main() {
@@ -16,7 +16,7 @@ async function main() {
 
   // We get the contract to deploy
   await deploy("CompoundSubscriptionsProxy");
-  const monitor = await deploy("CompoundMonitor", compoundMonitorProxyAddress, subscriptionsAddress, compoundFlashLoanTakerAddress);
+  const monitor = await deployContract("CompoundMonitor", compoundMonitorProxyAddress, subscriptionsAddress, compoundFlashLoanTakerAddress);
 
   const CompoundMonitorProxy = await ethers.getContractFactory("CompoundMonitorProxy");
   const monitorProxy = await CompoundMonitorProxy.attach(compoundMonitorProxyAddress);
