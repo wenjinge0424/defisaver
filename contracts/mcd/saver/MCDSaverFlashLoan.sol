@@ -1,19 +1,22 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import "../../mcd/saver/MCDSaverProxy.sol";
 import "../../utils/FlashLoanReceiverBase.sol";
+import "../../exchange/SaverExchangeCore.sol";
 
-contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
-    Manager public constant MANAGER = Manager(MANAGER_ADDRESS);
+contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
-    address payable public owner;
+    constructor() FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) public {}
 
-    constructor()
-        FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
-        public {
-            owner = msg.sender;
+    struct SaverData {
+        uint cdpId;
+        uint gasCost;
+        uint loanAmount;
+        uint fee;
+        address joinAddr;
     }
 
     function executeOperation(
@@ -28,18 +31,37 @@ contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
             "Invalid balance for the contract");
 
         (
-            uint[6] memory data,
-            address joinAddr,
-            address exchangeAddress,
+            uint[6] memory numData,
+            address[5] memory addrData,
             bytes memory callData,
             bool isRepay
         )
-         = abi.decode(_params, (uint256[6],address,address,bytes,bool));
+         = abi.decode(_params, (uint256[6],address[5],bytes,bool));
+
+        ExchangeData memory exchangeData = ExchangeData({
+            srcAddr: addrData[0],
+            destAddr: addrData[1],
+            srcAmount: numData[0],
+            destAmount: numData[1],
+            minPrice: numData[2],
+            wrapper: addrData[3],
+            exchangeAddr: addrData[2],
+            callData: callData,
+            price0x: numData[3]
+        });
+
+        SaverData memory saverData = SaverData({
+            cdpId: numData[4],
+            gasCost: numData[5],
+            loanAmount: _amount,
+            fee: _fee,
+            joinAddr: addrData[4]
+        });
 
         if (isRepay) {
-            repayWithLoan(data, _amount, joinAddr, exchangeAddress, callData, _fee);
+            repayWithLoan(saverData, exchangeData);
         } else {
-            boostWithLoan(data, _amount, joinAddr, exchangeAddress, callData, _fee);
+            boostWithLoan(saverData, exchangeData);
         }
 
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
@@ -51,88 +73,60 @@ contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
     }
 
     function boostWithLoan(
-        uint256[6] memory _data,
-        uint256 _loanAmount,
-        address _joinAddr,
-        address _exchangeAddress,
-        bytes memory _callData,
-        uint _fee
-    ) internal boostCheck(_data[0]) {
+        SaverData memory _saverData,
+        ExchangeData memory _exchangeData
+    ) internal boostCheck(_saverData.cdpId) {
 
-        // maxDebt,    daiDrawn,   dfsFee,     amountToSwap, swapedAmount
-        // amounts[0], amounts[1], amounts[2], amounts[3],   amounts[4]
-        uint[] memory amounts = new uint[](5);
-        address owner = getOwner(MANAGER, _data[0]);
+        address user = getOwner(manager, _saverData.cdpId);
 
         // Draw users Dai
-        amounts[0] = getMaxDebt(_data[0], manager.ilks(_data[0]));
-        amounts[1] = drawDai(_data[0], MANAGER.ilks(_data[0]), amounts[0]);
+        uint maxDebt = getMaxDebt(_saverData.cdpId, manager.ilks(_saverData.cdpId));
+        uint daiDrawn = drawDai(_saverData.cdpId, manager.ilks(_saverData.cdpId), maxDebt);
 
         // Calc. fees
-        amounts[2] = getFee((amounts[1] + _loanAmount), _data[4], owner);
-        amounts[3] = (amounts[1] + _loanAmount) - amounts[2];
+        uint dsfFee = getFee((daiDrawn + _saverData.loanAmount), _saverData.gasCost, user);
+        uint afterFee = (daiDrawn + _saverData.loanAmount) - dsfFee;
 
-        // Swap Dai to collateral
-        amounts[4] = swap(
-            [amounts[3], _data[2], _data[3], _data[5]],
-            DAI_ADDRESS,
-            getCollateralAddr(_joinAddr),
-            _exchangeAddress,
-            _callData
-        );
+        // Swap
+        _exchangeData.srcAmount = (_saverData.loanAmount + afterFee);
+        (, uint swapedAmount) = _sell(_exchangeData);
 
         // Return collateral
-        addCollateral(_data[0], _joinAddr, amounts[4]);
+        addCollateral(_saverData.cdpId, _saverData.joinAddr, swapedAmount);
 
         // Draw Dai to repay the flash loan
-        drawDai(_data[0],  manager.ilks(_data[0]), (_loanAmount + _fee));
+        drawDai(_saverData.cdpId,  manager.ilks(_saverData.cdpId), (_saverData.loanAmount + _saverData.fee));
 
-        SaverLogger(LOGGER_ADDRESS).LogBoost(_data[0], owner, (amounts[1] + _loanAmount), amounts[4]);
+        // SaverLogger(LOGGER_ADDRESS).LogBoost(_cdpId, user, (amounts[1] + _loanAmount), amounts[4]);
     }
 
     function repayWithLoan(
-        uint256[6] memory _data,
-        uint256 _loanAmount,
-        address _joinAddr,
-        address _exchangeAddress,
-        bytes memory _callData,
-        uint _fee
-    ) internal repayCheck(_data[0]) {
+        SaverData memory _saverData,
+        ExchangeData memory _exchangeData
+    ) internal repayCheck(_saverData.cdpId) {
 
-        // maxColl,    collDrawn,  swapedAmount, dfsFee
-        // amounts[0], amounts[1], amounts[2],   amounts[3]
-        uint[] memory amounts = new uint[](4);
-        address owner = getOwner(MANAGER, _data[0]);
+        address user = getOwner(manager, _saverData.cdpId);
+        bytes32 ilk = manager.ilks(_saverData.cdpId);
 
         // Draw collateral
-        amounts[0] = getMaxCollateral(_data[0], manager.ilks(_data[0]), _joinAddr);
-        amounts[1] = drawCollateral(_data[0], manager.ilks(_data[0]), _joinAddr, amounts[0]);
+        uint maxColl = getMaxCollateral(_saverData.cdpId, ilk, _saverData.joinAddr);
+        uint collDrawn = drawCollateral(_saverData.cdpId, ilk, _saverData.joinAddr, maxColl);
 
-        // Swap for Dai
-        amounts[2] = swap(
-            [(amounts[1] + _loanAmount), _data[2], _data[3], _data[5]],
-            getCollateralAddr(_joinAddr),
-            DAI_ADDRESS,
-            _exchangeAddress,
-            _callData
-        );
+        // Swap
+        _exchangeData.srcAmount = (_saverData.loanAmount + collDrawn);
+        (, uint swapedAmount) = _sell(_exchangeData);
 
-        // Get our fee
-        amounts[3] = getFee(amounts[2], _data[4], owner);
-
-        uint paybackAmount = (amounts[2] - amounts[3]);
-        paybackAmount = limitLoanAmount(_data[0], manager.ilks(_data[0]), paybackAmount, owner);
+        uint paybackAmount = (swapedAmount - getFee(swapedAmount, _saverData.gasCost, user));
+        paybackAmount = limitLoanAmount(_saverData.cdpId, ilk, paybackAmount, user);
 
         // Payback the debt
-        paybackDebt(_data[0], MANAGER.ilks(_data[0]), paybackAmount, owner);
+        paybackDebt(_saverData.cdpId, ilk, paybackAmount, user);
 
         // Draw collateral to repay the flash loan
-        drawCollateral(_data[0], manager.ilks(_data[0]), _joinAddr, (_loanAmount + _fee));
+        drawCollateral(_saverData.cdpId, ilk, _saverData.joinAddr, (_saverData.loanAmount + _saverData.fee));
 
-        SaverLogger(LOGGER_ADDRESS).LogRepay(_data[0], owner, (amounts[1] + _loanAmount), amounts[2]);
+        // SaverLogger(LOGGER_ADDRESS).LogRepay(_cdpId, owner, (amounts[1] + _loanAmount), amounts[2]);
     }
-
-    receive() external override payable {}
 
     /// @notice Handles that the amount is not bigger than cdp debt and not dust
     function limitLoanAmount(uint _cdpId, bytes32 _ilk, uint _paybackAmount, address _owner) internal returns (uint256) {
@@ -146,7 +140,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         uint debtLeft = debt - _paybackAmount;
 
         // Less than dust value
-        if (debtLeft < 20 ether) {
+        if (debtLeft < 20 ether) { // TODO: dust value not fixed
             uint amountOverDust = ((20 ether) - debtLeft);
 
             ERC20(DAI_ADDRESS).transfer(_owner, amountOverDust);
@@ -157,14 +151,6 @@ contract MCDSaverFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         return _paybackAmount;
     }
 
-    // ADMIN ONLY FAIL SAFE FUNCTION IF FUNDS GET STUCK
-    function withdrawStuckFunds(address _tokenAddr, uint _amount) public {
-        require(msg.sender == owner, "Only owner");
+    receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}
 
-        if (_tokenAddr == KYBER_ETH_ADDRESS) {
-            owner.transfer(_amount);
-        } else {
-            ERC20(_tokenAddr).transfer(owner, _amount);
-        }
-    }
 }

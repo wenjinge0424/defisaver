@@ -1,22 +1,23 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
-import "../../mcd/saver/MCDSaverProxy.sol";
+import "../../exchange/SaverExchangeCore.sol";
 import "./MCDOpenProxyActions.sol";
 import "../../utils/FlashLoanReceiverBase.sol";
+import "../../interfaces/Manager.sol";
+import "../../interfaces/Join.sol";
 
-
-contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
+contract MCDOpenFlashLoan is SaverExchangeCore, AdminAuth, FlashLoanReceiverBase {
     address public constant OPEN_PROXY_ACTIONS = 0x6d0984E80a86f26c0dd564ca0CF74a8E9Da03305;
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
-    address payable public owner;
+    address public constant ETH_JOIN_ADDRESS = 0x2F0b23f53734252Bda2277357e97e1517d6B042A;
+    address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
+    address public constant JUG_ADDRESS = 0x19c0976f590D67707E62397C87829d896Dc0f1F1;
+    address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
 
-    constructor()
-        FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
-        public {
-            owner = msg.sender;
-        }
+    constructor() FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) public {}
 
     function executeOperation(
         address _reserve,
@@ -30,15 +31,26 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
             "Invalid balance for the contract");
 
         (
-            uint[6] memory data,
-            bytes32 ilk,
-            address[3] memory addrData,
+            uint[6] memory numData,
+            address[5] memory addrData,
             bytes memory callData,
-            bool isEth
+            address proxy
         )
-         = abi.decode(_params, (uint256[6],bytes32,address[3],bytes,bool));
+         = abi.decode(_params, (uint256[6],address[5],bytes,address));
 
-        openAndLeverage(data, ilk, addrData, callData, isEth, _fee);
+        ExchangeData memory exchangeData = ExchangeData({
+            srcAddr: addrData[0],
+            destAddr: addrData[1],
+            srcAmount: numData[2],
+            destAmount: numData[3],
+            minPrice: numData[4],
+            wrapper: addrData[3],
+            exchangeAddr: addrData[2],
+            callData: callData,
+            price0x: numData[5]
+        });
+
+        openAndLeverage(numData[0], numData[1], addrData[4], proxy, _fee, exchangeData);
 
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
 
@@ -49,61 +61,44 @@ contract MCDOpenFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
     }
 
     function openAndLeverage(
-        uint256[6] memory _data,
-        bytes32 _ilk,
-        address[3] memory addrData, // [_collJoin, _exchangeAddress, _proxy]
-        bytes memory _callData,
-        bool _isEth,
-        uint _fee
+        uint _collAmount,
+        uint _daiAmount,
+        address _joinAddr,
+        address _proxy,
+        uint _fee,
+        ExchangeData memory _exchangeData
     ) public {
 
-        // Exchange the Dai loaned to Eth
-        // solhint-disable-next-line no-unused-vars
-        uint256 collSwaped = swap(
-            [(_data[1] - getFee(_data[1], 0, tx.origin)), _data[2], _data[3], _data[4]],
-            DAI_ADDRESS,
-            getCollateralAddr(addrData[0]),
-            addrData[1],
-            _callData
-        );
+        (, uint256 collSwaped) = _sell(_exchangeData);
 
-        if (_isEth) {
+        bytes32 ilk = Join(_joinAddr).ilk();
+
+        if (_joinAddr == ETH_JOIN_ADDRESS) {
             MCDOpenProxyActions(OPEN_PROXY_ACTIONS).openLockETHAndDraw{value: address(this).balance}(
-                address(manager),
+                MANAGER_ADDRESS,
                 JUG_ADDRESS,
                 ETH_JOIN_ADDRESS,
                 DAI_JOIN_ADDRESS,
-                _ilk,
-                (_data[1] + _fee),
-                addrData[2]
+                ilk,
+                (_daiAmount + _fee),
+                _proxy
             );
         } else {
-            ERC20(getCollateralAddr(addrData[0])).approve(OPEN_PROXY_ACTIONS, uint256(-1));
+            Join(_joinAddr).gem().approve(OPEN_PROXY_ACTIONS, uint256(-1));
 
             MCDOpenProxyActions(OPEN_PROXY_ACTIONS).openLockGemAndDraw(
-                address(manager),
+                MANAGER_ADDRESS,
                 JUG_ADDRESS,
-                addrData[0],
+                _joinAddr,
                 DAI_JOIN_ADDRESS,
-                _ilk,
-                (_data[0] + collSwaped),
-                (_data[1] + _fee),
+                ilk,
+                (_collAmount + collSwaped),
+                (_daiAmount + _fee),
                 true,
-                addrData[2]
+                _proxy
             );
         }
     }
 
-    receive() external override payable {}
-
-    // ADMIN ONLY FAIL SAFE FUNCTION IF FUNDS GET STUCK
-    function withdrawStuckFunds(address _tokenAddr, uint _amount) public {
-        require(msg.sender == owner, "Only owner");
-
-        if (_tokenAddr == KYBER_ETH_ADDRESS) {
-            owner.transfer(_amount);
-        } else {
-            ERC20(_tokenAddr).transfer(owner, _amount);
-        }
-    }
+    receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}
 }

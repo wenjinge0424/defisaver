@@ -2,17 +2,31 @@ pragma solidity ^0.6.0;
 
 import "../../mcd/saver/MCDSaverProxy.sol";
 import "../../utils/FlashLoanReceiverBase.sol";
+import "../../auth/AdminAuth.sol";
+import "../../exchange/SaverExchangeCore.sol";
+import "../../mcd/saver/MCDSaverProxyHelper.sol";
 
-contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
+contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanReceiverBase, AdminAuth {
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
-    address payable public owner;
+    uint public constant SERVICE_FEE = 400; // 0.25% Fee
+
+    bytes32 internal constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
+
+    address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+    address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
+    address public constant ETH_JOIN_ADDRESS = 0x2F0b23f53734252Bda2277357e97e1517d6B042A;
+    address public constant SPOTTER_ADDRESS = 0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3;
+    address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
+
+    Manager public constant manager = Manager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
+    DaiJoin public constant daiJoin = DaiJoin(DAI_JOIN_ADDRESS);
+    Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
+    Vat public constant vat = Vat(VAT_ADDRESS);
 
     constructor()
         FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
-        public {
-            owner = msg.sender;
-        }
+        public {}
 
     function executeOperation(
         address _reserve,
@@ -26,19 +40,32 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
             "Invalid balance for the contract");
 
         (
-            uint256[6] memory data,
-            uint256[4] memory debtData,
-            address joinAddr,
-            address exchangeAddress,
-            bytes memory callData
+            uint[8] memory numData,
+            address[5] memory addrData,
+            bytes memory callData,
+            address proxy
         )
-         = abi.decode(_params, (uint256[6],uint256[4],address,address,bytes));
+         = abi.decode(_params, (uint256[8],address[5],bytes,address));
 
-        closeCDP(data, debtData, joinAddr, exchangeAddress, callData, _fee);
+
+        ExchangeData memory exchangeData = ExchangeData({
+            srcAddr: addrData[0],
+            destAddr: addrData[1],
+            srcAmount: numData[4],
+            destAmount: numData[5],
+            minPrice: numData[6],
+            wrapper: addrData[3],
+            exchangeAddr: addrData[2],
+            callData: callData,
+            price0x: numData[7]
+        });
+
+        closeCDP(numData[0], numData[1], numData[2], numData[3], addrData[4], proxy, exchangeData);
 
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
 
         // if there is some eth left (0x fee), return it to user
+        // TODO: send both Dai and coll back
         if (address(this).balance > 0) {
             tx.origin.transfer(address(this).balance);
         }
@@ -46,74 +73,24 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
 
 
     function closeCDP(
-        uint256[6] memory _data,
-        uint[4] memory debtData,
+        uint _cdpId,
+        uint _collAmount,
+        uint _daiAmount,
+        uint _minAccepted,
         address _joinAddr,
-        address _exchangeAddress,
-        bytes memory _callData,
-        uint _fee
+        address _proxy,
+        ExchangeData memory _exchangeData
     ) internal {
-        address payable user = address(uint160(getOwner(manager, _data[0])));
-        address collateralAddr = getCollateralAddr(_joinAddr);
 
-        uint loanAmount = debtData[0];
+        paybackDebt(_cdpId, manager.ilks(_cdpId), _daiAmount); // payback whole debt
+        drawMaxCollateral(_cdpId, _joinAddr, _collAmount); // draw whole collateral
 
-        paybackDebt(_data[0], manager.ilks(_data[0]), debtData[0], user); // payback whole debt
-        drawMaxCollateral(_data[0], _joinAddr, debtData[2]);
+        (, uint256 daiSwaped) = _buy(_exchangeData);
 
-        uint256 collAmount = getCollAmount(_data, loanAmount, collateralAddr);
+        getFee(daiSwaped, 0, DSProxy(payable(_proxy)).owner());
 
-        // collDrawn, minPrice, exchangeType, 0xPrice
-        uint256[4] memory swapData = [collAmount, _data[2], _data[3], _data[5]];
-        uint256 daiSwaped = swap(
-            swapData,
-            collateralAddr,
-            DAI_ADDRESS,
-            _exchangeAddress,
-            _callData
-        );
+        require(address(this).balance >= _minAccepted, "Below min. number of eth specified");
 
-        daiSwaped = daiSwaped - getFee(daiSwaped, 0, user);
-
-        require(daiSwaped >= (loanAmount + _fee), "We must exchange enough Dai tokens to repay loan");
-
-        // If we swapped to much and have extra Dai
-        if (daiSwaped > (loanAmount + _fee)) {
-            swap(
-                [sub(daiSwaped, (loanAmount + _fee)), 0, 3, 1],
-                DAI_ADDRESS,
-                collateralAddr,
-                address(0),
-                _callData
-            );
-        }
-
-        // Give user the leftover collateral
-        if (collateralAddr == WETH_ADDRESS) {
-            require(address(this).balance >= debtData[3], "Below min. number of eth specified");
-            user.transfer(address(this).balance);
-        } else {
-            uint256 tokenBalance = ERC20(collateralAddr).balanceOf(address(this));
-
-            require(tokenBalance >= debtData[3], "Below min. number of collateral specified");
-            ERC20(collateralAddr).transfer(user, tokenBalance);
-        }
-    }
-
-    function getCollAmount(uint256[6] memory _data, uint256 _loanAmount, address _collateralAddr)
-        internal
-        view
-        returns (uint256 collAmount)
-    {
-        (, uint256 collPrice) = SaverExchangeInterface(SAVER_EXCHANGE_ADDRESS).getBestPrice(
-            _data[1],
-            _collateralAddr,
-            DAI_ADDRESS,
-            _data[2]
-        );
-        collPrice = sub(collPrice, collPrice / 50); // offset the price by 2%
-
-        collAmount = wdiv(_loanAmount, collPrice);
     }
 
     function drawMaxCollateral(uint _cdpId, address _joinAddr, uint _amount) internal returns (uint) {
@@ -135,16 +112,46 @@ contract MCDCloseFlashLoan is MCDSaverProxy, FlashLoanReceiverBase {
         return joinAmount;
     }
 
-    receive() external override payable {}
+    function paybackDebt(uint _cdpId, bytes32 _ilk, uint _daiAmount) internal {
+        address urn = manager.urns(_cdpId);
 
-    // ADMIN ONLY FAIL SAFE FUNCTION IF FUNDS GET STUCK
-    function withdrawStuckFunds(address _tokenAddr, uint _amount) public {
-        require(msg.sender == owner, "Only owner");
+        daiJoin.dai().approve(DAI_JOIN_ADDRESS, _daiAmount);
+        daiJoin.join(urn, _daiAmount);
 
-        if (_tokenAddr == KYBER_ETH_ADDRESS) {
-            owner.transfer(_amount);
-        } else {
-            ERC20(_tokenAddr).transfer(owner, _amount);
-        }
+        manager.frob(_cdpId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, _ilk));
     }
+
+    function getFee(uint _amount, uint _gasCost, address _owner) internal returns (uint feeAmount) {
+        uint fee = SERVICE_FEE;
+
+        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_owner)) {
+            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_owner);
+        }
+
+        feeAmount = (fee == 0) ? 0 : (_amount / fee);
+
+        if (_gasCost != 0) {
+            uint ethDaiPrice = getPrice(ETH_ILK);
+            _gasCost = rmul(_gasCost, ethDaiPrice);
+
+            feeAmount = add(feeAmount, _gasCost);
+        }
+
+        // fee can't go over 20% of the whole amount
+        if (feeAmount > (_amount / 5)) {
+            feeAmount = _amount / 5;
+        }
+
+        ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
+    }
+
+    function getPrice(bytes32 _ilk) public view returns (uint256) {
+        (, uint256 mat) = spotter.ilks(_ilk);
+        (, , uint256 spot, , ) = vat.ilks(_ilk);
+
+        return rmul(rmul(spot, spotter.par()), mat);
+    }
+
+    receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}
+
 }

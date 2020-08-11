@@ -34,7 +34,7 @@ contract SubscriptionsV2 is AdminAuth, StaticV2, ConstantAddresses {
 
     /// @param _saverProxy Address of the MCDSaverProxy contract
     constructor(address _saverProxy) public {
-        saverProxy = MCDSaverProxy(_saverProxy);
+        saverProxy = MCDSaverProxy(payable(_saverProxy));
 
         minLimits[ETH_ILK] = 1700000000000000000;
         minLimits[BAT_ILK] = 1700000000000000000;
