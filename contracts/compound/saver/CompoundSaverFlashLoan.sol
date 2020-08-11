@@ -1,10 +1,12 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import "../../utils/FlashLoanReceiverBase.sol";
 import "../../interfaces/DSProxyInterface.sol";
+import "../../exchange/SaverExchangeCore.sol";
 
 /// @title Contract that receives the FL from Aave for Repays/Boost
-contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
+contract CompoundSaverFlashLoan is FlashLoanReceiverBase, SaverExchangeCore {
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
     address payable public COMPOUND_SAVER_FLASH_PROXY = 0xe12A042b5Fc0cc2B8e598b36C4E87d8b723eB5ca;
@@ -56,20 +58,22 @@ contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
     /// @return proxyData Formated function call data
     function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal pure returns (bytes memory proxyData, address payable) {
         (
-            uint[5] memory data, // amount, minPrice, exchangeType, gasCost, 0xPrice
-            address[3] memory addrData, // cCollAddress, cBorrowAddress, exchangeAddress
-            bytes memory callData,
+            bytes memory exDataBytes,
+            address[2] memory addrData, // cCollAddress, cBorrowAddress
+            uint256 gasCost,
             bool isRepay,
             address payable proxyAddr
         )
-        = abi.decode(_params, (uint256[5],address[3],bytes,bool,address));
+        = abi.decode(_params, (bytes,address[2],uint256,bool,address));
+
+        ExchangeData memory _exData = unpackExchangeData(exDataBytes);
 
         uint[2] memory flashLoanData = [_amount, _fee];
 
         if (isRepay) {
-            proxyData = abi.encodeWithSignature("flashRepay(uint256[5],address[3],bytes,uint256[2])", data, addrData, callData, flashLoanData);
+            proxyData = abi.encodeWithSignature("flashRepay([address,address,uint256,uint256,uint256,address,address,bytes,uint256],address[2],uint256,uint256[2])", _exData, addrData, gasCost, flashLoanData);
         } else {
-            proxyData = abi.encodeWithSignature("flashBoost(uint256[5],address[3],bytes,uint256[2])", data, addrData, callData, flashLoanData);
+            proxyData = abi.encodeWithSignature("flashBoost([address,address,uint256,uint256,uint256,address,address,bytes,uint256],address[2],uint256,uint256[2])", _exData, addrData, gasCost, flashLoanData);
         }
 
         return (proxyData, proxyAddr);
@@ -87,5 +91,5 @@ contract CompoundSaverFlashLoan is FlashLoanReceiverBase {
         _proxy.transfer(address(this).balance);
     }
 
-    receive() external override payable {}
+    receive() external override(SaverExchangeCore, FlashLoanReceiverBase) payable {}
 }
