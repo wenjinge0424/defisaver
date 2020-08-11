@@ -55,16 +55,16 @@ contract CompoundSaverProxy is CompoundSaverHelper, SaverExchangeCore {
     /// @notice Borrows token, converts to collateral, and adds to position
     /// @dev Called through the DSProxy
     /// @param _exData Exchange data
-    /// @param _addrData Coll/Debt addresses [cCollAddress, cBorrowAddress, exchangeAddress]
+    /// @param _addrData Coll/Debt addresses [cCollAddress, cBorrowAddress]
     /// @param _gasCost Gas cost for specific transaction
     function boost(
         ExchangeData memory _exData,
-        address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
+        address[2] memory _addrData, // cCollAddress, cBorrowAddress
         uint256 _gasCost
     ) public payable {
         enterMarket(_addrData[0], _addrData[1]);
 
-        address payable user = address(uint160(getUserAddress()));
+        address payable user = payable(getUserAddress());
 
         uint maxBorrow = getMaxBorrow(_addrData[1], address(this));
         uint borrowAmount = (_exData.srcAmount > maxBorrow) ? maxBorrow : _exData.srcAmount;

@@ -1,4 +1,5 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import "../../utils/GasBurner.sol";
 import "../../interfaces/ILendingPool.sol";
@@ -18,24 +19,25 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurne
     );
 
     /// @notice Repays the position with it's own fund or with FL if needed
-    /// @param _data Amount and exchange data [amount, minPrice, exchangeType, gasCost, 0xPrice]
+    /// @param _exData Exchange data
     /// @param _addrData cTokens addreses and exchange [cCollAddress, cBorrowAddress, exchangeAddress]
-    /// @param _callData 0x callData
+    /// @param _gasCost Gas cost for specific transaction
     function repayWithLoan(
-        uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
-        address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
-        bytes calldata _callData
-    ) external payable burnGas(25) {
+        ExchangeData memory _exData,
+        address[2] memory _addrData, // cCollAddress, cBorrowAddress
+        uint256 _gasCost
+    ) public payable burnGas(25) {
         uint maxColl = getMaxCollateral(_addrData[0], address(this));
 
-        if (_data[0] <= maxColl) {
-            repay(_data, _addrData, _callData);
+        if (_exData.srcAmount <= maxColl) {
+            repay(_exData, _addrData, _gasCost);
         } else {
             // 0x fee
             COMPOUND_SAVER_FLASH_LOAN.transfer(msg.value);
 
-            uint loanAmount = (_data[0] - maxColl);
-            bytes memory paramsData = abi.encode(_data, _addrData, _callData, true, address(this));
+            uint loanAmount = (_exData.srcAmount - maxColl);
+            // bytes memory encoded = packExchangeData(_exData);
+            bytes memory paramsData;// = abi.encode(encoded, _addrData, _gasCost, true, address(this));
 
             givePermission(COMPOUND_SAVER_FLASH_LOAN);
 
@@ -43,29 +45,30 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurne
 
             removePermission(COMPOUND_SAVER_FLASH_LOAN);
 
-            logger.logFlashLoan("CompoundFlashRepay", loanAmount, _data[0], _addrData[0]);
+            logger.logFlashLoan("CompoundFlashRepay", loanAmount, _exData.srcAmount, _addrData[0]);
         }
     }
 
     /// @notice Boosts the position with it's own fund or with FL if needed
-    /// @param _data Amount and exchange data [amount, minPrice, exchangeType, gasCost, 0xPrice]
+    /// @param _exData Exchange data
     /// @param _addrData cTokens addreses and exchange [cCollAddress, cBorrowAddress, exchangeAddress]
-    /// @param _callData 0x callData
+    /// @param _gasCost Gas cost for specific transaction
     function boostWithLoan(
-        uint[5] calldata _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
-        address[3] calldata _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
-        bytes calldata _callData
-    ) external payable burnGas(20) {
+        ExchangeData memory _exData,
+        address[2] memory _addrData, // cCollAddress, cBorrowAddress
+        uint256 _gasCost
+    ) public payable burnGas(20) {
         uint maxBorrow = getMaxBorrow(_addrData[1], address(this));
 
-        if (_data[0] <= maxBorrow) {
-            boost(_data, _addrData, _callData);
+        if (_exData.srcAmount <= maxBorrow) {
+            boost(_exData, _addrData, _gasCost);
         } else {
             // 0x fee
             COMPOUND_SAVER_FLASH_LOAN.transfer(msg.value);
 
-            uint loanAmount = (_data[0] - maxBorrow);
-            bytes memory paramsData = abi.encode(_data, _addrData, _callData, false, address(this));
+            uint loanAmount = (_exData.srcAmount - maxBorrow);
+            bytes memory encoded = packExchangeData(_exData);
+            bytes memory paramsData = abi.encode(encoded, _addrData, _gasCost, false, address(this));
 
             givePermission(COMPOUND_SAVER_FLASH_LOAN);
 
@@ -73,9 +76,8 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurne
 
             removePermission(COMPOUND_SAVER_FLASH_LOAN);
 
-            logger.logFlashLoan("CompoundFlashBoost", loanAmount, _data[0], _addrData[1]);
+            logger.logFlashLoan("CompoundFlashBoost", loanAmount, _exData.srcAmount, _addrData[1]);
         }
 
     }
-
 }
