@@ -29,7 +29,7 @@ const AllowanceProxy = contract.fromArtifact("AllowanceProxy");
 
 const compoundBasicProxyAddr = '0x0F1e33A36fA6a33Ea01460F04c6D8F1FAc2186E3';
 const compoundLoanInfoAddr = '0x781FDB68cE5EE5Cd7470bbFEec0F98c24eA18c93';
-const compoundFlashLoanTakerAddr = '0x7C728214be9A0049e6a86f2137ec61030D0AA964';
+const compoundFlashLoanTakerAddr = '0x4339316e04CFfB5961D1c41fEF8E44bfA2A7fBd1';
 const uniswapWrapperAddr = '0x880a845a85f843a5c67db2061623c6fc3bb4c511';
 const allowanceProxyAddr = '0xdd8e19f63844e433c80117b402e36b62eff3ec0a';
 
@@ -162,62 +162,67 @@ describe("Compound-Saver", accounts => {
         expect(ratioAfter).is.above(ratioBefore);
     });
 
-    // it('... should call Flash boost', async () => {
-    //     const maxBorrow = await getMaxBorrow();
-    //     const amountBorrow = web3.utils.toWei((maxBorrow * 1.2).toString(), 'ether');
+    it('... should call Flash boost', async () => {
+        const maxBorrow = await getMaxBorrow();
+        const amountBorrow = web3.utils.toWei((maxBorrow * 1.2).toString(), 'ether');
 
-    //     const ratioBefore = await getCompoundRatio();
-    //     console.log(ratioBefore);
+        const ratioBefore = await getCompoundRatio();
+        console.log(ratioBefore);
 
-    //     const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundFlashLoanTaker, 'boostWithLoan'),
-    //     [[amountBorrow, 0, 0, 0, 0], [cCollToken, cBorrowToken, nullAddress], '0x0']);
+        const exchangeData = [borrowToken, collToken, amountBorrow, '0', '0', uniswapWrapperAddr, nullAddress, '0x00', '0'];
 
-    //     await web3Proxy.methods['execute(address,bytes)']
-    //         (compoundFlashLoanTakerAddr, data).send({from: accounts[0], gas: 3500000});
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundFlashLoanTaker, 'boostWithLoan'),
+        [exchangeData, [cCollToken, cBorrowToken], '0']);
 
-    //     const ratioAfter = await getCompoundRatio();
-    //     console.log(ratioAfter);
+        await web3Proxy.methods['execute(address,bytes)']
+            (compoundFlashLoanTakerAddr, data).send({from: accounts[0], gas: 3500000});
 
-    //     expect(ratioBefore).is.above(ratioAfter);
-    // });
+        const ratioAfter = await getCompoundRatio();
+        console.log(ratioAfter);
 
-    // it('... should call Flash repay', async () => {
-    //     const maxColl = await getMaxColl();
-    //     const amountColl = web3.utils.toWei((maxColl * 1.2).toString(), 'ether');
+        expect(ratioBefore).is.above(ratioAfter);
+    });
 
-    //     const ratioBefore = await getCompoundRatio();
-    //     console.log(ratioBefore);
+    it('... should call Flash repay', async () => {
+        const maxColl = await getMaxColl();
+        const amountColl = web3.utils.toWei((maxColl * 1.2).toString(), 'ether');
 
-    //     const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundFlashLoanTaker, 'repayWithLoan'),
-    //     [[amountColl, 0, 0, 0, 0], [cCollToken, cBorrowToken, nullAddress], '0x0']);
+        const ratioBefore = await getCompoundRatio();
+        console.log(ratioBefore);
 
-    //     await web3Proxy.methods['execute(address,bytes)']
-    //         (compoundFlashLoanTakerAddr, data).send({from: accounts[0], gas: 3500000});
+        const exchangeData = [collToken, borrowToken, amountColl, '0', '0', uniswapWrapperAddr, nullAddress, '0x00', '0'];
 
-    //     const ratioAfter = await getCompoundRatio();
-    //     console.log(ratioAfter);
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundFlashLoanTaker, 'repayWithLoan'),
+        [exchangeData, [cCollToken, cBorrowToken], '0']);
 
-    //     expect(ratioAfter).is.above(ratioBefore);
-    // });
+        await web3Proxy.methods['execute(address,bytes)']
+            (compoundFlashLoanTakerAddr, data).send({from: accounts[0], gas: 3500000});
 
-    // it('... should revert repay if value to large', async () => {
-    //     const amountColl = web3.utils.toWei((collAmount / 1e18 * 10).toString(), 'ether');
+        const ratioAfter = await getCompoundRatio();
+        console.log(ratioAfter);
 
-    //     const ratioBefore = await getCompoundRatio();
-    //     console.log(ratioBefore);
+        expect(ratioAfter).is.above(ratioBefore);
+    });
 
-    //     const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundFlashLoanTaker, 'repayWithLoan'),
-    //     [[amountColl, 0, 0, 0, 0], [cCollToken, cBorrowToken, nullAddress], '0x0']);
+    it('... should revert repay if value to large', async () => {
+        const amountColl = web3.utils.toWei((collAmount / 1e18 * 10).toString(), 'ether');
 
-    //     try {
-    //         await web3Proxy.methods['execute(address,bytes)']
-    //             (compoundFlashLoanTakerAddr, data).send({from: accounts[0], gas: 3500000});
+        const ratioBefore = await getCompoundRatio();
+        console.log(ratioBefore);
 
-    //         expect(0).is.above(1);
-    //     } catch(err) {
-    //         expect(1).is.above(0);
-    //     }
+        const exchangeData = [collToken, borrowToken, amountColl, '0', '0', uniswapWrapperAddr, nullAddress, '0x00', '0'];
+        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(CompoundFlashLoanTaker, 'repayWithLoan'),
+        [exchangeData, [cCollToken, cBorrowToken], '0']);
 
-    // });
+        try {
+            await web3Proxy.methods['execute(address,bytes)']
+                (compoundFlashLoanTakerAddr, data).send({from: accounts[0], gas: 3500000});
+
+            expect(0).is.above(1);
+        } catch(err) {
+            expect(1).is.above(0);
+        }
+
+    });
 
 });

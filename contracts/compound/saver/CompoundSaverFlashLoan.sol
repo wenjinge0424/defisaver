@@ -71,9 +71,9 @@ contract CompoundSaverFlashLoan is FlashLoanReceiverBase, SaverExchangeCore {
         uint[2] memory flashLoanData = [_amount, _fee];
 
         if (isRepay) {
-            proxyData = abi.encodeWithSignature("flashRepay([address,address,uint256,uint256,uint256,address,address,bytes,uint256],address[2],uint256,uint256[2])", _exData, addrData, gasCost, flashLoanData);
+            proxyData = abi.encodeWithSignature("flashRepay((address,address,uint256,uint256,uint256,address,address,bytes,uint256),address[2],uint256,uint256[2])", _exData, addrData, gasCost, flashLoanData);
         } else {
-            proxyData = abi.encodeWithSignature("flashBoost([address,address,uint256,uint256,uint256,address,address,bytes,uint256],address[2],uint256,uint256[2])", _exData, addrData, gasCost, flashLoanData);
+            proxyData = abi.encodeWithSignature("flashBoost((address,address,uint256,uint256,uint256,address,address,bytes,uint256),address[2],uint256,uint256[2])", _exData, addrData, gasCost, flashLoanData);
         }
 
         return (proxyData, proxyAddr);
