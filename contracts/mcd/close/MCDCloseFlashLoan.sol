@@ -24,9 +24,17 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
     Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
     Vat public constant vat = Vat(VAT_ADDRESS);
 
-    constructor()
-        FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
-        public {}
+    struct CloseData {
+        uint cdpId;
+        uint collAmount;
+        uint daiAmount;
+        uint minAccepted;
+        address joinAddr;
+        address proxy;
+        bool toDai;
+    }
+
+    constructor() FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) public {}
 
     function executeOperation(
         address _reserve,
@@ -43,9 +51,10 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
             uint[8] memory numData,
             address[5] memory addrData,
             bytes memory callData,
-            address proxy
+            address proxy,
+            bool toDai
         )
-         = abi.decode(_params, (uint256[8],address[5],bytes,address));
+         = abi.decode(_params, (uint256[8],address[5],bytes,address,bool));
 
 
         ExchangeData memory exchangeData = ExchangeData({
@@ -60,7 +69,17 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
             price0x: numData[7]
         });
 
-        closeCDP(numData[0], numData[1], numData[2], numData[3], addrData[4], proxy, exchangeData);
+        CloseData memory closeData = CloseData({
+            cdpId: numData[0],
+            collAmount: numData[1],
+            daiAmount: numData[2],
+            minAccepted: numData[3],
+            joinAddr: addrData[4],
+            proxy: proxy,
+            toDai: toDai
+        });
+
+        closeCDP(closeData, exchangeData);
 
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
 
@@ -73,23 +92,26 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
 
 
     function closeCDP(
-        uint _cdpId,
-        uint _collAmount,
-        uint _daiAmount,
-        uint _minAccepted,
-        address _joinAddr,
-        address _proxy,
+        CloseData memory _closeData,
         ExchangeData memory _exchangeData
     ) internal {
 
-        paybackDebt(_cdpId, manager.ilks(_cdpId), _daiAmount); // payback whole debt
-        drawMaxCollateral(_cdpId, _joinAddr, _collAmount); // draw whole collateral
+        paybackDebt(_closeData.cdpId, manager.ilks(_closeData.cdpId), _closeData.daiAmount); // payback whole debt
+        drawMaxCollateral(_closeData.cdpId, _closeData.joinAddr, _closeData.collAmount); // draw whole collateral
 
-        (, uint256 daiSwaped) = _buy(_exchangeData);
+        uint256 daiSwaped = 0;
 
-        getFee(daiSwaped, 0, DSProxy(payable(_proxy)).owner());
+        if (_closeData.toDai) {
+            (, daiSwaped) = _sell(_exchangeData);
+        } else {
+            (, daiSwaped) = _buy(_exchangeData);
+        }
 
-        require(address(this).balance >= _minAccepted, "Below min. number of eth specified");
+        getFee(daiSwaped, 0, DSProxy(payable(_closeData.proxy)).owner());
+
+        address tokenAddr = address(Join(_closeData.joinAddr).gem());
+
+        require(getBalance(tokenAddr) >= _closeData.minAccepted, "Below min. number of eth specified");
 
     }
 

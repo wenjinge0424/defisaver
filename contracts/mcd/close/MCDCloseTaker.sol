@@ -37,11 +37,10 @@ contract MCDCloseTaker is ConstantAddresses, MCDSaverProxyHelper {
         uint daiAmount;
         uint minAccepted;
         bool wholeDebt;
+        bool toDai;
     }
 
-    // solhint-disable-next-line const-name-snakecase
     Vat public constant vat = Vat(VAT_ADDRESS);
-    // solhint-disable-next-line const-name-snakecase
     Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
 
     // TODO: add exit to dai
@@ -66,7 +65,7 @@ contract MCDCloseTaker is ConstantAddresses, MCDSaverProxyHelper {
 
         (uint[8] memory numData, address[5] memory addrData, bytes memory callData)
                                             = _packData(_closeData, _exchangeData);
-        bytes memory paramsData = abi.encode(numData, addrData, callData, address(this));
+        bytes memory paramsData = abi.encode(numData, addrData, callData, address(this), _closeData.toDai);
 
         lendingPool.flashLoan(MCD_CLOSE_FLASH_LOAN, DAI_ADDRESS, _closeData.daiAmount, paramsData);
 
