@@ -15,7 +15,7 @@ abstract contract IMCDSubscriptions {
 }
 
 
-contract MCDCloseTaker is ConstantAddresses, MCDSaverProxyHelper {
+contract MCDCloseTaker is MCDSaverProxyHelper {
 
     address payable public constant MCD_CLOSE_FLASH_LOAN = 0xfCF3e72445D105c38C0fDC1a0687BDEeb8947a93;
 
@@ -26,7 +26,12 @@ contract MCDCloseTaker is ConstantAddresses, MCDSaverProxyHelper {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
     // solhint-disable-next-line const-name-snakecase
-    Manager public constant manager = Manager(MANAGER_ADDRESS);
+    Manager public constant manager = Manager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
+
+    address public constant SPOTTER_ADDRESS = 0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3;
+    address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
+    address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+
     // solhint-disable-next-line const-name-snakecase
     DefisaverLogger public constant logger = DefisaverLogger(DEFISAVER_LOGGER);
 
@@ -43,7 +48,6 @@ contract MCDCloseTaker is ConstantAddresses, MCDSaverProxyHelper {
     Vat public constant vat = Vat(VAT_ADDRESS);
     Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
 
-    // TODO: add exit to dai
     function closeWithLoan(
         CloseData memory _closeData,
         SaverExchangeCore.ExchangeData memory _exchangeData
@@ -58,7 +62,8 @@ contract MCDCloseTaker is ConstantAddresses, MCDSaverProxyHelper {
                 manager.ilks(_closeData.cdpId)
             );
 
-            // TODO: max coll amount
+            (_closeData.collAmount, )
+                = getCdpInfo(manager, _closeData.cdpId, manager.ilks(_closeData.cdpId));
         }
 
         manager.cdpAllow(_closeData.cdpId, MCD_CLOSE_FLASH_LOAN, 1);
@@ -72,11 +77,9 @@ contract MCDCloseTaker is ConstantAddresses, MCDSaverProxyHelper {
         manager.cdpAllow(_closeData.cdpId, MCD_CLOSE_FLASH_LOAN, 0);
 
         // If sub. to automatic protection unsubscribe
-        unsubscribe(SUBSCRIPTION_ADDRESS, _closeData.cdpId);
         unsubscribe(SUBSCRIPTION_ADDRESS_NEW, _closeData.cdpId);
 
-        // TODO: check what to log
-        logger.Log(address(this), msg.sender, "MCDClose", abi.encode(_closeData.cdpId, _closeData.daiAmount, msg.sender));
+        logger.Log(address(this), msg.sender, "MCDClose", abi.encode(_closeData.cdpId, _closeData.collAmount, _closeData.daiAmount, _closeData.toDai));
     }
 
     /// @notice Gets the maximum amount of debt available to generate
