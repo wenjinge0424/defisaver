@@ -8,7 +8,7 @@ import "../helpers/CompoundSaverHelper.sol";
 /// @title Contract that implements repay/boost functionality
 contract CompoundSaverProxy is CompoundSaverHelper, SaverExchangeCore {
 
-    address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
+    DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
 
     /// @notice Withdraws collateral, converts to borrowed token and repays debt
     /// @dev Called through the DSProxy
@@ -49,7 +49,7 @@ contract CompoundSaverProxy is CompoundSaverHelper, SaverExchangeCore {
         user.transfer(address(this).balance);
 
         // log amount, collToken, borrowToken
-        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "CompoundRepay", abi.encode(_exData.srcAmount, swapAmount, collToken, borrowToken));
+        logger.Log(address(this), msg.sender, "CompoundRepay", abi.encode(_exData.srcAmount, swapAmount, collToken, borrowToken));
     }
 
     /// @notice Borrows token, converts to collateral, and adds to position
@@ -98,7 +98,7 @@ contract CompoundSaverProxy is CompoundSaverHelper, SaverExchangeCore {
         user.transfer(address(this).balance);
 
         // log amount, collToken, borrowToken
-        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "CompoundBoost", abi.encode(_exData.srcAmount, swapAmount, collToken, borrowToken));
+        logger.Log(address(this), msg.sender, "CompoundBoost", abi.encode(_exData.srcAmount, swapAmount, collToken, borrowToken));
     }
 
 }

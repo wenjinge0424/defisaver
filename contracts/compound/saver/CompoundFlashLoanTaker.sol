@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 import "../../utils/GasBurner.sol";
 import "../../interfaces/ILendingPool.sol";
 import "./CompoundSaverProxy.sol";
-import "../../loggers/FlashLoanLogger.sol";
+import "../../loggers/DefisaverLogger.sol";
 import "../../auth/ProxyPermission.sol";
 
 /// @title Entry point for the FL Repay Boosts, called by DSProxy
@@ -12,11 +12,6 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurne
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
     address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0xFcCeD5E997E7fb1D0594518D3eD57245bB8ed17E;
-
-    // solhint-disable-next-line const-name-snakecase
-    FlashLoanLogger public constant logger = FlashLoanLogger(
-        0xb9303686B0EE92F92f63973EF85f3105329D345c
-    );
 
     /// @notice Repays the position with it's own fund or with FL if needed
     /// @param _exData Exchange data
@@ -45,7 +40,7 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurne
 
             removePermission(COMPOUND_SAVER_FLASH_LOAN);
 
-            logger.logFlashLoan("CompoundFlashRepay", loanAmount, _exData.srcAmount, _addrData[0]);
+            logger.Log(address(this), msg.sender, "CompoundFlashRepay", abi.encode(loanAmount, _exData.srcAmount, _addrData[0]));
         }
     }
 
@@ -75,7 +70,7 @@ contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurne
 
             removePermission(COMPOUND_SAVER_FLASH_LOAN);
 
-            logger.logFlashLoan("CompoundFlashBoost", loanAmount, _exData.srcAmount, _addrData[1]);
+            logger.Log(address(this), msg.sender, "CompoundFlashBoost", abi.encode(loanAmount, _exData.srcAmount, _addrData[1]));
         }
 
     }
