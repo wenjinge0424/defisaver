@@ -3,7 +3,6 @@ pragma experimental ABIEncoderV2;
 
 import "../saver/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
-import "../../loggers/FlashLoanLogger.sol";
 import "../../exchange/SaverExchangeCore.sol";
 
 abstract contract ILendingPool {
@@ -16,10 +15,6 @@ contract AutomaticProxyV2 is MCDSaverProxy {
     address public constant AAVE_POOL_CORE = 0x3dfd23A6c5E8BbcFc9581d2E864a68feb6a076d3;
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
-
-    FlashLoanLogger public constant logger = FlashLoanLogger(
-        0xb9303686B0EE92F92f63973EF85f3105329D345c
-    );
 
     function boostWithLoan(
         uint _cdpId,
@@ -51,8 +46,6 @@ contract AutomaticProxyV2 is MCDSaverProxy {
         lendingPool.flashLoan(MCD_SAVER_FLASH_LOAN, DAI_ADDRESS, loanAmount, paramsData);
 
         manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 0);
-
-        // logger.logFlashLoan("AutomaticBoost", loanAmount, _data[0], msg.sender);
     }
 
     function repayWithLoan(
@@ -85,8 +78,6 @@ contract AutomaticProxyV2 is MCDSaverProxy {
         lendingPool.flashLoan(MCD_SAVER_FLASH_LOAN, getAaveCollAddr(_joinAddr), loanAmount, paramsData);
 
         manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 0);
-
-        // logger.logFlashLoan("AutomaticRepay", loanAmount, _data[0], msg.sender);
     }
 
 

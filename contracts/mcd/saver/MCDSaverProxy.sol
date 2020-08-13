@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "../../interfaces/ExchangeInterface.sol";
 
-import "../../loggers/SaverLogger.sol";
+import "../../loggers/DefisaverLogger.sol";
 import "../../utils/Discount.sol";
 
 import "../../interfaces/Spotter.sol";
@@ -33,6 +33,8 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
     DaiJoin public constant daiJoin = DaiJoin(DAI_JOIN_ADDRESS);
     Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
 
+    DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
+
     /// @notice Repay - draws collateral, converts to Dai and repays the debt
     /// @dev Must be called by the DSProxy contract that owns the CDP
     function repay(
@@ -47,8 +49,7 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
 
         uint collDrawn = drawCollateral(_cdpId, _joinAddr, _exchangeData.srcAmount);
 
-        // TODO: collDrawn = srcAmount?
-
+        _exchangeData.srcAmount = collDrawn;
         (, uint daiAmount) = _sell(_exchangeData);
 
         uint daiAfterFee = sub(daiAmount, getFee(daiAmount, _gasCost, owner));
@@ -60,7 +61,8 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
             tx.origin.transfer(address(this).balance);
         }
 
-        // SaverLogger(LOGGER_ADDRESS).LogRepay(_data[0], owner, temp[0], temp[1]);
+        logger.Log(address(this), msg.sender, "MCDRepay", abi.encode(_cdpId, owner, _exchangeData.srcAmount, daiAmount));
+
     }
 
     /// @notice Boost - draws Dai, converts to collateral and adds to CDP
@@ -78,7 +80,6 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
         uint daiAfterFee = sub(daiDrawn, getFee(daiDrawn, _gasCost, owner));
 
         _exchangeData.srcAmount = daiAfterFee;
-
         (, uint swapedColl) = _sell(_exchangeData);
 
         addCollateral(_cdpId, _joinAddr, swapedColl);
@@ -88,7 +89,7 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
             tx.origin.transfer(address(this).balance);
         }
 
-        // SaverLogger(LOGGER_ADDRESS).LogBoost(_data[0], owner, temp[0], temp[2]);
+        logger.Log(address(this), msg.sender, "MCDBoost", abi.encode(_cdpId, owner, _exchangeData.srcAmount, swapedColl));
     }
 
     /// @notice Draws Dai from the CDP

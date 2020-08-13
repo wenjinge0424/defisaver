@@ -97,7 +97,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         // Draw Dai to repay the flash loan
         drawDai(_saverData.cdpId,  manager.ilks(_saverData.cdpId), (_saverData.loanAmount + _saverData.fee));
 
-        // SaverLogger(LOGGER_ADDRESS).LogBoost(_cdpId, user, (amounts[1] + _loanAmount), amounts[4]);
+        logger.Log(address(this), msg.sender, "MCDFlashBoost", abi.encode(_saverData.cdpId, owner, _exchangeData.srcAmount, swapedAmount));
     }
 
     function repayWithLoan(
@@ -125,7 +125,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         // Draw collateral to repay the flash loan
         drawCollateral(_saverData.cdpId, _saverData.joinAddr, (_saverData.loanAmount + _saverData.fee));
 
-        // SaverLogger(LOGGER_ADDRESS).LogRepay(_cdpId, owner, (amounts[1] + _loanAmount), amounts[2]);
+        logger.Log(address(this), msg.sender, "MCDFlashRepay", abi.encode(_saverData.cdpId, owner, _exchangeData.srcAmount, swapedAmount));
     }
 
     /// @notice Handles that the amount is not bigger than cdp debt and not dust
@@ -139,9 +139,12 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
 
         uint debtLeft = debt - _paybackAmount;
 
+        (,,,, uint dust) = vat.ilks(_ilk);
+        dust = dust / 10^27;
+
         // Less than dust value
-        if (debtLeft < 20 ether) { // TODO: dust value not fixed
-            uint amountOverDust = ((20 ether) - debtLeft);
+        if (debtLeft < dust) {
+            uint amountOverDust = (dust - debtLeft);
 
             ERC20(DAI_ADDRESS).transfer(_owner, amountOverDust);
 
