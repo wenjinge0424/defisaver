@@ -47,7 +47,7 @@ contract MCDCreateTaker {
 
         lendingPool.flashLoan(MCD_OPEN_FLASH_LOAN, DAI_ADDRESS, _createData.daiAmount, paramsData);
 
-        // logger.Log(address(this), msg.sender, "MCDCreate", abi.encode(_closeData.cdpId, _closeData.daiAmount, msg.sender));
+        logger.Log(address(this), msg.sender, "MCDCreate", abi.encode(manager.last(address(this)), _createData.collAmount, _createData.daiAmount));
     }
 
     function getCollateralAddr(address _joinAddr) internal view returns (address) {

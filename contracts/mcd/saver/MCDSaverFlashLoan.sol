@@ -75,7 +75,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
     function boostWithLoan(
         SaverData memory _saverData,
         ExchangeData memory _exchangeData
-    ) internal boostCheck(_saverData.cdpId) {
+    ) internal {
 
         address user = getOwner(manager, _saverData.cdpId);
 
@@ -103,14 +103,14 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
     function repayWithLoan(
         SaverData memory _saverData,
         ExchangeData memory _exchangeData
-    ) internal repayCheck(_saverData.cdpId) {
+    ) internal {
 
         address user = getOwner(manager, _saverData.cdpId);
         bytes32 ilk = manager.ilks(_saverData.cdpId);
 
         // Draw collateral
         uint maxColl = getMaxCollateral(_saverData.cdpId, ilk, _saverData.joinAddr);
-        uint collDrawn = drawCollateral(_saverData.cdpId, ilk, _saverData.joinAddr, maxColl);
+        uint collDrawn = drawCollateral(_saverData.cdpId, _saverData.joinAddr, maxColl);
 
         // Swap
         _exchangeData.srcAmount = (_saverData.loanAmount + collDrawn);
@@ -123,7 +123,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         paybackDebt(_saverData.cdpId, ilk, paybackAmount, user);
 
         // Draw collateral to repay the flash loan
-        drawCollateral(_saverData.cdpId, ilk, _saverData.joinAddr, (_saverData.loanAmount + _saverData.fee));
+        drawCollateral(_saverData.cdpId, _saverData.joinAddr, (_saverData.loanAmount + _saverData.fee));
 
         // SaverLogger(LOGGER_ADDRESS).LogRepay(_cdpId, owner, (amounts[1] + _loanAmount), amounts[2]);
     }
