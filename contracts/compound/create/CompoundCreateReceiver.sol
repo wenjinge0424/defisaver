@@ -66,7 +66,7 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
     function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal pure  returns (address payable, bytes memory proxyData, ExchangeData memory exchangeData) {
         (
             uint[4] memory numData, // srcAmount, destAmount, minPrice, price0x
-            address[6] memory addrData, // cCollAddr, cDebtAddr, srcAddr, destAddr, exchangeAddr, wrapper
+            address[6] memory cAddresses, // cCollAddr, cDebtAddr, srcAddr, destAddr, exchangeAddr, wrapper
             bytes memory callData,
             address proxy
         )
@@ -74,16 +74,16 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
 
         proxyData = abi.encodeWithSignature(
             "open(address,address,uint256)",
-                                addrData[0], addrData[1], (_amount + _fee));
+                                cAddresses[0], cAddresses[1], (_amount + _fee));
 
          exchangeData = SaverExchangeCore.ExchangeData({
-            srcAddr: addrData[2],
-            destAddr: addrData[3],
+            srcAddr: cAddresses[2],
+            destAddr: cAddresses[3],
             srcAmount: numData[0],
             destAmount: numData[1],
             minPrice: numData[2],
-            wrapper: addrData[5],
-            exchangeAddr: addrData[4],
+            wrapper: cAddresses[5],
+            exchangeAddr: cAddresses[4],
             callData: callData,
             price0x: numData[3]
         });

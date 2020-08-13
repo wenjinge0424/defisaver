@@ -17,27 +17,27 @@ contract CompoundSaverFlashProxy is SaverExchangeCore, CompoundSaverHelper  {
 
     /// @notice Repays the position and sends tokens back for FL
     /// @param _exData Exchange data
-    /// @param _addrData cTokens addreses and exchange [cCollAddress, cBorrowAddress]
+    /// @param _cAddresses cTokens addreses and exchange [cCollAddress, cBorrowAddress]
     /// @param _gasCost Gas cost for transaction
     /// @param _flashLoanData Data about FL [amount, fee]
     function flashRepay(
         ExchangeData memory _exData,
-        address[2] memory _addrData, // cCollAddress, cBorrowAddress
+        address[2] memory _cAddresses, // cCollAddress, cBorrowAddress
         uint256 _gasCost,
         uint[2] memory _flashLoanData // amount, fee
     ) public payable {
-        enterMarket(_addrData[0], _addrData[1]);
+        enterMarket(_cAddresses[0], _cAddresses[1]);
 
         address payable user = payable(getUserAddress());
         uint flashBorrowed = _flashLoanData[0] + _flashLoanData[1];
 
-        uint maxColl = getMaxCollateral(_addrData[0], address(this));
+        uint maxColl = getMaxCollateral(_cAddresses[0], address(this));
 
         // draw max coll
-        require(CTokenInterface(_addrData[0]).redeemUnderlying(maxColl) == 0);
+        require(CTokenInterface(_cAddresses[0]).redeemUnderlying(maxColl) == 0);
 
-        address collToken = getUnderlyingAddr(_addrData[0]);
-        address borrowToken = getUnderlyingAddr(_addrData[1]);
+        address collToken = getUnderlyingAddr(_cAddresses[0]);
+        address borrowToken = getUnderlyingAddr(_cAddresses[1]);
 
         uint swapAmount = 0;
 
@@ -46,17 +46,17 @@ contract CompoundSaverFlashProxy is SaverExchangeCore, CompoundSaverHelper  {
             (,swapAmount) = _sell(_exData);
 
             // get fee
-            swapAmount -= getFee(swapAmount, user, _gasCost, _addrData[1]);
+            swapAmount -= getFee(swapAmount, user, _gasCost, _cAddresses[1]);
         } else {
             swapAmount = (maxColl + _flashLoanData[0]);
-            swapAmount -= getGasCost(swapAmount, _gasCost, _addrData[1]);
+            swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[1]);
         }
 
         // payback debt
-        paybackDebt(swapAmount, _addrData[1], borrowToken, user);
+        paybackDebt(swapAmount, _cAddresses[1], borrowToken, user);
 
         // draw collateral for loanAmount + loanFee
-        require(CTokenInterface(_addrData[0]).redeemUnderlying(flashBorrowed) == 0);
+        require(CTokenInterface(_cAddresses[0]).redeemUnderlying(flashBorrowed) == 0);
 
         // repay flash loan
         returnFlashLoan(collToken, flashBorrowed);
@@ -66,45 +66,45 @@ contract CompoundSaverFlashProxy is SaverExchangeCore, CompoundSaverHelper  {
 
     /// @notice Boosts the position and sends tokens back for FL
     /// @param _exData Exchange data
-    /// @param _addrData cTokens addreses and exchange [cCollAddress, cBorrowAddress]
+    /// @param _cAddresses cTokens addreses and exchange [cCollAddress, cBorrowAddress]
     /// @param _gasCost Gas cost for specific transaction
     /// @param _flashLoanData Data about FL [amount, fee]
     function flashBoost(
         ExchangeData memory _exData,
-        address[2] memory _addrData, // cCollAddress, cBorrowAddress
+        address[2] memory _cAddresses, // cCollAddress, cBorrowAddress
         uint256 _gasCost,
         uint[2] memory _flashLoanData // amount, fee
     ) public payable {
-        enterMarket(_addrData[0], _addrData[1]);
+        enterMarket(_cAddresses[0], _cAddresses[1]);
 
         address payable user = payable(getUserAddress());
         uint flashBorrowed = _flashLoanData[0] + _flashLoanData[1];
 
         // borrow max amount
-        uint borrowAmount = getMaxBorrow(_addrData[1], address(this));
-        require(CTokenInterface(_addrData[1]).borrow(borrowAmount) == 0);
+        uint borrowAmount = getMaxBorrow(_cAddresses[1], address(this));
+        require(CTokenInterface(_cAddresses[1]).borrow(borrowAmount) == 0);
 
-        address collToken = getUnderlyingAddr(_addrData[0]);
-        address borrowToken = getUnderlyingAddr(_addrData[1]);
+        address collToken = getUnderlyingAddr(_cAddresses[0]);
+        address borrowToken = getUnderlyingAddr(_cAddresses[1]);
 
         uint swapAmount = 0;
 
         if (collToken != borrowToken) {
             // get dfs fee
-            borrowAmount -= getFee((borrowAmount + _flashLoanData[0]), user, _gasCost, _addrData[1]);
+            borrowAmount -= getFee((borrowAmount + _flashLoanData[0]), user, _gasCost, _cAddresses[1]);
             _exData.srcAmount = borrowAmount;
 
             (,swapAmount) = _sell(_exData);
         } else {
             swapAmount = (borrowAmount + _flashLoanData[0]);
-            swapAmount -= getGasCost(swapAmount, _gasCost, _addrData[1]);
+            swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[1]);
         }
 
         // deposit swaped collateral
-        depositCollateral(collToken, _addrData[0], swapAmount);
+        depositCollateral(collToken, _cAddresses[0], swapAmount);
 
         // borrow token to repay flash loan
-        require(CTokenInterface(_addrData[1]).borrow(flashBorrowed) == 0);
+        require(CTokenInterface(_cAddresses[1]).borrow(flashBorrowed) == 0);
 
         // repay flash loan
         returnFlashLoan(borrowToken, flashBorrowed);

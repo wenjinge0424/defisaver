@@ -56,12 +56,12 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
     /// @notice Bots call this method to repay for user when conditions are met
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     /// @param _data Amount and exchange data [amount, minPrice, exchangeType, gasCost, 0xPrice]
-    /// @param _addrData cTokens addreses and exchange [cCollAddress, cBorrowAddress, exchangeAddress]
+    /// @param _cAddresses cTokens addreses and exchange [cCollAddress, cBorrowAddress, exchangeAddress]
     /// @param _callData 0x callData
     /// @param _user The actual address that owns the Compound position
     function repayFor(
         uint[5] memory _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
-        address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
+        address[3] memory _cAddresses, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes memory _callData,
         address _user
     ) public payable onlyApproved burnGas(REPAY_GAS_TOKEN) {
@@ -75,7 +75,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
             _user,
             compoundFlashLoanTakerAddress,
             abi.encodeWithSignature("repayWithLoan(uint256[5],address[3],bytes)",
-            _data, _addrData, _callData));
+            _data, _cAddresses, _callData));
 
         (bool isGoodRatio, uint ratioAfter) = ratioGoodAfter(Method.Repay, _user);
         require(isGoodRatio); // check if the after result of the actions is good
@@ -88,12 +88,12 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
     /// @notice Bots call this method to boost for user when conditions are met
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     /// @param _data Amount and exchange data [amount, minPrice, exchangeType, gasCost, 0xPrice]
-    /// @param _addrData cTokens addreses and exchange [cCollAddress, cBorrowAddress, exchangeAddress]
+    /// @param _cAddresses cTokens addreses and exchange [cCollAddress, cBorrowAddress, exchangeAddress]
     /// @param _callData 0x callData
     /// @param _user The actual address that owns the Compound position
     function boostFor(
         uint[5] memory _data, // amount, minPrice, exchangeType, gasCost, 0xPrice
-        address[3] memory _addrData, // cCollAddress, cBorrowAddress, exchangeAddress
+        address[3] memory _cAddresses, // cCollAddress, cBorrowAddress, exchangeAddress
         bytes memory _callData,
         address _user
     ) public payable onlyApproved burnGas(BOOST_GAS_TOKEN) {
@@ -107,7 +107,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
             _user,
             compoundFlashLoanTakerAddress,
             abi.encodeWithSignature("boostWithLoan(uint256[5],address[3],bytes)",
-            _data, _addrData, _callData));
+            _data, _cAddresses, _callData));
 
 
         (bool isGoodRatio, uint ratioAfter) = ratioGoodAfter(Method.Boost, _user);

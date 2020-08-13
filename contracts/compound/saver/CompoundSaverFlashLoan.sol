@@ -59,7 +59,7 @@ contract CompoundSaverFlashLoan is FlashLoanReceiverBase, SaverExchangeCore {
     function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal pure returns (bytes memory proxyData, address payable) {
         (
             bytes memory exDataBytes,
-            address[2] memory addrData, // cCollAddress, cBorrowAddress
+            address[2] memory cAddresses, // cCollAddress, cBorrowAddress
             uint256 gasCost,
             bool isRepay,
             address payable proxyAddr
@@ -71,9 +71,9 @@ contract CompoundSaverFlashLoan is FlashLoanReceiverBase, SaverExchangeCore {
         uint[2] memory flashLoanData = [_amount, _fee];
 
         if (isRepay) {
-            proxyData = abi.encodeWithSignature("flashRepay((address,address,uint256,uint256,uint256,address,address,bytes,uint256),address[2],uint256,uint256[2])", _exData, addrData, gasCost, flashLoanData);
+            proxyData = abi.encodeWithSignature("flashRepay((address,address,uint256,uint256,uint256,address,address,bytes,uint256),address[2],uint256,uint256[2])", _exData, cAddresses, gasCost, flashLoanData);
         } else {
-            proxyData = abi.encodeWithSignature("flashBoost((address,address,uint256,uint256,uint256,address,address,bytes,uint256),address[2],uint256,uint256[2])", _exData, addrData, gasCost, flashLoanData);
+            proxyData = abi.encodeWithSignature("flashBoost((address,address,uint256,uint256,uint256,address,address,bytes,uint256),address[2],uint256,uint256[2])", _exData, cAddresses, gasCost, flashLoanData);
         }
 
         return (proxyData, proxyAddr);
