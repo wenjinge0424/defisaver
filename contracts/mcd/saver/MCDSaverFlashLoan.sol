@@ -140,7 +140,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         uint debtLeft = debt - _paybackAmount;
 
         (,,,, uint dust) = vat.ilks(_ilk);
-        dust = dust / 10^27;
+        dust = dust / 10**27;
 
         // Less than dust value
         if (debtLeft < dust) {

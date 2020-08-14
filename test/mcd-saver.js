@@ -1,5 +1,5 @@
 let { accounts, contract, web3, provider } = require('@openzeppelin/test-environment');
-const { expectEvent, balance, expectRevert } = require('@openzeppelin/test-helpers');
+const { expectEvent, balance, expectRevert, send } = require('@openzeppelin/test-helpers');
 const { expect } = require('chai');
 const Dec = require('decimal.js');
 
@@ -25,7 +25,8 @@ const ExchangeInterface = contract.fromArtifact('ExchangeInterface');
 const DSSProxyActions = contract.fromArtifact('DssProxyActions');
 const MCDSaverTaker = contract.fromArtifact('MCDSaverTaker');
 
-const mcdSaverTakerAddr = '0x966d3e76E7a890A2d7B9AE1E370dC219E920F9D4';
+const mcdSaverTakerAddr = '0x97bd553f21B175F7CC00819cC6494a7FbA344180';
+const mcdSaverFlashLoanAddr = '0x74E33B80BC77cdB5d49861a53913A8301CB72B4D';
 const uniswapWrapperAddr = '0x880A845A85F843a5c67DB2061623c6Fc3bB4c511';
 
 const makerVersion = "1.0.9";
