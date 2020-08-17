@@ -4,12 +4,13 @@ pragma experimental ABIEncoderV2;
 import "../saver/MCDSaverProxy.sol";
 import "../../constants/ConstantAddresses.sol";
 import "../../exchange/SaverExchangeCore.sol";
+import "../../utils/GasBurner.sol";
 
 abstract contract ILendingPool {
     function flashLoan( address payable _receiver, address _reserve, uint _amount, bytes calldata _params) external virtual;
 }
 
-contract MCDSaverTaker is MCDSaverProxy {
+contract MCDSaverTaker is MCDSaverProxy, GasBurner {
 
     address payable public constant MCD_SAVER_FLASH_LOAN = 0x74E33B80BC77cdB5d49861a53913A8301CB72B4D;
     address public constant AAVE_POOL_CORE = 0x3dfd23A6c5E8BbcFc9581d2E864a68feb6a076d3;
@@ -21,7 +22,7 @@ contract MCDSaverTaker is MCDSaverProxy {
         uint _cdpId,
         uint _gasCost,
         address _joinAddr
-    ) public payable {
+    ) public payable burnGas(25) {
         uint256 maxDebt = getMaxDebt(_cdpId, manager.ilks(_cdpId));
 
         if (maxDebt >= _exchangeData.srcAmount) {
@@ -51,7 +52,7 @@ contract MCDSaverTaker is MCDSaverProxy {
         uint _cdpId,
         uint _gasCost,
         address _joinAddr
-    ) public payable {
+    ) public payable burnGas(25) {
         uint256 maxColl = getMaxCollateral(_cdpId, manager.ilks(_cdpId));
 
         if (maxColl >= _exchangeData.srcAmount) {
