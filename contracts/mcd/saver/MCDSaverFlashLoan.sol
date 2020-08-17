@@ -59,9 +59,9 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         });
 
         if (isRepay) {
-            repayWithLoan(saverData, exchangeData);
+            repayWithLoan(exchangeData, saverData);
         } else {
-            boostWithLoan(saverData, exchangeData);
+            boostWithLoan(exchangeData, saverData);
         }
 
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
@@ -73,8 +73,8 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
     }
 
     function boostWithLoan(
-        SaverData memory _saverData,
-        ExchangeData memory _exchangeData
+        ExchangeData memory _exchangeData,
+        SaverData memory _saverData
     ) internal {
 
         address user = getOwner(manager, _saverData.cdpId);
@@ -88,7 +88,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         uint afterFee = (daiDrawn + _saverData.loanAmount) - dsfFee;
 
         // Swap
-        _exchangeData.srcAmount = (_saverData.loanAmount + afterFee);
+        _exchangeData.srcAmount = afterFee;
         (, uint swapedAmount) = _sell(_exchangeData);
 
         // Return collateral
@@ -101,8 +101,8 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
     }
 
     function repayWithLoan(
-        SaverData memory _saverData,
-        ExchangeData memory _exchangeData
+        ExchangeData memory _exchangeData,
+        SaverData memory _saverData
     ) internal {
 
         address user = getOwner(manager, _saverData.cdpId);

@@ -57,7 +57,6 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     function repayFor(
         uint _cdpId,
-        uint _gasCost,
         uint _nextPrice,
         address _joinAddr,
         SaverExchangeCore.ExchangeData memory _exchangeData
@@ -66,14 +65,14 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
         (bool isAllowed, uint ratioBefore) = canCall(Method.Repay, _cdpId, _nextPrice);
         require(isAllowed);
 
-        _gasCost = calcGasCost(REPAY_GAS_COST);
+        uint gasCost = calcGasCost(REPAY_GAS_COST);
 
         monitorProxyContract.callExecute{value: msg.value}(
             subscriptionsContract.getOwner(_cdpId),
             mcdSaverTakerAddress,
             abi.encodeWithSignature(
             "repayWithLoan(uint256,uint256,address,(address,address,uint256,uint256,uint256,address,address,bytes,uint256))",
-            _cdpId, _gasCost, _joinAddr, _exchangeData));
+            _cdpId, gasCost, _joinAddr, _exchangeData));
 
 
         (bool isGoodRatio, uint ratioAfter) = ratioGoodAfter(Method.Repay, _cdpId, _nextPrice);
@@ -88,7 +87,6 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     function boostFor(
         uint _cdpId,
-        uint _gasCost,
         uint _nextPrice,
         address _joinAddr,
         SaverExchangeCore.ExchangeData memory _exchangeData
@@ -97,14 +95,14 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
         (bool isAllowed, uint ratioBefore) = canCall(Method.Boost, _cdpId, _nextPrice);
         require(isAllowed);
 
-        _gasCost = calcGasCost(BOOST_GAS_COST);
+        uint gasCost = calcGasCost(BOOST_GAS_COST);
 
         monitorProxyContract.callExecute{value: msg.value}(
             subscriptionsContract.getOwner(_cdpId),
             mcdSaverTakerAddress,
             abi.encodeWithSignature(
             "boostWithLoan(uint256,uint256,address,(address,address,uint256,uint256,uint256,address,address,bytes,uint256))",
-            _cdpId, _gasCost, _joinAddr, _exchangeData));
+            _cdpId, gasCost, _joinAddr, _exchangeData));
 
         (bool isGoodRatio, uint ratioAfter) = ratioGoodAfter(Method.Boost, _cdpId, _nextPrice);
         require(isGoodRatio);

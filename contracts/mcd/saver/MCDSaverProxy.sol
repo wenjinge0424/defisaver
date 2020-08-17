@@ -38,18 +38,17 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
     /// @notice Repay - draws collateral, converts to Dai and repays the debt
     /// @dev Must be called by the DSProxy contract that owns the CDP
     function repay(
+        SaverExchangeCore.ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _gasCost,
-        address _joinAddr,
-        SaverExchangeCore.ExchangeData memory _exchangeData
+        address _joinAddr
     ) public payable {
 
         address owner = getOwner(manager, _cdpId);
         bytes32 ilk = manager.ilks(_cdpId);
 
-        uint collDrawn = drawCollateral(_cdpId, _joinAddr, _exchangeData.srcAmount);
+        drawCollateral(_cdpId, _joinAddr, _exchangeData.srcAmount);
 
-        _exchangeData.srcAmount = collDrawn;
         (, uint daiAmount) = _sell(_exchangeData);
 
         uint daiAfterFee = sub(daiAmount, getFee(daiAmount, _gasCost, owner));
@@ -68,10 +67,10 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
     /// @notice Boost - draws Dai, converts to collateral and adds to CDP
     /// @dev Must be called by the DSProxy contract that owns the CDP
     function boost(
+        SaverExchangeCore.ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _gasCost,
-        address _joinAddr,
-        SaverExchangeCore.ExchangeData memory _exchangeData
+        address _joinAddr
     ) public payable {
         address owner = getOwner(manager, _cdpId);
         bytes32 ilk = manager.ilks(_cdpId);

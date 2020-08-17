@@ -17,22 +17,22 @@ contract MCDSaverTaker is MCDSaverProxy {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
     function boostWithLoan(
+        SaverExchangeCore.ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _gasCost,
-        address _joinAddr,
-        SaverExchangeCore.ExchangeData memory _exchangeData
+        address _joinAddr
     ) public payable {
         uint256 maxDebt = getMaxDebt(_cdpId, manager.ilks(_cdpId));
-        uint256 debtAmount = _exchangeData.srcAmount;
 
-        if (maxDebt >= debtAmount) {
-            boost(_cdpId, _gasCost, _joinAddr, _exchangeData);
+        if (maxDebt >= _exchangeData.srcAmount) {
+            _exchangeData.srcAmount = maxDebt;
+            boost(_exchangeData, _cdpId, _gasCost, _joinAddr);
             return;
         }
 
         MCD_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
 
-        uint256 loanAmount = sub(debtAmount, maxDebt);
+        uint256 loanAmount = sub(_exchangeData.srcAmount, maxDebt);
         uint maxLiq = getAvailableLiquidity(_joinAddr);
 
         loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
@@ -49,16 +49,16 @@ contract MCDSaverTaker is MCDSaverProxy {
     }
 
     function repayWithLoan(
+        SaverExchangeCore.ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _gasCost,
-        address _joinAddr,
-        SaverExchangeCore.ExchangeData memory _exchangeData
+        address _joinAddr
     ) public payable {
-        uint collAmount = _exchangeData.srcAmount;
         uint256 maxColl = getMaxCollateral(_cdpId, manager.ilks(_cdpId));
 
-        if (maxColl >= collAmount) {
-            repay(_cdpId, _gasCost, _joinAddr, _exchangeData);
+        if (maxColl >= _exchangeData.srcAmount) {
+            _exchangeData.srcAmount = maxColl;
+            repay(_exchangeData, _cdpId, _gasCost, _joinAddr);
             return;
         }
 
