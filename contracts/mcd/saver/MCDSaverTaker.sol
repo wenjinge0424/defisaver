@@ -12,7 +12,7 @@ abstract contract ILendingPool {
 
 contract MCDSaverTaker is MCDSaverProxy, GasBurner {
 
-    address payable public constant MCD_SAVER_FLASH_LOAN = 0x74E33B80BC77cdB5d49861a53913A8301CB72B4D;
+    address payable public constant MCD_SAVER_FLASH_LOAN = 0x72440269630E393d38975Db7fA7Cb4D14e7eC061;
     address public constant AAVE_POOL_CORE = 0x3dfd23A6c5E8BbcFc9581d2E864a68feb6a076d3;
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
