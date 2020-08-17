@@ -1,4 +1,5 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import "../DS/DSMath.sol";
 import "../interfaces/TokenInterface.sol";
@@ -200,6 +201,51 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
     /// @param _src Input address
     function ethToWethAddr(address _src) internal pure returns (address) {
         return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
+    }
+
+    function packExchangeData(ExchangeData memory _exData) public pure returns(bytes memory) {     
+        // splitting in two different bytes and encoding all because of stack too deep in decoding part
+
+        bytes memory part1 = abi.encode(
+            _exData.srcAddr,
+            _exData.destAddr,
+            _exData.srcAmount,
+            _exData.destAmount
+        );
+
+        bytes memory part2 = abi.encode(
+            _exData.minPrice,
+            _exData.wrapper,
+            _exData.exchangeAddr,
+            _exData.callData,
+            _exData.price0x
+        );
+
+
+        return abi.encode(part1, part2);
+    }
+
+    function unpackExchangeData(bytes memory _data) public pure returns(ExchangeData memory _exData) {
+        (
+            bytes memory part1,
+            bytes memory part2
+        ) = abi.decode(_data, (bytes,bytes));
+
+        (
+            _exData.srcAddr,
+            _exData.destAddr,
+            _exData.srcAmount,
+            _exData.destAmount
+        ) = abi.decode(part1, (address,address,uint256,uint256));
+        
+        (
+            _exData.minPrice,
+            _exData.wrapper,
+            _exData.exchangeAddr,
+            _exData.callData,
+            _exData.price0x  
+        )
+        = abi.decode(part2, (uint256,address,address,bytes,uint256));
     }
 
     // solhint-disable-next-line no-empty-blocks

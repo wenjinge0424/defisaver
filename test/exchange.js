@@ -14,8 +14,8 @@ const AllowanceProxy = contract.fromArtifact('AllowanceProxy');
 
 const makerVersion = "1.0.6";
 
-const wrapperAddress = '0x4E42782ac3A619Bf6A515Ca33c4B926364A51e31';
-const allowanceProxyAddress = '0x3Cc7B9a386410858B412B00B13264654F68364Ed';
+const wrapperAddress = '0x880a845a85f843a5c67db2061623c6fc3bb4c511';
+const allowanceProxyAddress = '0xdd8e19f63844e433c80117b402e36b62eff3ec0a';
 
 let tokenName = "MCD_DAI"; // ["MCD_DAI", "BAT", "USCD", "WBTC"]
 
