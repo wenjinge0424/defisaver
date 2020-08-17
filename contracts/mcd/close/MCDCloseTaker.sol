@@ -49,8 +49,8 @@ contract MCDCloseTaker is MCDSaverProxyHelper {
     Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
 
     function closeWithLoan(
-        CloseData memory _closeData,
-        SaverExchangeCore.ExchangeData memory _exchangeData
+        SaverExchangeCore.ExchangeData memory _exchangeData,
+        CloseData memory _closeData
     ) public payable {
         MCD_CLOSE_FLASH_LOAN.transfer(msg.value); // 0x fee
 

@@ -31,31 +31,22 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
             "Invalid balance for the contract");
 
         (
-            uint[6] memory numData,
-            address[5] memory addrData,
-            bytes memory callData,
+            bytes memory exDataBytes,
+            uint cdpId,
+            uint gasCost,
+            address joinAddr,
             bool isRepay
         )
-         = abi.decode(_params, (uint256[6],address[5],bytes,bool));
+         = abi.decode(_params, (bytes,uint256,uint256,address,bool));
 
-        ExchangeData memory exchangeData = ExchangeData({
-            srcAddr: addrData[0],
-            destAddr: addrData[1],
-            srcAmount: numData[0],
-            destAmount: numData[1],
-            minPrice: numData[2],
-            wrapper: addrData[3],
-            exchangeAddr: addrData[2],
-            callData: callData,
-            price0x: numData[3]
-        });
+        ExchangeData memory exchangeData = unpackExchangeData(exDataBytes);
 
         SaverData memory saverData = SaverData({
-            cdpId: numData[4],
-            gasCost: numData[5],
+            cdpId: cdpId,
+            gasCost: gasCost,
             loanAmount: _amount,
             fee: _fee,
-            joinAddr: addrData[4]
+            joinAddr: joinAddr
         });
 
         if (isRepay) {

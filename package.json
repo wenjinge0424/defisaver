@@ -6,7 +6,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "npx mocha --exit --recursive --timeout 60000",
+    "test": "npx mocha --exit --recursive --timeout 6000000 --grep",
     "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol",
     "flatten-all": "sol-merger@3.1.0 \"./contracts/*.sol\" ./build",
     "flatten": "npx sol-merger@3.1.0",

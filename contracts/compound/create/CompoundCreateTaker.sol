@@ -45,9 +45,9 @@ contract CompoundCreateTaker is ProxyPermission {
         sendDeposit(_compReceiver, _exchangeData.destAddr);
 
         // Pack the struct data
-        (uint[4] memory numData, address[6] memory addrData, bytes memory callData)
+        (uint[4] memory numData, address[6] memory cAddresses, bytes memory callData)
                                             = _packData(_createInfo, _exchangeData);
-        bytes memory paramsData = abi.encode(numData, addrData, callData, address(this));
+        bytes memory paramsData = abi.encode(numData, cAddresses, callData, address(this));
 
         givePermission(_compReceiver);
 
@@ -70,7 +70,7 @@ contract CompoundCreateTaker is ProxyPermission {
     function _packData(
         CreateInfo memory _createInfo,
         SaverExchangeCore.ExchangeData memory exchangeData
-    ) internal pure returns (uint[4] memory numData, address[6] memory addrData, bytes memory callData) {
+    ) internal pure returns (uint[4] memory numData, address[6] memory cAddresses, bytes memory callData) {
 
         numData = [
             exchangeData.srcAmount,
@@ -79,7 +79,7 @@ contract CompoundCreateTaker is ProxyPermission {
             exchangeData.price0x
         ];
 
-        addrData = [
+        cAddresses = [
             _createInfo.cCollAddress,
             _createInfo.cBorrowAddress,
             exchangeData.srcAddr,

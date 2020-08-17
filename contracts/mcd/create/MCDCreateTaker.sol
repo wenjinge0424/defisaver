@@ -29,8 +29,8 @@ contract MCDCreateTaker {
     }
 
     function openWithLoan(
-        CreateData memory _createData,
-        SaverExchangeCore.ExchangeData memory _exchangeData
+        SaverExchangeCore.ExchangeData memory _exchangeData,
+        CreateData memory _createData
     ) public payable {
 
         MCD_OPEN_FLASH_LOAN.transfer(msg.value); //0x fee

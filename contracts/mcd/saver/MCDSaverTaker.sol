@@ -39,9 +39,7 @@ contract MCDSaverTaker is MCDSaverProxy {
 
         manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 1);
 
-        (uint[6] memory numData, address[5] memory addrData, bytes memory callData)
-                                            = _packData(_cdpId, _gasCost, _joinAddr, _exchangeData);
-        bytes memory paramsData = abi.encode(numData, addrData, callData, false);
+        bytes memory paramsData = abi.encode(packExchangeData(_exchangeData), _cdpId, _gasCost, _joinAddr, false);
 
         lendingPool.flashLoan(MCD_SAVER_FLASH_LOAN, DAI_ADDRESS, loanAmount, paramsData);
 
@@ -71,9 +69,7 @@ contract MCDSaverTaker is MCDSaverProxy {
 
         manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 1);
 
-        (uint[6] memory numData, address[5] memory addrData, bytes memory callData)
-                                            = _packData(_cdpId, _gasCost, _joinAddr, _exchangeData);
-        bytes memory paramsData = abi.encode(numData, addrData, callData, true);
+        bytes memory paramsData = abi.encode(packExchangeData(_exchangeData), _cdpId, _gasCost, _joinAddr, true);
 
         lendingPool.flashLoan(MCD_SAVER_FLASH_LOAN, getAaveCollAddr(_joinAddr), loanAmount, paramsData);
 
