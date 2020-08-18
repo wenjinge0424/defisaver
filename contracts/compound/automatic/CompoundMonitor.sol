@@ -96,7 +96,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
     /// @param _user The actual address that owns the Compound position
     function boostFor(
         SaverExchangeCore.ExchangeData memory _exData,
-        address[3] memory _cAddresses, // cCollAddress, cBorrowAddress
+        address[2] memory _cAddresses, // cCollAddress, cBorrowAddress
         address _user
     ) public payable onlyApproved burnGas(BOOST_GAS_TOKEN) {
 
