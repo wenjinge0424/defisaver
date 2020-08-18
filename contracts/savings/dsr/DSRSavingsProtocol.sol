@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-import "../../mcd/maker/Join.sol";
+import "../../interfaces/Join.sol";
 import "../../DS/DSMath.sol";
 import "../../constants/ConstantAddresses.sol";
 

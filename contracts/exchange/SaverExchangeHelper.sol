@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 
 import "../utils/SafeERC20.sol";
-import "../mcd/Discount.sol";
+import "../utils/Discount.sol";
 
 contract SaverExchangeHelper {
 

@@ -1,134 +1,94 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import "../../interfaces/ExchangeInterface.sol";
 
-import "../../loggers/SaverLogger.sol";
-import "../Discount.sol";
+import "../../loggers/DefisaverLogger.sol";
+import "../../utils/Discount.sol";
 
-import "../maker/Spotter.sol";
-import "../maker/Jug.sol";
-import "../maker/DaiJoin.sol";
-import "../maker/Join.sol";
+import "../../interfaces/Spotter.sol";
+import "../../interfaces/Jug.sol";
+import "../../interfaces/DaiJoin.sol";
+import "../../interfaces/Join.sol";
 
-import "./ExchangeHelper.sol";
-import "./SaverProxyHelper.sol";
-
+import "./MCDSaverProxyHelper.sol";
+import "../../exchange/SaverExchangeCore.sol";
 
 /// @title Implements Boost and Repay for MCD CDPs
-contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
+contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
 
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
     bytes32 public constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
-    bytes32 public constant USDC_ILK = 0x555344432d410000000000000000000000000000000000000000000000000000;
+
+    address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
+    address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
+    address public constant SPOTTER_ADDRESS = 0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3;
+    address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
+    address public constant JUG_ADDRESS = 0x19c0976f590D67707E62397C87829d896Dc0f1F1;
+    address public constant ETH_JOIN_ADDRESS = 0x2F0b23f53734252Bda2277357e97e1517d6B042A;
+    address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     Manager public constant manager = Manager(MANAGER_ADDRESS);
     Vat public constant vat = Vat(VAT_ADDRESS);
     DaiJoin public constant daiJoin = DaiJoin(DAI_JOIN_ADDRESS);
     Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
 
-    /// @notice Checks if the collateral amount is increased after boost
-    /// @param _cdpId The Id of the CDP
-    modifier boostCheck(uint _cdpId) {
-        bytes32 ilk = manager.ilks(_cdpId);
-        address urn = manager.urns(_cdpId);
-
-        (uint collateralBefore, ) = vat.urns(ilk, urn);
-
-        _;
-
-        (uint collateralAfter, ) = vat.urns(ilk, urn);
-
-        require(collateralAfter > collateralBefore);
-    }
-
-    /// @notice Checks if ratio is increased after repay
-    /// @param _cdpId The Id of the CDP
-    modifier repayCheck(uint _cdpId) {
-        bytes32 ilk = manager.ilks(_cdpId);
-
-        uint beforeRatio = getRatio(_cdpId, ilk);
-
-        _;
-
-        uint afterRatio = getRatio(_cdpId, ilk);
-
-        require(afterRatio > beforeRatio || afterRatio == 0);
-    }
+    DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
 
     /// @notice Repay - draws collateral, converts to Dai and repays the debt
     /// @dev Must be called by the DSProxy contract that owns the CDP
-    /// @param _data Uint array [cdpId, amount, minPrice, exchangeType, gasCost, 0xPrice]
-    /// @param _joinAddr Address of the join contract for the CDP collateral
-    /// @param _exchangeAddress Address of 0x exchange that should be called
-    /// @param _callData data to call 0x exchange with
     function repay(
-        // cdpId, amount, minPrice, exchangeType, gasCost, 0xPrice
-        uint[6] memory _data,
-        address _joinAddr,
-        address _exchangeAddress,
-        bytes memory _callData
-    ) public payable repayCheck(_data[0]) {
+        SaverExchangeCore.ExchangeData memory _exchangeData,
+        uint _cdpId,
+        uint _gasCost,
+        address _joinAddr
+    ) public payable {
 
-        address owner = getOwner(manager, _data[0]);
-        bytes32 ilk = manager.ilks(_data[0]);
+        address owner = getOwner(manager, _cdpId);
+        bytes32 ilk = manager.ilks(_cdpId);
 
-        // uint collDrawn;
-        // uint daiAmount;
-        // uint daiAfterFee;
-        uint[3] memory temp;
+        drawCollateral(_cdpId, _joinAddr, _exchangeData.srcAmount);
 
-        temp[0] = drawCollateral(_data[0], ilk, _joinAddr, _data[1]);
+        (, uint daiAmount) = _sell(_exchangeData);
 
-                                // collDrawn, minPrice, exchangeType, 0xPrice
-        uint[4] memory swapData = [temp[0], _data[2], _data[3], _data[5]];
-        temp[1] = swap(swapData, getCollateralAddr(_joinAddr), DAI_ADDRESS, _exchangeAddress, _callData);
-        temp[2] = sub(temp[1], getFee(temp[1], _data[4], owner));
+        uint daiAfterFee = sub(daiAmount, getFee(daiAmount, _gasCost, owner));
 
-        paybackDebt(_data[0], ilk, temp[2], owner);
+        paybackDebt(_cdpId, ilk, daiAfterFee, owner);
 
         // if there is some eth left (0x fee), return it to user
         if (address(this).balance > 0) {
             tx.origin.transfer(address(this).balance);
         }
 
-        SaverLogger(LOGGER_ADDRESS).LogRepay(_data[0], owner, temp[0], temp[1]);
+        logger.Log(address(this), msg.sender, "MCDRepay", abi.encode(_cdpId, owner, _exchangeData.srcAmount, daiAmount));
+
     }
 
     /// @notice Boost - draws Dai, converts to collateral and adds to CDP
     /// @dev Must be called by the DSProxy contract that owns the CDP
-    /// @param _data Uint array [cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice]
-    /// @param _joinAddr Address of the join contract for the CDP collateral
-    /// @param _exchangeAddress Address of 0x exchange that should be called
-    /// @param _callData data to call 0x exchange with
     function boost(
-        // cdpId, daiAmount, minPrice, exchangeType, gasCost, 0xPrice
-        uint[6] memory _data,
-        address _joinAddr,
-        address _exchangeAddress,
-        bytes memory _callData
-    ) public payable boostCheck(_data[0]) {
-        address owner = getOwner(manager, _data[0]);
-        bytes32 ilk = manager.ilks(_data[0]);
+        SaverExchangeCore.ExchangeData memory _exchangeData,
+        uint _cdpId,
+        uint _gasCost,
+        address _joinAddr
+    ) public payable {
+        address owner = getOwner(manager, _cdpId);
+        bytes32 ilk = manager.ilks(_cdpId);
 
-        // uint daiDrawn;
-        // uint daiAfterFee;
-        // uint collateralAmount;
-        uint[3] memory temp;
+        uint daiDrawn = drawDai(_cdpId, ilk, _exchangeData.srcAmount);
+        uint daiAfterFee = sub(daiDrawn, getFee(daiDrawn, _gasCost, owner));
 
-        temp[0] = drawDai(_data[0], ilk, _data[1]);
-        temp[1] = sub(temp[0], getFee(temp[0], _data[4], owner));
-                                // daiAfterFee, minPrice, exchangeType, 0xPrice
-        uint[4] memory swapData = [temp[1], _data[2], _data[3], _data[5]];
-        temp[2] = swap(swapData, DAI_ADDRESS, getCollateralAddr(_joinAddr), _exchangeAddress, _callData);
+        _exchangeData.srcAmount = daiAfterFee;
+        (, uint swapedColl) = _sell(_exchangeData);
 
-        addCollateral(_data[0], _joinAddr, temp[2]);
+        addCollateral(_cdpId, _joinAddr, swapedColl);
 
         // if there is some eth left (0x fee), return it to user
         if (address(this).balance > 0) {
             tx.origin.transfer(address(this).balance);
         }
 
-        SaverLogger(LOGGER_ADDRESS).LogBoost(_data[0], owner, temp[0], temp[2]);
+        logger.Log(address(this), msg.sender, "MCDBoost", abi.encode(_cdpId, owner, _exchangeData.srcAmount, swapedColl));
     }
 
     /// @notice Draws Dai from the CDP
@@ -189,16 +149,9 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
     /// @notice Draws collateral and returns it to DSProxy
     /// @dev If _amount is bigger than max available we'll draw max
     /// @param _cdpId Id of the CDP
-    /// @param _ilk Ilk of the CDP
     /// @param _joinAddr Address of the join contract for the CDP collateral
     /// @param _amount Amount of collateral to draw
-    function drawCollateral(uint _cdpId, bytes32 _ilk, address _joinAddr, uint _amount) internal returns (uint) {
-        uint maxCollateral = getMaxCollateral(_cdpId, _ilk, _joinAddr);
-
-        if (_amount >= maxCollateral) {
-            _amount = sub(maxCollateral, 1);
-        }
-
+    function drawCollateral(uint _cdpId, address _joinAddr, uint _amount) internal returns (uint) {
         uint frobAmount = _amount;
 
         if (Join(_joinAddr).dec() != 18) {
@@ -233,7 +186,10 @@ contract MCDSaverProxy is SaverProxyHelper, ExchangeHelper {
             _daiAmount = wholeDebt;
         }
 
-        daiJoin.dai().approve(DAI_JOIN_ADDRESS, _daiAmount);
+        if (ERC20(DAI_ADDRESS).allowance(address(this), DAI_JOIN_ADDRESS) == 0) {
+            ERC20(DAI_ADDRESS).approve(DAI_JOIN_ADDRESS, uint(-1));
+        }
+
         daiJoin.join(urn, _daiAmount);
 
         manager.frob(_cdpId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, _ilk));

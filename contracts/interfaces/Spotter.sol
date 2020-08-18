@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-import "../../interfaces/PipInterface.sol";
+import "./PipInterface.sol";
 
 abstract contract Spotter {
     struct Ilk {

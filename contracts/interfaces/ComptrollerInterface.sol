@@ -13,4 +13,6 @@ abstract contract ComptrollerInterface {
     function getAccountLiquidity(address account) external virtual view returns (uint256, uint256, uint256);
 
     function claimComp(address holder) virtual public;
+
+    function oracle() public virtual view returns (address);
 }

@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 import "../../utils/SafeERC20.sol";
 import "../../exchange/SaverExchangeCore.sol";
 import "../../interfaces/CTokenInterface.sol";
-import "../../mcd/Discount.sol";
+import "../../utils/Discount.sol";
 import "../helpers/CompoundSaverHelper.sol";
 import "../../loggers/DefisaverLogger.sol";
 
