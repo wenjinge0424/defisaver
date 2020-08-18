@@ -11,15 +11,13 @@ contract CompoundSafetyRatio is Exponential, DSMath {
     // solhint-disable-next-line const-name-snakecase
     ComptrollerInterface public constant comp = ComptrollerInterface(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
 
-    // solhint-disable-next-line const-name-snakecase
-    CompoundOracleInterface public constant oracle = CompoundOracleInterface(0xDDc46a3B076aec7ab3Fc37420A8eDd2959764Ec4);
-
-
     /// @notice Calcualted the ratio of debt / adjusted collateral
     /// @param _user Address of the user
     function getSafetyRatio(address _user) public view returns (uint) {
         // For each asset the account is in
         address[] memory assets = comp.getAssetsIn(_user);
+        address oracleAddr = comp.oracle();
+
 
         uint sumCollateral = 0;
         uint sumBorrow = 0;
@@ -33,10 +31,10 @@ contract CompoundSafetyRatio is Exponential, DSMath {
             Exp memory oraclePrice;
 
             if (cTokenBalance != 0 || borrowBalance != 0) {
-                oraclePrice = Exp({mantissa: oracle.getUnderlyingPrice(asset)});
+                oraclePrice = Exp({mantissa: CompoundOracleInterface(oracleAddr).getUnderlyingPrice(asset)});
             }
 
-            // Sum up collateral in Eth
+            // Sum up collateral in Usd
             if (cTokenBalance != 0) {
 
                 (, uint collFactorMantissa) = comp.markets(address(asset));
@@ -44,12 +42,12 @@ contract CompoundSafetyRatio is Exponential, DSMath {
                 Exp memory collateralFactor = Exp({mantissa: collFactorMantissa});
                 Exp memory exchangeRate = Exp({mantissa: exchangeRateMantissa});
 
-                (, Exp memory tokensToEther) = mulExp3(collateralFactor, exchangeRate, oraclePrice);
+                (, Exp memory tokensToUsd) = mulExp3(collateralFactor, exchangeRate, oraclePrice);
 
-                (, sumCollateral) = mulScalarTruncateAddUInt(tokensToEther, cTokenBalance, sumCollateral);
+                (, sumCollateral) = mulScalarTruncateAddUInt(tokensToUsd, cTokenBalance, sumCollateral);
             }
 
-            // Sum up debt in Eth
+            // Sum up debt in Usd
             if (borrowBalance != 0) {
                 (, sumBorrow) = mulScalarTruncateAddUInt(oraclePrice, borrowBalance, sumBorrow);
             }

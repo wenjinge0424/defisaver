@@ -74,7 +74,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
             _user,
             compoundFlashLoanTakerAddress,
             abi.encodeWithSignature(
-                "repayWithLoan((address,address,uint256,uint256,uint256,address,address,bytes,uint256),address[2],uint256)", 
+                "repayWithLoan((address,address,uint256,uint256,uint256,address,address,bytes,uint256),address[2],uint256)",
                 _exData,
                 _cAddresses,
                 gasCost
@@ -97,7 +97,6 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
     function boostFor(
         SaverExchangeCore.ExchangeData memory _exData,
         address[3] memory _cAddresses, // cCollAddress, cBorrowAddress
-        bytes memory _callData,
         address _user
     ) public payable onlyApproved burnGas(BOOST_GAS_TOKEN) {
 
@@ -110,7 +109,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
             _user,
             compoundFlashLoanTakerAddress,
             abi.encodeWithSignature(
-                "boostWithLoan((address,address,uint256,uint256,uint256,address,address,bytes,uint256),address[2],uint256)", 
+                "boostWithLoan((address,address,uint256,uint256,uint256,address,address,bytes,uint256),address[2],uint256)",
                 _exData,
                 _cAddresses,
                 gasCost

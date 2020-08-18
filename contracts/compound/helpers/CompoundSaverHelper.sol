@@ -8,11 +8,13 @@ import "../../interfaces/ComptrollerInterface.sol";
 import "../../utils/Discount.sol";
 import "../../DS/DSMath.sol";
 import "../../DS/DSProxy.sol";
+import "./Exponential.sol";
+
 
 import "../../utils/SafeERC20.sol";
 
 /// @title Utlity functions for Compound contracts
-contract CompoundSaverHelper is DSMath {
+contract CompoundSaverHelper is DSMath, Exponential {
 
     using SafeERC20 for ERC20;
 
@@ -179,12 +181,17 @@ contract CompoundSaverHelper is DSMath {
 
         CTokenInterface(_cCollAddress).accrueInterest();
 
+        (, uint collFactorMantissa) = ComptrollerInterface(COMPTROLLER).markets(_cCollAddress);
+        Exp memory collateralFactor = Exp({mantissa: collFactorMantissa});
+
+        (, uint tokensToUsd) = divScalarByExpTruncate(liquidityInUsd, collateralFactor);
+
         uint usdPrice = CompoundOracleInterface(oracle).getUnderlyingPrice(_cCollAddress);
-        uint liquidityInToken = wdiv(liquidityInUsd, usdPrice);
+        uint liqInToken = wdiv(tokensToUsd, usdPrice);
 
-        if (liquidityInToken > usersBalance) return usersBalance;
+        if (liqInToken > usersBalance) return usersBalance;
 
-        return sub(liquidityInToken, (liquidityInToken / 100)); // cut off 1% due to rounding issues
+        return sub(liqInToken, (liqInToken / 100)); // cut off 1% due to rounding issues
     }
 
     /// @notice Returns the maximum amount of borrow amount available
