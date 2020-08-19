@@ -11,7 +11,7 @@ import "../../auth/ProxyPermission.sol";
 contract CompoundFlashLoanTaker is CompoundSaverProxy, ProxyPermission, GasBurner {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
-    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0xFcCeD5E997E7fb1D0594518D3eD57245bB8ed17E;
+    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0xBD3140131dEd4426694257411d564791Cc36D382;
 
     /// @notice Repays the position with it's own fund or with FL if needed
     /// @param _exData Exchange data

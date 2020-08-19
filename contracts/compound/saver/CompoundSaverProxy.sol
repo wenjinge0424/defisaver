@@ -46,7 +46,7 @@ contract CompoundSaverProxy is CompoundSaverHelper, SaverExchangeCore {
         paybackDebt(swapAmount, _cAddresses[1], borrowToken, user);
 
         // handle 0x fee
-        user.transfer(address(this).balance);
+        tx.origin.transfer(address(this).balance);
 
         // log amount, collToken, borrowToken
         logger.Log(address(this), msg.sender, "CompoundRepay", abi.encode(_exData.srcAmount, swapAmount, collToken, borrowToken));
@@ -95,7 +95,7 @@ contract CompoundSaverProxy is CompoundSaverHelper, SaverExchangeCore {
         }
 
         // handle 0x fee
-        user.transfer(address(this).balance);
+        tx.origin.transfer(address(this).balance);
 
         // log amount, collToken, borrowToken
         logger.Log(address(this), msg.sender, "CompoundBoost", abi.encode(_exData.srcAmount, swapAmount, collToken, borrowToken));
