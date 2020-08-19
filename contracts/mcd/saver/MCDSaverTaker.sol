@@ -53,7 +53,7 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
         uint _gasCost,
         address _joinAddr
     ) public payable burnGas(25) {
-        uint256 maxColl = getMaxCollateral(_cdpId, manager.ilks(_cdpId));
+        uint256 maxColl = getMaxCollateral(_cdpId, manager.ilks(_cdpId), _joinAddr);
 
         if (maxColl >= _exchangeData.srcAmount) {
             _exchangeData.srcAmount = maxColl;
@@ -88,20 +88,6 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
         (uint256 collateral, uint256 debt) = getCdpInfo(manager, _cdpId, _ilk);
 
         return sub(wdiv(wmul(collateral, price), mat), debt);
-    }
-
-    /// @notice Gets the maximum amount of collateral available to draw
-    /// @param _cdpId Id of the CDP
-    /// @param _ilk Ilk of the CDP
-    /// @dev Substracts 10 wei to aviod rounding error later on
-    function getMaxCollateral(uint _cdpId, bytes32 _ilk) public view returns (uint) {
-        uint price = getPrice(_ilk);
-
-        (uint collateral, uint debt) = getCdpInfo(manager, _cdpId, _ilk);
-
-        (, uint mat) = Spotter(SPOTTER_ADDRESS).ilks(_ilk);
-
-        return sub(sub(collateral, (div(mul(mat, debt), price))), 10);
     }
 
     function getAaveCollAddr(address _joinAddr) internal view returns (address) {
