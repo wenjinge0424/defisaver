@@ -68,7 +68,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             TokenInterface(WETH_ADDRESS).withdraw(
                 TokenInterface(WETH_ADDRESS).balanceOf(address(this))
             );
-        }            
+        }
 
         return (wrapper, swapedTokens);
     }
@@ -91,7 +91,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             TokenInterface(WETH_ADDRESS).deposit.value(exData.srcAmount)();
         }
 
-        if (exData.price0x > 0) { 
+        if (exData.price0x > 0) {
             approve0xProxy(exData.srcAddr, exData.srcAmount);
 
             (success, swapedTokens,) = takeOrder(exData, address(this).balance, ActionType.BUY);
@@ -172,7 +172,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         uint ethValue = 0;
 
         ERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
-        
+
         if (_type == ActionType.SELL) {
             swapedTokens = ExchangeInterfaceV2(_exData.wrapper).
                     sell{value: ethValue}(_exData.srcAddr, _exData.destAddr, _exData.srcAmount);
@@ -203,7 +203,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
     }
 
-    function packExchangeData(ExchangeData memory _exData) public pure returns(bytes memory) {     
+    function packExchangeData(ExchangeData memory _exData) public pure returns(bytes memory) {
         // splitting in two different bytes and encoding all because of stack too deep in decoding part
 
         bytes memory part1 = abi.encode(
@@ -237,13 +237,13 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             _exData.srcAmount,
             _exData.destAmount
         ) = abi.decode(part1, (address,address,uint256,uint256));
-        
+
         (
             _exData.minPrice,
             _exData.wrapper,
             _exData.exchangeAddr,
             _exData.callData,
-            _exData.price0x  
+            _exData.price0x
         )
         = abi.decode(part2, (uint256,address,address,bytes,uint256));
     }

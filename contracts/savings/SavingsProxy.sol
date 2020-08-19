@@ -16,8 +16,12 @@ contract SavingsProxy is DSRSavingsProtocol, CompoundSavingsProtocol {
 
     address public constant SAVINGS_DYDX_ADDRESS = 0x03b1565e070df392e48e7a8e01798C4B00E534A5;
     address public constant SAVINGS_AAVE_ADDRESS = 0x535B9035E9bA8D7efe0FeAEac885fb65b303E37C;
+    address public constant NEW_IDAI_ADDRESS = 0x493C57C4763932315A328269E1ADaD09653B9081;
 
     address public constant COMP_ADDRESS = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
+
+    address public constant SAVINGS_LOGGER_ADDRESS = 0x89b3635BD2bAD145C6f92E82C9e83f06D5654984;
+    address public constant SOLO_MARGIN_ADDRESS = 0x1E0447b19BB6EcFdAe1e4AE1694b0C3659614e4e;
 
     enum SavingsProtocol {Compound, Dydx, Fulcrum, Dsr, Aave}
 

@@ -6,9 +6,12 @@ import "../../interfaces/ExchangeInterfaceV2.sol";
 import "../../interfaces/UniswapExchangeInterface.sol";
 import "../../interfaces/UniswapFactoryInterface.sol";
 import "../../DS/DSMath.sol";
-import "../../constants/ConstantAddresses.sol";
 
-contract UniswapWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
+contract UniswapWrapper is DSMath, ExchangeInterfaceV2 {
+
+    address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant UNISWAP_FACTORY = 0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95;
 
     using SafeERC20 for ERC20;
 

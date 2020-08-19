@@ -4,16 +4,19 @@ pragma experimental ABIEncoderV2;
 import "../../interfaces/Manager.sol";
 import "./StaticV2.sol";
 import "../saver/MCDSaverProxy.sol";
-import "../../constants/ConstantAddresses.sol";
 import "../../interfaces/Vat.sol";
 import "../../interfaces/Spotter.sol";
 import "../../auth/AdminAuth.sol";
 
 /// @title Handles subscriptions for automatic monitoring
-contract SubscriptionsV2 is AdminAuth, StaticV2, ConstantAddresses {
+contract SubscriptionsV2 is AdminAuth, StaticV2 {
 
     bytes32 internal constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
     bytes32 internal constant BAT_ILK = 0x4241542d41000000000000000000000000000000000000000000000000000000;
+
+    address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
+    address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
+    address public constant SPOTTER_ADDRESS = 0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3;
 
     CdpHolder[] public subscribers;
     mapping (uint => SubPosition) public subscribersPos;

@@ -2,7 +2,6 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../saver/MCDSaverProxy.sol";
-import "../../constants/ConstantAddresses.sol";
 import "../../exchange/SaverExchangeCore.sol";
 import "../../utils/GasBurner.sol";
 
