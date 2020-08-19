@@ -2,13 +2,17 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../../exchange/SaverExchangeCore.sol";
-import "./MCDOpenProxyActions.sol";
+import "./MCDCreateProxyActions.sol";
 import "../../utils/FlashLoanReceiverBase.sol";
 import "../../interfaces/Manager.sol";
 import "../../interfaces/Join.sol";
+import "../../DS/DSProxy.sol";
 
-contract MCDOpenFlashLoan is SaverExchangeCore, AdminAuth, FlashLoanReceiverBase {
-    address public constant OPEN_PROXY_ACTIONS = 0x6d0984E80a86f26c0dd564ca0CF74a8E9Da03305;
+contract MCDCreateFlashLoan is SaverExchangeCore, AdminAuth, FlashLoanReceiverBase {
+    address public constant CREATE_PROXY_ACTIONS = 0x6d0984E80a86f26c0dd564ca0CF74a8E9Da03305;
+
+    uint public constant SERVICE_FEE = 400; // 0.25% Fee
+    address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
@@ -50,7 +54,7 @@ contract MCDOpenFlashLoan is SaverExchangeCore, AdminAuth, FlashLoanReceiverBase
             price0x: numData[5]
         });
 
-        openAndLeverage(numData[0], numData[1], addrData[4], proxy, _fee, exchangeData);
+        openAndLeverage(numData[0], numData[1] + _fee, addrData[4], proxy, exchangeData);
 
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
 
@@ -62,42 +66,61 @@ contract MCDOpenFlashLoan is SaverExchangeCore, AdminAuth, FlashLoanReceiverBase
 
     function openAndLeverage(
         uint _collAmount,
-        uint _daiAmount,
+        uint _daiAmountAndFee,
         address _joinAddr,
         address _proxy,
-        uint _fee,
         ExchangeData memory _exchangeData
     ) public {
 
+        uint dfsFee = getFee(_exchangeData.srcAmount, DSProxy(payable(_proxy)).owner());
+
+        _exchangeData.srcAmount = (_exchangeData.srcAmount - dfsFee);
         (, uint256 collSwaped) = _sell(_exchangeData);
 
         bytes32 ilk = Join(_joinAddr).ilk();
 
         if (_joinAddr == ETH_JOIN_ADDRESS) {
-            MCDOpenProxyActions(OPEN_PROXY_ACTIONS).openLockETHAndDraw{value: address(this).balance}(
+            MCDCreateProxyActions(CREATE_PROXY_ACTIONS).openLockETHAndDraw{value: address(this).balance}(
                 MANAGER_ADDRESS,
                 JUG_ADDRESS,
                 ETH_JOIN_ADDRESS,
                 DAI_JOIN_ADDRESS,
                 ilk,
-                (_daiAmount + _fee),
+                _daiAmountAndFee,
                 _proxy
             );
         } else {
-            Join(_joinAddr).gem().approve(OPEN_PROXY_ACTIONS, uint256(-1));
+            Join(_joinAddr).gem().approve(CREATE_PROXY_ACTIONS, uint256(-1));
 
-            MCDOpenProxyActions(OPEN_PROXY_ACTIONS).openLockGemAndDraw(
+            MCDCreateProxyActions(CREATE_PROXY_ACTIONS).openLockGemAndDraw(
                 MANAGER_ADDRESS,
                 JUG_ADDRESS,
                 _joinAddr,
                 DAI_JOIN_ADDRESS,
                 ilk,
                 (_collAmount + collSwaped),
-                (_daiAmount + _fee),
+                _daiAmountAndFee,
                 true,
                 _proxy
             );
         }
+    }
+
+    function getFee(uint _amount, address _owner) internal returns (uint feeAmount) {
+        uint fee = SERVICE_FEE;
+
+        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_owner)) {
+            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_owner);
+        }
+
+        feeAmount = (fee == 0) ? 0 : (_amount / fee);
+
+        // fee can't go over 20% of the whole amount
+        if (feeAmount > (_amount / 5)) {
+            feeAmount = _amount / 5;
+        }
+
+        ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
     }
 
     receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}

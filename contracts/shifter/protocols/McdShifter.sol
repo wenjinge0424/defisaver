@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "../../interfaces/ILoanShifter.sol";
 import "../../mcd/saver/MCDSaverProxy.sol";
-import "../../mcd/create/MCDOpenProxyActions.sol";
+import "../../mcd/create/MCDCreateProxyActions.sol";
 
 contract McdShifter is MCDSaverProxy {
 
@@ -84,7 +84,7 @@ contract McdShifter is MCDSaverProxy {
         bytes32 ilk = Join(_joinAddrTo).ilk();
 
         if (_joinAddrTo == ETH_JOIN_ADDRESS) {
-            MCDOpenProxyActions(OPEN_PROXY_ACTIONS).openLockETHAndDraw{value: address(this).balance}(
+            MCDCreateProxyActions(OPEN_PROXY_ACTIONS).openLockETHAndDraw{value: address(this).balance}(
                 address(manager),
                 JUG_ADDRESS,
                 ETH_JOIN_ADDRESS,
@@ -96,7 +96,7 @@ contract McdShifter is MCDSaverProxy {
         } else {
             ERC20(getCollateralAddr(_joinAddrTo)).approve(OPEN_PROXY_ACTIONS, uint256(-1));
 
-            MCDOpenProxyActions(OPEN_PROXY_ACTIONS).openLockGemAndDraw(
+            MCDCreateProxyActions(OPEN_PROXY_ACTIONS).openLockGemAndDraw(
                 address(manager),
                 JUG_ADDRESS,
                 _joinAddrTo,

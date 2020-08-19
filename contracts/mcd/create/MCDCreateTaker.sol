@@ -9,7 +9,7 @@ import "../../exchange/SaverExchangeCore.sol";
 
 contract MCDCreateTaker {
 
-    address payable public constant MCD_OPEN_FLASH_LOAN = 0x86E132932566fb7030eeF19B997C8797De13CFBD;
+    address payable public constant MCD_CREATE_FLASH_LOAN = 0xb09bCc172050fBd4562da8b229Cf3E45Dc3045A6;
 
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address public constant ETH_JOIN_ADDRESS = 0x2F0b23f53734252Bda2277357e97e1517d6B042A;
@@ -33,19 +33,19 @@ contract MCDCreateTaker {
         CreateData memory _createData
     ) public payable {
 
-        MCD_OPEN_FLASH_LOAN.transfer(msg.value); //0x fee
+        MCD_CREATE_FLASH_LOAN.transfer(msg.value); //0x fee
 
 
         if (_createData.joinAddr != ETH_JOIN_ADDRESS) {
             ERC20(getCollateralAddr(_createData.joinAddr)).transferFrom(msg.sender, address(this), _createData.collAmount);
-            ERC20(getCollateralAddr(_createData.joinAddr)).transfer(MCD_OPEN_FLASH_LOAN, _createData.collAmount);
+            ERC20(getCollateralAddr(_createData.joinAddr)).transfer(MCD_CREATE_FLASH_LOAN, _createData.collAmount);
         }
 
         (uint[6] memory numData, address[5] memory addrData, bytes memory callData)
                                             = _packData(_createData, _exchangeData);
         bytes memory paramsData = abi.encode(numData, addrData, callData, address(this));
 
-        lendingPool.flashLoan(MCD_OPEN_FLASH_LOAN, DAI_ADDRESS, _createData.daiAmount, paramsData);
+        lendingPool.flashLoan(MCD_CREATE_FLASH_LOAN, DAI_ADDRESS, _createData.daiAmount, paramsData);
 
         logger.Log(address(this), msg.sender, "MCDCreate", abi.encode(manager.last(address(this)), _createData.collAmount, _createData.daiAmount));
     }

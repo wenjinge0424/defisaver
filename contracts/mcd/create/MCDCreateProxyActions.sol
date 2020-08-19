@@ -174,7 +174,7 @@ contract Common {
 }
 
 
-contract MCDOpenProxyActions is Common {
+contract MCDCreateProxyActions is Common {
     // Internal functions
 
     function sub(uint256 x, uint256 y) internal pure returns (uint256 z) {
