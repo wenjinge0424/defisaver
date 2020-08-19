@@ -8,14 +8,6 @@ import "./SaverExchangeHelper.sol";
 contract Prices is DSMath {
 
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-
-    address public constant KYBER_WRAPPER = 0x69f822ac6A5980aB50616A035d4246dC7c8ADF7e;
-    address public constant UNISWAP_WRAPPER = 0x880A845A85F843a5c67DB2061623c6Fc3bB4c511;
-    address public constant OASIS_WRAPPER = 0xF023bC4BD9745EDd1c5D033d2B53eB68f1897D66;
-
-    // first is empty to keep the legacy order in place
-    enum ExchangeType { _, OASIS, KYBER, UNISWAP, ZEROX }
 
     enum ActionType { SELL, BUY }
 
@@ -24,37 +16,26 @@ contract Prices is DSMath {
     /// @param _amount Amount of source tokens you want to exchange
     /// @param _srcToken Address of the source token
     /// @param _destToken Address of the destination token
-    /// @param _exchangeType Which exchange will be used
     /// @param _type Type of action SELL|BUY
+    /// @param _wrappers Array of wrapper addresses to compare
     /// @return (address, uint) The address of the best exchange and the exchange price
     function getBestPrice(
         uint256 _amount,
         address _srcToken,
         address _destToken,
-        ExchangeType _exchangeType,
-        ActionType _type
+        ActionType _type,
+        address[] memory _wrappers
     ) public returns (address, uint256) {
 
-        if (_exchangeType == ExchangeType.OASIS) {
-            return (OASIS_WRAPPER, getExpectedRate(OASIS_WRAPPER, _srcToken, _destToken, _amount, _type));
+        uint256[] memory rates = new uint256[](_wrappers.length);
+        for (uint i=0; i<_wrappers.length; i++) {
+            rates[i] = getExpectedRate(_wrappers[i], _srcToken, _destToken, _amount, _type);
         }
-
-        if (_exchangeType == ExchangeType.KYBER) {
-            return (KYBER_WRAPPER, getExpectedRate(KYBER_WRAPPER, _srcToken, _destToken, _amount, _type));
-        }
-
-        if (_exchangeType == ExchangeType.UNISWAP) {
-            return (UNISWAP_WRAPPER, getExpectedRate(UNISWAP_WRAPPER, _srcToken, _destToken, _amount, _type));
-        }
-
-        uint expectedRateKyber = getExpectedRate(KYBER_WRAPPER, _srcToken, _destToken, _amount, _type);
-        uint expectedRateUniswap = getExpectedRate(UNISWAP_WRAPPER, _srcToken, _destToken, _amount, _type);
-        uint expectedRateOasis = getExpectedRate(OASIS_WRAPPER, _srcToken, _destToken, _amount, _type);
 
         if (_type == ActionType.SELL) {
-            return getBiggestRate(expectedRateKyber, expectedRateUniswap, expectedRateOasis);
+            return getBiggestRate(_wrappers, rates);
         } else {
-            return getSmallestRate(expectedRateKyber, expectedRateUniswap, expectedRateOasis);
+            return getSmallestRate(_wrappers, rates);
         }
     }
 
@@ -100,59 +81,41 @@ contract Prices is DSMath {
     }
 
     /// @notice Finds the biggest rate between exchanges, needed for sell rate
-    /// @param _expectedRateKyber Kyber rate
-    /// @param _expectedRateUniswap Uniswap rate
-    /// @param _expectedRateOasis Oasis rate
+    /// @param _wrappers Array of wrappers to compare
+    /// @param _rates Array of rates to compare
     function getBiggestRate(
-        uint _expectedRateKyber,
-        uint _expectedRateUniswap,
-        uint _expectedRateOasis
+        address[] memory _wrappers,
+        uint256[] memory _rates
     ) internal pure returns (address, uint) {
-        if (
-            (_expectedRateUniswap >= _expectedRateKyber) && (_expectedRateUniswap >= _expectedRateOasis)
-        ) {
-            return (UNISWAP_WRAPPER, _expectedRateUniswap);
+        uint256 maxIndex = 0;
+
+        // starting from 0 in case there is only one rate in array
+        for (uint256 i=0; i<_rates.length; i++) {
+            if (_rates[i] > _rates[maxIndex]) {
+                maxIndex = i;
+            }
         }
 
-        if (
-            (_expectedRateKyber >= _expectedRateUniswap) && (_expectedRateKyber >= _expectedRateOasis)
-        ) {
-            return (KYBER_WRAPPER, _expectedRateKyber);
-        }
-
-        if (
-            (_expectedRateOasis >= _expectedRateKyber) && (_expectedRateOasis >= _expectedRateUniswap)
-        ) {
-            return (OASIS_WRAPPER, _expectedRateOasis);
-        }
+        return (_wrappers[maxIndex], _rates[maxIndex]);
     }
 
     /// @notice Finds the smallest rate between exchanges, needed for buy rate
-    /// @param _expectedRateKyber Kyber rate
-    /// @param _expectedRateUniswap Uniswap rate
-    /// @param _expectedRateOasis Oasis rate
+    /// @param _wrappers Array of wrappers to compare
+    /// @param _rates Array of rates to compare
     function getSmallestRate(
-        uint _expectedRateKyber,
-        uint _expectedRateUniswap,
-        uint _expectedRateOasis
+        address[] memory _wrappers,
+        uint256[] memory _rates
     ) internal pure returns (address, uint) {
-        if (
-            (_expectedRateUniswap <= _expectedRateKyber) && (_expectedRateUniswap <= _expectedRateOasis)
-        ) {
-            return (UNISWAP_WRAPPER, _expectedRateUniswap);
+        uint256 minIndex = 0;
+
+        // starting from 0 in case there is only one rate in array
+        for (uint256 i=0; i<_rates.length; i++) {
+            if (_rates[i] < _rates[minIndex]) {
+                minIndex = i;
+            }
         }
 
-        if (
-            (_expectedRateKyber <= _expectedRateUniswap) && (_expectedRateKyber <= _expectedRateOasis)
-        ) {
-            return (KYBER_WRAPPER, _expectedRateKyber);
-        }
-
-        if (
-            (_expectedRateOasis <= _expectedRateKyber) && (_expectedRateOasis <= _expectedRateUniswap)
-        ) {
-            return (OASIS_WRAPPER, _expectedRateOasis);
-        }
+        return (_wrappers[minIndex], _rates[minIndex]);
     }
 
     function getDecimals(address _token) internal view returns (uint256) {

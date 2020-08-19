@@ -2,12 +2,14 @@ pragma solidity ^0.6.0;
 
 import "../../utils/SafeERC20.sol";
 import "../../interfaces/KyberNetworkProxyInterface.sol";
-import "../../interfaces/ExchangeInterface.sol";
 import "../../interfaces/ExchangeInterfaceV2.sol";
-import "../../constants/ConstantAddresses.sol";
 import "../../DS/DSMath.sol";
 
-contract KyberWrapper is DSMath, ConstantAddresses, ExchangeInterfaceV2 {
+contract KyberWrapper is DSMath, ExchangeInterfaceV2 {
+
+    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant KYBER_INTERFACE = 0x9AAb3f75489902f3a48495025729a0AF77d4b11e;
+    address payable public constant WALLET_ID = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
 
     using SafeERC20 for ERC20;
 
