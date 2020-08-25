@@ -207,19 +207,4 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
     function removeCaller(address _caller) public onlyOwner {
         approvedCallers[_caller] = false;
     }
-
-    /// @notice If any tokens gets stuck in the contract owner can withdraw it
-    /// @param _tokenAddress Address of the ERC20 token
-    /// @param _to Address of the receiver
-    /// @param _amount The amount to be sent
-    function transferERC20(address _tokenAddress, address _to, uint _amount) public onlyOwner {
-        ERC20(_tokenAddress).safeTransfer(_to, _amount);
-    }
-
-    /// @notice If any Eth gets stuck in the contract owner can withdraw it
-    /// @param _to Address of the receiver
-    /// @param _amount The amount to be sent
-    function transferEth(address payable _to, uint _amount) public onlyOwner {
-        _to.transfer(_amount);
-    }
 }
