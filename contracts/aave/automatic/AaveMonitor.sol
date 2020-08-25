@@ -128,7 +128,7 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
 /******************* STATIC METHODS ********************************/
 
     /// @notice Checks if Boost/Repay could be triggered for the CDP
-    /// @dev Called by MCDMonitor to enforce the min/max check
+    /// @dev Called by AaveMonitor to enforce the min/max check
     /// @param _method Type of action to be called
     /// @param _user The actual address that owns the Aave position
     /// @return Boolean if it can be called and the ratio

@@ -6,8 +6,8 @@ import "../../interfaces/IAaveSubscription.sol";
 /// @title SubscriptionsProxy handles authorization and interaction with the Subscriptions contract
 contract AaveSubscriptionsProxy is ProxyPermission {
 
-    address public constant AAVE_SUBSCRIPTION_ADDRESS = 0x52015EFFD577E08f498a0CCc11905925D58D6207;
-    address public constant AAVE_MONITOR_PROXY = 0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a;
+    address public constant AAVE_SUBSCRIPTION_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant AAVE_MONITOR_PROXY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     /// @notice Calls subscription contract and creates a DSGuard if non existent
     /// @param _minRatio Minimum ratio below which repay is triggered
