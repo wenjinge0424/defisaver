@@ -19,7 +19,7 @@ contract DyDxFlashLoanTaker is DydxFlashLoanBase, ProxyPermission {
     /// @param _receiver Address of funds receiver
     /// @param _ethAmount ETH amount that needs to be pulled from dydx    
     /// @param _encodedData Bytes with packed data
-    function importLoan(address _receiver, uint256 _ethAmount, bytes memory _encodedData) public {
+    function takeLoan(address _receiver, uint256 _ethAmount, bytes memory _encodedData) public {
         ISoloMargin solo = ISoloMargin(SOLO_MARGIN_ADDRESS);
 
         // Get marketId from token address
@@ -46,6 +46,6 @@ contract DyDxFlashLoanTaker is DydxFlashLoanBase, ProxyPermission {
         solo.operate(accountInfos, operations);
         removePermission(_receiver);
 
-        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "FlashLoanTaken", abi.encode(_receiver, _ethAmount, _encodedData));
+        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "DyDxFlashLoanTaken", abi.encode(_receiver, _ethAmount, _encodedData));
     }
 }
