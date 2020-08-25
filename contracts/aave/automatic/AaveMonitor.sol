@@ -25,7 +25,6 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
     uint public REPAY_GAS_COST = 2200000;
     uint public BOOST_GAS_COST = 1700000;
 
-    address public constant GAS_TOKEN_INTERFACE_ADDRESS = 0x0000000000b3F879cb30FE243b4Dfee438691c04;
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
     AaveMonitorProxy public aaveMonitorProxy;
