@@ -20,7 +20,7 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
     uint public REPAY_GAS_TOKEN = 25;
     uint public BOOST_GAS_TOKEN = 20;
 
-    uint constant public MAX_GAS_PRICE = 80000000000; // 80 gwei
+    uint constant public MAX_GAS_PRICE = 200000000000; // 200 gwei
 
     uint public REPAY_GAS_COST = 2200000;
     uint public BOOST_GAS_COST = 1700000;
