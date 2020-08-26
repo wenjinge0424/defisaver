@@ -20,7 +20,7 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
     uint public REPAY_GAS_TOKEN = 25;
     uint public BOOST_GAS_TOKEN = 20;
 
-    uint constant public MAX_GAS_PRICE = 200000000000; // 200 gwei
+    uint public MAX_GAS_PRICE = 200000000000; // 200 gwei
 
     uint public REPAY_GAS_COST = 2200000;
     uint public BOOST_GAS_COST = 1700000;
@@ -195,6 +195,27 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
 
         REPAY_GAS_COST = _gasCost;
     }
+
+    /// @notice Allows owner to change max gas price
+    /// @param _maxGasPrice New max gas price
+    function changeMaxGasPrice(uint _maxGasPrice) public onlyOwner {
+        require(_maxGasPrice < 500000000000);
+
+        MAX_GAS_PRICE = _maxGasPrice;
+    }
+
+    /// @notice Allows owner to change gas token amount
+    /// @param _gasTokenAmount New gas token amount
+    /// @param _repay true if repay gas token, false if boost gas token
+    function changeGasTokenAmount(uint _gasTokenAmount, bool _repay) public onlyOwner {
+        if (_repay) {
+            REPAY_GAS_TOKEN = _gasTokenAmount;
+        } else {
+            BOOST_GAS_TOKEN = _gasTokenAmount;
+        }
+    }
+
+    
 
     /// @notice Adds a new bot address which will be able to call repay/boost
     /// @param _caller Bot address
