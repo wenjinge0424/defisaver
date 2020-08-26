@@ -15,6 +15,7 @@ const {
     ETH_JOIN_ADDRESS,
     BAT_ADDRESS,
     WBTC_ADDRESS,
+    WETH_ADDRESS,
     nullAddress,
 } = require('./helper.js');
 
@@ -27,8 +28,10 @@ const DSSProxyActions = contract.fromArtifact('DssProxyActions');
 const MCDCloseTaker = contract.fromArtifact('MCDCloseTaker');
 const MCDSaverTaker = contract.fromArtifact('MCDSaverTaker');
 
-const mcdCloseTakerAddr = '0xb4fFe5983B0B748124577Af4d16953bd096b6897';
-const uniswapWrapperAddr = '0x880A845A85F843a5c67DB2061623c6Fc3bB4c511';
+const mcdCloseTakerAddr = '0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B';
+const mcdCloseFlashLoanAddr = '0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab';
+
+const uniswapWrapperAddr = '0x4c9B55f2083629A1F7aDa257ae984E03096eCD25';
 const oldUniswapWrapperAddr = '0x1e30124FDE14533231216D95F7798cD0061e5cf8';
 const mcdSaverTakerAddr = '0xafaa78182ad0ba15e32f525e49d575b3716a1e57';
 
@@ -59,58 +62,59 @@ describe("MCD-Close", accounts => {
 
     });
 
-    it('... should buy a token', async () => {
-        const ethAmount = web3.utils.toWei('5', 'ether');
-        await web3Exchange.methods.swapEtherToToken(ethAmount, WBTC_ADDRESS, '0').send({from: accounts[0], value: ethAmount, gas: 800000});
-
-        const tokenBalance = await getBalance(web3, accounts[0], WBTC_ADDRESS);
-        console.log(tokenBalance/ 1e18);
-        expect(tokenBalance).to.be.bignumber.is.above('0');
-    });
-
     it('... should close Eth vault, exiting in Eth', async () => {
         let ilk = 'ETH_A';
         let collToken = ETH_ADDRESS;
 
-        const balanceBefore = await getBalance(web3, accounts[0], collToken);
-
-        const vaultId = await createVault(ilk, web3.utils.toWei('2', 'ether'), web3.utils.toWei('500', 'ether'));
+        const vaultId = await createVault(ilk, web3.utils.toWei('4', 'ether'), web3.utils.toWei('500', 'ether'));
 
         const vaultInfo = await mcdSaverTaker.getCdpDetailedInfo(vaultId);
 
-        let destAmount = Dec(vaultInfo.debt.toString()).times(1.05).toString(); // vault debt + 0.5%
+        let destAmount = Dec(vaultInfo.debt.toString()).times(1.05).toString(); // vault debt + 5%
         let srcAmount = vaultInfo.collateral.toString(); // vault coll
+
+        const balanceBefore = await getBalance(web3, accounts[0], collToken);
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(mcdCloseTaker, 'closeWithLoan'),
         [[collToken, makerAddresses["MCD_DAI"], srcAmount, destAmount, 0, uniswapWrapperAddr, nullAddress, "0x0", 0],
-        [vaultId, makerAddresses[`MCD_JOIN_${ilk}`], 0, 0, 0, true, false]]);
+        [vaultId, makerAddresses[`MCD_JOIN_${ilk}`], 0, 0, 1, true, false]]);
 
         await web3Proxy.methods['execute(address,bytes)']
             (mcdCloseTakerAddr, data).send({from: accounts[0], gas: 3500000 });
 
         const balanceAfter = await getBalance(web3, accounts[0], collToken);
+        const proxyBalanceAfter = await getBalance(web3, proxyAddr, collToken);
+        const contractBalance = await getBalance(web3, uniswapWrapperAddr, collToken);
 
-        console.log(balanceBefore / 1e18, balanceAfter / 1e18);
+        console.log(balanceBefore / 1e18, balanceAfter / 1e18, contractBalance / 1e18, proxyBalanceAfter / 1e18);
+        const vaultInfoAfter = await mcdSaverTaker.getCdpDetailedInfo(vaultId);
+        console.log(vaultInfoAfter);
     });
 
-    it('... should close Eth vault, exiting in Dai', async () => {
-        let ilk = 'ETH_A';
-        let collToken = ETH_ADDRESS;
+    // it('... should close Eth vault, exiting in Dai', async () => {
+    //     let ilk = 'ETH_A';
+    //     let collToken = ETH_ADDRESS;
 
-        const vaultId = await createVault(ilk, web3.utils.toWei('2', 'ether'), web3.utils.toWei('500', 'ether'));
+    //     const vaultId = await createVault(ilk, web3.utils.toWei('2', 'ether'), web3.utils.toWei('500', 'ether'));
 
-        const vaultInfo = await mcdSaverTaker.getCdpDetailedInfo(vaultId);
+    //     const daiBalanceBefore = await getBalance(web3, accounts[0], makerAddresses["MCD_DAI"]);
+    //     console.log(`Dai balance before ${daiBalanceBefore / 1e18}`);
 
-        let destAmount = Dec(vaultInfo.debt.toString()).times(1.05).toString(); // vault debt + 0.5%
-        let srcAmount = vaultInfo.collateral.toString(); // vault coll
+    //     const vaultInfo = await mcdSaverTaker.getCdpDetailedInfo(vaultId);
 
-        const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(mcdCloseTaker, 'closeWithLoan'),
-        [[collToken, makerAddresses["MCD_DAI"], srcAmount, 0, 0, uniswapWrapperAddr, nullAddress, "0x0", 0],
-        [vaultId, makerAddresses[`MCD_JOIN_${ilk}`], 0, 0, 0, true, true]]);
+    //     let destAmount = Dec(vaultInfo.debt.toString()).times(1.05).toString(); // vault debt + 0.5%
+    //     let srcAmount = vaultInfo.collateral.toString(); // vault coll
 
-        await web3Proxy.methods['execute(address,bytes)']
-            (mcdCloseTakerAddr, data).send({from: accounts[0], gas: 3500000 });
-    });
+    //     const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(mcdCloseTaker, 'closeWithLoan'),
+    //     [[collToken, makerAddresses["MCD_DAI"], srcAmount, 0, 0, uniswapWrapperAddr, nullAddress, "0x0", 0],
+    //     [vaultId, makerAddresses[`MCD_JOIN_${ilk}`], 0, 0, 0, true, true]]);
+
+    //     await web3Proxy.methods['execute(address,bytes)']
+    //         (mcdCloseTakerAddr, data).send({from: accounts[0], gas: 3500000 });
+
+    //     const daiBalanceAfter = await getBalance(web3, accounts[0], makerAddresses["MCD_DAI"]);
+    //     console.log(`Dai balance before ${daiBalanceAfter / 1e18}`);
+    // });
 
     const createVault = async (type, _collAmount, _daiAmount) => {
 

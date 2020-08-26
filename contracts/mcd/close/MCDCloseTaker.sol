@@ -16,7 +16,7 @@ abstract contract IMCDSubscriptions {
 
 contract MCDCloseTaker is MCDSaverProxyHelper {
 
-    address payable public constant MCD_CLOSE_FLASH_LOAN = 0xdFccc9C59c7361307d47c558ffA75840B32DbA29;
+    address payable public constant MCD_CLOSE_FLASH_LOAN = 0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab;
 
     address public constant SUBSCRIPTION_ADDRESS_NEW = 0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a;
 
