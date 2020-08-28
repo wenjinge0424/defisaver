@@ -75,9 +75,13 @@ contract AaveBasicProxy is GasBurner {
 
         uint256 amount = _amount;
 
+        (,uint256 borrowAmount,,,,,uint256 originationFee,,,) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, address(this));
+
         if (_wholeDebt) {
-            (,amount,,,,,,,,) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, address(this));
+            amount = borrowAmount;
         }
+
+        amount += originationFee;
 
         if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), amount);
@@ -101,9 +105,13 @@ contract AaveBasicProxy is GasBurner {
 
         uint256 amount = _amount;
 
+        (,uint256 borrowAmount,,,,,uint256 originationFee,,,) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, _onBehalf);
+
         if (_wholeDebt) {
-            (,amount,,,,,,,,) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, _onBehalf);
+            amount = borrowAmount;
         }
+
+        amount += originationFee;
 
         if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), amount);
