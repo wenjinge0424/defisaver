@@ -46,22 +46,22 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
     /// @notice Main entry point, it will move or transform a loan
     /// @dev Called through DSProxy
     function moveLoan(
-        LoanShiftData memory _loanShift,
-        SaverExchangeCore.ExchangeData memory _exchangeData
+        SaverExchangeCore.ExchangeData memory _exchangeData,
+        LoanShiftData memory _loanShift
     ) public {
         if (_isSameTypeVaults(_loanShift)) {
             _forkVault(_loanShift);
             return;
         }
 
-        _callCloseAndOpen(_loanShift, _exchangeData);
+        _callCloseAndOpen(_exchangeData, _loanShift);
     }
 
     //////////////////////// INTERNAL FUNCTIONS //////////////////////////
 
     function _callCloseAndOpen(
-        LoanShiftData memory _loanShift,
-        SaverExchangeCore.ExchangeData memory _exchangeData
+        SaverExchangeCore.ExchangeData memory _exchangeData,
+        LoanShiftData memory _loanShift
     ) internal {
         address protoAddr = shifterRegistry.getAddr(getNameByProtocol(uint8(_loanShift.fromProtocol)));
 
