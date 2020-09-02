@@ -11,15 +11,21 @@ const SaverExchange = contract.fromArtifact('SaverExchange');
 const ExchangeInterfaceV2 = contract.fromArtifact('ExchangeInterfaceV2');
 const ExchangeInterface = contract.fromArtifact('ExchangeInterface');
 const AllowanceProxy = contract.fromArtifact('AllowanceProxy');
+const Prices = contract.fromArtifact('Prices');
 
 const makerVersion = "1.0.6";
 
-const wrapperAddress = '0x880a845a85f843a5c67db2061623c6fc3bb4c511';
-const allowanceProxyAddress = '0xdd8e19f63844e433c80117b402e36b62eff3ec0a';
+// UniswapWrapper:  0xDd37b2eB92F97dd09cEd1f1d20A73aA340b2311A
+// KyberWrapper:  0x393A6a6850e0788e496d73c50a436606e6CcA874
+// OasisTradeWrapper:  0x71e7EC880873af0FE33Ad988F862bE200FdD85cC
+
+const wrapperAddress = '0x71e7EC880873af0FE33Ad988F862bE200FdD85cC';
+const allowanceProxyAddress = '0xC3Ef4965B788cc4b905084d01F2eb7D4b6E93ABF';
+const pricesAddress = '0xC045C7B6B976d24728872d2117073c893d0B09C2';
 
 let tokenName = "MCD_DAI"; // ["MCD_DAI", "BAT", "USCD", "WBTC"]
 
-describe("Exchange", accounts => {
+describe("Exchange2", accounts => {
     let registry, proxy, proxyAddr, makerAddresses, exchange, web3Exchange, web3OasisWrapper;
 
     before(async () => {
@@ -34,20 +40,13 @@ describe("Exchange", accounts => {
         proxy = proxyInfo.proxy;
         proxyAddr = proxyInfo.proxyAddr;
         web3Proxy = new web3.eth.Contract(DSProxy.abi, proxyAddr);
+        prices = new web3.eth.Contract(Prices.abi, pricesAddress);
 
         exchange = await SaverExchange.at(saverExchangeAddress);
         web3Exchange = new web3.eth.Contract(SaverExchange.abi, saverExchangeAddress);
         allowanceProxy = new web3.eth.Contract(AllowanceProxy.abi, allowanceProxyAddress);
     });
 
-    it('... should check sell rate', async () => {
-        const value = web3.utils.toWei('1', 'ether');
-
-        const sellRate = await web3Exchange.methods.getBestPrice(value, ETH_ADDRESS, makerAddresses[tokenName],  3, 1).call();
-
-        console.log(sellRate);
-
-    });
 
     it(`... should sell Ether for ${tokenName}`, async () => {
         const value = web3.utils.toWei('10', 'ether');
