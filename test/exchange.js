@@ -15,12 +15,13 @@ const Prices = contract.fromArtifact('Prices');
 
 const makerVersion = "1.0.6";
 
-// UniswapWrapper:  0xDd37b2eB92F97dd09cEd1f1d20A73aA340b2311A
-// KyberWrapper:  0x393A6a6850e0788e496d73c50a436606e6CcA874
-// OasisTradeWrapper:  0x71e7EC880873af0FE33Ad988F862bE200FdD85cC
+// UniswapWrapperV2:  0xf19A2A01B70519f67ADb309a994Ec8c69A967E8b
+// UniswapWrapper:  0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb
+// KyberWrapper:  0x9561C133DD8580860B6b7E504bC5Aa500f0f06a7
+// OasisTradeWrapper:  0xA57B8a5584442B467b4689F1144D269d096A3daF
 
-const wrapperAddress = '0x71e7EC880873af0FE33Ad988F862bE200FdD85cC';
-const allowanceProxyAddress = '0xC3Ef4965B788cc4b905084d01F2eb7D4b6E93ABF';
+const wrapperAddress = '0x4339316e04CFfB5961D1c41fEF8E44bfA2A7fBd1';
+const allowanceProxyAddress = '0x5b1869D9A4C187F2EAa108f3062412ecf0526b24';
 const pricesAddress = '0xC045C7B6B976d24728872d2117073c893d0B09C2';
 
 let tokenName = "MCD_DAI"; // ["MCD_DAI", "BAT", "USCD", "WBTC"]
@@ -88,7 +89,7 @@ describe("Exchange2", accounts => {
     });
 
     it(`... should buy Ether with ${tokenName}`, async () => {
-        const srcAmount = web3.utils.toWei('200', 'ether');
+        const srcAmount = web3.utils.toWei('500', 'ether');
         const destAmount = web3.utils.toWei('0.5', 'ether');
 
         await approve(web3, makerAddresses[tokenName], accounts[0], allowanceProxyAddress);

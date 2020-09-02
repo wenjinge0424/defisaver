@@ -22,7 +22,7 @@ const C_USDT_ADDRESS = '0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9';
 const C_WBTC_ADDRESS = '0xc11b1268c1a384e55c48c2391d8d480264a3a7f4';
 const C_ZRX_ADDRESS = '0xb3319f5d18bc0d84dd1b4825dcde5d5f7266d407';
 
-const saverExchangeAddress = "0x04CbD650c829299FDedCE903eada37FbDbA3b50f";
+const saverExchangeAddress = "0xe97DbD7116D168190F8A6E7beB1092c103c53a12";
 const mcdSaverProxyAddress = "0xa292832ACF0b0226E378E216A982fA966eaA7EBc";
 
 const debugContractAddr = '0x59d3631c86BbE35EF041872d502F218A39FBa150';
