@@ -54,14 +54,16 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
         } else if (paramData.swapType == 2) { // DEBT_SWAP
             exchangeData.destAmount = (_amount + _fee);
             _buy(exchangeData);
+
+            // Send extra to DSProxy
+            sendToProxy(payable(paramData.proxy), exchangeData.srcAddr, ERC20(exchangeData.srcAddr).balanceOf(address(this)));
+
         } else { // NO_SWAP just send tokens to proxy
             sendToProxy(payable(paramData.proxy), exchangeData.srcAddr, getBalance(exchangeData.srcAddr));
         }
 
-        // Execute the Open operation (Skip if it's debt swap)
-        if (paramData.swapType != 2) {
-            DSProxyInterface(paramData.proxy).execute(protocolAddr2, paramData.proxyData2);
-        }
+        // Execute the Open operation
+        DSProxyInterface(paramData.proxy).execute(protocolAddr2, paramData.proxyData2);
 
         // Repay FL
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
@@ -92,20 +94,23 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
             proxyData1 = abi.encodeWithSignature("close(uint256,address,uint256,uint256)", numData[2], addrData[0], _amount, numData[0]);
 
         } else if(enumData[0] == 1) { // COMPOUND FROM
-            proxyData1 = abi.encodeWithSignature(
-            "close(address,address,uint256,uint256)", addrData[0], addrData[2], numData[0], numData[1]);
+            if (enumData[2] == 2) { // DEBT_SWAP
+                proxyData1 = abi.encodeWithSignature("changeDebt(address,address,uint256,uint256)", addrData[2], addrData[3], (_amount + _fee), numData[4]);
+            } else {
+                proxyData1 = abi.encodeWithSignature("close(address,address,uint256,uint256)", addrData[0], addrData[2], numData[0], numData[1]);
+            }
         }
 
         if (enumData[1] == 0) { // MAKER TO
             proxyData2 = abi.encodeWithSignature("open(uint256,address,uint256)", numData[3], addrData[1], openDebtAmount);
         } else if(enumData[1] == 1) { // COMPOUND TO
-            proxyData2 = abi.encodeWithSignature("open(address,address,uint256)", addrData[1], addrData[3], openDebtAmount);
+            if (enumData[2] == 2) { // DEBT_SWAP
+                proxyData2 = abi.encodeWithSignature("repayAll(address)", addrData[3]);
+            } else {
+                proxyData2 = abi.encodeWithSignature("open(address,address,uint256)", addrData[1], addrData[3], openDebtAmount);
+            }
         }
 
-        // Call specific function if it's a debt swap
-        if (enumData[2] == 2) { // DEBT_SWAP
-            proxyData1 = abi.encodeWithSignature("changeDebt(address,address,uint256,uint256)", addrData[2], addrData[3], (_amount + _fee), numData[4]);
-        }
 
         paramData = ParamData({
             proxyData1: proxyData1,
