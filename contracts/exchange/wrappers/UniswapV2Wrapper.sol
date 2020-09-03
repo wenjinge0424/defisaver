@@ -29,16 +29,14 @@ contract UniswapV2Wrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
         path[0] = _srcAddr;
         path[1] = _destAddr;
 
+        ERC20(_srcAddr).safeApprove(address(router), _srcAmount);
+
         // if we are buying ether
         if (_destAddr == WETH_ADDRESS) {
-            ERC20(_srcAddr).safeApprove(address(router), _srcAmount);
-
             amounts = router.swapExactTokensForETH(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
         }
         // if we are selling token to token
         else {
-            ERC20(_srcAddr).safeApprove(address(router), _srcAmount);
-
             amounts = router.swapExactTokensForTokens(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
         }
 
@@ -60,16 +58,15 @@ contract UniswapV2Wrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
         path[0] = _srcAddr;
         path[1] = _destAddr;
 
+        ERC20(_srcAddr).safeApprove(address(router), uint(-1));
+
+
          // if we are buying ether
         if (_destAddr == WETH_ADDRESS) {
-            ERC20(_srcAddr).safeApprove(address(router), uint(-1));
-
             amounts = router.swapTokensForExactETH(_destAmount, uint(-1), path, msg.sender, block.timestamp + 1);
         }
         // if we are buying token to token
         else {
-            ERC20(_srcAddr).safeApprove(address(router), uint(-1));
-
             amounts = router.swapTokensForExactTokens(_destAmount, uint(-1), path, msg.sender, block.timestamp + 1);
         }
 
