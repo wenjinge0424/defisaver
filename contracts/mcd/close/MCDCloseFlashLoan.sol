@@ -3,7 +3,6 @@ pragma experimental ABIEncoderV2;
 
 import "../../mcd/saver/MCDSaverProxy.sol";
 import "../../utils/FlashLoanReceiverBase.sol";
-import "../../utils/DebugInfo.sol";
 import "../../auth/AdminAuth.sol";
 import "../../exchange/SaverExchangeCore.sol";
 import "../../mcd/saver/MCDSaverProxyHelper.sol";
@@ -12,8 +11,6 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
-
-    DebugInfo public constant console = DebugInfo(0x59d3631c86BbE35EF041872d502F218A39FBa150);
 
     bytes32 internal constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
 
@@ -101,8 +98,6 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
         uint daiSwaped = 0;
         uint dfsFee = 0;
 
-        console.logUint("BEFORE_BALANCE", address(this).balance);
-
         if (_closeData.toDai) {
             _exchangeData.srcAmount = _closeData.collAmount;
             (, daiSwaped) = _sell(_exchangeData);
@@ -113,8 +108,6 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
 
             _exchangeData.destAmount = (_closeData.daiAmount + _closeData.flFee + dfsFee);
             (, daiSwaped) = _buy(_exchangeData);
-
-            console.logUint("AFTER_BALANCE", address(this).balance);
         }
 
         takeFee(dfsFee);
