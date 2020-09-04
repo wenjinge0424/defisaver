@@ -17,6 +17,7 @@ const {
     WBTC_ADDRESS,
     WETH_ADDRESS,
     nullAddress,
+    getDebugInfo,
 } = require('./helper.js');
 
 const DSProxy = contract.fromArtifact("DSProxy");
@@ -29,9 +30,9 @@ const MCDCloseTaker = contract.fromArtifact('MCDCloseTaker');
 const MCDSaverTaker = contract.fromArtifact('MCDSaverTaker');
 
 const mcdCloseTakerAddr = '0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B';
-const mcdCloseFlashLoanAddr = '0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab';
+const mcdCloseFlashLoanAddr = '0xdAA71FBBA28C946258DD3d5FcC9001401f72270F';
 
-const uniswapWrapperAddr = '0x4c9B55f2083629A1F7aDa257ae984E03096eCD25';
+const uniswapWrapperAddr = '0x0d3C71782055bD88A71b611972152d6e984EDF79';
 const oldUniswapWrapperAddr = '0x1e30124FDE14533231216D95F7798cD0061e5cf8';
 const mcdSaverTakerAddr = '0xafaa78182ad0ba15e32f525e49d575b3716a1e57';
 
@@ -77,18 +78,21 @@ describe("MCD-Close", accounts => {
 
         const data = web3.eth.abi.encodeFunctionCall(getAbiFunction(mcdCloseTaker, 'closeWithLoan'),
         [[collToken, makerAddresses["MCD_DAI"], srcAmount, destAmount, 0, uniswapWrapperAddr, nullAddress, "0x0", 0],
-        [vaultId, makerAddresses[`MCD_JOIN_${ilk}`], 0, 0, 1, true, false]]);
+        [vaultId, makerAddresses[`MCD_JOIN_${ilk}`], 0, 0, '0', true, false], mcdCloseFlashLoanAddr]);
 
         await web3Proxy.methods['execute(address,bytes)']
             (mcdCloseTakerAddr, data).send({from: accounts[0], gas: 3500000 });
 
         const balanceAfter = await getBalance(web3, accounts[0], collToken);
-        const proxyBalanceAfter = await getBalance(web3, proxyAddr, collToken);
-        const contractBalance = await getBalance(web3, uniswapWrapperAddr, collToken);
 
-        console.log(balanceBefore / 1e18, balanceAfter / 1e18, contractBalance / 1e18, proxyBalanceAfter / 1e18);
+        console.log(balanceBefore / 1e18, balanceAfter / 1e18);
         const vaultInfoAfter = await mcdSaverTaker.getCdpDetailedInfo(vaultId);
         console.log(vaultInfoAfter);
+
+        // const beforeEthBalance = await getDebugInfo("BEFORE_BALANCE", "uint");
+        // const afterEthBalance = await getDebugInfo("AFTER_BALANCE", "uint");
+
+        // console.log(contractBalance.toString() / 1e18);
     });
 
     // it('... should close Eth vault, exiting in Dai', async () => {
