@@ -15,10 +15,10 @@ const Prices = contract.fromArtifact('Prices');
 
 const makerVersion = "1.0.6";
 
-// UniswapWrapperV2:  0xf19A2A01B70519f67ADb309a994Ec8c69A967E8b
-// UniswapWrapper:  0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb
-// KyberWrapper:  0x9561C133DD8580860B6b7E504bC5Aa500f0f06a7
-// OasisTradeWrapper:  0xA57B8a5584442B467b4689F1144D269d096A3daF
+// UniswapWrapper:  0xC89Ce4735882C9F0f0FE26686c53074E09B0D550
+// KyberWrapper:  0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb
+// OasisTradeWrapper:  0x9561C133DD8580860B6b7E504bC5Aa500f0f06a7
+// UniswapV2WrapperAddr:  0xe982E462b094850F12AF94d21D470e21bE9D0E9C
 
 const wrapperAddress = '0x4339316e04CFfB5961D1c41fEF8E44bfA2A7fBd1';
 const allowanceProxyAddress = '0x5b1869D9A4C187F2EAa108f3062412ecf0526b24';
