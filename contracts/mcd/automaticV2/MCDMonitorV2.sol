@@ -56,10 +56,10 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
     /// @notice Bots call this method to repay for user when conditions are met
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     function repayFor(
+        SaverExchangeCore.ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _nextPrice,
-        address _joinAddr,
-        SaverExchangeCore.ExchangeData memory _exchangeData
+        address _joinAddr
     ) public payable onlyApproved burnGas(REPAY_GAS_TOKEN) {
 
         (bool isAllowed, uint ratioBefore) = canCall(Method.Repay, _cdpId, _nextPrice);
@@ -73,8 +73,8 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
             owner,
             mcdSaverTakerAddress,
             abi.encodeWithSignature(
-            "repayWithLoan(uint256,uint256,address,(address,address,uint256,uint256,uint256,address,address,bytes,uint256))",
-            _cdpId, gasCost, _joinAddr, _exchangeData));
+            "repayWithLoan((address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256,uint256,address)",
+            _exchangeData, _cdpId, gasCost, _joinAddr));
 
 
         (bool isGoodRatio, uint ratioAfter) = ratioGoodAfter(Method.Repay, _cdpId, _nextPrice);
@@ -88,10 +88,10 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
     /// @notice Bots call this method to boost for user when conditions are met
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     function boostFor(
+        SaverExchangeCore.ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _nextPrice,
-        address _joinAddr,
-        SaverExchangeCore.ExchangeData memory _exchangeData
+        address _joinAddr
     ) public payable onlyApproved burnGas(BOOST_GAS_TOKEN)  {
 
         (bool isAllowed, uint ratioBefore) = canCall(Method.Boost, _cdpId, _nextPrice);
@@ -105,8 +105,8 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
             owner,
             mcdSaverTakerAddress,
             abi.encodeWithSignature(
-            "boostWithLoan(uint256,uint256,address,(address,address,uint256,uint256,uint256,address,address,bytes,uint256))",
-            _cdpId, gasCost, _joinAddr, _exchangeData));
+            "boostWithLoan((address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256,uint256,address)",
+            _exchangeData, _cdpId, gasCost, _joinAddr));
 
         (bool isGoodRatio, uint ratioAfter) = ratioGoodAfter(Method.Boost, _cdpId, _nextPrice);
         require(isGoodRatio);
