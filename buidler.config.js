@@ -16,7 +16,7 @@ module.exports = {
         mainnet: {
             url: process.env.ALCHEMY_NODE,
             accounts: [process.env.PRIV_KEY_OWNER],
-            gasPrice: 55000000000
+            gasPrice: 132000000000
         },
         kovan: {
             url: process.env.KOVAN_INFURA_ENDPOINT,
@@ -32,7 +32,6 @@ module.exports = {
         }
     },
     etherscan: {
-        url: "https://api-kovan.etherscan.io/api",
         apiKey: process.env.ETHERSCAN_API_KEY
     }
 };

@@ -13,7 +13,7 @@ const file = require(filename);
 const address = file.networks[networkName].address;
 const args = file.networks[networkName].args.join(' ');
 
-const command = `npx buidler verify-contract --contract-name ${contractName} --address ${address} ${args}`
+const command = `npx buidler verify-contract --network ${networkName} --contract-name ${contractName} --address ${address} ${args}`
 
 exec(command, (error, stdout, stderr) => {
     if (error) {
