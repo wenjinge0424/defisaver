@@ -137,6 +137,10 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             writeUint256(_exData.callData, 36, _exData.destAmount);
         }
 
+        if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isNonPayableAddr(_exData.exchangeAddr)) {
+            _ethAmount = 0;
+        }
+
         if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.exchangeAddr)) {
             (success, ) = _exData.exchangeAddr.call{value: _ethAmount}(_exData.callData);
         } else {
