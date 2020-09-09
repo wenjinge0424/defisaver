@@ -12,12 +12,15 @@ import "../../interfaces/DaiJoin.sol";
 import "../../interfaces/Join.sol";
 
 import "./MCDSaverProxyHelper.sol";
+import "../../utils/BotRegistry.sol";
 import "../../exchange/SaverExchangeCore.sol";
 
 /// @title Implements Boost and Repay for MCD CDPs
 contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
 
-    uint public constant SERVICE_FEE = 400; // 0.25% Fee
+    uint public constant MANUAL_SERVICE_FEE = 400; // 0.25% Fee
+    uint public constant AUTOMATIC_SERVICE_FEE = 333; // 0.3% Fee
+
     bytes32 public constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
 
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
@@ -27,6 +30,8 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
     address public constant JUG_ADDRESS = 0x19c0976f590D67707E62397C87829d896Dc0f1F1;
     address public constant ETH_JOIN_ADDRESS = 0x2F0b23f53734252Bda2277357e97e1517d6B042A;
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+
+    address public constant BOT_REGISTRY_ADDRESS = 0x637726f8b08a7ABE3aE3aCaB01A80E2d8ddeF77B;
 
     Manager public constant manager = Manager(MANAGER_ADDRESS);
     Vat public constant vat = Vat(VAT_ADDRESS);
@@ -202,7 +207,11 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
     /// @param _gasCost Used for Monitor, estimated gas cost of tx
     /// @param _owner The address that controlls the DSProxy that owns the CDP
     function getFee(uint _amount, uint _gasCost, address _owner) internal returns (uint feeAmount) {
-        uint fee = SERVICE_FEE;
+        uint fee = MANUAL_SERVICE_FEE;
+
+        if (BotRegistry(BOT_REGISTRY_ADDRESS).botList(tx.origin)) {
+            fee = AUTOMATIC_SERVICE_FEE;
+        }
 
         if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_owner)) {
             fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_owner);
