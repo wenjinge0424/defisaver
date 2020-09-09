@@ -233,6 +233,7 @@ contract SaverProxyActions is Common {
             // Gets token from the user's wallet
             GemJoinLike(apt).gem().transferFrom(msg.sender, address(this), wad);
             // Approves adapter to take the token amount
+            GemJoinLike(apt).gem().approve(apt, 0);
             GemJoinLike(apt).gem().approve(apt, wad);
         }
         // Joins token collateral into the vat
