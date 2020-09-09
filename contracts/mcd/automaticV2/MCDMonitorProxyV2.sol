@@ -121,16 +121,4 @@ contract MCDMonitorProxyV2 is AdminAuth {
         CHANGE_PERIOD = _periodInDays * 1 days;
     }
 
-    /// @notice In case something is left in contract, owner is able to withdraw it
-    /// @param _token address of token to withdraw balance
-    function withdrawToken(address _token) public onlyOwner {
-        uint balance = ERC20(_token).balanceOf(address(this));
-        ERC20(_token).transfer(msg.sender, balance);
-    }
-
-    /// @notice In case something is left in contract, owner is able to withdraw it
-    function withdrawEth() public onlyOwner {
-        uint balance = address(this).balance;
-        msg.sender.transfer(balance);
-    }
 }

@@ -132,7 +132,9 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
             convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
         }
 
-        Join(_joinAddr).gem().approve(_joinAddr, _amount);
+        ERC20(address(Join(_joinAddr).gem())).safeApprove(_joinAddr, 0);
+        ERC20(address(Join(_joinAddr).gem())).safeApprove(_joinAddr, _amount);
+
         Join(_joinAddr).join(address(this), _amount);
 
         vat.frob(

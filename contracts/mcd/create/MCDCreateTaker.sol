@@ -5,8 +5,11 @@ import "../../mcd/saver/MCDSaverProxy.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../../interfaces/ILendingPool.sol";
 import "../../exchange/SaverExchangeCore.sol";
+import "../../utils/SafeERC20.sol";
 
 contract MCDCreateTaker {
+
+    using SafeERC20 for ERC20;
 
     address payable public constant MCD_CREATE_FLASH_LOAN = 0x71eC9a4fCE561c3936a511D9ebb05B60CF2bA519;
 
@@ -36,8 +39,8 @@ contract MCDCreateTaker {
 
 
         if (_createData.joinAddr != ETH_JOIN_ADDRESS) {
-            ERC20(getCollateralAddr(_createData.joinAddr)).transferFrom(msg.sender, address(this), _createData.collAmount);
-            ERC20(getCollateralAddr(_createData.joinAddr)).transfer(MCD_CREATE_FLASH_LOAN, _createData.collAmount);
+            ERC20(getCollateralAddr(_createData.joinAddr)).safeTransferFrom(msg.sender, address(this), _createData.collAmount);
+            ERC20(getCollateralAddr(_createData.joinAddr)).safeTransfer(MCD_CREATE_FLASH_LOAN, _createData.collAmount);
         }
 
         (uint[6] memory numData, address[5] memory addrData, bytes memory callData)
