@@ -110,7 +110,7 @@ contract Prices is DSMath {
 
         // starting from 0 in case there is only one rate in array
         for (uint256 i=0; i<_rates.length; i++) {
-            if (_rates[i] < _rates[minIndex]) {
+            if ((_rates[i] < _rates[minIndex] && _rates[i] > 0) || _rates[minIndex] == 0) {
                 minIndex = i;
             }
         }
