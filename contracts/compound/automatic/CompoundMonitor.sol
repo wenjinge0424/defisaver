@@ -1,6 +1,7 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
+import "../../utils/BotRegistry.sol";
 import "../../utils/GasBurner.sol";
 import "./CompoundMonitorProxy.sol";
 import "./CompoundSubscriptions.sol";
@@ -28,6 +29,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
 
     address public constant GAS_TOKEN_INTERFACE_ADDRESS = 0x0000000000b3F879cb30FE243b4Dfee438691c04;
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
+    address public constant BOT_REGISTRY_ADDRESS = 0x637726f8b08a7ABE3aE3aCaB01A80E2d8ddeF77B;
 
     CompoundMonitorProxy public compoundMonitorProxy;
     CompoundSubscriptions public subscriptionsContract;
@@ -35,11 +37,8 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
 
     DefisaverLogger public logger = DefisaverLogger(DEFISAVER_LOGGER);
 
-    /// @dev Addresses that are able to call methods for repay and boost
-    mapping(address => bool) public approvedCallers;
-
     modifier onlyApproved() {
-        require(approvedCallers[msg.sender]);
+        require(BotRegistry(BOT_REGISTRY_ADDRESS).botList(msg.sender), "Not auth bot");
         _;
     }
 
@@ -47,8 +46,6 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
     /// @param _subscriptions Subscriptions contract for Compound positions
     /// @param _compoundFlashLoanTaker Contract that actually performs Repay/Boost
     constructor(address _compoundMonitorProxy, address _subscriptions, address _compoundFlashLoanTaker) public {
-        approvedCallers[msg.sender] = true;
-
         compoundMonitorProxy = CompoundMonitorProxy(_compoundMonitorProxy);
         subscriptionsContract = CompoundSubscriptions(_subscriptions);
         compoundFlashLoanTakerAddress = _compoundFlashLoanTaker;
@@ -202,18 +199,6 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
         require(_gasCost < 3000000);
 
         REPAY_GAS_COST = _gasCost;
-    }
-
-    /// @notice Adds a new bot address which will be able to call repay/boost
-    /// @param _caller Bot address
-    function addCaller(address _caller) public onlyOwner {
-        approvedCallers[_caller] = true;
-    }
-
-    /// @notice Removes a bot address so it can't call repay/boost
-    /// @param _caller Bot address
-    function removeCaller(address _caller) public onlyOwner {
-        approvedCallers[_caller] = false;
     }
 
     /// @notice If any tokens gets stuck in the contract owner can withdraw it
