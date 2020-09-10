@@ -9,6 +9,7 @@ import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../../utils/GasBurner.sol";
+import "../../utils/BotRegistry.sol";
 import "../../exchange/SaverExchangeCore.sol";
 
 import "./ISubscriptionsV2.sol";
@@ -31,23 +32,20 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
     ISubscriptionsV2 public subscriptionsContract;
     address public mcdSaverTakerAddress;
 
+    address public constant BOT_REGISTRY_ADDRESS = 0x637726f8b08a7ABE3aE3aCaB01A80E2d8ddeF77B;
+
     Manager public manager = Manager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
     Vat public vat = Vat(0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B);
     Spotter public spotter = Spotter(0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3);
 
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
 
-    /// @dev Addresses that are able to call methods for repay and boost
-    mapping(address => bool) public approvedCallers;
-
     modifier onlyApproved() {
-        require(approvedCallers[msg.sender]);
+        require(BotRegistry(BOT_REGISTRY_ADDRESS).botList(msg.sender), "Not auth bot");
         _;
     }
 
     constructor(address _monitorProxy, address _subscriptions, address _mcdSaverTakerAddress) public {
-        approvedCallers[msg.sender] = true;
-
         monitorProxyContract = MCDMonitorProxyV2(_monitorProxy);
         subscriptionsContract = ISubscriptionsV2(_subscriptions);
         mcdSaverTakerAddress = _mcdSaverTakerAddress;
@@ -66,7 +64,7 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
         require(isAllowed);
 
         uint gasCost = calcGasCost(REPAY_GAS_COST);
-        
+
         address owner = subscriptionsContract.getOwner(_cdpId);
 
         monitorProxyContract.callExecute{value: msg.value}(
@@ -98,7 +96,7 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
         require(isAllowed);
 
         uint gasCost = calcGasCost(BOOST_GAS_COST);
-        
+
         address owner = subscriptionsContract.getOwner(_cdpId);
 
         monitorProxyContract.callExecute{value: msg.value}(
@@ -254,17 +252,5 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
         } else {
             BOOST_GAS_TOKEN = _gasAmount;
         }
-    }
-
-    /// @notice Adds a new bot address which will be able to call repay/boost
-    /// @param _caller Bot address
-    function addCaller(address _caller) public onlyOwner {
-        approvedCallers[_caller] = true;
-    }
-
-    /// @notice Removes a bot address so it can't call repay/boost
-    /// @param _caller Bot address
-    function removeCaller(address _caller) public onlyOwner {
-        approvedCallers[_caller] = false;
     }
 }

@@ -9,7 +9,7 @@ import "../../utils/Discount.sol";
 import "../../DS/DSMath.sol";
 import "../../DS/DSProxy.sol";
 import "./Exponential.sol";
-
+import "../../utils/BotRegistry.sol";
 
 import "../../utils/SafeERC20.sol";
 
@@ -21,12 +21,16 @@ contract CompoundSaverHelper is DSMath, Exponential {
     address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
 
-    uint public constant SERVICE_FEE = 400; // 0.25% Fee
+    uint public constant MANUAL_SERVICE_FEE = 400; // 0.25% Fee
+    uint public constant AUTOMATIC_SERVICE_FEE = 333; // 0.3% Fee
+
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant CETH_ADDRESS = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
     address public constant COMPTROLLER = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
 
     address public constant COMPOUND_LOGGER = 0x3DD0CDf5fFA28C6847B4B276e2fD256046a44bb7;
+
+    address public constant BOT_REGISTRY_ADDRESS = 0x637726f8b08a7ABE3aE3aCaB01A80E2d8ddeF77B;
 
     /// @notice Helper method to payback the Compound debt
     /// @dev If amount is bigger it will repay the whole debt and send the extra to the _user
@@ -63,7 +67,11 @@ contract CompoundSaverHelper is DSMath, Exponential {
     /// @param _cTokenAddr CToken addr. of token we are getting for the fee
     /// @return feeAmount The amount we took for the fee
     function getFee(uint _amount, address _user, uint _gasCost, address _cTokenAddr) internal returns (uint feeAmount) {
-        uint fee = SERVICE_FEE;
+        uint fee = MANUAL_SERVICE_FEE;
+
+        if (BotRegistry(BOT_REGISTRY_ADDRESS).botList(tx.origin)) {
+            fee = AUTOMATIC_SERVICE_FEE;
+        }
 
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 

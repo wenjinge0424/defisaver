@@ -9,6 +9,7 @@ import "../interfaces/ILendingPoolAddressesProvider.sol";
 import "../interfaces/IPriceOracleGetterAave.sol";
 
 import "../utils/SafeERC20.sol";
+import "../utils/BotRegistry.sol";
 
 contract AaveHelper is DSMath {
 
@@ -16,7 +17,11 @@ contract AaveHelper is DSMath {
 
     address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
-    uint public constant SERVICE_FEE = 400; // 0.25% Fee
+
+    uint public constant MANUAL_SERVICE_FEE = 400; // 0.25% Fee
+    uint public constant AUTOMATIC_SERVICE_FEE = 333; // 0.3% Fee
+
+    address public constant BOT_REGISTRY_ADDRESS = 0x637726f8b08a7ABE3aE3aCaB01A80E2d8ddeF77B;
 
 	address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant AAVE_LENDING_POOL_ADDRESSES = 0x24a42fD28C976A61Df5D00D0599C34c4f90748c8;
@@ -88,7 +93,12 @@ contract AaveHelper is DSMath {
     /// @return feeAmount The amount we took for the fee
     function getFee(uint _amount, address _user, uint _gasCost, address _tokenAddr) internal returns (uint feeAmount) {
         address priceOracleAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getPriceOracle();
-        uint fee = SERVICE_FEE;
+
+        uint fee = MANUAL_SERVICE_FEE;
+
+        if (BotRegistry(BOT_REGISTRY_ADDRESS).botList(tx.origin)) {
+            fee = AUTOMATIC_SERVICE_FEE;
+        }
 
         if (Discount(DISCOUNT_ADDR).isCustomFeeSet(_user)) {
             fee = Discount(DISCOUNT_ADDR).getCustomServiceFee(_user);

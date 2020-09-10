@@ -33,11 +33,8 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
 
     DefisaverLogger public logger = DefisaverLogger(DEFISAVER_LOGGER);
 
-    /// @dev Addresses that are able to call methods for repay and boost
-    mapping(address => bool) public approvedCallers;
-
     modifier onlyApproved() {
-        require(approvedCallers[msg.sender]);
+        require(BotRegistry(BOT_REGISTRY_ADDRESS).botList(msg.sender), "Not auth bot");
         _;
     }
 
@@ -45,8 +42,6 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
     /// @param _subscriptions Subscriptions contract for Aave positions
     /// @param _aaveSaverProxy Contract that actually performs Repay/Boost
     constructor(address _aaveMonitorProxy, address _subscriptions, address _aaveSaverProxy) public {
-        approvedCallers[msg.sender] = true;
-
         aaveMonitorProxy = AaveMonitorProxy(_aaveMonitorProxy);
         subscriptionsContract = AaveSubscriptions(_subscriptions);
         aaveSaverProxy = _aaveSaverProxy;
@@ -213,19 +208,5 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
         } else {
             BOOST_GAS_TOKEN = _gasTokenAmount;
         }
-    }
-
-    
-
-    /// @notice Adds a new bot address which will be able to call repay/boost
-    /// @param _caller Bot address
-    function addCaller(address _caller) public onlyOwner {
-        approvedCallers[_caller] = true;
-    }
-
-    /// @notice Removes a bot address so it can't call repay/boost
-    /// @param _caller Bot address
-    function removeCaller(address _caller) public onlyOwner {
-        approvedCallers[_caller] = false;
     }
 }
