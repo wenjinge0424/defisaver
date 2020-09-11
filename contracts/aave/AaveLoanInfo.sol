@@ -167,7 +167,7 @@ contract AaveLoanInfo is AaveSafetyRatio {
             uint256 price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(reserves[i]);
 
             if (aTokenBalance > 0) {
-            	uint256 userTokenBalanceEth = wmul(aTokenBalance, price);
+            	uint256 userTokenBalanceEth = wmul(aTokenBalance, price) * (10 ** (18 - getDecimals(reserve)));
             	data.collAddr[collPos] = reserve;
                 data.collAmounts[collPos] = userTokenBalanceEth;
                 collPos++;
@@ -175,7 +175,7 @@ contract AaveLoanInfo is AaveSafetyRatio {
 
             // Sum up debt in Eth
             if (borrowBalance > 0) {
-            	uint256 userBorrowBalanceEth = wmul(borrowBalance, price);
+            	uint256 userBorrowBalanceEth = wmul(borrowBalance, price) * (10 ** (18 - getDecimals(reserve)));
                 data.borrowAddr[borrowPos] = reserve;
                 data.borrowAmounts[borrowPos] = userBorrowBalanceEth;
                 borrowPos++;
@@ -196,5 +196,12 @@ contract AaveLoanInfo is AaveSafetyRatio {
         for (uint i = 0; i < _users.length; ++i) {
             loans[i] = getLoanData(_users[i]);
         }
+    }
+
+
+    function getDecimals(address _token) internal view returns (uint256) {
+        if (_token == ETH_ADDR) return 18;
+
+        return ERC20(_token).decimals();
     }
 }
