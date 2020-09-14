@@ -150,6 +150,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         uint256 tokensSwaped = 0;
         uint256 tokensLeft = _exData.srcAmount;
 
+        uint256 tokensBefore = getBalance(_exData.destAddr);
         if (success) {
             // check to see if any _src tokens are left over after exchange
             tokensLeft = getBalance(_exData.srcAddr);
@@ -162,7 +163,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             }
 
             // get the current balance of the swaped tokens
-            tokensSwaped = getBalance(_exData.destAddr);
+            tokensSwaped = getBalance(_exData.destAddr) - tokensBefore;
         }
 
         return (success, tokensSwaped, tokensLeft);
