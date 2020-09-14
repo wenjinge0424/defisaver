@@ -141,6 +141,8 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             _ethAmount = 0;
         }
 
+        uint256 tokensBefore = getBalance(_exData.destAddr);
+
         if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.exchangeAddr)) {
             (success, ) = _exData.exchangeAddr.call{value: _ethAmount}(_exData.callData);
         } else {
@@ -150,7 +152,6 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         uint256 tokensSwaped = 0;
         uint256 tokensLeft = _exData.srcAmount;
 
-        uint256 tokensBefore = getBalance(_exData.destAddr);
         if (success) {
             // check to see if any _src tokens are left over after exchange
             tokensLeft = getBalance(_exData.srcAddr);
