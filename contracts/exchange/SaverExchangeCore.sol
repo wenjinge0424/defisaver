@@ -109,7 +109,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             wrapper = exData.wrapper;
         }
 
-        require(getBalance(exData.destAddr) >= exData.destAmount, "Final amount isn't correct");
+        require(swapedTokens >= exData.destAmount, "Final amount isn't correct");
 
         // if anything is left in weth, pull it to user as eth
         if (getBalance(WETH_ADDRESS) > 0) {
