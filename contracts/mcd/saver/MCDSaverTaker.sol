@@ -32,7 +32,7 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
         MCD_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
 
         uint256 loanAmount = sub(_exchangeData.srcAmount, maxDebt);
-        uint maxLiq = getAvailableLiquidity(DAI_ADDRESS);
+        uint maxLiq = getAvailableLiquidity(DAI_JOIN_ADDRESS);
 
         loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
 
