@@ -153,6 +153,7 @@ contract CompoundSaverHelper is DSMath, Exponential {
     /// @param _cTokenAddr Address which will gain the approval
     function approveCToken(address _tokenAddr, address _cTokenAddr) internal {
         if (_tokenAddr != ETH_ADDRESS) {
+            ERC20(_tokenAddr).safeApprove(_cTokenAddr, 0);
             ERC20(_tokenAddr).safeApprove(_cTokenAddr, uint(-1));
         }
     }
