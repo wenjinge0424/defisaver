@@ -107,7 +107,7 @@ contract UniswapV2Wrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
         path[1] = _destAddr;
 
         uint[] memory amounts = router.getAmountsIn(_destAmount, path);
-        return wdiv(amounts[0], _destAmount);
+        return wdiv(_destAmount, amounts[0]);
     }
 
     /// @notice Send any leftover tokens, we use to clear out srcTokens after buy
@@ -124,6 +124,12 @@ contract UniswapV2Wrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
     /// @param _src Input address
     function ethToWethAddr(address _src) internal pure returns (address) {
         return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
+    }
+
+    function getDecimals(address _token) internal view returns (uint256) {
+        if (_token == KYBER_ETH_ADDRESS) return 18;
+
+        return ERC20(_token).decimals();
     }
 
     receive() payable external {}
