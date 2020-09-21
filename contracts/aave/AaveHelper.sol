@@ -125,6 +125,35 @@ contract AaveHelper is DSMath {
         }
     }
 
+    /// @notice Calculates the gas cost for transaction
+    /// @param _amount Amount that is converted
+    /// @param _user Actuall user addr not DSProxy
+    /// @param _gasCost Ether amount of gas we are spending for tx
+    /// @param _tokenAddr token addr. of token we are getting for the fee
+    /// @return gasCost The amount we took for the gas cost
+    function getGasCost(uint _amount, address _user, uint _gasCost, address _tokenAddr) internal returns (uint gasCost) {
+        address priceOracleAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getPriceOracle();
+
+        if (_gasCost != 0) {
+            uint256 price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr);
+            _gasCost = wmul(_gasCost, price);
+
+            gasCost = _gasCost;
+        }
+
+        // fee can't go over 20% of the whole amount
+        if (gasCost > (_amount / 5)) {
+            gasCost = _amount / 5;
+        }
+
+        if (_tokenAddr == ETH_ADDR) {
+            WALLET_ADDR.transfer(gasCost);
+        } else {
+            ERC20(_tokenAddr).safeTransfer(WALLET_ADDR, gasCost);
+        }
+    }
+
+
     /// @notice Returns the owner of the DSProxy that called the contract
     function getUserAddress() internal view returns (address) {
         DSProxy proxy = DSProxy(payable(address(this)));
