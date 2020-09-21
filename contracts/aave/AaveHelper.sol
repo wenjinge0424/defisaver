@@ -146,6 +146,8 @@ contract AaveHelper is DSMath {
     /// @param _user User that should receive funds
     /// @param _amount Amount that should be sent
     function sendContractBalance(address _token, address _user, uint _amount) public {
+        if (_amount == 0) return;
+
         if (_token == ETH_ADDR) {
             payable(_user).transfer(_amount);
         } else {
