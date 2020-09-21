@@ -91,7 +91,10 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
         if (_joinAddr == 0x2F0b23f53734252Bda2277357e97e1517d6B042A
             || _joinAddr == 0x775787933e92b709f2a3C70aa87999696e74A9F8) {
             return KYBER_ETH_ADDRESS;
-        } else {
+        } else if (_joinAddr == DAI_JOIN_ADDRESS) {
+            return DAI_ADDRESS;
+        } else
+         {
             return getCollateralAddr(_joinAddr);
         }
     }
