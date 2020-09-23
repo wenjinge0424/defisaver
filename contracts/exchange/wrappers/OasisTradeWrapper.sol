@@ -88,7 +88,7 @@ contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
         address srcAddr = ethToWethAddr(_srcAddr);
         address destAddr = ethToWethAddr(_destAddr);
 
-        return wdiv(OasisInterface(OTC_ADDRESS).getPayAmount(srcAddr, destAddr, _destAmount), _destAmount);
+        return wdiv(1 ether, wdiv(OasisInterface(OTC_ADDRESS).getPayAmount(srcAddr, destAddr, _destAmount), _destAmount));
     }
 
     /// @notice Send any leftover tokens, we use to clear out srcTokens after buy

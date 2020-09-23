@@ -111,10 +111,10 @@ contract KyberWrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
     /// @param _destAmount To amount
     /// @return rate Rate
     function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount) public override view returns (uint rate) {
-        uint256 srcRate = getSellRate(_srcAddr, _destAddr, _destAmount);
-        uint256 srcAmount = wmul(_destAmount, srcRate);
+        uint256 srcRate = getSellRate(_destAddr, _srcAddr, _destAmount);
+        uint256 srcAmount = wmul(srcRate, _destAmount);
 
-        rate = getSellRate(_destAddr, _srcAddr, srcAmount);
+        rate = getSellRate(_srcAddr, _destAddr, srcAmount);
 
         // increase rate by 3% too account for inaccuracy between sell/buy conversion
         rate = rate + (rate / 30);

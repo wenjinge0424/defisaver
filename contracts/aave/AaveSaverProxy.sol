@@ -28,10 +28,14 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 		address aTokenCollateral = ILendingPool(lendingPoolCore).getReserveATokenAddress(_data.srcAddr);
 		IAToken(aTokenCollateral).redeem(_data.srcAmount);
 
-		// swap
-		(, uint256 destAmount) = _sell(_data);
-
-		destAmount -= getFee(destAmount, user, _gasCost, _data.destAddr);
+		uint256 destAmount = _data.srcAmount;
+		if (_data.srcAddr != _data.destAddr) {
+			// swap
+			(, destAmount) = _sell(_data);
+			destAmount -= getFee(destAmount, user, _gasCost, _data.destAddr);
+		} else {
+			destAmount -= getGasCost(destAmount, user, _gasCost, _data.destAddr);
+		}
 
 		// payback
 		if (_data.destAddr == ETH_ADDR) {
@@ -60,10 +64,16 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 
 		// borrow amount
 		ILendingPool(lendingPool).borrow(_data.srcAddr, _data.srcAmount, VARIABLE_RATE, AAVE_REFERRAL_CODE);
-		_data.srcAmount -= getFee(_data.srcAmount, user, _gasCost, _data.srcAddr);
 
-		// swap
-		(, uint256 destAmount) = _sell(_data);
+		uint256 destAmount;
+		if (_data.destAddr != _data.srcAddr) {
+			_data.srcAmount -= getFee(_data.srcAmount, user, _gasCost, _data.srcAddr);
+			// swap
+			(, destAmount) = _sell(_data);
+		} else {
+			_data.srcAmount -= getGasCost(_data.srcAmount, user, _gasCost, _data.srcAddr);
+			destAmount = _data.srcAmount;
+		}
 
 		if (_data.destAddr == ETH_ADDR) {
 			ILendingPool(lendingPool).deposit{value: destAmount}(_data.destAddr, destAmount, AAVE_REFERRAL_CODE);

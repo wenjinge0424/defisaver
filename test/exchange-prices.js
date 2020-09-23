@@ -7,12 +7,12 @@ const { wdiv, wmul, getBalance, approve, loadAccounts, getAccounts, getProxy, fe
 
 const Prices = contract.fromArtifact("Prices");
 
-const pricesAddress = '0x970e8f18ebfEa0B08810f33a5A40438b9530FBCF';
+const pricesAddress = '0x9a355c00d7f5ad0c702e512f2ba9abfdaae6845d';
 
-const uniswapWrapperAddr = '0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb';
-const kyberWrapperAddr = '0x9561C133DD8580860B6b7E504bC5Aa500f0f06a7';
-const uniswapV2WrapperAddr = '0xf19A2A01B70519f67ADb309a994Ec8c69A967E8b';
-const oasisTradeWrapperAddr = '0xA57B8a5584442B467b4689F1144D269d096A3daF';
+const uniswapWrapperAddr = '0x91f92970A201F507734E61a7100C8fc2f2EAF495';
+const kyberWrapperAddr = '0xeEA6F50596e50696e9B2ed04581BaAA608A97BF8';
+const uniswapV2WrapperAddr = '0x25Cd147d46E17be2eC03C90D079c2bE840cC02A6';
+const oasisTradeWrapperAddr = '0xE89C8fE2259DaB9894068Bd57eF43eab229F9dfd';
 
 const usdc = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 const usdt = '0xdac17f958d2ee523a2206206994597c13d831ec7';
@@ -20,7 +20,7 @@ const dai = '0x6b175474e89094c44da98b954eedeac495271d0f';
 const wbtc = '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599';
 
 const sellToken = ETH_ADDRESS; //usdc;
-const buyToken = dai; //ETH_ADDRESS;
+const buyToken = usdc; //ETH_ADDRESS;
 const value = '100000000'; // '1000000000000000000';//'1000000'; // '1000000'; //
 
 describe("ExchangePrices", accounts => {
@@ -34,55 +34,73 @@ describe("ExchangePrices", accounts => {
     });
 
     it('... should check sell prices', async () => {
-        const ethAmount = 500;
+        const ethAmount = web3.utils.toWei('1');
         console.log(`Selling ${ethAmount} eth`);
 
         const sellRateUni = await prices.methods.getExpectedRate(
             uniswapWrapperAddr, sellToken, buyToken,  ethAmount, 0).call();
 
-        console.log('UNI V1: ', sellRateUni / 1e18);
+        console.log('UNI V1: ', sellRateUni);
 
         const sellRateUni2 = await prices.methods.getExpectedRate(
             uniswapV2WrapperAddr, sellToken, buyToken,  ethAmount, 0).call();
 
-        console.log('UNI V2: ', sellRateUni2 / 1e18);
+        console.log('UNI V2: ', sellRateUni2);
 
         const sellRateKyber = await prices.methods.getExpectedRate(
             kyberWrapperAddr, sellToken, buyToken,  ethAmount, 0).call();
 
-        console.log('Kyber: ', sellRateKyber / 1e18);
+        console.log('Kyber: ', sellRateKyber);
 
         const sellRateOasis = await prices.methods.getExpectedRate(
             oasisTradeWrapperAddr, sellToken, buyToken,  ethAmount, 0).call();
 
-        console.log('Oasis: ', sellRateOasis / 1e18);
+        console.log('Oasis: ', sellRateOasis);
     });
 
 
     it('... should check buy prices', async () => {
-        const daiAmount = 10000;
+        const daiAmount = '103000000'; //web3.utils.toWei('103');
         console.log(`Buying ${daiAmount} dai`);
 
         const buyRateUni = await prices.methods.getExpectedRate(
             uniswapWrapperAddr, sellToken, buyToken,  daiAmount, 1).call();
 
-        console.log('UNI V1: ', buyRateUni / 1e18);
+        console.log('UNI V1: ', buyRateUni);
 
         const buyRateUni2 = await prices.methods.getExpectedRate(
             uniswapV2WrapperAddr, sellToken, buyToken,  daiAmount, 1).call();
 
-        console.log('UNI V2: ', buyRateUni2 / 1e18);
+        console.log('UNI V2: ', buyRateUni2);
 
         const buyRateKyber = await prices.methods.getExpectedRate(
             kyberWrapperAddr, sellToken, buyToken,  daiAmount, 1).call();
 
-        console.log('Kyber: ', buyRateKyber / 1e18);
+        console.log('Kyber: ', buyRateKyber);
 
         const buyRateOasis = await prices.methods.getExpectedRate(
             oasisTradeWrapperAddr, sellToken, buyToken,  daiAmount, 1).call();
 
-        console.log('Oasis: ', buyRateOasis / 1e18);
+        console.log('Oasis: ', buyRateOasis);
     });
+
+
+    // it('... should check Kyber get best buy price logic', async () => {
+    //     const amount =  web3.utils.toWei('103'); 
+    //     console.log(`Buying ${amount} dai`);
+
+    //     const sellRate = await prices.methods.getExpectedRate(
+    //         kyberWrapperAddr, buyToken, sellToken, amount, 0).call();
+
+    //     const sellAmount = wmul(amount, sellRate).toFixed(0);
+    //     console.log({sellAmount});
+
+    //     const finalRate = await prices.methods.getExpectedRate(
+    //         kyberWrapperAddr, sellToken, buyToken, sellAmount, 0).call();        
+
+    //     console.log({finalRate});
+    //     console.log(wmul(sellAmount, finalRate));
+    // });
 
 
     // it('... should check Oasis rates', async () => {
