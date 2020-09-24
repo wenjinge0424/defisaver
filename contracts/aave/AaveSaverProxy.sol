@@ -46,7 +46,7 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 		}
 
 		// first return 0x fee to msg.sender as it is the address that actually sent 0x fee
-		sendContractBalance(ETH_ADDR, msg.sender, min(address(this).balance, msg.value));
+		sendContractBalance(ETH_ADDR, tx.origin, min(address(this).balance, msg.value));
 		// send all leftovers from dest addr to proxy owner
 		sendFullContractBalance(_data.destAddr, user);
 
@@ -87,7 +87,7 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
         }
 
 		// returning to msg.sender as it is the address that actually sent 0x fee
-		sendContractBalance(ETH_ADDR, msg.sender, min(address(this).balance, msg.value));
+		sendContractBalance(ETH_ADDR, tx.origin, min(address(this).balance, msg.value));
 		// send all leftovers from dest addr to proxy owner
 		sendFullContractBalance(_data.destAddr, user);
 
