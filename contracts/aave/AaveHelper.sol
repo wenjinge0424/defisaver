@@ -36,9 +36,8 @@ contract AaveHelper is DSMath {
         address priceOracleAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getPriceOracle();
 
         // fetch all needed data
-        // using LTV as tokenLiquidationThreshold
-        (,uint256 totalCollateralETH, uint256 totalBorrowsETH,,uint256 currentLiquidationThreshold,,,) = ILendingPool(lendingPoolAddressDataProvider).calculateUserGlobalData(_user);
-        (,uint256 tokenLiquidationThreshold,,) = ILendingPool(lendingPoolCoreAddress).getReserveConfiguration(_collateralAddress);
+        (,uint256 totalCollateralETH, uint256 totalBorrowsETH,,uint256 currentLTV,,,) = ILendingPool(lendingPoolAddressDataProvider).calculateUserGlobalData(_user);
+        (uint256 tokenLTV,,,) = ILendingPool(lendingPoolCoreAddress).getReserveConfiguration(_collateralAddress);
         uint256 collateralPrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_collateralAddress);
         uint256 userTokenBalance = ILendingPool(lendingPoolCoreAddress).getUserUnderlyingAssetBalance(_collateralAddress, _user);
         uint256 userTokenBalanceEth = wmul(userTokenBalance, collateralPrice);
@@ -48,7 +47,7 @@ contract AaveHelper is DSMath {
         	return userTokenBalance;
         }
 
-        uint256 maxCollateralEth = div(sub(mul(currentLiquidationThreshold, totalCollateralETH), mul(totalBorrowsETH, 100)), currentLiquidationThreshold);
+        uint256 maxCollateralEth = div(sub(mul(currentLTV, totalCollateralETH), mul(totalBorrowsETH, 100)), currentLTV);
 		/// @dev final amount can't be higher than users token balance
         maxCollateralEth = maxCollateralEth > userTokenBalanceEth ? userTokenBalanceEth : maxCollateralEth;
 
@@ -58,12 +57,12 @@ contract AaveHelper is DSMath {
         }
 
         // get sum of all other reserves multiplied with their liquidation thresholds by reversing formula
-        uint256 a = sub(wmul(currentLiquidationThreshold, totalCollateralETH), wmul(tokenLiquidationThreshold, userTokenBalanceEth));
+        uint256 a = sub(wmul(currentLTV, totalCollateralETH), wmul(tokenLTV, userTokenBalanceEth));
         // add new collateral amount multiplied by its threshold, and then divide with new total collateral
-        uint256 newLiquidationThreshold = wdiv(add(a, wmul(sub(userTokenBalanceEth, maxCollateralEth), tokenLiquidationThreshold)), sub(totalCollateralETH, maxCollateralEth));
+        uint256 newLiquidationThreshold = wdiv(add(a, wmul(sub(userTokenBalanceEth, maxCollateralEth), tokenLTV)), sub(totalCollateralETH, maxCollateralEth));
 
         // if new threshold is lower than first one, calculate new max collateral with newLiquidationThreshold
-        if (newLiquidationThreshold < currentLiquidationThreshold) {
+        if (newLiquidationThreshold < currentLTV) {
         	maxCollateralEth = div(sub(mul(newLiquidationThreshold, totalCollateralETH), mul(totalBorrowsETH, 100)), newLiquidationThreshold);
         	maxCollateralEth = maxCollateralEth > userTokenBalanceEth ? userTokenBalanceEth : maxCollateralEth;
         }
