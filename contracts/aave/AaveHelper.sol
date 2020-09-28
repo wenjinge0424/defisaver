@@ -35,12 +35,14 @@ contract AaveHelper is DSMath {
         address lendingPoolCoreAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
         address priceOracleAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getPriceOracle();
 
+        uint256 pow10 = 10 ** (18 - _getDecimals(_collateralAddress));
+
         // fetch all needed data
         (,uint256 totalCollateralETH, uint256 totalBorrowsETH,,uint256 currentLTV,,,) = ILendingPool(lendingPoolAddressDataProvider).calculateUserGlobalData(_user);
-        (uint256 tokenLTV,,,) = ILendingPool(lendingPoolCoreAddress).getReserveConfiguration(_collateralAddress);
+        (,uint256 tokenLTV,,) = ILendingPool(lendingPoolCoreAddress).getReserveConfiguration(_collateralAddress);
         uint256 collateralPrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_collateralAddress);
         uint256 userTokenBalance = ILendingPool(lendingPoolCoreAddress).getUserUnderlyingAssetBalance(_collateralAddress, _user);
-        uint256 userTokenBalanceEth = wmul(userTokenBalance, collateralPrice);
+        uint256 userTokenBalanceEth = wmul(userTokenBalance * pow10, collateralPrice);
 
 		// if borrow is 0, return whole user balance
         if (totalBorrowsETH == 0) {
@@ -53,7 +55,7 @@ contract AaveHelper is DSMath {
 
         // might happen due to wmul precision
         if (maxCollateralEth >= totalCollateralETH) {
-        	return totalCollateralETH;
+        	return wdiv(totalCollateralETH, collateralPrice) / pow10;
         }
 
         // get sum of all other reserves multiplied with their liquidation thresholds by reversing formula
@@ -68,7 +70,8 @@ contract AaveHelper is DSMath {
         }
 
 
-		return wmul(wdiv(maxCollateralEth, collateralPrice), NINETY_NINE_PERCENT_WEI);
+        
+		return wmul(wdiv(maxCollateralEth, collateralPrice) / pow10, NINETY_NINE_PERCENT_WEI);
 	}
 
 	/// @param _borrowAddress underlying token address
@@ -81,7 +84,7 @@ contract AaveHelper is DSMath {
 
 		uint256 borrowPrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_borrowAddress);
 
-		return wmul(wdiv(availableBorrowsETH, borrowPrice), NINETY_NINE_PERCENT_WEI);
+		return wmul(wdiv(availableBorrowsETH, borrowPrice) / (10 ** (18 - _getDecimals(_borrowAddress))), NINETY_NINE_PERCENT_WEI);
 	}
 
     /// @notice Calculates the fee amount
@@ -189,5 +192,11 @@ contract AaveHelper is DSMath {
         } else {
             sendContractBalance(_token, _user, ERC20(_token).balanceOf(address(this)));
         }
+    }
+
+    function _getDecimals(address _token) internal view returns (uint256) {
+        if (_token == ETH_ADDR) return 18;
+
+        return ERC20(_token).decimals();
     }
 }
