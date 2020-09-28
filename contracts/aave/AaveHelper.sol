@@ -55,7 +55,7 @@ contract AaveHelper is DSMath {
 
         // might happen due to wmul precision
         if (maxCollateralEth >= totalCollateralETH) {
-        	return wdiv(totalCollateralETH, collateralPrice);
+        	return wdiv(totalCollateralETH, collateralPrice) / pow10;
         }
 
         // get sum of all other reserves multiplied with their liquidation thresholds by reversing formula
