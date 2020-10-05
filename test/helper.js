@@ -138,6 +138,17 @@ const transferToken = async (web3, tokenAddress, from, to, amount) => {
     console.log('Tokens transfered');
 };
 
+const getDecimals = async (web3, tokenAddress) => {
+    if (tokenAddress === ETH_ADDRESS) {
+        return 18;
+    }
+
+    const erc20 = new web3.eth.Contract(ERC20.abi, tokenAddress);
+    const decimals = await erc20.methods.decimals().call();
+
+    return parseInt(decimals);
+};
+
 const getDebugInfo = async (id, type) => {
     const debugContract = await DebugInfo.at(debugContractAddr);
 
@@ -187,5 +198,6 @@ module.exports = {
     transferToken,
     MAX_UINT,
     wmul,
-    wdiv
+    wdiv,
+    getDecimals
 };

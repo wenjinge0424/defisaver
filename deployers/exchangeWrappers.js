@@ -24,6 +24,11 @@ async function main() {
  	await registry.addWrapper(uniswap.address);
  	console.log('setting uniswapv2');
  	await registry.addWrapper(uniswap2.address);
+
+ 	console.log(`const uniswapWrapperAddr = '${uniswap.address}';`);
+ 	console.log(`const kyberWrapperAddr = '${kyber.address}';`);
+ 	console.log(`const uniswapV2WrapperAddr = '${uniswap.address}';`);
+ 	console.log(`const oasisTradeWrapperAddr = '${uniswap2.address}';`)
 }
 
 start(main);
