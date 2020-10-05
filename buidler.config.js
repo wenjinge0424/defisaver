@@ -10,13 +10,13 @@ module.exports = {
         },
         moonnet: {
             url: process.env.MOON_NET_NODE,
-            accounts: ['0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d'],
+            accounts: [process.env.PRIV_KEY_DEV],
             gasPrice: 1000000000
         },
         mainnet: {
             url: process.env.ALCHEMY_NODE,
             accounts: [process.env.PRIV_KEY_OWNER],
-            gasPrice: 91000000000
+            gasPrice: 45000000000
         },
         kovan: {
             url: process.env.KOVAN_INFURA_ENDPOINT,

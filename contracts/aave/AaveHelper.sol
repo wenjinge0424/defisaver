@@ -110,7 +110,7 @@ contract AaveHelper is DSMath {
 
         if (_gasCost != 0) {
             uint256 price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr);
-            _gasCost = wmul(_gasCost, price);
+            _gasCost = wdiv(_gasCost, price);
 
             feeAmount = add(feeAmount, _gasCost);
         }
