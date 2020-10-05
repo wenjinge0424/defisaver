@@ -20,6 +20,13 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
     // solhint-disable-next-line no-empty-blocks
     constructor() public FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) {}
 
+    struct CompCreateData {
+        address payable proxyAddr;
+        bytes proxyData;
+        address cCollAddr;
+        address cDebtAddr;
+    }
+
     /// @notice Called by Aave when sending back the FL amount
     /// @param _reserve The address of the borrowed token
     /// @param _amount Amount of FL tokens received
@@ -32,22 +39,27 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
         bytes calldata _params)
     external override {
         // Format the call data for DSProxy
-        (address payable proxyAddr, bytes memory proxyData, ExchangeData memory exchangeData)
+        (CompCreateData memory compCreate, ExchangeData memory exchangeData)
                                  = packFunctionCall(_amount, _fee, _params);
 
-        // Swap
-        (, uint sellAmount) = _sell(exchangeData);
 
-        // DFS fee
-        getFee(sellAmount, exchangeData.destAddr, proxyAddr);
+        address leveragedAsset = _reserve;
+
+        // If the assets are different
+        if (compCreate.cCollAddr != compCreate.cDebtAddr) {
+            (, uint sellAmount) = _sell(exchangeData);
+            getFee(sellAmount, exchangeData.destAddr, compCreate.proxyAddr);
+
+            leveragedAsset = exchangeData.destAddr;
+        }
 
         // Send amount to DSProxy
-        sendToProxy(proxyAddr, exchangeData.destAddr);
+        sendToProxy(compCreate.proxyAddr, leveragedAsset);
 
         address compOpenProxy = shifterRegistry.getAddr("COMP_SHIFTER");
 
         // Execute the DSProxy call
-        DSProxyInterface(proxyAddr).execute(compOpenProxy, proxyData);
+        DSProxyInterface(compCreate.proxyAddr).execute(compOpenProxy, compCreate.proxyData);
 
         // Repay the loan with the money DSProxy sent back
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
@@ -63,7 +75,7 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
     /// @param _amount Amount of FL
     /// @param _fee Fee of the FL
     /// @param _params Saver proxy params
-    function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal pure  returns (address payable, bytes memory proxyData, ExchangeData memory exchangeData) {
+    function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal pure  returns (CompCreateData memory compCreate, ExchangeData memory exchangeData) {
         (
             uint[4] memory numData, // srcAmount, destAmount, minPrice, price0x
             address[6] memory cAddresses, // cCollAddr, cDebtAddr, srcAddr, destAddr, exchangeAddr, wrapper
@@ -72,7 +84,7 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
         )
         = abi.decode(_params, (uint256[4],address[6],bytes,address));
 
-        proxyData = abi.encodeWithSignature(
+        bytes memory proxyData = abi.encodeWithSignature(
             "open(address,address,uint256)",
                                 cAddresses[0], cAddresses[1], (_amount + _fee));
 
@@ -88,7 +100,14 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
             price0x: numData[3]
         });
 
-        return (payable(proxy), proxyData, exchangeData);
+        compCreate = CompCreateData({
+            proxyAddr: payable(proxy),
+            proxyData: proxyData,
+            cCollAddr: cAddresses[0],
+            cDebtAddr: cAddresses[1]
+        });
+
+        return (compCreate, exchangeData);
     }
 
     /// @notice Send the FL funds received to DSProxy

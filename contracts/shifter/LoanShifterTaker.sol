@@ -23,7 +23,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
 
     Manager public constant manager = Manager(MANAGER_ADDRESS);
-    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0x2612Af3A521c2df9EAF28422Ca335b04AdF3ac66);
+    ShifterRegistry public constant shifterRegistry = ShifterRegistry(0x597C52281b31B9d949a9D8fEbA08F7A2530a965e);
 
     enum Protocols { MCD, COMPOUND }
     enum SwapType { NO_SWAP, COLL_SWAP, DEBT_SWAP }
