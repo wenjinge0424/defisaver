@@ -15,10 +15,10 @@ const Prices = contract.fromArtifact("Prices");
 
 const pricesAddress = '0x9a355c00d7f5ad0c702e512f2ba9abfdaae6845d';
 
-const uniswapWrapperAddr = '0x6eE424DF6a11808e3F9b1F8B5Bc4C0F721b35edF';
-const kyberWrapperAddr = '0xb200a7200F14b97Ba4D970943aAD4410A54CA8EF';
-const uniswapV2WrapperAddr = '0x6eE424DF6a11808e3F9b1F8B5Bc4C0F721b35edF';
-const oasisTradeWrapperAddr = '0x0825252DA4c30321840d4fC65fE08904C8cDF922';
+const uniswapWrapperAddr = '0x14af8Af6dccFF858AB465f13506cB7b3561C024E';
+const kyberWrapperAddr = '0x84C00C34e07eEDF2095E48e2a17d97F2449bC867';
+const uniswapV2WrapperAddr = '0x14af8Af6dccFF858AB465f13506cB7b3561C024E';
+const oasisTradeWrapperAddr = '0x3Ba0319533C578527aE69BF7fA2D289F20B9B55c';
 
 
 const getName = (addr) => {
