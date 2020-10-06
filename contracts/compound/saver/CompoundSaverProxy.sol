@@ -36,6 +36,8 @@ contract CompoundSaverProxy is CompoundSaverHelper, SaverExchangeCore {
         uint swapAmount = 0;
 
         if (collToken != borrowToken) {
+            _exData.srcAmount = collAmount;
+
             (, swapAmount) = _sell(_exData);
             swapAmount -= getFee(swapAmount, user, _gasCost, _cAddresses[1]);
         } else {
