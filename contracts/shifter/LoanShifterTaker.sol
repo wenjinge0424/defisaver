@@ -48,7 +48,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
     function moveLoan(
         SaverExchangeCore.ExchangeData memory _exchangeData,
         LoanShiftData memory _loanShift
-    ) public {
+    ) public payable {
         if (_isSameTypeVaults(_loanShift)) {
             _forkVault(_loanShift);
             return;
@@ -83,6 +83,8 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         bytes memory paramsData = abi.encode(numData, addrData, enumData, callData, address(this));
 
         address payable loanShifterReceiverAddr = payable(shifterRegistry.getAddr("LOAN_SHIFTER_RECEIVER"));
+
+        loanShifterReceiverAddr.transfer(address(this).balance);
 
         // call FL
         givePermission(loanShifterReceiverAddr);
