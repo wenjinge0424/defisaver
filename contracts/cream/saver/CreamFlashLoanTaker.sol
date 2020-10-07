@@ -11,7 +11,8 @@ import "../../auth/ProxyPermission.sol";
 contract CreamFlashLoanTaker is CreamSaverProxy, ProxyPermission, GasBurner {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
-    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0xCeB190A35D9D4804b9CE8d0CF79239f6949BfCcB;
+    address payable public constant COMPOUND_SAVER_FLASH_LOAN = 0x3ceD2067c0B057611e4E2686Dbe40028962Cc625;
+    address public constant AAVE_POOL_CORE = 0x3dfd23A6c5E8BbcFc9581d2E864a68feb6a076d3;
 
     /// @notice Repays the position with it's own fund or with FL if needed
     /// @param _exData Exchange data
@@ -23,8 +24,9 @@ contract CreamFlashLoanTaker is CreamSaverProxy, ProxyPermission, GasBurner {
         uint256 _gasCost
     ) public payable burnGas(25) {
         uint maxColl = getMaxCollateral(_cAddresses[0], address(this));
+        uint availableLiquidity = getAvailableLiquidity(_exData.srcAddr);
 
-        if (_exData.srcAmount <= maxColl) {
+        if (_exData.srcAmount <= maxColl || availableLiquidity == 0) {
             repay(_exData, _cAddresses, _gasCost);
         } else {
             // 0x fee
@@ -54,8 +56,9 @@ contract CreamFlashLoanTaker is CreamSaverProxy, ProxyPermission, GasBurner {
         uint256 _gasCost
     ) public payable burnGas(20) {
         uint maxBorrow = getMaxBorrow(_cAddresses[1], address(this));
+        uint availableLiquidity = getAvailableLiquidity(_exData.srcAddr);
 
-        if (_exData.srcAmount <= maxBorrow) {
+        if (_exData.srcAmount <= maxBorrow || availableLiquidity == 0) {
             boost(_exData, _cAddresses, _gasCost);
         } else {
             // 0x fee
@@ -73,5 +76,13 @@ contract CreamFlashLoanTaker is CreamSaverProxy, ProxyPermission, GasBurner {
             logger.Log(address(this), msg.sender, "CreamFlashBoost", abi.encode(loanAmount, _exData.srcAmount, _cAddresses[1]));
         }
 
+    }
+
+    function getAvailableLiquidity(address _tokenAddr) internal view returns (uint liquidity) {
+        if (_tokenAddr == KYBER_ETH_ADDRESS) {
+            liquidity = AAVE_POOL_CORE.balance;
+        } else {
+            liquidity = ERC20(_tokenAddr).balanceOf(AAVE_POOL_CORE);
+        }
     }
 }

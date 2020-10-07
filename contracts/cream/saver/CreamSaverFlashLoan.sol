@@ -9,7 +9,7 @@ import "../../exchange/SaverExchangeCore.sol";
 contract CreamSaverFlashLoan is FlashLoanReceiverBase, SaverExchangeCore {
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
-    address payable public COMPOUND_SAVER_FLASH_PROXY = 0xcEAb38B5C88F33Dabe4D31BDD384E08215526632;
+    address payable public COMPOUND_SAVER_FLASH_PROXY = 0x1e012554891d271eDc80ba8eB146EA5FF596fA51;
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address public owner;
