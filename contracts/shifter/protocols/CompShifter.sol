@@ -6,7 +6,11 @@ contract CompShifter is CompoundSaverHelper {
 
     address public constant COMPTROLLER_ADDR = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
 
-    function getWholeDebt(uint _cdpId, address _joinAddr) public virtual returns(uint loanAmount) {
+    function getLoanAmount(uint _cdpId, address _joinAddr) public returns(uint loanAmount) {
+        return getWholeDebt(_cdpId, _joinAddr);
+    }
+
+    function getWholeDebt(uint _cdpId, address _joinAddr) public returns(uint loanAmount) {
         return CTokenInterface(_joinAddr).borrowBalanceCurrent(msg.sender);
     }
 
