@@ -68,7 +68,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         uint loanAmount = _loanShift.debtAmount;
 
         if (_loanShift.wholeDebt) {
-            loanAmount = ILoanShifter(protoAddr).getLoanAmount(_loanShift.id1, _loanShift.addrLoan1);
+            loanAmount = ILoanShifter(protoAddr).getLoanAmount(_loanShift.id1, _loanShift.debtAddr1);
         }
 
         (

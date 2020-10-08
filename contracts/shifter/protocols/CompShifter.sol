@@ -11,6 +11,7 @@ contract CompShifter is CompoundSaverHelper {
     }
 
     function getWholeDebt(uint _cdpId, address _joinAddr) public returns(uint loanAmount) {
+        CTokenInterface(_joinAddr).accrueInterest();
         return CTokenInterface(_joinAddr).borrowBalanceCurrent(msg.sender);
     }
 
