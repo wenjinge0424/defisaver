@@ -86,7 +86,7 @@ contract AaveBasicProxy is GasBurner {
             approveToken(_tokenAddr, lendingPoolCore);
         }
 
-        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, amount, payable(address(this)));
+        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, amount + originationFee, payable(address(this)));
 
         withdrawTokens(_tokenAddr);
     }
@@ -117,7 +117,7 @@ contract AaveBasicProxy is GasBurner {
             approveToken(_tokenAddr, lendingPoolCore);
         }
 
-        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, amount, _onBehalf);
+        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, amount + originationFee, _onBehalf);
 
         withdrawTokens(_tokenAddr);
     }
