@@ -11,9 +11,11 @@ import "../auth/AdminAuth.sol";
 import "../auth/ProxyPermission.sol";
 import "../exchange/SaverExchangeCore.sol";
 import "./ShifterRegistry.sol";
+import "../utils/GasBurner.sol";
+
 
 /// @title LoanShifterTaker Entry point for using the shifting operation
-contract LoanShifterTaker is AdminAuth, ProxyPermission {
+contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
@@ -48,7 +50,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
     function moveLoan(
         SaverExchangeCore.ExchangeData memory _exchangeData,
         LoanShiftData memory _loanShift
-    ) public payable {
+    ) public payable burnGas(20) {
         if (_isSameTypeVaults(_loanShift)) {
             _forkVault(_loanShift);
             return;
@@ -65,10 +67,8 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
     ) internal {
         address protoAddr = shifterRegistry.getAddr(getNameByProtocol(uint8(_loanShift.fromProtocol)));
 
-        uint loanAmount = _loanShift.debtAmount;
-
         if (_loanShift.wholeDebt) {
-            loanAmount = ILoanShifter(protoAddr).getLoanAmount(_loanShift.id1, _loanShift.debtAddr1);
+            _loanShift.debtAmount = ILoanShifter(protoAddr).getLoanAmount(_loanShift.id1, _loanShift.debtAddr1);
         }
 
         (
@@ -90,7 +90,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission {
         givePermission(loanShifterReceiverAddr);
 
         lendingPool.flashLoan(loanShifterReceiverAddr,
-           getLoanAddr(_loanShift.debtAddr1, _loanShift.fromProtocol), loanAmount, paramsData);
+           getLoanAddr(_loanShift.debtAddr1, _loanShift.fromProtocol), _loanShift.debtAmount, paramsData);
 
         removePermission(loanShifterReceiverAddr);
     }
