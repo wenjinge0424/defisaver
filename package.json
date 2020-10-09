@@ -10,7 +10,8 @@
     "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol",
     "flatten-all": "sol-merger@3.1.0 \"./contracts/*.sol\" ./build",
     "flatten": "npx sol-merger@3.1.0",
-    "verify": "node deployers/utils/verifier.js"
+    "verify": "node deployers/utils/verifier.js",
+    "compile": "npx buidler compile --force"
   },
   "repository": {
     "type": "git",
