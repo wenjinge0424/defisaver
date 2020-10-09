@@ -109,7 +109,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             wrapper = exData.wrapper;
         }
 
-        require(swapedTokens >= exData.destAmount, "Final amount isn't correct");
+        require(getBalance(exData.destAddr) >= exData.destAmount, "Final amount isn't correct");
 
         // if anything is left in weth, pull it to user as eth
         if (getBalance(WETH_ADDRESS) > 0) {
@@ -211,7 +211,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
     }
 
-    /// @notice Calculates protocol fee 
+    /// @notice Calculates protocol fee
     /// @param _srcAddr selling token address (if eth should be WETH)
     /// @param _msgValue msg.value in transaction
     /// @param _srcAmount amount we are selling

@@ -25,13 +25,7 @@ contract CompShifter is CompoundSaverHelper {
         // payback debt
         paybackDebt(_debtAmount, _cBorrowAddr, getUnderlyingAddr(_cBorrowAddr), tx.origin);
 
-        // draw coll
-        if (CTokenInterface(_cBorrowAddr).borrowBalanceCurrent(address(this)) == 0) {
-            uint cTokenBalance = CTokenInterface(_cCollAddr).balanceOf(address(this));
-            require(CTokenInterface(_cCollAddr).redeem(cTokenBalance) == 0);
-        } else {
-            require(CTokenInterface(_cCollAddr).redeemUnderlying(_collAmount) == 0);
-        }
+        require(CTokenInterface(_cCollAddr).redeemUnderlying(_collAmount) == 0);
 
         // Send back money to repay FL
         if (collAddr == ETH_ADDRESS) {
