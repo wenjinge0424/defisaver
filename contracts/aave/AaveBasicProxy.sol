@@ -81,14 +81,12 @@ contract AaveBasicProxy is GasBurner {
             amount = borrowAmount;
         }
 
-        amount += originationFee;
-
         if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), amount);
+            ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), amount + originationFee);
             approveToken(_tokenAddr, lendingPoolCore);
         }
 
-        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, borrowAmount, payable(address(this)));
+        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, amount, payable(address(this)));
 
         withdrawTokens(_tokenAddr);
     }
@@ -111,14 +109,15 @@ contract AaveBasicProxy is GasBurner {
             amount = borrowAmount;
         }
 
-        amount += originationFee;
-
         if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), amount);
+            ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), amount + originationFee);
+            if (originationFee > 0) {
+                ERC20(_tokenAddr).safeTransfer(_onBehalf, amount + originationFee);
+            }
             approveToken(_tokenAddr, lendingPoolCore);
         }
 
-        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, borrowAmount, _onBehalf);
+        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, amount, _onBehalf);
 
         withdrawTokens(_tokenAddr);
     }
