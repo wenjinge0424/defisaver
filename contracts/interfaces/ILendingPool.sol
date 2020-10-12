@@ -95,6 +95,10 @@ abstract contract ILendingPool {
         public virtual
         view
         returns (uint256);
+    function getReserveCurrentStableBorrowRate(address _reserve) 
+        public virtual
+        view
+        returns (uint256);
     function getReserveTotalLiquidity(address _reserve)
         public virtual
         view

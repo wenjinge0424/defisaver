@@ -26,6 +26,7 @@ contract AaveLoanInfo is AaveSafetyRatio {
         address underlyingTokenAddress;
         uint256 supplyRate;
         uint256 borrowRate;
+        uint256 borrowRateStable;
         uint256 totalSupply;
         uint256 availableLiquidity;
         uint256 totalBorrow;
@@ -128,6 +129,7 @@ contract AaveLoanInfo is AaveSafetyRatio {
                 underlyingTokenAddress: _tokenAddresses[i],
                 supplyRate: ILendingPool(lendingPoolCoreAddress).getReserveCurrentLiquidityRate(_tokenAddresses[i]),
                 borrowRate: ILendingPool(lendingPoolCoreAddress).getReserveCurrentVariableBorrowRate(_tokenAddresses[i]),
+                borrowRateStable: ILendingPool(lendingPoolCoreAddress).getReserveCurrentStableBorrowRate(_tokenAddresses[i]),
                 totalSupply: ILendingPool(lendingPoolCoreAddress).getReserveTotalLiquidity(_tokenAddresses[i]),
                 availableLiquidity: ILendingPool(lendingPoolCoreAddress).getReserveAvailableLiquidity(_tokenAddresses[i]),
                 totalBorrow: ILendingPool(lendingPoolCoreAddress).getReserveTotalBorrowsVariable(_tokenAddresses[i]),
