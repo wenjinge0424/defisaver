@@ -31,6 +31,7 @@ contract AaveLoanInfo is AaveSafetyRatio {
         uint256 availableLiquidity;
         uint256 totalBorrow;
         uint256 collateralFactor;
+        uint256 liquidationRatio;
         uint256 price;
         bool usageAsCollateralEnabled;
     }
@@ -122,7 +123,7 @@ contract AaveLoanInfo is AaveSafetyRatio {
         tokens = new TokenInfoFull[](_tokenAddresses.length);
 
         for (uint256 i = 0; i < _tokenAddresses.length; ++i) {
-        	(,uint256 ltv,,bool usageAsCollateralEnabled) = ILendingPool(lendingPoolCoreAddress).getReserveConfiguration(_tokenAddresses[i]);
+        	(,uint256 ltv, uint256 liqRatio, bool usageAsCollateralEnabled) = ILendingPool(lendingPoolCoreAddress).getReserveConfiguration(_tokenAddresses[i]);
 
             tokens[i] = TokenInfoFull({
             	aTokenAddress: ILendingPool(lendingPoolCoreAddress).getReserveATokenAddress(_tokenAddresses[i]),
@@ -134,6 +135,7 @@ contract AaveLoanInfo is AaveSafetyRatio {
                 availableLiquidity: ILendingPool(lendingPoolCoreAddress).getReserveAvailableLiquidity(_tokenAddresses[i]),
                 totalBorrow: ILendingPool(lendingPoolCoreAddress).getReserveTotalBorrowsVariable(_tokenAddresses[i]),
                 collateralFactor: ltv,
+                liquidationRatio: liqRatio,
                 price: IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddresses[i]),
                 usageAsCollateralEnabled: usageAsCollateralEnabled
             });
