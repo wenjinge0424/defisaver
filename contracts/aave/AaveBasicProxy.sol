@@ -78,17 +78,15 @@ contract AaveBasicProxy is GasBurner {
         (,uint256 borrowAmount,,,,,uint256 originationFee,,,) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, address(this));
 
         if (_wholeDebt) {
-            amount = borrowAmount;
+            amount = borrowAmount + originationFee;
         }
-
-        amount += originationFee;
 
         if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), amount);
             approveToken(_tokenAddr, lendingPoolCore);
         }
 
-        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, borrowAmount, payable(address(this)));
+        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, amount, payable(address(this)));
 
         withdrawTokens(_tokenAddr);
     }
@@ -108,17 +106,18 @@ contract AaveBasicProxy is GasBurner {
         (,uint256 borrowAmount,,,,,uint256 originationFee,,,) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, _onBehalf);
 
         if (_wholeDebt) {
-            amount = borrowAmount;
+            amount = borrowAmount + originationFee;
         }
-
-        amount += originationFee;
 
         if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), amount);
+            if (originationFee > 0) {
+                ERC20(_tokenAddr).safeTransfer(_onBehalf, originationFee);
+            }
             approveToken(_tokenAddr, lendingPoolCore);
         }
 
-        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, borrowAmount, _onBehalf);
+        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, amount, _onBehalf);
 
         withdrawTokens(_tokenAddr);
     }
