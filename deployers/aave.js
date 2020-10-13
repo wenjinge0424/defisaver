@@ -7,10 +7,10 @@ const { deployContract } = require("./utils/deployer");
 const { start } = require('./utils/starter');
 
 async function main() {
-     await deployContract("AaveBasicProxy");
-     await deployContract("AaveSaverProxy");
+     // await deployContract("AaveBasicProxy");
+     // await deployContract("AaveSaverProxy");
      // await deployContract("AaveSaverReceiver");
-     // await deployContract("AaveSaverTaker");
+     await deployContract("AaveSaverTaker");
 }
 
 start(main);
