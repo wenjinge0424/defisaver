@@ -24,17 +24,21 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
     ) public payable burnGas(25) {
         uint256 maxDebt = getMaxDebt(_cdpId, manager.ilks(_cdpId));
 
-        if (maxDebt >= _exchangeData.srcAmount) {
+        uint256 loanAmount = sub(_exchangeData.srcAmount, maxDebt);
+        uint maxLiq = getAvailableLiquidity(DAI_JOIN_ADDRESS);
+
+        loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
+
+        if (maxDebt >= _exchangeData.srcAmount || maxLiq == 0) {
+            if (_exchangeData.srcAmount > maxDebt) {
+                _exchangeData.srcAmount = maxDebt;
+            }
+
             boost(_exchangeData, _cdpId, _gasCost, _joinAddr);
             return;
         }
 
         MCD_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
-
-        uint256 loanAmount = sub(_exchangeData.srcAmount, maxDebt);
-        uint maxLiq = getAvailableLiquidity(DAI_JOIN_ADDRESS);
-
-        loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
 
         manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 1);
 
@@ -53,17 +57,21 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
     ) public payable burnGas(25) {
         uint256 maxColl = getMaxCollateral(_cdpId, manager.ilks(_cdpId), _joinAddr);
 
-        if (maxColl >= _exchangeData.srcAmount) {
+        uint256 loanAmount = sub(_exchangeData.srcAmount, maxColl);
+        uint maxLiq = getAvailableLiquidity(_joinAddr);
+
+        loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
+
+        if (maxColl >= _exchangeData.srcAmount || maxLiq == 0) {
+            if (_exchangeData.srcAmount > maxColl) {
+                _exchangeData.srcAmount = maxColl;
+            }
+
             repay(_exchangeData, _cdpId, _gasCost, _joinAddr);
             return;
         }
 
         MCD_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
-
-        uint256 loanAmount = sub(_exchangeData.srcAmount, maxColl);
-        uint maxLiq = getAvailableLiquidity(_joinAddr);
-
-        loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
 
         manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 1);
 

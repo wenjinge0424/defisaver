@@ -95,7 +95,7 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
 
         } else if(enumData[0] == 1) { // COMPOUND FROM
             if (enumData[2] == 2) { // DEBT_SWAP
-                proxyData1 = abi.encodeWithSignature("changeDebt(address,address,uint256,uint256)", addrData[2], addrData[3], (_amount + _fee), numData[4]);
+                proxyData1 = abi.encodeWithSignature("changeDebt(address,address,uint256,uint256)", addrData[2], addrData[3], _amount, numData[4]);
             } else {
                 proxyData1 = abi.encodeWithSignature("close(address,address,uint256,uint256)", addrData[0], addrData[2], numData[0], numData[1]);
             }
