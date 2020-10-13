@@ -30,6 +30,10 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
         loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
 
         if (maxDebt >= _exchangeData.srcAmount || maxLiq == 0) {
+            if (_exchangeData.srcAmount > maxDebt) {
+                _exchangeData.srcAmount = maxDebt;
+            }
+
             boost(_exchangeData, _cdpId, _gasCost, _joinAddr);
             return;
         }
@@ -59,6 +63,10 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
         loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
 
         if (maxColl >= _exchangeData.srcAmount || maxLiq == 0) {
+            if (_exchangeData.srcAmount > maxColl) {
+                _exchangeData.srcAmount = maxColl;
+            }
+
             repay(_exchangeData, _cdpId, _gasCost, _joinAddr);
             return;
         }
