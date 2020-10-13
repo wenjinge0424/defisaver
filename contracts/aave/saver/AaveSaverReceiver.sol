@@ -45,7 +45,7 @@ contract AaveSaverReceiver is AaveHelper, AdminAuth, SaverExchangeCore {
         DSProxy(payable(proxy)).execute{value: ethAmount}(AAVE_BASIC_PROXY, abi.encodeWithSignature("deposit(address,uint256)", ETH_ADDR, ethAmount));
         
         bytes memory functionData = packFunctionCall(exchangeDataBytes, gasCost, isRepay);
-        DSProxy(payable(proxy)).execute(AAVE_SAVER_PROXY, functionData);
+        DSProxy(payable(proxy)).execute{value: txValue}(AAVE_SAVER_PROXY, functionData);
 
         // withdraw deposited eth
         DSProxy(payable(proxy)).execute(AAVE_BASIC_PROXY, abi.encodeWithSignature("withdraw(address,address,uint256,bool)", ETH_ADDR, AETH_ADDRESS, ethAmount, false));

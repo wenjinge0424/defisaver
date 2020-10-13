@@ -46,6 +46,7 @@ contract AaveSaverTaker is DydxFlashLoanBase, ProxyPermission, GasBurner, SaverE
         Actions.ActionArgs[] memory operations = new Actions.ActionArgs[](3);
 
         operations[0] = _getWithdrawAction(marketId, ethAmount, AAVE_RECEIVER);
+        AAVE_RECEIVER.transfer(msg.value);
         bytes memory encodedData = packExchangeData(_data);
         operations[1] = _getCallAction(
             abi.encode(encodedData, _gasCost, _isRepay, ethAmount, msg.value, proxyOwner(), address(this)),
