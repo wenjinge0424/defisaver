@@ -79,11 +79,11 @@ describe("ExchangePrices", accounts => {
         if (Dec(sellRateUni2).gt('0')) console.log(`Would get: ${Dec(wmul(sellRateUni2, ethAmount)).div(buyTokenDivider).toFixed(2)} ${getName(buyToken)}`)
         console.log('------------------------------')
 
-        const sellRateKyber = (await prices.methods.getBestPrice(
-            ethAmount, sellToken, buyToken, 0, [kyberWrapperAddr]).call())['1'];
-        console.log('Kyber: ', sellRateKyber);
-        if (Dec(sellRateKyber).gt('0')) console.log(`Would get: ${Dec(wmul(sellRateKyber, ethAmount)).div(buyTokenDivider).toFixed(2)} ${getName(buyToken)}`)
-        console.log('------------------------------')
+        // const sellRateKyber = (await prices.methods.getBestPrice(
+        //     ethAmount, sellToken, buyToken, 0, [kyberWrapperAddr]).call())['1'];
+        // console.log('Kyber: ', sellRateKyber);
+        // if (Dec(sellRateKyber).gt('0')) console.log(`Would get: ${Dec(wmul(sellRateKyber, ethAmount)).div(buyTokenDivider).toFixed(2)} ${getName(buyToken)}`)
+        // console.log('------------------------------')
 
         const sellRateOasis = (await prices.methods.getBestPrice(
             ethAmount, sellToken, buyToken, 0, [oasisTradeWrapperAddr]).call())['1'];
@@ -110,11 +110,11 @@ describe("ExchangePrices", accounts => {
         if (Dec(buyRateUni2).gt('0')) console.log(`Would need: ${Dec(wdiv(daiAmount, buyRateUni2)).div(sellTokenDivider).toFixed(2)} ${getName(sellToken)}`)
         console.log('------------------------------')
 
-        const buyRateKyber = (await prices.methods.getBestPrice(
-            daiAmount, sellToken, buyToken, 1, [kyberWrapperAddr]).call())['1'];
-        console.log('Kyber: ', buyRateKyber);
-        if (Dec(buyRateKyber).gt('0')) console.log(`Would need: ${Dec(wdiv(daiAmount, buyRateKyber)).div(sellTokenDivider).toFixed(2)} ${getName(sellToken)}`)
-        console.log('------------------------------')
+        // const buyRateKyber = (await prices.methods.getBestPrice(
+        //     daiAmount, sellToken, buyToken, 1, [kyberWrapperAddr]).call())['1'];
+        // console.log('Kyber: ', buyRateKyber);
+        // if (Dec(buyRateKyber).gt('0')) console.log(`Would need: ${Dec(wdiv(daiAmount, buyRateKyber)).div(sellTokenDivider).toFixed(2)} ${getName(sellToken)}`)
+        // console.log('------------------------------')
 
         const buyRateOasis = (await prices.methods.getBestPrice(
             daiAmount, sellToken, buyToken, 1, [oasisTradeWrapperAddr]).call())['1'];

@@ -16,13 +16,18 @@ module.exports = {
         mainnet: {
             url: process.env.ALCHEMY_NODE,
             accounts: [process.env.PRIV_KEY_OWNER],
-            gasPrice: 57000000000
+            gasPrice: 70000000000
         },
         kovan: {
             url: process.env.KOVAN_INFURA_ENDPOINT,
             accounts: [process.env.PRIV_KEY_KOVAN],
             gasPrice: 1600000000
         },
+        dev: {
+            url: 'http://127.0.0.1:8545',
+            accounts: [process.env.LOCAL_PK],
+            gasPrice: 70000000000
+        }
     },
     solc: {
         version: "0.6.6",
