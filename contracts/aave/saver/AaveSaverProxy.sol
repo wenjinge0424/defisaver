@@ -1,12 +1,12 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "./AaveHelper.sol";
-import "../exchange/SaverExchangeCore.sol";
-import "../interfaces/IAToken.sol";
-import "../interfaces/ILendingPool.sol";
-import "../loggers/DefisaverLogger.sol";
-import "../utils/GasBurner.sol";
+import "../AaveHelper.sol";
+import "../../exchange/SaverExchangeCore.sol";
+import "../../interfaces/IAToken.sol";
+import "../../interfaces/ILendingPool.sol";
+import "../../loggers/DefisaverLogger.sol";
+import "../../utils/GasBurner.sol";
 
 contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 
@@ -20,12 +20,11 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 		address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 		address payable user = payable(getUserAddress());
 
-		uint256 maxCollateral = getMaxCollateral(_data.srcAddr, address(this));
-		// don't swap more than maxCollateral
-		_data.srcAmount = _data.srcAmount > maxCollateral ? maxCollateral : _data.srcAmount;
-
 		// redeem collateral
 		address aTokenCollateral = ILendingPool(lendingPoolCore).getReserveATokenAddress(_data.srcAddr);
+		uint256 maxCollateral = IAToken(aTokenCollateral).balanceOf(address(this)); 
+		// don't swap more than maxCollateral
+		_data.srcAmount = _data.srcAmount > maxCollateral ? maxCollateral : _data.srcAmount;
 		IAToken(aTokenCollateral).redeem(_data.srcAmount);
 
 		uint256 destAmount = _data.srcAmount;

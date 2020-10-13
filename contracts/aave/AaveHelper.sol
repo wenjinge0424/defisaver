@@ -25,7 +25,7 @@ contract AaveHelper is DSMath {
 
 	address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant AAVE_LENDING_POOL_ADDRESSES = 0x24a42fD28C976A61Df5D00D0599C34c4f90748c8;
-    uint public constant NINETY_NINE_PERCENT_WEI = 999900000000000000;
+    uint public constant NINETY_NINE_PERCENT_WEI = 990000000000000000;
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
     /// @param _collateralAddress underlying token address
@@ -69,8 +69,6 @@ contract AaveHelper is DSMath {
         	maxCollateralEth = maxCollateralEth > userTokenBalanceEth ? userTokenBalanceEth : maxCollateralEth;
         }
 
-
-
 		return wmul(wdiv(maxCollateralEth, collateralPrice) / pow10, NINETY_NINE_PERCENT_WEI);
 	}
 
@@ -86,6 +84,21 @@ contract AaveHelper is DSMath {
 
 		return wmul(wdiv(availableBorrowsETH, borrowPrice) / (10 ** (18 - _getDecimals(_borrowAddress))), NINETY_NINE_PERCENT_WEI);
 	}
+
+    function getMaxBoost(address _borrowAddress, address _collateralAddress, address _user) public view returns (uint256) {
+        address lendingPoolAddressDataProvider = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolDataProvider();
+        address lendingPoolCoreAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
+        address priceOracleAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getPriceOracle();
+
+        (,uint256 totalCollateralETH, uint256 totalBorrowsETH,,uint256 currentLTV,,,) = ILendingPool(lendingPoolAddressDataProvider).calculateUserGlobalData(_user);
+        (,uint256 tokenLTV,,) = ILendingPool(lendingPoolCoreAddress).getReserveConfiguration(_collateralAddress);
+        totalCollateralETH = div(mul(totalCollateralETH, currentLTV), 100);
+
+        uint256 availableBorrowsETH = wmul(mul(div(sub(totalCollateralETH, totalBorrowsETH), sub(100, tokenLTV)), 100), NINETY_NINE_PERCENT_WEI);
+        uint256 borrowPrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_borrowAddress);
+
+        return wdiv(availableBorrowsETH, borrowPrice) / (10 ** (18 - _getDecimals(_borrowAddress)));
+    }
 
     /// @notice Calculates the fee amount
     /// @param _amount Amount that is converted
