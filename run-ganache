@@ -1,4 +1,4 @@
 #!/bin/bash
 NODE=$(grep ARCHIVE_NODE .env | cut -d '=' -f2)
 
-npx ganache-cli -f $NODE -i 1
+npx ganache-cli -f $NODE -i 1 --account="0x382be65f8dc1c9272ca2588062c1bbb9f9f1364c1dd5df054221a6784aac2fe3,10000000000000000000000"
