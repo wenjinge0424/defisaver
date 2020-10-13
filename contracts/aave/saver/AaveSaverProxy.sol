@@ -1,12 +1,12 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "./AaveHelper.sol";
-import "../exchange/SaverExchangeCore.sol";
-import "../interfaces/IAToken.sol";
-import "../interfaces/ILendingPool.sol";
-import "../loggers/DefisaverLogger.sol";
-import "../utils/GasBurner.sol";
+import "../AaveHelper.sol";
+import "../../exchange/SaverExchangeCore.sol";
+import "../../interfaces/IAToken.sol";
+import "../../interfaces/ILendingPool.sol";
+import "../../loggers/DefisaverLogger.sol";
+import "../../utils/GasBurner.sol";
 
 contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 
@@ -20,12 +20,11 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 		address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 		address payable user = payable(getUserAddress());
 
-		uint256 maxCollateral = getMaxCollateral(_data.srcAddr, address(this));
-		// don't swap more than maxCollateral
-		_data.srcAmount = _data.srcAmount > maxCollateral ? maxCollateral : _data.srcAmount;
-
 		// redeem collateral
 		address aTokenCollateral = ILendingPool(lendingPoolCore).getReserveATokenAddress(_data.srcAddr);
+		uint256 maxCollateral = IAToken(aTokenCollateral).balanceOf(address(this)); 
+		// don't swap more than maxCollateral
+		_data.srcAmount = _data.srcAmount > maxCollateral ? maxCollateral : _data.srcAmount;
 		IAToken(aTokenCollateral).redeem(_data.srcAmount);
 
 		uint256 destAmount = _data.srcAmount;
@@ -56,14 +55,14 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 	function boost(ExchangeData memory _data, uint _gasCost) public payable burnGas(20) {
 		address lendingPoolCore = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
 		address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
-		(,,,,,,,,,bool collateralEnabled) = ILendingPool(lendingPool).getUserReserveData(_data.destAddr, address(this));
+		(,,,uint256 borrowRateMode,,,,,,bool collateralEnabled) = ILendingPool(lendingPool).getUserReserveData(_data.destAddr, address(this));
 		address payable user = payable(getUserAddress());
 
-		uint256 maxBorrow = getMaxBorrow(_data.srcAddr, address(this));
+		uint256 maxBorrow = getMaxBoost(_data.srcAddr, _data.destAddr, address(this));
 		_data.srcAmount = _data.srcAmount > maxBorrow ? maxBorrow : _data.srcAmount;
 
 		// borrow amount
-		ILendingPool(lendingPool).borrow(_data.srcAddr, _data.srcAmount, VARIABLE_RATE, AAVE_REFERRAL_CODE);
+		ILendingPool(lendingPool).borrow(_data.srcAddr, _data.srcAmount, borrowRateMode == 0 ? VARIABLE_RATE : borrowRateMode, AAVE_REFERRAL_CODE);
 
 		uint256 destAmount;
 		if (_data.destAddr != _data.srcAddr) {

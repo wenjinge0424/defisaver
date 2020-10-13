@@ -54,7 +54,7 @@ const wmul = (a, b) => {
 }
 
 const loadAccounts = (web3) => {
-    const account = web3.eth.accounts.privateKeyToAccount('0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d');
+    const account = web3.eth.accounts.privateKeyToAccount('0x382be65f8dc1c9272ca2588062c1bbb9f9f1364c1dd5df054221a6784aac2fe3');
     web3.eth.accounts.wallet.add(account);
 
     return web3;

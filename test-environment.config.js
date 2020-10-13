@@ -19,7 +19,7 @@ module.exports = {
     },
 
     setupProvider: (baseProvider) => {
-        baseProvider.host = `${process.env.MOON_NET_NODE}`;
+        baseProvider.host = `http://127.0.0.1:8545`;//`${process.env.MOON_NET_NODE}`;
 
         return baseProvider;
       },

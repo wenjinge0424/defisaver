@@ -4,10 +4,11 @@ pragma experimental ABIEncoderV2;
 import "../saver/MCDSaverProxy.sol";
 import "../../exchange/SaverExchangeCore.sol";
 import "../../utils/GasBurner.sol";
+import "../../interfaces/ILendingPool.sol";
 
-abstract contract ILendingPool {
-    function flashLoan( address payable _receiver, address _reserve, uint _amount, bytes calldata _params) external virtual;
-}
+// abstract contract ILendingPool {
+//     function flashLoan( address payable _receiver, address _reserve, uint _amount, bytes calldata _params) external virtual;
+// }
 
 contract MCDSaverTaker is MCDSaverProxy, GasBurner {
 
