@@ -1,0 +1,4 @@
+#!/bin/bash
+NODE=$(grep ARCHIVE_NODE .env | cut -d '=' -f2)
+
+npx ganache-cli -f $NODE -i 1
