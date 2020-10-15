@@ -48,7 +48,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         if (exData.price0x > 0) {
             approve0xProxy(exData.srcAddr, exData.srcAmount);
 
-            uint ethAmount = getProtocolFee(exData.srcAddr, msg.value, exData.srcAmount);
+            uint ethAmount = getProtocolFee(exData.srcAddr, exData.srcAmount);
             (success, swapedTokens, tokensLeft) = takeOrder(exData, ethAmount, ActionType.SELL);
 
             if (success) {
@@ -95,7 +95,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         if (exData.price0x > 0) {
             approve0xProxy(exData.srcAddr, exData.srcAmount);
 
-            uint ethAmount = getProtocolFee(exData.srcAddr, msg.value, exData.srcAmount);
+            uint ethAmount = getProtocolFee(exData.srcAddr, exData.srcAmount);
             (success, swapedTokens,) = takeOrder(exData, ethAmount, ActionType.BUY);
 
             if (success) {
@@ -213,15 +213,14 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
 
     /// @notice Calculates protocol fee
     /// @param _srcAddr selling token address (if eth should be WETH)
-    /// @param _msgValue msg.value in transaction
     /// @param _srcAmount amount we are selling
-    function getProtocolFee(address _srcAddr, uint256 _msgValue, uint256 _srcAmount) internal view returns(uint256) {
+    function getProtocolFee(address _srcAddr, uint256 _srcAmount) internal view returns(uint256) {
         // if we are not selling ETH msg value is always the protocol fee
         if (_srcAddr != WETH_ADDRESS) return address(this).balance;
 
         // if msg value is larger than srcAmount, that means that msg value is protocol fee + srcAmount, so we subsctract srcAmount from msg value
         // we have an edge case here when protocol fee is higher than selling amount
-        if (_msgValue > _srcAmount) return address(this).balance - _srcAmount;
+        if (address(this).balance > _srcAmount) return address(this).balance - _srcAmount;
 
         // if msg value is lower than src amount, that means that srcAmount isn't included in msg value, so we return msg value
         return address(this).balance;
