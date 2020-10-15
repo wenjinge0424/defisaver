@@ -93,13 +93,13 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
     ) internal {
 
         paybackDebt(_closeData.cdpId, manager.ilks(_closeData.cdpId), _closeData.daiAmount); // payback whole debt
-        drawMaxCollateral(_closeData.cdpId, _closeData.joinAddr, _closeData.collAmount); // draw whole collateral
+        uint drawnAmount = drawMaxCollateral(_closeData.cdpId, _closeData.joinAddr, _closeData.collAmount); // draw whole collateral
 
         uint daiSwaped = 0;
         uint dfsFee = 0;
 
         if (_closeData.toDai) {
-            _exchangeData.srcAmount = _closeData.collAmount;
+            _exchangeData.srcAmount = drawnAmount;
             (, daiSwaped) = _sell(_exchangeData);
 
             dfsFee = getFee(daiSwaped, _user);

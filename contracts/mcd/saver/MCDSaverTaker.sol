@@ -25,10 +25,7 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
     ) public payable burnGas(25) {
         uint256 maxDebt = getMaxDebt(_cdpId, manager.ilks(_cdpId));
 
-        uint256 loanAmount = sub(_exchangeData.srcAmount, maxDebt);
         uint maxLiq = getAvailableLiquidity(DAI_JOIN_ADDRESS);
-
-        loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
 
         if (maxDebt >= _exchangeData.srcAmount || maxLiq == 0) {
             if (_exchangeData.srcAmount > maxDebt) {
@@ -38,6 +35,9 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
             boost(_exchangeData, _cdpId, _gasCost, _joinAddr);
             return;
         }
+
+        uint256 loanAmount = sub(_exchangeData.srcAmount, maxDebt);
+        loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
 
         MCD_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
 
@@ -58,10 +58,8 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
     ) public payable burnGas(25) {
         uint256 maxColl = getMaxCollateral(_cdpId, manager.ilks(_cdpId), _joinAddr);
 
-        uint256 loanAmount = sub(_exchangeData.srcAmount, maxColl);
-        uint maxLiq = getAvailableLiquidity(_joinAddr);
 
-        loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
+        uint maxLiq = getAvailableLiquidity(_joinAddr);
 
         if (maxColl >= _exchangeData.srcAmount || maxLiq == 0) {
             if (_exchangeData.srcAmount > maxColl) {
@@ -71,6 +69,9 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
             repay(_exchangeData, _cdpId, _gasCost, _joinAddr);
             return;
         }
+
+        uint256 loanAmount = sub(_exchangeData.srcAmount, maxColl);
+        loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
 
         MCD_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
 
