@@ -22,9 +22,9 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 
 		// redeem collateral
 		address aTokenCollateral = ILendingPool(lendingPoolCore).getReserveATokenAddress(_data.srcAddr);
-		uint256 maxCollateral = IAToken(aTokenCollateral).balanceOf(address(this)); 
+		// uint256 maxCollateral = IAToken(aTokenCollateral).balanceOf(address(this)); 
 		// don't swap more than maxCollateral
-		_data.srcAmount = _data.srcAmount > maxCollateral ? maxCollateral : _data.srcAmount;
+		// _data.srcAmount = _data.srcAmount > maxCollateral ? maxCollateral : _data.srcAmount;
 		IAToken(aTokenCollateral).redeem(_data.srcAmount);
 
 		uint256 destAmount = _data.srcAmount;
