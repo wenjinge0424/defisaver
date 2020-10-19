@@ -97,17 +97,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
 
         removePermission(loanShifterReceiverAddr);
 
-        DefisaverLogger(DEFISAVER_LOGGER)
-            .Log(address(this), msg.sender, "LoanShifter",
-            abi.encode(
-            _loanShift.fromProtocol,
-            _loanShift.toProtocol,
-            _loanShift.swapType,
-            _exchangeData.srcAddr,
-            _exchangeData.destAddr,
-            _exchangeData.srcAmount,
-            _exchangeData.destAmount
-        ));
+        logEvent(_exchangeData, _loanShift);
     }
 
     function _forkVault(LoanShiftData memory _loanShift) internal {
@@ -142,6 +132,23 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
         } else {
             return address(0);
         }
+    }
+
+    function logEvent(
+        SaverExchangeCore.ExchangeData memory _exchangeData,
+        LoanShiftData memory _loanShift
+    ) internal {
+        DefisaverLogger(DEFISAVER_LOGGER)
+            .Log(address(this), msg.sender, "LoanShifter",
+            abi.encode(
+            _loanShift.fromProtocol,
+            _loanShift.toProtocol,
+            _loanShift.swapType,
+            _exchangeData.srcAddr,
+            _exchangeData.destAddr,
+            _exchangeData.srcAmount,
+            _exchangeData.destAmount
+        ));
     }
 
     function _packData(
