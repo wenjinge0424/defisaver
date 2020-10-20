@@ -7,6 +7,7 @@ import "../interfaces/ILoanShifter.sol";
 import "../interfaces/DSProxyInterface.sol";
 import "../interfaces/Vat.sol";
 import "../interfaces/Manager.sol";
+import "../interfaces/IMCDSubscriptions.sol";
 import "../auth/AdminAuth.sol";
 import "../auth/ProxyPermission.sol";
 import "../exchange/SaverExchangeCore.sol";
@@ -22,6 +23,8 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+
+    address public constant MCD_SUB_ADDRESS = 0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a;
 
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
 
@@ -97,6 +100,8 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
 
         removePermission(loanShifterReceiverAddr);
 
+        // unsubscribeMcd(_loanShift.id1);
+
         logEvent(_exchangeData, _loanShift);
     }
 
@@ -149,6 +154,16 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
             _exchangeData.srcAmount,
             _exchangeData.destAmount
         ));
+    }
+
+    function unsubscribeMcd(uint _cdpId) internal {
+        if (_cdpId != 0) {
+            (, bool isSubscribed) = IMCDSubscriptions(MCD_SUB_ADDRESS).subscribersPos(_cdpId);
+
+            if (isSubscribed) {
+                IMCDSubscriptions(MCD_SUB_ADDRESS).unsubscribe(_cdpId);
+            }
+        }
     }
 
     function _packData(

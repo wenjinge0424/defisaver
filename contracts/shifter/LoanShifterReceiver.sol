@@ -10,6 +10,9 @@ import "./ShifterRegistry.sol";
 /// @title LoanShifterReceiver Recevies the Aave flash loan and calls actions through users DSProxy
 contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminAuth {
 
+    address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
+    address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
+
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
@@ -47,11 +50,13 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
         DSProxyInterface(paramData.proxy).execute(protocolAddr1, paramData.proxyData1);
 
         if (paramData.swapType == 1) { // COLL_SWAP
-            exchangeData.srcAmount = getBalance(exchangeData.srcAddr);
+            exchangeData.srcAmount -= getFee(getBalance(exchangeData.srcAddr), exchangeData.srcAddr, paramData.proxy);
             (, uint amount) = _sell(exchangeData);
 
             sendToProxy(payable(paramData.proxy), exchangeData.destAddr, amount);
         } else if (paramData.swapType == 2) { // DEBT_SWAP
+            exchangeData.srcAmount -= getFee(exchangeData.srcAmount, exchangeData.srcAddr, paramData.proxy);
+
             exchangeData.destAmount = (_amount + _fee);
             _buy(exchangeData);
 
@@ -149,6 +154,30 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
             return "MCD_SHIFTER";
         } else if (_proto == 1) {
             return "COMP_SHIFTER";
+        }
+    }
+
+    function getFee(uint _amount, address _tokenAddr, address _proxy) internal returns (uint feeAmount) {
+        uint fee = 400;
+
+        DSProxyInterface proxy = DSProxyInterface(payable(_proxy));
+        address user = proxy.owner();
+
+        if (Discount(DISCOUNT_ADDR).isCustomFeeSet(user)) {
+            fee = Discount(DISCOUNT_ADDR).getCustomServiceFee(user);
+        }
+
+        feeAmount = (fee == 0) ? 0 : (_amount / fee);
+
+        // fee can't go over 20% of the whole amount
+        if (feeAmount > (_amount / 5)) {
+            feeAmount = _amount / 5;
+        }
+
+        if (_tokenAddr == ETH_ADDRESS) {
+            WALLET_ADDR.transfer(feeAmount);
+        } else {
+            ERC20(_tokenAddr).safeTransfer(WALLET_ADDR, feeAmount);
         }
     }
 

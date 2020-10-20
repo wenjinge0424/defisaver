@@ -76,6 +76,20 @@ contract MCDSaverProxyHelper is DSMath {
         return address(Join(_joinAddr).gem());
     }
 
+    /// @notice Checks if the join address is one of the Ether coll. types
+    /// @param _joinAddr Join address to check
+    function isEthJoinAddr(address _joinAddr) internal view returns (bool) {
+        // if it's dai_join_addr don't check gem() it will fail
+        if (_joinAddr == 0x9759A6Ac90977b93B58547b4A71c78317f391A28) return false;
+
+        // if coll is weth it's and eth type coll
+        if (address(Join(_joinAddr).gem()) == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) {
+            return true;
+        }
+
+        return false;
+    }
+
     /// @notice Gets CDP info (collateral, debt)
     /// @param _manager Manager contract
     /// @param _cdpId Id of the CDP

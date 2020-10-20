@@ -28,7 +28,6 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
     address public constant SPOTTER_ADDRESS = 0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3;
     address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
     address public constant JUG_ADDRESS = 0x19c0976f590D67707E62397C87829d896Dc0f1F1;
-    address public constant ETH_JOIN_ADDRESS = 0x2F0b23f53734252Bda2277357e97e1517d6B042A;
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     address public constant BOT_REGISTRY_ADDRESS = 0x637726f8b08a7ABE3aE3aCaB01A80E2d8ddeF77B;
@@ -130,7 +129,7 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
     function addCollateral(uint _cdpId, address _joinAddr, uint _amount) internal {
         int convertAmount = 0;
 
-        if (_joinAddr == ETH_JOIN_ADDRESS) {
+        if (isEthJoinAddr(_joinAddr)) {
             Join(_joinAddr).gem().deposit{value: _amount}();
             convertAmount = toPositiveInt(_amount);
         } else {
@@ -170,7 +169,7 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
 
         Join(_joinAddr).exit(address(this), _amount);
 
-        if (_joinAddr == ETH_JOIN_ADDRESS) {
+        if (isEthJoinAddr(_joinAddr)) {
             Join(_joinAddr).gem().withdraw(_amount); // Weth -> Eth
         }
 
