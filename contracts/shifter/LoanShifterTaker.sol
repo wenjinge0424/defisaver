@@ -8,6 +8,7 @@ import "../interfaces/DSProxyInterface.sol";
 import "../interfaces/Vat.sol";
 import "../interfaces/Manager.sol";
 import "../interfaces/IMCDSubscriptions.sol";
+import "../interfaces/ICompoundSubscriptions.sol";
 import "../auth/AdminAuth.sol";
 import "../auth/ProxyPermission.sol";
 import "../exchange/SaverExchangeCore.sol";
@@ -25,6 +26,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     address public constant MCD_SUB_ADDRESS = 0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a;
+    address public constant COMPOUND_SUB_ADDRESS = 0x52015EFFD577E08f498a0CCc11905925D58D6207;
 
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
 
@@ -35,11 +37,13 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
 
     enum Protocols { MCD, COMPOUND }
     enum SwapType { NO_SWAP, COLL_SWAP, DEBT_SWAP }
+    enum Unsub { NO_UNSUB, FIRST_UNSUB, SECOND_UNSUB, BOTH_UNSUB }
 
     struct LoanShiftData {
         Protocols fromProtocol;
         Protocols toProtocol;
         SwapType swapType;
+        Unsub unsub;
         bool wholeDebt;
         uint collAmount;
         uint debtAmount;
@@ -100,7 +104,13 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
 
         removePermission(loanShifterReceiverAddr);
 
-        // unsubscribeMcd(_loanShift.id1);
+        unsubFromAutomation(
+            _loanShift.unsub,
+            _loanShift.id1,
+            _loanShift.id2,
+            _loanShift.fromProtocol,
+            _loanShift.toProtocol
+        );
 
         logEvent(_exchangeData, _loanShift);
     }
@@ -156,13 +166,25 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
         ));
     }
 
-    function unsubscribeMcd(uint _cdpId) internal {
-        if (_cdpId != 0) {
-            (, bool isSubscribed) = IMCDSubscriptions(MCD_SUB_ADDRESS).subscribersPos(_cdpId);
-
-            if (isSubscribed) {
-                IMCDSubscriptions(MCD_SUB_ADDRESS).unsubscribe(_cdpId);
+    function unsubFromAutomation(Unsub _unsub, uint _cdp1, uint _cdp2, Protocols _from, Protocols _to) internal {
+        if (_unsub != Unsub.NO_UNSUB) {
+            if (_unsub == Unsub.FIRST_UNSUB || _unsub == Unsub.BOTH_UNSUB) {
+                unsubscribe(_cdp1, _from);
             }
+
+            if (_unsub == Unsub.SECOND_UNSUB || _unsub == Unsub.BOTH_UNSUB) {
+                unsubscribe(_cdp2, _to);
+            }
+        }
+    }
+
+    function unsubscribe(uint _cdpId, Protocols _protocol) internal {
+        if (_cdpId != 0 && _protocol == Protocols.MCD) {
+            IMCDSubscriptions(MCD_SUB_ADDRESS).unsubscribe(_cdpId);
+        }
+
+        if (_protocol == Protocols.COMPOUND) {
+            ICompoundSubscriptions(COMPOUND_SUB_ADDRESS).unsubscribe();
         }
     }
 
