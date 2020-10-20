@@ -118,19 +118,20 @@ contract AaveLoanInfo is AaveSafetyRatio {
     /// @return tokens Array of reserves infomartion
     function getFullTokensInfo(address[] memory _tokenAddresses) public view returns(TokenInfoFull[] memory tokens) {
     	address lendingPoolCoreAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPoolCore();
+        address lendingPoolAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
     	address priceOracleAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getPriceOracle();
 
         tokens = new TokenInfoFull[](_tokenAddresses.length);
 
         for (uint256 i = 0; i < _tokenAddresses.length; ++i) {
-        	(,uint256 ltv, uint256 liqRatio, bool usageAsCollateralEnabled) = ILendingPool(lendingPoolCoreAddress).getReserveConfiguration(_tokenAddresses[i]);
+        	(uint256 ltv, uint256 liqRatio,,, bool usageAsCollateralEnabled, bool borrowingEnabled, bool stableBorrowingEnabled,) = ILendingPool(lendingPoolAddress).getReserveConfigurationData(_tokenAddresses[i]);
 
             tokens[i] = TokenInfoFull({
             	aTokenAddress: ILendingPool(lendingPoolCoreAddress).getReserveATokenAddress(_tokenAddresses[i]),
                 underlyingTokenAddress: _tokenAddresses[i],
                 supplyRate: ILendingPool(lendingPoolCoreAddress).getReserveCurrentLiquidityRate(_tokenAddresses[i]),
-                borrowRate: ILendingPool(lendingPoolCoreAddress).getReserveCurrentVariableBorrowRate(_tokenAddresses[i]),
-                borrowRateStable: ILendingPool(lendingPoolCoreAddress).getReserveCurrentStableBorrowRate(_tokenAddresses[i]),
+                borrowRate: borrowingEnabled ? ILendingPool(lendingPoolCoreAddress).getReserveCurrentVariableBorrowRate(_tokenAddresses[i]) : 0,
+                borrowRateStable: stableBorrowingEnabled ? ILendingPool(lendingPoolCoreAddress).getReserveCurrentStableBorrowRate(_tokenAddresses[i]) : 0,
                 totalSupply: ILendingPool(lendingPoolCoreAddress).getReserveTotalLiquidity(_tokenAddresses[i]),
                 availableLiquidity: ILendingPool(lendingPoolCoreAddress).getReserveAvailableLiquidity(_tokenAddresses[i]),
                 totalBorrow: ILendingPool(lendingPoolCoreAddress).getReserveTotalBorrowsVariable(_tokenAddresses[i]),
