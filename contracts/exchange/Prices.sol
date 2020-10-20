@@ -32,11 +32,7 @@ contract Prices is DSMath {
             rates[i] = getExpectedRate(_wrappers[i], _srcToken, _destToken, _amount, _type);
         }
 
-        if (_type == ActionType.SELL) {
-            return getBiggestRate(_wrappers, rates);
-        } else {
-            return getSmallestRate(_wrappers, rates);
-        }
+        return getBiggestRate(_wrappers, rates);
     }
 
     /// @notice Return the expected rate from the exchange wrapper
@@ -97,25 +93,6 @@ contract Prices is DSMath {
         }
 
         return (_wrappers[maxIndex], _rates[maxIndex]);
-    }
-
-    /// @notice Finds the smallest rate between exchanges, needed for buy rate
-    /// @param _wrappers Array of wrappers to compare
-    /// @param _rates Array of rates to compare
-    function getSmallestRate(
-        address[] memory _wrappers,
-        uint256[] memory _rates
-    ) internal pure returns (address, uint) {
-        uint256 minIndex = 0;
-
-        // starting from 0 in case there is only one rate in array
-        for (uint256 i=0; i<_rates.length; i++) {
-            if ((_rates[i] < _rates[minIndex] && _rates[i] > 0) || _rates[minIndex] == 0) {
-                minIndex = i;
-            }
-        }
-
-        return (_wrappers[minIndex], _rates[minIndex]);
     }
 
     function getDecimals(address _token) internal view returns (uint256) {
