@@ -7,11 +7,13 @@ import "../interfaces/ILoanShifter.sol";
 import "../interfaces/DSProxyInterface.sol";
 import "../interfaces/Vat.sol";
 import "../interfaces/Manager.sol";
+import "../interfaces/IMCDSubscriptions.sol";
 import "../auth/AdminAuth.sol";
 import "../auth/ProxyPermission.sol";
 import "../exchange/SaverExchangeCore.sol";
 import "./ShifterRegistry.sol";
 import "../utils/GasBurner.sol";
+import "../loggers/DefisaverLogger.sol";
 
 
 /// @title LoanShifterTaker Entry point for using the shifting operation
@@ -22,7 +24,11 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
+    address public constant MCD_SUB_ADDRESS = 0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a;
+
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
+
+    address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
     Manager public constant manager = Manager(MANAGER_ADDRESS);
     ShifterRegistry public constant shifterRegistry = ShifterRegistry(0x597C52281b31B9d949a9D8fEbA08F7A2530a965e);
@@ -93,6 +99,10 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
            getLoanAddr(_loanShift.debtAddr1, _loanShift.fromProtocol), _loanShift.debtAmount, paramsData);
 
         removePermission(loanShifterReceiverAddr);
+
+        // unsubscribeMcd(_loanShift.id1);
+
+        logEvent(_exchangeData, _loanShift);
     }
 
     function _forkVault(LoanShiftData memory _loanShift) internal {
@@ -126,6 +136,33 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
             return DAI_ADDRESS;
         } else {
             return address(0);
+        }
+    }
+
+    function logEvent(
+        SaverExchangeCore.ExchangeData memory _exchangeData,
+        LoanShiftData memory _loanShift
+    ) internal {
+        DefisaverLogger(DEFISAVER_LOGGER)
+            .Log(address(this), msg.sender, "LoanShifter",
+            abi.encode(
+            _loanShift.fromProtocol,
+            _loanShift.toProtocol,
+            _loanShift.swapType,
+            _exchangeData.srcAddr,
+            _exchangeData.destAddr,
+            _exchangeData.srcAmount,
+            _exchangeData.destAmount
+        ));
+    }
+
+    function unsubscribeMcd(uint _cdpId) internal {
+        if (_cdpId != 0) {
+            (, bool isSubscribed) = IMCDSubscriptions(MCD_SUB_ADDRESS).subscribersPos(_cdpId);
+
+            if (isSubscribed) {
+                IMCDSubscriptions(MCD_SUB_ADDRESS).unsubscribe(_cdpId);
+            }
         }
     }
 

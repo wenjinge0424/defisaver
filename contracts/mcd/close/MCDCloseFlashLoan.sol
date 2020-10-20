@@ -16,7 +16,6 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
 
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
-    address public constant ETH_JOIN_ADDRESS = 0x2F0b23f53734252Bda2277357e97e1517d6B042A;
     address public constant SPOTTER_ADDRESS = 0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
 
@@ -138,7 +137,7 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
 
         Join(_joinAddr).exit(address(this), joinAmount);
 
-        if (_joinAddr == ETH_JOIN_ADDRESS) {
+        if (isEthJoinAddr(_joinAddr)) {
             Join(_joinAddr).gem().withdraw(joinAmount); // Weth -> Eth
         }
 

@@ -16,7 +16,6 @@ contract MCDCreateFlashLoan is SaverExchangeCore, AdminAuth, FlashLoanReceiverBa
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
-    address public constant ETH_JOIN_ADDRESS = 0x2F0b23f53734252Bda2277357e97e1517d6B042A;
     address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
     address public constant JUG_ADDRESS = 0x19c0976f590D67707E62397C87829d896Dc0f1F1;
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
@@ -79,11 +78,11 @@ contract MCDCreateFlashLoan is SaverExchangeCore, AdminAuth, FlashLoanReceiverBa
 
         bytes32 ilk = Join(_joinAddr).ilk();
 
-        if (_joinAddr == ETH_JOIN_ADDRESS) {
+        if (isEthJoinAddr(_joinAddr)) {
             MCDCreateProxyActions(CREATE_PROXY_ACTIONS).openLockETHAndDraw{value: address(this).balance}(
                 MANAGER_ADDRESS,
                 JUG_ADDRESS,
-                ETH_JOIN_ADDRESS,
+                _joinAddr,
                 DAI_JOIN_ADDRESS,
                 ilk,
                 _daiAmountAndFee,
@@ -122,6 +121,20 @@ contract MCDCreateFlashLoan is SaverExchangeCore, AdminAuth, FlashLoanReceiverBa
         }
 
         ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
+    }
+
+    /// @notice Checks if the join address is one of the Ether coll. types
+    /// @param _joinAddr Join address to check
+    function isEthJoinAddr(address _joinAddr) internal view returns (bool) {
+        // if it's dai_join_addr don't check gem() it will fail
+        if (_joinAddr == 0x9759A6Ac90977b93B58547b4A71c78317f391A28) return false;
+
+        // if coll is weth it's and eth type coll
+        if (address(Join(_joinAddr).gem()) == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) {
+            return true;
+        }
+
+        return false;
     }
 
     receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}

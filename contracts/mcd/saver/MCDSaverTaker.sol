@@ -12,7 +12,7 @@ import "../../interfaces/ILendingPool.sol";
 
 contract MCDSaverTaker is MCDSaverProxy, GasBurner {
 
-    address payable public constant MCD_SAVER_FLASH_LOAN = 0x28e444b53a9e7E3F6fFe50E93b18dCce7838551F;
+    address payable public constant MCD_SAVER_FLASH_LOAN = 0x1245456DcE9Ac395B4a5F7c3b6622486180A6166;
     address public constant AAVE_POOL_CORE = 0x3dfd23A6c5E8BbcFc9581d2E864a68feb6a076d3;
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
@@ -98,7 +98,7 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
     }
 
     function getAaveCollAddr(address _joinAddr) internal view returns (address) {
-        if (_joinAddr == 0x2F0b23f53734252Bda2277357e97e1517d6B042A
+        if (isEthJoinAddr(_joinAddr)
             || _joinAddr == 0x775787933e92b709f2a3C70aa87999696e74A9F8) {
             return KYBER_ETH_ADDRESS;
         } else if (_joinAddr == DAI_JOIN_ADDRESS) {

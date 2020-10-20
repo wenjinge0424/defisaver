@@ -11,10 +11,9 @@ contract MCDCreateTaker {
 
     using SafeERC20 for ERC20;
 
-    address payable public constant MCD_CREATE_FLASH_LOAN = 0x71eC9a4fCE561c3936a511D9ebb05B60CF2bA519;
+    address payable public constant MCD_CREATE_FLASH_LOAN = 0x78aF7A2Ee6C2240c748aDdc42aBc9A693559dcaF;
 
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address public constant ETH_JOIN_ADDRESS = 0x2F0b23f53734252Bda2277357e97e1517d6B042A;
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
@@ -38,7 +37,7 @@ contract MCDCreateTaker {
         MCD_CREATE_FLASH_LOAN.transfer(msg.value); //0x fee
 
 
-        if (_createData.joinAddr != ETH_JOIN_ADDRESS) {
+        if (!isEthJoinAddr(_createData.joinAddr)) {
             ERC20(getCollateralAddr(_createData.joinAddr)).safeTransferFrom(msg.sender, address(this), _createData.collAmount);
             ERC20(getCollateralAddr(_createData.joinAddr)).safeTransfer(MCD_CREATE_FLASH_LOAN, _createData.collAmount);
         }
@@ -54,6 +53,20 @@ contract MCDCreateTaker {
 
     function getCollateralAddr(address _joinAddr) internal view returns (address) {
         return address(Join(_joinAddr).gem());
+    }
+
+    /// @notice Checks if the join address is one of the Ether coll. types
+    /// @param _joinAddr Join address to check
+    function isEthJoinAddr(address _joinAddr) internal view returns (bool) {
+        // if it's dai_join_addr don't check gem() it will fail
+        if (_joinAddr == 0x9759A6Ac90977b93B58547b4A71c78317f391A28) return false;
+
+        // if coll is weth it's and eth type coll
+        if (address(Join(_joinAddr).gem()) == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) {
+            return true;
+        }
+
+        return false;
     }
 
     function _packData(

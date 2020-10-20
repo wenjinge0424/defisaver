@@ -41,7 +41,7 @@ contract McdShifter is MCDSaverProxy {
         drawMaxCollateral(_cdpId, _joinAddr, maxColl);
 
         // send back to msg.sender
-        if (_joinAddr == ETH_JOIN_ADDRESS) {
+        if (isEthJoinAddr(_joinAddr)) {
             msg.sender.transfer(address(this).balance);
         } else {
             ERC20 collToken = ERC20(getCollateralAddr(_joinAddr));
@@ -57,7 +57,7 @@ contract McdShifter is MCDSaverProxy {
 
         uint collAmount = 0;
 
-        if (_joinAddr == ETH_JOIN_ADDRESS) {
+        if (isEthJoinAddr(_joinAddr)) {
             collAmount = address(this).balance;
         } else {
             collAmount = ERC20(address(Join(_joinAddr).gem())).balanceOf(address(this));
@@ -83,11 +83,11 @@ contract McdShifter is MCDSaverProxy {
     function openAndWithdraw(uint _collAmount, uint _debtAmount, address _proxy, address _joinAddrTo) internal {
         bytes32 ilk = Join(_joinAddrTo).ilk();
 
-        if (_joinAddrTo == ETH_JOIN_ADDRESS) {
+        if (isEthJoinAddr(_joinAddrTo)) {
             MCDCreateProxyActions(OPEN_PROXY_ACTIONS).openLockETHAndDraw{value: address(this).balance}(
                 address(manager),
                 JUG_ADDRESS,
-                ETH_JOIN_ADDRESS,
+                _joinAddrTo,
                 DAI_JOIN_ADDRESS,
                 ilk,
                 _debtAmount,
@@ -123,7 +123,7 @@ contract McdShifter is MCDSaverProxy {
 
         Join(_joinAddr).exit(address(this), joinAmount);
 
-        if (_joinAddr == ETH_JOIN_ADDRESS) {
+        if (isEthJoinAddr(_joinAddr)) {
             Join(_joinAddr).gem().withdraw(joinAmount); // Weth -> Eth
         }
 
