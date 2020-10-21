@@ -7,6 +7,8 @@ import "../../mcd/create/MCDCreateProxyActions.sol";
 
 contract McdShifter is MCDSaverProxy {
 
+    using SafeERC20 for ERC20;
+
     address public constant OPEN_PROXY_ACTIONS = 0x6d0984E80a86f26c0dd564ca0CF74a8E9Da03305;
 
     function getLoanAmount(uint _cdpId, address _joinAddr) public view virtual returns(uint loanAmount) {
@@ -45,7 +47,7 @@ contract McdShifter is MCDSaverProxy {
             msg.sender.transfer(address(this).balance);
         } else {
             ERC20 collToken = ERC20(getCollateralAddr(_joinAddr));
-            collToken.transfer(msg.sender, collToken.balanceOf(address(this)));
+            collToken.safeTransfer(msg.sender, collToken.balanceOf(address(this)));
         }
     }
 
