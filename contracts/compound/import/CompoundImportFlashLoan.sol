@@ -43,7 +43,6 @@ contract CompoundImportFlashLoan is FlashLoanReceiverBase {
         = abi.decode(_params, (address,address,address,address));
 
         // approve FL tokens so we can repay them
-        ERC20(_reserve).safeApprove(cBorrowToken, 0);
         ERC20(_reserve).safeApprove(cBorrowToken, uint(-1));
 
         // repay compound debt
