@@ -1,12 +1,12 @@
 const dotenv = require('dotenv').config();
+const { getFile } = require('./utils.js');
 const fs = require('fs');
 const fsPromises = fs.promises;
 
 const write = async (contractName, network, address, ...args) => {
-	const filename = `../../artifacts/${contractName}.json`;
+	const filename = (await getFile(`./artifacts/`, `${contractName}.json`))[0];
 	const file = require(filename);
 
-	console.log('file name:', file.contractName);
 	if (!file.networks) {
 		file.networks = {};
 	}
@@ -19,7 +19,7 @@ const write = async (contractName, network, address, ...args) => {
 	file.networks[network].args = args;
 
 	try {
-		const writeFilename = `./artifacts/${contractName}.json`;
+		const writeFilename = filename;
 		await fsPromises.writeFile(writeFilename, JSON.stringify(file, null, '\t'));
 		
 		return;

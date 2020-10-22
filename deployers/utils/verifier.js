@@ -1,28 +1,33 @@
 const { exec } = require("child_process");
+const { getFile } = require("./utils");
 
 const networkName = process.argv[2];
 const contractName = process.argv[3];
 
 if (!contractName || !networkName) {
-	console.log('You need to provide contract name and network name');
+	console.log('You need to provide network name and contract name respectively');
 	process.exit(1);
 }
 
-const filename = `../../artifacts/${contractName}.json`;
-const file = require(filename);
-const address = file.networks[networkName].address;
-const args = file.networks[networkName].args.join(' ');
+(async () => {
+    const filename = (await getFile(`./artifacts/`, `${contractName}.json`))[0];
+    const file = require(filename);
+    const address = file.networks[networkName].address;
+    const args = file.networks[networkName].args.join(' ');
 
-const command = `npx buidler verify-contract --network ${networkName} --contract-name ${contractName} --address ${address} ${args}`
+    const command = `npx hardhat verify --network ${networkName} ${address} ${args}`
 
-exec(command, (error, stdout, stderr) => {
-    if (error) {
-        console.log(`error: ${error.message}`);
-        return;
-    }
-    if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-    }
-    console.log(`stdout: ${stdout}`);
-});
+    console.log(command);
+
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            console.log(`error: ${error.message}`);
+            return;
+        }
+        if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            return;
+        }
+        console.log(`stdout: ${stdout}`);
+    });
+})();

@@ -1,4 +1,4 @@
-const bre = require("@nomiclabs/buidler");
+const bre = require("hardhat");
 const ethers = require("ethers");
 const dotenv = require('dotenv').config();
 const { write } = require('./writer');
@@ -43,6 +43,7 @@ const deploy = async (contractName, action, gasPrice, nonce, ...args) => {
 
 	  	console.log(`Gas used: ${tx.gasUsed}`);
 	  	console.log(`${contractName} deployed to:`, contract.address);
+	  	console.log(`Mainnet link: https://etherscan.io/address/${contract.address}`);
 
 	  	await write(contractName, bre.network.name, contract.address, ...args);
 	  	console.log('-------------------------------------------------------------');

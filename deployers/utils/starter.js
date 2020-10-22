@@ -1,6 +1,6 @@
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-const bre = require("@nomiclabs/buidler");
+const bre = require("hardhat");
 const readline = require("readline");
 
 

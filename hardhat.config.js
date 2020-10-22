@@ -1,13 +1,10 @@
-usePlugin("@nomiclabs/buidler-etherscan");
-usePlugin("buidler-ethers-v5");
-usePlugin("@nomiclabs/buidler-solhint");
-
 const dotenv           = require('dotenv').config();
+require("@nomiclabs/hardhat-ethers");
+require("@nomiclabs/hardhat-etherscan");
+
 
 module.exports = {
     networks: {
-        buidlerevm: {
-        },
         moonnet: {
             url: process.env.MOON_NET_NODE,
             accounts: [process.env.PRIV_KEY_DEV],
@@ -29,12 +26,20 @@ module.exports = {
             gasPrice: 70000000000
         }
     },
-    solc: {
+    solidity: {
         version: "0.6.6",
-        optimizer: {
-            enabled: true,
-            runs: 200
-        }
+        // settings: {
+        //     optimizer: {
+        //         enabled: true,
+        //         runs: 200
+        //     }
+        // }
+    },
+    paths: {
+        sources: "./contracts",
+        tests: "./test",
+        cache: "./cache",
+        artifacts: "./artifacts"
     },
     etherscan: {
         apiKey: process.env.ETHERSCAN_API_KEY
