@@ -89,7 +89,6 @@ contract MCDCreateFlashLoan is SaverExchangeCore, AdminAuth, FlashLoanReceiverBa
                 _proxy
             );
         } else {
-            ERC20(address(Join(_joinAddr).gem())).safeApprove(CREATE_PROXY_ACTIONS, 0);
             ERC20(address(Join(_joinAddr).gem())).safeApprove(CREATE_PROXY_ACTIONS, uint256(-1));
 
             MCDCreateProxyActions(CREATE_PROXY_ACTIONS).openLockGemAndDraw(

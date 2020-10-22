@@ -182,7 +182,6 @@ contract AaveHelper is DSMath {
     /// @param _caller Address which will gain the approval
     function approveToken(address _tokenAddr, address _caller) internal {
         if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).safeApprove(_caller, 0);
             ERC20(_tokenAddr).safeApprove(_caller, uint256(-1));
         }
     }

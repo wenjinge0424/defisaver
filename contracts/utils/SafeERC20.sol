@@ -21,6 +21,7 @@ library SafeERC20 {
      * {IERC20-approve}, and its usage is discouraged.
      */
     function safeApprove(ERC20 token, address spender, uint256 value) internal {
+        _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, 0));
         _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, value));
     }
 

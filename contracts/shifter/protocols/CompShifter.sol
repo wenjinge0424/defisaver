@@ -4,6 +4,8 @@ import "../../compound/helpers/CompoundSaverHelper.sol";
 
 contract CompShifter is CompoundSaverHelper {
 
+    using SafeERC20 for ERC20;
+
     address public constant COMPTROLLER_ADDR = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
 
     function getLoanAmount(uint _cdpId, address _joinAddr) public returns(uint loanAmount) {
@@ -31,7 +33,7 @@ contract CompShifter is CompoundSaverHelper {
         if (collAddr == ETH_ADDRESS) {
             msg.sender.transfer(address(this).balance);
         } else {
-            ERC20(collAddr).transfer(msg.sender, ERC20(collAddr).balanceOf(address(this)));
+            ERC20(collAddr).safeTransfer(msg.sender, ERC20(collAddr).balanceOf(address(this)));
         }
     }
 
@@ -54,7 +56,7 @@ contract CompShifter is CompoundSaverHelper {
         if (borrowAddrNew == ETH_ADDRESS) {
             msg.sender.transfer(address(this).balance);
         } else {
-            ERC20(borrowAddrNew).transfer(msg.sender, ERC20(borrowAddrNew).balanceOf(address(this)));
+            ERC20(borrowAddrNew).safeTransfer(msg.sender, ERC20(borrowAddrNew).balanceOf(address(this)));
         }
     }
 
@@ -84,7 +86,7 @@ contract CompShifter is CompoundSaverHelper {
         if (borrowAddr == ETH_ADDRESS) {
             msg.sender.transfer(address(this).balance);
         } else {
-            ERC20(borrowAddr).transfer(msg.sender, ERC20(borrowAddr).balanceOf(address(this)));
+            ERC20(borrowAddr).safeTransfer(msg.sender, ERC20(borrowAddr).balanceOf(address(this)));
         }
 
     }
