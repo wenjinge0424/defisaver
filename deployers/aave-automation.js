@@ -10,7 +10,7 @@ async function main() {
  	// const subscriptions = await deployContract("AaveSubscriptions");
  	// const monitorProxy = await deployContract("AaveMonitorProxy", 0);
 
- 	await deployContract("AaveMonitor", '0xfA560Dba3a8D0B197cA9505A2B98120DD89209AC', '0xe08ff7A2BADb634F0b581E675E6B3e583De086FC', "0xd3382598172bbDbC393F11f2B7A09B0Dd273378D")
+ 	await deployContract("AaveMonitor", '0xfA560Dba3a8D0B197cA9505A2B98120DD89209AC', '0xe08ff7A2BADb634F0b581E675E6B3e583De086FC', "0x2D67F20cb905D50545dF90e6B9154F9ed8cd294c")
 
  	// await deployContract("AaveSubscriptionsProxy");
 }
