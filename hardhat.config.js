@@ -13,7 +13,7 @@ module.exports = {
         mainnet: {
             url: process.env.ALCHEMY_NODE,
             accounts: [process.env.PRIV_KEY_OWNER],
-            gasPrice: 40000000000
+            gasPrice: 100000000000
         },
         kovan: {
             url: process.env.KOVAN_INFURA_ENDPOINT,
@@ -28,12 +28,12 @@ module.exports = {
     },
     solidity: {
         version: "0.6.12",
-        // settings: {
-        //     optimizer: {
-        //         enabled: true,
-        //         runs: 200
-        //     }
-        // }
+        settings: {
+            optimizer: {
+                enabled: true,
+                runs: 200
+            }
+        }
     },
     paths: {
         sources: "./contracts",

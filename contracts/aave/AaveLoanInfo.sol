@@ -36,6 +36,14 @@ contract AaveLoanInfo is AaveSafetyRatio {
         bool usageAsCollateralEnabled;
     }
 
+    struct UserToken {
+        address token;
+        uint256 balance;
+        uint256 borrows;
+        uint256 borrowRateMode;
+        bool enabledAsCollateral;
+    }
+
     /// @notice Calcualted the ratio of coll/debt for a compound user
     /// @param _user Address of the user
     function getRatio(address _user) public view returns (uint256) {
@@ -67,17 +75,16 @@ contract AaveLoanInfo is AaveSafetyRatio {
         }
     }
 
-    function getTokenBalances(address _user, address[] memory _tokens) public view returns (uint256[] memory balances, uint256[] memory borrows, bool[] memory enabledAsCollateral) {
+    function getTokenBalances(address _user, address[] memory _tokens) public view returns (UserToken[] memory userTokens) {
     	address lendingPoolAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 
-        balances = new uint256[](_tokens.length);
-        borrows = new uint256[](_tokens.length);
-        enabledAsCollateral = new bool[](_tokens.length);
+        userTokens = new UserToken[](_tokens.length);
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             address asset = _tokens[i];
+            userTokens[i].token = asset;
 
-            (balances[i], borrows[i],,,,,,,,enabledAsCollateral[i]) = ILendingPool(lendingPoolAddress).getUserReserveData(asset, _user);
+            (userTokens[i].balance, userTokens[i].borrows,,userTokens[i].borrowRateMode,,,,,,userTokens[i].enabledAsCollateral) = ILendingPool(lendingPoolAddress).getUserReserveData(asset, _user);
         }
     }
 
