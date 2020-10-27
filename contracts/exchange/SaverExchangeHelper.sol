@@ -48,12 +48,13 @@ contract SaverExchangeHelper {
 
     /// @notice Takes a feePercentage and sends it to wallet
     /// @param _amount Dai amount of the whole trade
+    /// @param _user Address of the user
     /// @param _token Address of the token
     /// @param _dfsFeeDivider Dfs fee divider
     /// @return feeAmount Amount in Dai owner earned on the fee
-    function getFee(uint256 _amount, address _token, uint256 _dfsFeeDivider) internal returns (uint256 feeAmount) {
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(msg.sender)) {
-            _dfsFeeDivider = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(msg.sender);
+    function getFee(uint256 _amount, address _user, address _token, uint256 _dfsFeeDivider) internal returns (uint256 feeAmount) {
+        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_user)) {
+            _dfsFeeDivider = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_user);
         }
 
         if (_dfsFeeDivider == 0) {

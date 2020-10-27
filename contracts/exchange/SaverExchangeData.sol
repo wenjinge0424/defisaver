@@ -19,10 +19,11 @@ contract SaverExchangeData {
     struct ExchangeData {
         address srcAddr;
         address destAddr;
-        uint srcAmount;
-        uint destAmount;
-        uint minPrice;
-        uint dfsFeeDivider;
+        uint256 srcAmount;
+        uint256 destAmount;
+        uint256 minPrice;
+        uint256 dfsFeeDivider;
+        address user;
         address wrapper;
         bytes wrapperData;
         OffchainData offchainData;

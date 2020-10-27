@@ -28,7 +28,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath, SaverExchangeData {
             TokenInterface(WETH_ADDRESS).deposit.value(exData.srcAmount)();
         }
 
-        exData.srcAmount -= getFee(exData.srcAmount, exData.srcAddr, exData.dfsFeeDivider);
+        exData.srcAmount -= getFee(exData.srcAmount, exData.user, exData.srcAddr, exData.dfsFeeDivider);
 
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
@@ -75,7 +75,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath, SaverExchangeData {
             TokenInterface(WETH_ADDRESS).deposit.value(exData.srcAmount)();
         }
 
-        exData.srcAmount -= getFee(exData.srcAmount, exData.srcAddr, exData.dfsFeeDivider);
+        exData.srcAmount -= getFee(exData.srcAmount, exData.user, exData.srcAddr, exData.dfsFeeDivider);
 
         if (exData.offchainData.price > 0) {
             (success, swapedTokens,) = takeOrder(exData, ActionType.BUY);
