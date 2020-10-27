@@ -5,27 +5,11 @@ import "../DS/DSMath.sol";
 import "../interfaces/TokenInterface.sol";
 import "../interfaces/ExchangeInterfaceV2.sol";
 import "../utils/ZrxAllowlist.sol";
+import "./SaverExchangeData.sol";
 import "./SaverExchangeHelper.sol";
 import "./SaverExchangeRegistry.sol";
 
-contract SaverExchangeCore is SaverExchangeHelper, DSMath {
-
-    // first is empty to keep the legacy order in place
-    enum ExchangeType { _, OASIS, KYBER, UNISWAP, ZEROX }
-
-    enum ActionType { SELL, BUY }
-
-    struct ExchangeData {
-        address srcAddr;
-        address destAddr;
-        uint srcAmount;
-        uint destAmount;
-        uint minPrice;
-        address wrapper;
-        address exchangeAddr;
-        bytes callData;
-        uint256 price0x;
-    }
+contract SaverExchangeCore is SaverExchangeHelper, DSMath, SaverExchangeData {
 
     /// @notice Internal method that preforms a sell on 0x/on-chain
     /// @dev Usefull for other DFS contract to integrate for exchanging
@@ -45,14 +29,12 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         }
 
         // Try 0x first and then fallback on specific wrapper
-        if (exData.price0x > 0) {
-            approve0xProxy(exData.srcAddr, exData.srcAmount);
-
+        if (exData.offchainData.price > 0) {
             uint ethAmount = getProtocolFee(exData.srcAddr, exData.srcAmount);
             (success, swapedTokens, tokensLeft) = takeOrder(exData, ethAmount, ActionType.SELL);
 
             if (success) {
-                wrapper = exData.exchangeAddr;
+                wrapper = exData.offchainData.exchangeAddr;
             }
         }
 
@@ -92,14 +74,12 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             TokenInterface(WETH_ADDRESS).deposit.value(exData.srcAmount)();
         }
 
-        if (exData.price0x > 0) {
-            approve0xProxy(exData.srcAddr, exData.srcAmount);
-
+        if (exData.offchainData.price > 0) {
             uint ethAmount = getProtocolFee(exData.srcAddr, exData.srcAmount);
             (success, swapedTokens,) = takeOrder(exData, ethAmount, ActionType.BUY);
 
             if (success) {
-                wrapper = exData.exchangeAddr;
+                wrapper = exData.offchainData.exchangeAddr;
             }
         }
 
@@ -130,21 +110,25 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         ActionType _type
     ) private returns (bool success, uint256, uint256) {
 
-        // write in the exact amount we are selling/buing in an order
-        if (_type == ActionType.SELL) {
-            writeUint256(_exData.callData, 36, _exData.srcAmount);
-        } else {
-            writeUint256(_exData.callData, 36, _exData.destAmount);
+        if (_exData.srcAddr != KYBER_ETH_ADDRESS) {
+            ERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
         }
 
-        if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isNonPayableAddr(_exData.exchangeAddr)) {
+        // write in the exact amount we are selling/buing in an order
+        if (_type == ActionType.SELL) {
+            writeUint256(_exData.offchainData.callData, 36, _exData.srcAmount);
+        } else {
+            writeUint256(_exData.offchainData.callData, 36, _exData.destAmount);
+        }
+
+        if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isNonPayableAddr(_exData.offchainData.exchangeAddr)) {
             _ethAmount = 0;
         }
 
         uint256 tokensBefore = getBalance(_exData.destAddr);
 
-        if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.exchangeAddr)) {
-            (success, ) = _exData.exchangeAddr.call{value: _ethAmount}(_exData.callData);
+        if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.offchainData.exchangeAddr)) {
+            (success, ) = _exData.offchainData.exchangeAddr.call{value: _ethAmount}(_exData.offchainData.callData);
         } else {
             success = false;
         }
@@ -224,51 +208,6 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
 
         // if msg value is lower than src amount, that means that srcAmount isn't included in msg value, so we return msg value
         return address(this).balance;
-    }
-
-    function packExchangeData(ExchangeData memory _exData) public pure returns(bytes memory) {
-        // splitting in two different bytes and encoding all because of stack too deep in decoding part
-
-        bytes memory part1 = abi.encode(
-            _exData.srcAddr,
-            _exData.destAddr,
-            _exData.srcAmount,
-            _exData.destAmount
-        );
-
-        bytes memory part2 = abi.encode(
-            _exData.minPrice,
-            _exData.wrapper,
-            _exData.exchangeAddr,
-            _exData.callData,
-            _exData.price0x
-        );
-
-
-        return abi.encode(part1, part2);
-    }
-
-    function unpackExchangeData(bytes memory _data) public pure returns(ExchangeData memory _exData) {
-        (
-            bytes memory part1,
-            bytes memory part2
-        ) = abi.decode(_data, (bytes,bytes));
-
-        (
-            _exData.srcAddr,
-            _exData.destAddr,
-            _exData.srcAmount,
-            _exData.destAmount
-        ) = abi.decode(part1, (address,address,uint256,uint256));
-
-        (
-            _exData.minPrice,
-            _exData.wrapper,
-            _exData.exchangeAddr,
-            _exData.callData,
-            _exData.price0x
-        )
-        = abi.decode(part2, (uint256,address,address,bytes,uint256));
     }
 
     // solhint-disable-next-line no-empty-blocks
