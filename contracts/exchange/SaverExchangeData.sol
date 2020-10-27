@@ -23,7 +23,8 @@ contract SaverExchangeData {
         uint destAmount;
         uint minPrice;
         address wrapper;
-        OffchainData offhchainData;
+        bytes wrapperData;
+        OffchainData offchainData;
     }
 
     function packExchangeData(ExchangeData memory _exData) public pure returns(bytes memory) {

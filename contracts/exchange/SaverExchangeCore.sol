@@ -167,10 +167,10 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath, SaverExchangeData {
 
         if (_type == ActionType.SELL) {
             swapedTokens = ExchangeInterfaceV2(_exData.wrapper).
-                    sell{value: ethValue}(_exData.srcAddr, _exData.destAddr, _exData.srcAmount);
+                    sell{value: ethValue}(_exData.srcAddr, _exData.destAddr, _exData.srcAmount, _exData.wrapperData);
         } else {
             swapedTokens = ExchangeInterfaceV2(_exData.wrapper).
-                    buy{value: ethValue}(_exData.srcAddr, _exData.destAddr, _exData.destAmount);
+                    buy{value: ethValue}(_exData.srcAddr, _exData.destAddr, _exData.destAmount, _exData.wrapperData);
         }
     }
 

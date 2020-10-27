@@ -19,7 +19,7 @@ contract KyberWrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
     /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return uint Destination amount
-    function sell(address _srcAddr, address _destAddr, uint _srcAmount) external override payable returns (uint) {
+    function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) external override payable returns (uint) {
         ERC20 srcToken = ERC20(_srcAddr);
         ERC20 destToken = ERC20(_destAddr);
 
@@ -47,7 +47,7 @@ contract KyberWrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
     /// @param _destAddr To token
     /// @param _destAmount To amount
     /// @return uint srcAmount
-    function buy(address _srcAddr, address _destAddr, uint _destAmount) external override payable returns(uint) {
+    function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory _additionalData) external override payable returns(uint) {
         ERC20 srcToken = ERC20(_srcAddr);
         ERC20 destToken = ERC20(_destAddr);
 
@@ -95,7 +95,7 @@ contract KyberWrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
     /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return rate Rate
-    function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount) public override view returns (uint rate) {
+    function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) public override view returns (uint rate) {
         (rate, ) = KyberNetworkProxyInterface(KYBER_INTERFACE)
             .getExpectedRate(ERC20(_srcAddr), ERC20(_destAddr), _srcAmount);
 
@@ -110,7 +110,7 @@ contract KyberWrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
     /// @param _destAddr To token
     /// @param _destAmount To amount
     /// @return rate Rate
-    function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount) public override view returns (uint rate) {
+    function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount, bytes memory _additionalData) public override view returns (uint rate) {
         uint256 srcRate = getSellRate(_destAddr, _srcAddr, _destAmount);
         uint256 srcAmount = wmul(srcRate, _destAmount);
 
