@@ -26,9 +26,7 @@ contract SaverExchange is SaverExchangeCore, AdminAuth, GasBurner {
     /// @param _user User address who called the exchange
     function sell(ExchangeData memory exData, address payable _user) public payable burnGas(burnAmount) {
 
-        // take fee
-        uint dfsFee = getFee(exData.srcAmount, exData.srcAddr);
-        exData.srcAmount = sub(exData.srcAmount, dfsFee);
+        exData.dfsFeeDivider = SERVICE_FEE;
 
         // Perform the exchange
         (address wrapper, uint destAmount) = _sell(exData);
@@ -46,8 +44,7 @@ contract SaverExchange is SaverExchangeCore, AdminAuth, GasBurner {
     /// @param _user User address who called the exchange
     function buy(ExchangeData memory exData, address payable _user) public payable burnGas(burnAmount){
 
-        uint dfsFee = getFee(exData.srcAmount, exData.srcAddr);
-        exData.srcAmount = sub(exData.srcAmount, dfsFee);
+        exData.dfsFeeDivider = SERVICE_FEE;
 
         // Perform the exchange
         (address wrapper, uint srcAmount) = _buy(exData);
