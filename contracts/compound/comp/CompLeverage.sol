@@ -42,6 +42,11 @@ contract CompLeverage is SaverExchangeCore, CompBalance, CompoundBasicProxy {
         if (exchangeData.srcAddr != address(0)) {
             exchangeData.srcAmount -= getFee(compBalance, COMP_ADDR, address(this));
             (, depositAmount) = _sell(exchangeData);
+
+            // if we have no deposit after, send back tokens to the user
+            if (_cDepositAddr == address(0)) {
+                ERC20(exchangeData.destAddr).transfer(msg.sender, depositAmount);
+            }
         }
 
         // Deposit back a token
