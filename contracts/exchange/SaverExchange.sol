@@ -60,29 +60,6 @@ contract SaverExchange is SaverExchangeCore, AdminAuth, GasBurner {
 
     }
 
-    /// @notice Takes a feePercentage and sends it to wallet
-    /// @param _amount Dai amount of the whole trade
-    /// @param _token Address of the token
-    /// @return feeAmount Amount in Dai owner earned on the fee
-    function getFee(uint256 _amount, address _token) internal returns (uint256 feeAmount) {
-        uint256 fee = SERVICE_FEE;
-
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(msg.sender)) {
-            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(msg.sender);
-        }
-
-        if (fee == 0) {
-            feeAmount = 0;
-        } else {
-            feeAmount = _amount / fee;
-            if (_token == KYBER_ETH_ADDRESS) {
-                WALLET_ID.transfer(feeAmount);
-            } else {
-                ERC20(_token).safeTransfer(WALLET_ID, feeAmount);
-            }
-        }
-    }
-
     /// @notice Changes the amount of gas token we burn for each call
     /// @dev Only callable by the owner
     /// @param _newBurnAmount New amount of gas tokens to be burned

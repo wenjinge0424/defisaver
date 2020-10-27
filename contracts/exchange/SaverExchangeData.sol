@@ -12,7 +12,7 @@ contract SaverExchangeData {
         address exchangeAddr;
         address allowanceTarget;
         uint256 price;
-        uint256 fee;
+        uint256 protocolFee;
         bytes callData;
     }
 
@@ -22,6 +22,7 @@ contract SaverExchangeData {
         uint srcAmount;
         uint destAmount;
         uint minPrice;
+        uint dfsFeeDivider;
         address wrapper;
         bytes wrapperData;
         OffchainData offchainData;

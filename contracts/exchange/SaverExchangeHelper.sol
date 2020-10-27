@@ -46,6 +46,34 @@ contract SaverExchangeHelper {
         }
     }
 
+    /// @notice Takes a feePercentage and sends it to wallet
+    /// @param _amount Dai amount of the whole trade
+    /// @param _token Address of the token
+    /// @param _dfsFeeDivider Dfs fee divider
+    /// @return feeAmount Amount in Dai owner earned on the fee
+    function getFee(uint256 _amount, address _token, uint256 _dfsFeeDivider) internal returns (uint256 feeAmount) {
+        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(msg.sender)) {
+            _dfsFeeDivider = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(msg.sender);
+        }
+
+        if (_dfsFeeDivider == 0) {
+            feeAmount = 0;
+        } else {
+            feeAmount = _amount / _dfsFeeDivider;
+
+            // fee can't go over 10% of the whole amount
+            if (feeAmount > (_amount / 10)) {
+                feeAmount = _amount / 10;
+            }
+
+            if (_token == KYBER_ETH_ADDRESS) {
+                WALLET_ID.transfer(feeAmount);
+            } else {
+                ERC20(_token).safeTransfer(WALLET_ID, feeAmount);
+            }
+        }
+    }
+
     function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
         require(bs.length >= start + 32, "slicing out of range");
 

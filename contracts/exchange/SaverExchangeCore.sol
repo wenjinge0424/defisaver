@@ -28,10 +28,11 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath, SaverExchangeData {
             TokenInterface(WETH_ADDRESS).deposit.value(exData.srcAmount)();
         }
 
+        exData.srcAmount -= getFee(exData.srcAmount, exData.srcAddr, exData.dfsFeeDivider);
+
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
-            uint ethAmount = getProtocolFee(exData.srcAddr, exData.srcAmount);
-            (success, swapedTokens, tokensLeft) = takeOrder(exData, ethAmount, ActionType.SELL);
+            (success, swapedTokens, tokensLeft) = takeOrder(exData, ActionType.SELL);
 
             if (success) {
                 wrapper = exData.offchainData.exchangeAddr;
@@ -74,9 +75,10 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath, SaverExchangeData {
             TokenInterface(WETH_ADDRESS).deposit.value(exData.srcAmount)();
         }
 
+        exData.srcAmount -= getFee(exData.srcAmount, exData.srcAddr, exData.dfsFeeDivider);
+
         if (exData.offchainData.price > 0) {
-            uint ethAmount = getProtocolFee(exData.srcAddr, exData.srcAmount);
-            (success, swapedTokens,) = takeOrder(exData, ethAmount, ActionType.BUY);
+            (success, swapedTokens,) = takeOrder(exData, ActionType.BUY);
 
             if (success) {
                 wrapper = exData.offchainData.exchangeAddr;
@@ -103,10 +105,8 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath, SaverExchangeData {
 
     /// @notice Takes order from 0x and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    /// @param _ethAmount Ether fee needed for 0x order
     function takeOrder(
         ExchangeData memory _exData,
-        uint256 _ethAmount,
         ActionType _type
     ) private returns (bool success, uint256, uint256) {
 
@@ -121,14 +121,10 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath, SaverExchangeData {
             writeUint256(_exData.offchainData.callData, 36, _exData.destAmount);
         }
 
-        if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isNonPayableAddr(_exData.offchainData.exchangeAddr)) {
-            _ethAmount = 0;
-        }
-
         uint256 tokensBefore = getBalance(_exData.destAddr);
 
         if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.offchainData.exchangeAddr)) {
-            (success, ) = _exData.offchainData.exchangeAddr.call{value: _ethAmount}(_exData.offchainData.callData);
+            (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(_exData.offchainData.callData);
         } else {
             success = false;
         }
@@ -193,21 +189,6 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath, SaverExchangeData {
     /// @param _src Input address
     function ethToWethAddr(address _src) internal pure returns (address) {
         return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
-    }
-
-    /// @notice Calculates protocol fee
-    /// @param _srcAddr selling token address (if eth should be WETH)
-    /// @param _srcAmount amount we are selling
-    function getProtocolFee(address _srcAddr, uint256 _srcAmount) internal view returns(uint256) {
-        // if we are not selling ETH msg value is always the protocol fee
-        if (_srcAddr != WETH_ADDRESS) return address(this).balance;
-
-        // if msg value is larger than srcAmount, that means that msg value is protocol fee + srcAmount, so we subsctract srcAmount from msg value
-        // we have an edge case here when protocol fee is higher than selling amount
-        if (address(this).balance > _srcAmount) return address(this).balance - _srcAmount;
-
-        // if msg value is lower than src amount, that means that srcAmount isn't included in msg value, so we return msg value
-        return address(this).balance;
     }
 
     // solhint-disable-next-line no-empty-blocks
