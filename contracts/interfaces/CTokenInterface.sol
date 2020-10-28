@@ -14,6 +14,8 @@ abstract contract CTokenInterface is ERC20 {
     function redeemUnderlying(uint256 redeemAmount) external virtual returns (uint256);
 
     function borrow(uint256 borrowAmount) external virtual returns (uint256);
+    function borrowIndex() public view virtual returns (uint);
+    function borrowBalanceStored(address) public view virtual returns(uint);
 
     function repayBorrow(uint256 repayAmount) external virtual returns (uint256);
 

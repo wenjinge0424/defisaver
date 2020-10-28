@@ -63,6 +63,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
     ) public payable burnGas(20) {
         if (_isSameTypeVaults(_loanShift)) {
             _forkVault(_loanShift);
+            logEvent(_exchangeData, _loanShift);
             return;
         }
 
@@ -153,16 +154,30 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
         SaverExchangeCore.ExchangeData memory _exchangeData,
         LoanShiftData memory _loanShift
     ) internal {
+        address srcAddr = _exchangeData.srcAddr;
+        address destAddr = _exchangeData.destAddr;
+
+        uint collAmount = _exchangeData.srcAmount;
+        uint debtAmount = _exchangeData.destAmount;
+
+        if (_loanShift.swapType == SwapType.NO_SWAP) {
+            srcAddr = _loanShift.addrLoan1;
+            destAddr = _loanShift.debtAddr1;
+
+            collAmount = _loanShift.collAmount;
+            debtAmount = _loanShift.debtAmount;
+        }
+
         DefisaverLogger(DEFISAVER_LOGGER)
             .Log(address(this), msg.sender, "LoanShifter",
             abi.encode(
             _loanShift.fromProtocol,
             _loanShift.toProtocol,
             _loanShift.swapType,
-            _exchangeData.srcAddr,
-            _exchangeData.destAddr,
-            _exchangeData.srcAmount,
-            _exchangeData.destAmount
+            srcAddr,
+            destAddr,
+            collAmount,
+            debtAmount
         ));
     }
 

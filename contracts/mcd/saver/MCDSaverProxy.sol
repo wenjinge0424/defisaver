@@ -244,15 +244,12 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
 
         (, uint mat) = Spotter(SPOTTER_ADDRESS).ilks(_ilk);
 
-        uint maxCollateral = sub(sub(collateral, (div(mul(mat, debt), price))), 10);
+        uint maxCollateral = sub(collateral, (div(mul(mat, debt), price)));
 
-        uint normalizeMaxCollateral = maxCollateral;
+        uint normalizeMaxCollateral = maxCollateral / (10 ** (18 - Join(_joinAddr).dec()));
 
-        if (Join(_joinAddr).dec() != 18) {
-            normalizeMaxCollateral = maxCollateral / (10 ** (18 - Join(_joinAddr).dec()));
-        }
-
-        return normalizeMaxCollateral;
+        // take one percent due to precision issues
+        return normalizeMaxCollateral * 99 / 100;
     }
 
     /// @notice Gets the maximum amount of debt available to generate
