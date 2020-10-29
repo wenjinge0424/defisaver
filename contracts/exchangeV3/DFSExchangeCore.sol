@@ -11,6 +11,11 @@ import "../exchange/SaverExchangeRegistry.sol";
 
 contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
+    string public constant ERR_SLIPPAGE_HIT = "Slippage hit";
+    string public constant ERR_DEST_AMOUNT_MISSING = "Dest amount missing";
+    string public constant ERR_WRAPPER_INVALID = "Wrapper invalid";
+    string public constant ERR_OFFCHAIN_DATA_INVALID = "Offchain data invalid";
+
     /// @notice Internal method that preforms a sell on 0x/on-chain
     /// @dev Usefull for other DFS contract to integrate for exchanging
     /// @param exData Exchange data struct
@@ -45,7 +50,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             wrapper = exData.wrapper;
         }
 
-        require(getBalance(exData.destAddr) >= wmul(exData.minPrice, exData.srcAmount), "Final amount isn't correct");
+        require(getBalance(exData.destAddr) >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
 
         // if anything is left in weth, pull it to user as eth
         if (getBalance(WETH_ADDRESS) > 0) {
@@ -67,7 +72,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         uint swapedTokens;
         bool success;
 
-        require(exData.destAmount != 0, "Dest amount must be specified");
+        require(exData.destAmount != 0, ERR_DEST_AMOUNT_MISSING);
 
         // if selling eth, convert to weth
         if (exData.srcAddr == KYBER_ETH_ADDRESS) {
@@ -91,7 +96,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             wrapper = exData.wrapper;
         }
 
-        require(getBalance(exData.destAddr) >= exData.destAmount, "Final amount isn't correct");
+        require(getBalance(exData.destAddr) >= exData.destAmount, ERR_SLIPPAGE_HIT);
 
         // if anything is left in weth, pull it to user as eth
         if (getBalance(WETH_ADDRESS) > 0) {
@@ -155,7 +160,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
     /// @param _type Type of action SELL|BUY
     /// @return swapedTokens For Sell that the destAmount, for Buy thats the srcAmount
     function saverSwap(ExchangeData memory _exData, ActionType _type) internal returns (uint swapedTokens) {
-        require(SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.wrapper), "Wrapper is not valid");
+        require(SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.wrapper), WRAPPER_INVALID);
 
         ERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
 
@@ -170,7 +175,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
     function writeUint256(bytes memory _b, uint256 _index, uint _input) internal pure {
         if (_b.length < _index + 32) {
-            revert("Incorrent lengt while writting bytes32");
+            revert(ERR_OFFCHAIN_DATA_INVALID);
         }
 
         bytes32 input = bytes32(_input);
