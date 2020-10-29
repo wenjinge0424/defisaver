@@ -40,7 +40,7 @@ contract McdShifter is MCDSaverProxy {
         maxColl = _collateral > maxColl ? maxColl : _collateral;
 
         // withdraw collateral from cdp
-        drawMaxCollateral(_cdpId, _joinAddr, maxColl);
+        drawCollateral(_cdpId, _joinAddr, maxColl);
 
         // send back to msg.sender
         if (isEthJoinAddr(_joinAddr)) {
@@ -110,26 +110,6 @@ contract McdShifter is MCDSaverProxy {
                 _proxy
             );
         }
-    }
-
-
-    function drawMaxCollateral(uint _cdpId, address _joinAddr, uint _amount) internal returns (uint) {
-        manager.frob(_cdpId, -toPositiveInt(_amount), 0);
-        manager.flux(_cdpId, address(this), _amount);
-
-        uint joinAmount = _amount;
-
-        if (Join(_joinAddr).dec() != 18) {
-            joinAmount = _amount / (10 ** (18 - Join(_joinAddr).dec()));
-        }
-
-        Join(_joinAddr).exit(address(this), joinAmount);
-
-        if (isEthJoinAddr(_joinAddr)) {
-            Join(_joinAddr).gem().withdraw(joinAmount); // Weth -> Eth
-        }
-
-        return joinAmount;
     }
 
 }
