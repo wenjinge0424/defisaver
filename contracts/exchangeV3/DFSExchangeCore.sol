@@ -157,16 +157,14 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
     function saverSwap(ExchangeData memory _exData, ActionType _type) internal returns (uint swapedTokens) {
         require(SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.wrapper), "Wrapper is not valid");
 
-        uint ethValue = 0;
-
         ERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
 
         if (_type == ActionType.SELL) {
             swapedTokens = ExchangeInterfaceV3(_exData.wrapper).
-                    sell{value: ethValue}(_exData.srcAddr, _exData.destAddr, _exData.srcAmount, _exData.wrapperData);
+                    sell(_exData.srcAddr, _exData.destAddr, _exData.srcAmount, _exData.wrapperData);
         } else {
             swapedTokens = ExchangeInterfaceV3(_exData.wrapper).
-                    buy{value: ethValue}(_exData.srcAddr, _exData.destAddr, _exData.destAmount, _exData.wrapperData);
+                    buy(_exData.srcAddr, _exData.destAddr, _exData.destAmount, _exData.wrapperData);
         }
     }
 
