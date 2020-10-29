@@ -1,90 +1,75 @@
 pragma solidity ^0.6.0;
 
 import "../../utils/SafeERC20.sol";
-import "../../interfaces/KyberNetworkProxyInterface.sol";
 import "../../interfaces/ExchangeInterfaceV3.sol";
-import "../../interfaces/UniswapExchangeInterface.sol";
-import "../../interfaces/UniswapFactoryInterface.sol";
+import "../../interfaces/UniswapRouterInterface.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 
+/// @title DFS exchange wrapper for UniswapV2
 contract UniswapWrapperV3 is DSMath, ExchangeInterfaceV3, AdminAuth {
 
     address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant UNISWAP_FACTORY = 0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95;
+    UniswapRouterInterface public constant router = UniswapRouterInterface(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
 
     using SafeERC20 for ERC20;
 
-    /// @notice Sells a _srcAmount of tokens at Uniswap
+    /// @notice Sells a _srcAmount of tokens at UniswapV2
     /// @param _srcAddr From token
     /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return uint Destination amount
     function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) external payable override returns (uint) {
-        address uniswapExchangeAddr;
-        uint destAmount;
-
         _srcAddr = ethToWethAddr(_srcAddr);
         _destAddr = ethToWethAddr(_destAddr);
 
+        uint[] memory amounts;
+        address[] memory path = abi.decode(_additionalData, (address[]));
+
+        ERC20(_srcAddr).safeApprove(address(router), _srcAmount);
+
         // if we are buying ether
         if (_destAddr == WETH_ADDRESS) {
-            uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
-
-            ERC20(_srcAddr).safeApprove(uniswapExchangeAddr, _srcAmount);
-
-            destAmount = UniswapExchangeInterface(uniswapExchangeAddr).
-                tokenToEthTransferInput(_srcAmount, 1, block.timestamp + 1, msg.sender);
+            amounts = router.swapExactTokensForETH(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
         }
         // if we are selling token to token
         else {
-            uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
-
-            ERC20(_srcAddr).safeApprove(uniswapExchangeAddr, _srcAmount);
-
-            destAmount = UniswapExchangeInterface(uniswapExchangeAddr).
-                tokenToTokenTransferInput(_srcAmount, 1, 1, block.timestamp + 1, msg.sender, _destAddr);
+            amounts = router.swapExactTokensForTokens(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
         }
 
-        return destAmount;
+        return amounts[amounts.length - 1];
     }
 
-    /// @notice Buys a _destAmount of tokens at Uniswap
+    /// @notice Buys a _destAmount of tokens at UniswapV2
     /// @param _srcAddr From token
     /// @param _destAddr To token
     /// @param _destAmount To amount
     /// @return uint srcAmount
     function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory _additionalData) external override payable returns(uint) {
-        address uniswapExchangeAddr;
-        uint srcAmount;
 
         _srcAddr = ethToWethAddr(_srcAddr);
         _destAddr = ethToWethAddr(_destAddr);
 
+        uint[] memory amounts;
+        address[] memory path = abi.decode(_additionalData, (address[]));
+
+        ERC20(_srcAddr).safeApprove(address(router), uint(-1));
+
+
          // if we are buying ether
         if (_destAddr == WETH_ADDRESS) {
-            uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
-
-            ERC20(_srcAddr).safeApprove(uniswapExchangeAddr, uint(-1));
-
-            srcAmount = UniswapExchangeInterface(uniswapExchangeAddr).
-                tokenToEthTransferOutput(_destAmount, uint(-1), block.timestamp + 1, msg.sender);
+            amounts = router.swapTokensForExactETH(_destAmount, uint(-1), path, msg.sender, block.timestamp + 1);
         }
         // if we are buying token to token
         else {
-            uniswapExchangeAddr = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
-
-            ERC20(_srcAddr).safeApprove(uniswapExchangeAddr, uint(-1));
-
-            srcAmount = UniswapExchangeInterface(uniswapExchangeAddr).
-                tokenToTokenTransferOutput(_destAmount, uint(-1), uint(-1), block.timestamp + 1, msg.sender, _destAddr);
+            amounts = router.swapTokensForExactTokens(_destAmount, uint(-1), path, msg.sender, block.timestamp + 1);
         }
 
         // Send the leftover from the source token back
         sendLeftOver(_srcAddr);
 
-        return srcAmount;
+        return amounts[0];
     }
 
     /// @notice Return a rate for which we can sell an amount of tokens
@@ -96,16 +81,10 @@ contract UniswapWrapperV3 is DSMath, ExchangeInterfaceV3, AdminAuth {
         _srcAddr = ethToWethAddr(_srcAddr);
         _destAddr = ethToWethAddr(_destAddr);
 
-        if(_srcAddr == WETH_ADDRESS) {
-            address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_destAddr);
-            return wdiv(UniswapExchangeInterface(uniswapTokenAddress).getEthToTokenInputPrice(_srcAmount), _srcAmount);
-        } else if (_destAddr == WETH_ADDRESS) {
-            address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
-            return wdiv(UniswapExchangeInterface(uniswapTokenAddress).getTokenToEthInputPrice(_srcAmount), _srcAmount);
-        } else {
-            uint ethBought = UniswapExchangeInterface(UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr)).getTokenToEthInputPrice(_srcAmount);
-            return wdiv(UniswapExchangeInterface(UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_destAddr)).getEthToTokenInputPrice(ethBought), _srcAmount);
-        }
+        address[] memory path = abi.decode(_additionalData, (address[]));
+
+        uint[] memory amounts = router.getAmountsOut(_srcAmount, path);
+        return wdiv(amounts[amounts.length - 1], _srcAmount);
     }
 
     /// @notice Return a rate for which we can buy an amount of tokens
@@ -117,16 +96,10 @@ contract UniswapWrapperV3 is DSMath, ExchangeInterfaceV3, AdminAuth {
         _srcAddr = ethToWethAddr(_srcAddr);
         _destAddr = ethToWethAddr(_destAddr);
 
-        if(_srcAddr == WETH_ADDRESS) {
-            address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_destAddr);
-            return wdiv(1 ether, wdiv(UniswapExchangeInterface(uniswapTokenAddress).getEthToTokenOutputPrice(_destAmount), _destAmount));
-        } else if (_destAddr == WETH_ADDRESS) {
-            address uniswapTokenAddress = UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr);
-            return wdiv(1 ether, wdiv(UniswapExchangeInterface(uniswapTokenAddress).getTokenToEthOutputPrice(_destAmount), _destAmount));
-        } else {
-            uint ethNeeded = UniswapExchangeInterface(UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_destAddr)).getTokenToEthOutputPrice(_destAmount);
-            return wdiv(1 ether, wdiv(UniswapExchangeInterface(UniswapFactoryInterface(UNISWAP_FACTORY).getExchange(_srcAddr)).getEthToTokenOutputPrice(ethNeeded), _destAmount));
-        }
+        address[] memory path = abi.decode(_additionalData, (address[]));
+
+        uint[] memory amounts = router.getAmountsIn(_destAmount, path);
+        return wdiv(_destAmount, amounts[0]);
     }
 
     /// @notice Send any leftover tokens, we use to clear out srcTokens after buy
@@ -143,6 +116,12 @@ contract UniswapWrapperV3 is DSMath, ExchangeInterfaceV3, AdminAuth {
     /// @param _src Input address
     function ethToWethAddr(address _src) internal pure returns (address) {
         return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
+    }
+
+    function getDecimals(address _token) internal view returns (uint256) {
+        if (_token == KYBER_ETH_ADDRESS) return 18;
+
+        return ERC20(_token).decimals();
     }
 
     receive() payable external {}
