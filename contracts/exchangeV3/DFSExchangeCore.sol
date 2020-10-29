@@ -25,7 +25,6 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         address wrapper;
         uint swapedTokens;
         bool success;
-        uint tokensLeft = exData.srcAmount;
 
         // if selling eth, convert to weth
         if (exData.srcAddr == KYBER_ETH_ADDRESS) {
@@ -37,7 +36,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
-            (success, swapedTokens, tokensLeft) = takeOrder(exData, ActionType.SELL);
+            (success, swapedTokens) = takeOrder(exData, ActionType.SELL);
 
             if (success) {
                 wrapper = exData.offchainData.exchangeAddr;
@@ -83,7 +82,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         exData.srcAmount -= getFee(exData.srcAmount, exData.user, exData.srcAddr, exData.dfsFeeDivider);
 
         if (exData.offchainData.price > 0) {
-            (success, swapedTokens,) = takeOrder(exData, ActionType.BUY);
+            (success, swapedTokens) = takeOrder(exData, ActionType.BUY);
 
             if (success) {
                 wrapper = exData.offchainData.exchangeAddr;
@@ -113,7 +112,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
     function takeOrder(
         ExchangeData memory _exData,
         ActionType _type
-    ) private returns (bool success, uint256, uint256) {
+    ) private returns (bool success, uint256) {
 
         if (_exData.srcAddr != KYBER_ETH_ADDRESS) {
             ERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
@@ -135,11 +134,8 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         }
 
         uint256 tokensSwaped = 0;
-        uint256 tokensLeft = _exData.srcAmount;
 
         if (success) {
-            // check to see if any _src tokens are left over after exchange
-            tokensLeft = getBalance(_exData.srcAddr);
 
             // convert weth -> eth if needed
             if (_exData.destAddr == KYBER_ETH_ADDRESS) {
@@ -152,7 +148,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             tokensSwaped = getBalance(_exData.destAddr) - tokensBefore;
         }
 
-        return (success, tokensSwaped, tokensLeft);
+        return (success, tokensSwaped);
     }
 
     /// @notice Calls wraper contract for exchage to preform an on-chain swap
@@ -160,7 +156,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
     /// @param _type Type of action SELL|BUY
     /// @return swapedTokens For Sell that the destAmount, for Buy thats the srcAmount
     function saverSwap(ExchangeData memory _exData, ActionType _type) internal returns (uint swapedTokens) {
-        require(SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.wrapper), WRAPPER_INVALID);
+        require(SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.wrapper), ERR_WRAPPER_INVALID);
 
         ERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
 
