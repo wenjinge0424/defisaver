@@ -53,7 +53,7 @@ contract DFSExchangeHelper {
     /// @param _dfsFeeDivider Dfs fee divider
     /// @return feeAmount Amount in Dai owner earned on the fee
     function getFee(uint256 _amount, address _user, address _token, uint256 _dfsFeeDivider) internal returns (uint256 feeAmount) {
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_user)) {
+        if (_dfsFeeDivider != 0 && Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_user)) {
             _dfsFeeDivider = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_user);
         }
 
