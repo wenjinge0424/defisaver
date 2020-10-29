@@ -1,13 +1,13 @@
 pragma solidity ^0.6.0;
 
-import "../../interfaces/ExchangeInterfaceV2.sol";
+import "../../interfaces/ExchangeInterfaceV3.sol";
 import "../../interfaces/OasisInterface.sol";
 import "../../interfaces/TokenInterface.sol";
 import "../../DS/DSMath.sol";
 import "../../utils/SafeERC20.sol";
 import "../../auth/AdminAuth.sol";
 
-contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
+contract OasisTradeWrapperV3 is DSMath, ExchangeInterfaceV3, AdminAuth {
 
     using SafeERC20 for ERC20;
 
@@ -20,7 +20,7 @@ contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
     /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return uint Destination amount
-    function sell(address _srcAddr, address _destAddr, uint _srcAmount) external override payable returns (uint) {
+    function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) external override payable returns (uint) {
         address srcAddr = ethToWethAddr(_srcAddr);
         address destAddr = ethToWethAddr(_destAddr);
 
@@ -44,7 +44,7 @@ contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
     /// @param _destAddr To token
     /// @param _destAmount To amount
     /// @return uint srcAmount
-    function buy(address _srcAddr, address _destAddr, uint _destAmount) external override payable returns(uint) {
+    function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory _additionalData) external override payable returns(uint) {
         address srcAddr = ethToWethAddr(_srcAddr);
         address destAddr = ethToWethAddr(_destAddr);
 
@@ -71,7 +71,7 @@ contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
     /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return uint Rate
-    function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount) public override view returns (uint) {
+    function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) public override view returns (uint) {
         address srcAddr = ethToWethAddr(_srcAddr);
         address destAddr = ethToWethAddr(_destAddr);
 
@@ -84,7 +84,7 @@ contract OasisTradeWrapper is DSMath, ExchangeInterfaceV2, AdminAuth {
     /// @param _destAddr To token
     /// @param _destAmount To amount
     /// @return uint Rate
-    function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount) public override view returns (uint) {
+    function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount, bytes memory _additionalData) public override view returns (uint) {
         address srcAddr = ethToWethAddr(_srcAddr);
         address destAddr = ethToWethAddr(_destAddr);
 

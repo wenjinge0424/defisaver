@@ -3,29 +3,13 @@ pragma experimental ABIEncoderV2;
 
 import "../DS/DSMath.sol";
 import "../interfaces/TokenInterface.sol";
-import "../interfaces/ExchangeInterfaceV2.sol";
+import "../interfaces/ExchangeInterfaceV3.sol";
 import "../utils/ZrxAllowlist.sol";
-import "./SaverExchangeHelper.sol";
-import "./SaverExchangeRegistry.sol";
+import "./DFSExchangeData.sol";
+import "./DFSExchangeHelper.sol";
+import "../exchange/SaverExchangeRegistry.sol";
 
-contract SaverExchangeCore is SaverExchangeHelper, DSMath {
-
-    // first is empty to keep the legacy order in place
-    enum ExchangeType { _, OASIS, KYBER, UNISWAP, ZEROX }
-
-    enum ActionType { SELL, BUY }
-
-    struct ExchangeData {
-        address srcAddr;
-        address destAddr;
-        uint srcAmount;
-        uint destAmount;
-        uint minPrice;
-        address wrapper;
-        address exchangeAddr;
-        bytes callData;
-        uint256 price0x;
-    }
+contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
     /// @notice Internal method that preforms a sell on 0x/on-chain
     /// @dev Usefull for other DFS contract to integrate for exchanging
@@ -44,15 +28,14 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             TokenInterface(WETH_ADDRESS).deposit.value(exData.srcAmount)();
         }
 
-        // Try 0x first and then fallback on specific wrapper
-        if (exData.price0x > 0) {
-            approve0xProxy(exData.srcAddr, exData.srcAmount);
+        exData.srcAmount -= getFee(exData.srcAmount, exData.user, exData.srcAddr, exData.dfsFeeDivider);
 
-            uint ethAmount = getProtocolFee(exData.srcAddr, exData.srcAmount);
-            (success, swapedTokens, tokensLeft) = takeOrder(exData, ethAmount, ActionType.SELL);
+        // Try 0x first and then fallback on specific wrapper
+        if (exData.offchainData.price > 0) {
+            (success, swapedTokens, tokensLeft) = takeOrder(exData, ActionType.SELL);
 
             if (success) {
-                wrapper = exData.exchangeAddr;
+                wrapper = exData.offchainData.exchangeAddr;
             }
         }
 
@@ -92,14 +75,13 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
             TokenInterface(WETH_ADDRESS).deposit.value(exData.srcAmount)();
         }
 
-        if (exData.price0x > 0) {
-            approve0xProxy(exData.srcAddr, exData.srcAmount);
+        exData.srcAmount -= getFee(exData.srcAmount, exData.user, exData.srcAddr, exData.dfsFeeDivider);
 
-            uint ethAmount = getProtocolFee(exData.srcAddr, exData.srcAmount);
-            (success, swapedTokens,) = takeOrder(exData, ethAmount, ActionType.BUY);
+        if (exData.offchainData.price > 0) {
+            (success, swapedTokens,) = takeOrder(exData, ActionType.BUY);
 
             if (success) {
-                wrapper = exData.exchangeAddr;
+                wrapper = exData.offchainData.exchangeAddr;
             }
         }
 
@@ -123,28 +105,26 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
 
     /// @notice Takes order from 0x and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    /// @param _ethAmount Ether fee needed for 0x order
     function takeOrder(
         ExchangeData memory _exData,
-        uint256 _ethAmount,
         ActionType _type
     ) private returns (bool success, uint256, uint256) {
 
-        // write in the exact amount we are selling/buing in an order
-        if (_type == ActionType.SELL) {
-            writeUint256(_exData.callData, 36, _exData.srcAmount);
-        } else {
-            writeUint256(_exData.callData, 36, _exData.destAmount);
+        if (_exData.srcAddr != KYBER_ETH_ADDRESS) {
+            ERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
         }
 
-        if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isNonPayableAddr(_exData.exchangeAddr)) {
-            _ethAmount = 0;
+        // write in the exact amount we are selling/buing in an order
+        if (_type == ActionType.SELL) {
+            writeUint256(_exData.offchainData.callData, 36, _exData.srcAmount);
+        } else {
+            writeUint256(_exData.offchainData.callData, 36, _exData.destAmount);
         }
 
         uint256 tokensBefore = getBalance(_exData.destAddr);
 
-        if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.exchangeAddr)) {
-            (success, ) = _exData.exchangeAddr.call{value: _ethAmount}(_exData.callData);
+        if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.offchainData.exchangeAddr)) {
+            (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(_exData.offchainData.callData);
         } else {
             success = false;
         }
@@ -182,11 +162,11 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         ERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
 
         if (_type == ActionType.SELL) {
-            swapedTokens = ExchangeInterfaceV2(_exData.wrapper).
-                    sell{value: ethValue}(_exData.srcAddr, _exData.destAddr, _exData.srcAmount);
+            swapedTokens = ExchangeInterfaceV3(_exData.wrapper).
+                    sell{value: ethValue}(_exData.srcAddr, _exData.destAddr, _exData.srcAmount, _exData.wrapperData);
         } else {
-            swapedTokens = ExchangeInterfaceV2(_exData.wrapper).
-                    buy{value: ethValue}(_exData.srcAddr, _exData.destAddr, _exData.destAmount);
+            swapedTokens = ExchangeInterfaceV3(_exData.wrapper).
+                    buy{value: ethValue}(_exData.srcAddr, _exData.destAddr, _exData.destAmount, _exData.wrapperData);
         }
     }
 
@@ -209,66 +189,6 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
     /// @param _src Input address
     function ethToWethAddr(address _src) internal pure returns (address) {
         return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
-    }
-
-    /// @notice Calculates protocol fee
-    /// @param _srcAddr selling token address (if eth should be WETH)
-    /// @param _srcAmount amount we are selling
-    function getProtocolFee(address _srcAddr, uint256 _srcAmount) internal view returns(uint256) {
-        // if we are not selling ETH msg value is always the protocol fee
-        if (_srcAddr != WETH_ADDRESS) return address(this).balance;
-
-        // if msg value is larger than srcAmount, that means that msg value is protocol fee + srcAmount, so we subsctract srcAmount from msg value
-        // we have an edge case here when protocol fee is higher than selling amount
-        if (address(this).balance > _srcAmount) return address(this).balance - _srcAmount;
-
-        // if msg value is lower than src amount, that means that srcAmount isn't included in msg value, so we return msg value
-        return address(this).balance;
-    }
-
-    function packExchangeData(ExchangeData memory _exData) public pure returns(bytes memory) {
-        // splitting in two different bytes and encoding all because of stack too deep in decoding part
-
-        bytes memory part1 = abi.encode(
-            _exData.srcAddr,
-            _exData.destAddr,
-            _exData.srcAmount,
-            _exData.destAmount
-        );
-
-        bytes memory part2 = abi.encode(
-            _exData.minPrice,
-            _exData.wrapper,
-            _exData.exchangeAddr,
-            _exData.callData,
-            _exData.price0x
-        );
-
-
-        return abi.encode(part1, part2);
-    }
-
-    function unpackExchangeData(bytes memory _data) public pure returns(ExchangeData memory _exData) {
-        (
-            bytes memory part1,
-            bytes memory part2
-        ) = abi.decode(_data, (bytes,bytes));
-
-        (
-            _exData.srcAddr,
-            _exData.destAddr,
-            _exData.srcAmount,
-            _exData.destAmount
-        ) = abi.decode(part1, (address,address,uint256,uint256));
-
-        (
-            _exData.minPrice,
-            _exData.wrapper,
-            _exData.exchangeAddr,
-            _exData.callData,
-            _exData.price0x
-        )
-        = abi.decode(part2, (uint256,address,address,bytes,uint256));
     }
 
     // solhint-disable-next-line no-empty-blocks

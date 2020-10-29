@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-contract SaverExchangeData {
+contract DFSExchangeData {
 
     // first is empty to keep the legacy order in place
     enum ExchangeType { _, OASIS, KYBER, UNISWAP, ZEROX }

@@ -1,11 +1,12 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 import "../DS/DSMath.sol";
 import "../interfaces/TokenInterface.sol";
-import "../interfaces/ExchangeInterfaceV2.sol";
-import "./SaverExchangeHelper.sol";
+import "../interfaces/ExchangeInterfaceV3.sol";
+import "../utils/SafeERC20.sol";
 
-contract Prices is DSMath {
+contract DFSPricesV3 is DSMath {
 
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
@@ -24,12 +25,13 @@ contract Prices is DSMath {
         address _srcToken,
         address _destToken,
         ActionType _type,
-        address[] memory _wrappers
+        address[] memory _wrappers,
+        bytes[] memory _additionalData
     ) public returns (address, uint256) {
 
         uint256[] memory rates = new uint256[](_wrappers.length);
         for (uint i=0; i<_wrappers.length; i++) {
-            rates[i] = getExpectedRate(_wrappers[i], _srcToken, _destToken, _amount, _type);
+            rates[i] = getExpectedRate(_wrappers[i], _srcToken, _destToken, _amount, _type, _additionalData[i]);
         }
 
         return getBiggestRate(_wrappers, rates);
@@ -47,25 +49,28 @@ contract Prices is DSMath {
         address _srcToken,
         address _destToken,
         uint256 _amount,
-        ActionType _type
+        ActionType _type,
+        bytes memory _additionalData
     ) public returns (uint256) {
         bool success;
         bytes memory result;
 
         if (_type == ActionType.SELL) {
             (success, result) = _wrapper.call(abi.encodeWithSignature(
-                "getSellRate(address,address,uint256)",
+                "getSellRate(address,address,uint256,bytes)",
                 _srcToken,
                 _destToken,
-                _amount
+                _amount,
+                _additionalData
             ));
 
         } else {
             (success, result) = _wrapper.call(abi.encodeWithSignature(
-                "getBuyRate(address,address,uint256)",
+                "getBuyRate(address,address,uint256,bytes)",
                 _srcToken,
                 _destToken,
-                _amount
+                _amount,
+                _additionalData
             ));
         }
 

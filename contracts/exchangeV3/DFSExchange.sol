@@ -2,14 +2,14 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../interfaces/GasTokenInterface.sol";
-import "./SaverExchangeCore.sol";
+import "./DFSExchangeCore.sol";
 import "../DS/DSMath.sol";
 import "../loggers/DefisaverLogger.sol";
 import "../auth/AdminAuth.sol";
 import "../utils/GasBurner.sol";
 import "../utils/SafeERC20.sol";
 
-contract SaverExchange is SaverExchangeCore, AdminAuth, GasBurner {
+contract DFSExchange is DFSExchangeCore, AdminAuth, GasBurner {
 
     using SafeERC20 for ERC20;
 
@@ -26,9 +26,7 @@ contract SaverExchange is SaverExchangeCore, AdminAuth, GasBurner {
     /// @param _user User address who called the exchange
     function sell(ExchangeData memory exData, address payable _user) public payable burnGas(burnAmount) {
 
-        // take fee
-        uint dfsFee = getFee(exData.srcAmount, exData.srcAddr);
-        exData.srcAmount = sub(exData.srcAmount, dfsFee);
+        exData.dfsFeeDivider = SERVICE_FEE;
 
         // Perform the exchange
         (address wrapper, uint destAmount) = _sell(exData);
@@ -46,8 +44,7 @@ contract SaverExchange is SaverExchangeCore, AdminAuth, GasBurner {
     /// @param _user User address who called the exchange
     function buy(ExchangeData memory exData, address payable _user) public payable burnGas(burnAmount){
 
-        uint dfsFee = getFee(exData.srcAmount, exData.srcAddr);
-        exData.srcAmount = sub(exData.srcAmount, dfsFee);
+        exData.dfsFeeDivider = SERVICE_FEE;
 
         // Perform the exchange
         (address wrapper, uint srcAmount) = _buy(exData);
@@ -58,29 +55,6 @@ contract SaverExchange is SaverExchangeCore, AdminAuth, GasBurner {
         // log the event
         logger.Log(address(this), msg.sender, "ExchangeBuy", abi.encode(wrapper, exData.srcAddr, exData.destAddr, srcAmount, exData.destAmount));
 
-    }
-
-    /// @notice Takes a feePercentage and sends it to wallet
-    /// @param _amount Dai amount of the whole trade
-    /// @param _token Address of the token
-    /// @return feeAmount Amount in Dai owner earned on the fee
-    function getFee(uint256 _amount, address _token) internal returns (uint256 feeAmount) {
-        uint256 fee = SERVICE_FEE;
-
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(msg.sender)) {
-            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(msg.sender);
-        }
-
-        if (fee == 0) {
-            feeAmount = 0;
-        } else {
-            feeAmount = _amount / fee;
-            if (_token == KYBER_ETH_ADDRESS) {
-                WALLET_ID.transfer(feeAmount);
-            } else {
-                ERC20(_token).safeTransfer(WALLET_ID, feeAmount);
-            }
-        }
     }
 
     /// @notice Changes the amount of gas token we burn for each call

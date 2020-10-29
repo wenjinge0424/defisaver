@@ -3,7 +3,7 @@ pragma solidity ^0.6.0;
 import "../utils/SafeERC20.sol";
 import "../utils/Discount.sol";
 
-contract SaverExchangeHelper {
+contract DFSExchangeHelper {
 
     using SafeERC20 for ERC20;
 
@@ -14,7 +14,6 @@ contract SaverExchangeHelper {
     address public constant DISCOUNT_ADDRESS = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
     address public constant SAVER_EXCHANGE_REGISTRY = 0x25dd3F51e0C3c3Ff164DDC02A8E4D65Bb9cBB12D;
 
-    address public constant ERC20_PROXY_0X = 0x95E6F48254609A6ee006F7D493c8e5fB97094ceF;
     address public constant ZRX_ALLOWLIST_ADDR = 0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F;
 
 
@@ -32,12 +31,6 @@ contract SaverExchangeHelper {
         }
     }
 
-    function approve0xProxy(address _tokenAddr, uint _amount) internal {
-        if (_tokenAddr != KYBER_ETH_ADDRESS) {
-            ERC20(_tokenAddr).safeApprove(address(ERC20_PROXY_0X), _amount);
-        }
-    }
-
     function sendLeftover(address _srcAddr, address _destAddr, address payable _to) internal {
         // send back any leftover ether or tokens
         if (address(this).balance > 0) {
@@ -50,6 +43,35 @@ contract SaverExchangeHelper {
 
         if (getBalance(_destAddr) > 0) {
             ERC20(_destAddr).safeTransfer(_to, getBalance(_destAddr));
+        }
+    }
+
+    /// @notice Takes a feePercentage and sends it to wallet
+    /// @param _amount Dai amount of the whole trade
+    /// @param _user Address of the user
+    /// @param _token Address of the token
+    /// @param _dfsFeeDivider Dfs fee divider
+    /// @return feeAmount Amount in Dai owner earned on the fee
+    function getFee(uint256 _amount, address _user, address _token, uint256 _dfsFeeDivider) internal returns (uint256 feeAmount) {
+        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_user)) {
+            _dfsFeeDivider = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_user);
+        }
+
+        if (_dfsFeeDivider == 0) {
+            feeAmount = 0;
+        } else {
+            feeAmount = _amount / _dfsFeeDivider;
+
+            // fee can't go over 10% of the whole amount
+            if (feeAmount > (_amount / 10)) {
+                feeAmount = _amount / 10;
+            }
+
+            if (_token == KYBER_ETH_ADDRESS) {
+                WALLET_ID.transfer(feeAmount);
+            } else {
+                ERC20(_token).safeTransfer(WALLET_ID, feeAmount);
+            }
         }
     }
 
