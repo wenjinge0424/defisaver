@@ -2,12 +2,12 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "./CompBalance.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../../interfaces/DSProxyInterface.sol";
 import "../CompoundBasicProxy.sol";
 
-contract CompLeverage is SaverExchangeCore, CompBalance, CompoundBasicProxy {
+contract CompLeverage is DFSExchangeCore, CompBalance, CompoundBasicProxy {
     address public constant C_COMP_ADDR = 0x70e36f6BF80a52b3B46b3aF8e106CC0ed743E8e4;
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -40,7 +40,7 @@ contract CompLeverage is SaverExchangeCore, CompBalance, CompoundBasicProxy {
 
         // Exchange COMP
         if (exchangeData.srcAddr != address(0)) {
-            exchangeData.srcAmount -= getFee(compBalance, COMP_ADDR, address(this));
+            exchangeData.dfsFeeDivider = 400; // 0.25%
             (, depositAmount) = _sell(exchangeData);
 
             // if we have no deposit after, send back tokens to the user
@@ -68,30 +68,6 @@ contract CompLeverage is SaverExchangeCore, CompBalance, CompoundBasicProxy {
             return ETH_ADDRESS;
         } else {
             return CTokenInterface(_cTokenAddress).underlying();
-        }
-    }
-
-    function getFee(uint _amount, address _tokenAddr, address _proxy) internal returns (uint feeAmount) {
-        uint fee = 400;
-
-        DSProxyInterface proxy = DSProxyInterface(payable(_proxy));
-        address user = proxy.owner();
-
-        if (Discount(DISCOUNT_ADDR).isCustomFeeSet(user)) {
-            fee = Discount(DISCOUNT_ADDR).getCustomServiceFee(user);
-        }
-
-        feeAmount = (fee == 0) ? 0 : (_amount / fee);
-
-        // fee can't go over 20% of the whole amount
-        if (feeAmount > (_amount / 5)) {
-            feeAmount = _amount / 5;
-        }
-
-        if (_tokenAddr == ETH_ADDRESS) {
-            WALLET_ADDR.transfer(feeAmount);
-        } else {
-            ERC20(_tokenAddr).safeTransfer(WALLET_ADDR, feeAmount);
         }
     }
 }
