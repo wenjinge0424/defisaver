@@ -7,15 +7,16 @@ import "../../loggers/DefisaverLogger.sol";
 import "../../interfaces/DSProxyInterface.sol";
 import "../CompoundBasicProxy.sol";
 
-contract CompLeverage is DFSExchangeCore, CompBalance, CompoundBasicProxy {
+contract CompLeverage is DFSExchangeCore, CompBalance {
     address public constant C_COMP_ADDR = 0x70e36f6BF80a52b3B46b3aF8e106CC0ed743E8e4;
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant CETH_ADDRESS = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
     address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
+    address public constant COMPTROLLER_ADDR = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
 
-     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
+    address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
 
@@ -41,11 +42,17 @@ contract CompLeverage is DFSExchangeCore, CompBalance, CompoundBasicProxy {
         // Exchange COMP
         if (exchangeData.srcAddr != address(0)) {
             exchangeData.dfsFeeDivider = 400; // 0.25%
+            exchangeData.srcAmount = compBalance;
+
             (, depositAmount) = _sell(exchangeData);
 
             // if we have no deposit after, send back tokens to the user
             if (_cDepositAddr == address(0)) {
-                ERC20(exchangeData.destAddr).transfer(msg.sender, depositAmount);
+                if (exchangeData.destAddr != ETH_ADDRESS) {
+                    ERC20(exchangeData.destAddr).transfer(msg.sender, depositAmount);
+                } else {
+                    msg.sender.transfer(address(this).balance);
+                }
             }
         }
 
@@ -68,6 +75,33 @@ contract CompLeverage is DFSExchangeCore, CompBalance, CompoundBasicProxy {
             return ETH_ADDRESS;
         } else {
             return CTokenInterface(_cTokenAddress).underlying();
+        }
+    }
+
+    function deposit(address _tokenAddr, address _cTokenAddr, uint _amount, bool _inMarket) public burnGas(5) payable {
+        approveToken(_tokenAddr, _cTokenAddr);
+
+        if (!_inMarket) {
+            enterMarket(_cTokenAddr);
+        }
+
+        if (_tokenAddr != ETH_ADDRESS) {
+            require(CTokenInterface(_cTokenAddr).mint(_amount) == 0);
+        } else {
+            CEtherInterface(_cTokenAddr).mint{value: msg.value}(); // reverts on fail
+        }
+    }
+
+     function enterMarket(address _cTokenAddr) public {
+        address[] memory markets = new address[](1);
+        markets[0] = _cTokenAddr;
+
+        ComptrollerInterface(COMPTROLLER_ADDR).enterMarkets(markets);
+    }
+
+    function approveToken(address _tokenAddr, address _cTokenAddr) internal {
+        if (_tokenAddr != ETH_ADDRESS) {
+            ERC20(_tokenAddr).safeApprove(_cTokenAddr, uint(-1));
         }
     }
 }
