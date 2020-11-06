@@ -47,16 +47,26 @@ contract AaveImport is AaveHelper, AdminAuth {
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
         address aCollateralToken = ILendingPool(lendingPoolCoreAddress).getReserveATokenAddress(collateralToken);
         address aBorrowToken = ILendingPool(lendingPoolCoreAddress).getReserveATokenAddress(borrowToken);
+        uint256 globalBorrowAmount = 0;
 
-        // deposit eth on behalf of proxy
-        DSProxy(payable(proxy)).execute{value: ethAmount}(BASIC_PROXY, abi.encodeWithSignature("deposit(address,uint256)", ETH_ADDR, ethAmount));
-        // borrow needed amount to repay users borrow
-        (,uint256 borrowAmount,,uint256 borrowRateMode,,,uint256 originationFee,,,) = ILendingPool(lendingPool).getUserReserveData(borrowToken, user);
-        borrowAmount += originationFee;
-        DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("borrow(address,uint256,uint256)", borrowToken, borrowAmount, borrowRateMode));
+        { // avoid stack too deep
+            // deposit eth on behalf of proxy
+            DSProxy(payable(proxy)).execute{value: ethAmount}(BASIC_PROXY, abi.encodeWithSignature("deposit(address,uint256)", ETH_ADDR, ethAmount));
+            // borrow needed amount to repay users borrow
+            (,uint256 borrowAmount,,uint256 borrowRateMode,,,uint256 originationFee,,,) = ILendingPool(lendingPool).getUserReserveData(borrowToken, user);
+            borrowAmount += originationFee;
+            DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("borrow(address,uint256,uint256)", borrowToken, borrowAmount, borrowRateMode));
+            globalBorrowAmount = borrowAmount;
+        }
+        
         // payback on behalf of user
-        ERC20(borrowToken).safeApprove(proxy, borrowAmount);
-        DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("paybackOnBehalf(address,address,uint256,bool,address)", borrowToken, aBorrowToken, 0, true, user));
+        if (borrowToken != ETH_ADDR) {
+            ERC20(borrowToken).safeApprove(proxy, globalBorrowAmount);
+            DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("paybackOnBehalf(address,address,uint256,bool,address)", borrowToken, aBorrowToken, 0, true, user));
+        } else {
+            DSProxy(payable(proxy)).execute{value: globalBorrowAmount}(BASIC_PROXY, abi.encodeWithSignature("paybackOnBehalf(address,address,uint256,bool,address)", borrowToken, aBorrowToken, 0, true, user));
+        }
+
         // pull tokens from user to proxy
         ERC20(aCollateralToken).safeTransferFrom(user, proxy, ERC20(aCollateralToken).balanceOf(user));
 
@@ -65,6 +75,7 @@ contract AaveImport is AaveHelper, AdminAuth {
 
         // withdraw deposited eth
         DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("withdraw(address,address,uint256,bool)", ETH_ADDR, AETH_ADDRESS, ethAmount, false));
+        
 
         // deposit eth, get weth and return to sender
         TokenInterface(WETH_ADDRESS).deposit.value(address(this).balance)();
