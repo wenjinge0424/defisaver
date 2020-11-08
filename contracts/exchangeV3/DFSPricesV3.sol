@@ -6,7 +6,7 @@ import "../interfaces/TokenInterface.sol";
 import "../interfaces/ExchangeInterfaceV3.sol";
 import "../utils/SafeERC20.sol";
 
-contract DFSPricesV3 is DSMath {
+contract DFSPrices is DSMath {
 
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
