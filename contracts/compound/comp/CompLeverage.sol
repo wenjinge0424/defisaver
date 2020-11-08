@@ -49,7 +49,7 @@ contract CompLeverage is DFSExchangeCore, CompBalance {
             // if we have no deposit after, send back tokens to the user
             if (_cDepositAddr == address(0)) {
                 if (exchangeData.destAddr != ETH_ADDRESS) {
-                    ERC20(exchangeData.destAddr).transfer(msg.sender, depositAmount);
+                    ERC20(exchangeData.destAddr).safeTransfer(msg.sender, depositAmount);
                 } else {
                     msg.sender.transfer(address(this).balance);
                 }
