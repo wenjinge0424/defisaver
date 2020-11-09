@@ -79,8 +79,6 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             TokenInterface(WETH_ADDRESS).deposit.value(exData.srcAmount)();
         }
 
-        exData.srcAmount -= getFee(exData.srcAmount, exData.user, exData.srcAddr, exData.dfsFeeDivider);
-
         if (exData.offchainData.price > 0) {
             (success, swapedTokens) = takeOrder(exData, ActionType.BUY);
 
@@ -94,6 +92,8 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             swapedTokens = saverSwap(exData, ActionType.BUY);
             wrapper = exData.wrapper;
         }
+
+        getFee(exData.destAmount, exData.user, exData.destAddr, exData.dfsFeeDivider);
 
         require(getBalance(exData.destAddr) >= exData.destAmount, ERR_SLIPPAGE_HIT);
 
