@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 import "../../mcd/saver/MCDSaverProxy.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../../interfaces/ILendingPool.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeData.sol";
 import "../../utils/SafeERC20.sol";
 
 contract MCDCreateTaker {
@@ -30,7 +30,7 @@ contract MCDCreateTaker {
     }
 
     function openWithLoan(
-        SaverExchangeCore.ExchangeData memory _exchangeData,
+        DFSExchangeData.ExchangeData memory _exchangeData,
         CreateData memory _createData
     ) public payable {
 
@@ -42,9 +42,8 @@ contract MCDCreateTaker {
             ERC20(getCollateralAddr(_createData.joinAddr)).safeTransfer(MCD_CREATE_FLASH_LOAN, _createData.collAmount);
         }
 
-        (uint[6] memory numData, address[5] memory addrData, bytes memory callData)
-                                            = _packData(_createData, _exchangeData);
-        bytes memory paramsData = abi.encode(numData, addrData, callData, address(this));
+        bytes memory packedData = _packData(_createData, _exchangeData);
+        bytes memory paramsData = abi.encode(address(this), packedData);
 
         lendingPool.flashLoan(MCD_CREATE_FLASH_LOAN, DAI_ADDRESS, _createData.daiAmount, paramsData);
 
@@ -71,26 +70,9 @@ contract MCDCreateTaker {
 
     function _packData(
         CreateData memory _createData,
-        SaverExchangeCore.ExchangeData memory exchangeData
-    ) internal pure returns (uint[6] memory numData, address[5] memory addrData, bytes memory callData) {
+        DFSExchangeData.ExchangeData memory _exchangeData
+    ) internal pure returns (bytes memory) {
 
-        numData = [
-            _createData.collAmount,
-            _createData.daiAmount,
-            exchangeData.srcAmount,
-            exchangeData.destAmount,
-            exchangeData.minPrice,
-            exchangeData.price0x
-        ];
-
-        addrData = [
-            exchangeData.srcAddr,
-            exchangeData.destAddr,
-            exchangeData.exchangeAddr,
-            exchangeData.wrapper,
-            _createData.joinAddr
-        ];
-
-        callData = exchangeData.callData;
+        return abi.encode(_createData, _exchangeData);
     }
 }
