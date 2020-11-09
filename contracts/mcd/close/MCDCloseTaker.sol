@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 import "../../mcd/saver/MCDSaverProxy.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../../interfaces/ILendingPool.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeData.sol";
 
 
 abstract contract IMCDSubscriptions {
@@ -46,7 +46,7 @@ contract MCDCloseTaker is MCDSaverProxyHelper {
     Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
 
     function closeWithLoan(
-        SaverExchangeCore.ExchangeData memory _exchangeData,
+        DFSExchangeData.ExchangeData memory _exchangeData,
         CloseData memory _closeData,
         address payable mcdCloseFlashLoan
     ) public payable {
@@ -66,9 +66,8 @@ contract MCDCloseTaker is MCDSaverProxyHelper {
 
         manager.cdpAllow(_closeData.cdpId, mcdCloseFlashLoan, 1);
 
-        (uint[8] memory numData, address[5] memory addrData, bytes memory callData)
-                                            = _packData(_closeData, _exchangeData);
-        bytes memory paramsData = abi.encode(numData, addrData, callData, address(this), _closeData.toDai);
+        bytes memory packedData  = _packData(_closeData, _exchangeData);
+        bytes memory paramsData = abi.encode(address(this), packedData);
 
         lendingPool.flashLoan(mcdCloseFlashLoan, DAI_ADDRESS, _closeData.daiAmount, paramsData);
 
@@ -111,29 +110,10 @@ contract MCDCloseTaker is MCDSaverProxyHelper {
 
     function _packData(
         CloseData memory _closeData,
-        SaverExchangeCore.ExchangeData memory exchangeData
-    ) internal pure returns (uint[8] memory numData, address[5] memory addrData, bytes memory callData) {
+        DFSExchangeData.ExchangeData memory _exchangeData
+    ) internal pure returns (bytes memory) {
 
-        numData = [
-            _closeData.cdpId,
-            _closeData.collAmount,
-            _closeData.daiAmount,
-            _closeData.minAccepted,
-            exchangeData.srcAmount,
-            exchangeData.destAmount,
-            exchangeData.minPrice,
-            exchangeData.price0x
-        ];
-
-        addrData = [
-            exchangeData.srcAddr,
-            exchangeData.destAddr,
-            exchangeData.exchangeAddr,
-            exchangeData.wrapper,
-            _closeData.joinAddr
-        ];
-
-        callData = exchangeData.callData;
+        return abi.encode(_closeData, _exchangeData);
     }
 
 }

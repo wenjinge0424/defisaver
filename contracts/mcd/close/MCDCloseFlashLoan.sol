@@ -4,10 +4,10 @@ pragma experimental ABIEncoderV2;
 import "../../mcd/saver/MCDSaverProxy.sol";
 import "../../utils/FlashLoanReceiverBase.sol";
 import "../../auth/AdminAuth.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../mcd/saver/MCDSaverProxyHelper.sol";
 
-contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanReceiverBase, AdminAuth {
+contract MCDCloseFlashLoan is DFSExchangeCore, MCDSaverProxyHelper, FlashLoanReceiverBase, AdminAuth {
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
@@ -46,41 +46,14 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
         bytes calldata _params)
     external override {
 
-        (
-            uint[8] memory numData,
-            address[5] memory addrData,
-            bytes memory callData,
-            address proxy,
-            bool toDai
-        )
-         = abi.decode(_params, (uint256[8],address[5],bytes,address,bool));
+        (address proxy, bytes memory packedData) = abi.decode(_params, (address,bytes));
 
-        ExchangeData memory exchangeData = ExchangeData({
-            srcAddr: addrData[0],
-            destAddr: addrData[1],
-            srcAmount: numData[4],
-            destAmount: numData[5],
-            minPrice: numData[6],
-            wrapper: addrData[3],
-            exchangeAddr: addrData[2],
-            callData: callData,
-            price0x: numData[7]
-        });
-
-        CloseData memory closeData = CloseData({
-            cdpId: numData[0],
-            collAmount: numData[1],
-            daiAmount: numData[2],
-            minAccepted: numData[3],
-            joinAddr: addrData[4],
-            proxy: proxy,
-            flFee: _fee,
-            toDai: toDai,
-            reserve: _reserve,
-            amount: _amount
-        });
+        (CloseData memory closeData, ExchangeData memory exchangeData) = abi.decode(packedData, (CloseData,ExchangeData));
 
         address user = DSProxy(payable(closeData.proxy)).owner();
+
+        exchangeData.dfsFeeDivider = SERVICE_FEE;
+        exchangeData.user = user;
 
         closeCDP(closeData, exchangeData, user);
     }
@@ -189,6 +162,6 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
         return rmul(rmul(spot, spotter.par()), mat);
     }
 
-    receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}
+    receive() external override(FlashLoanReceiverBase, DFSExchangeCore) payable {}
 
 }
