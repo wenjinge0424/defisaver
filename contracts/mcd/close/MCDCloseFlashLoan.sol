@@ -82,21 +82,14 @@ contract MCDCloseFlashLoan is DFSExchangeCore, MCDSaverProxyHelper, FlashLoanRec
         uint drawnAmount = drawMaxCollateral(_closeData.cdpId, _closeData.joinAddr, _closeData.collAmount); // draw whole collateral
 
         uint daiSwaped = 0;
-        uint dfsFee = 0;
 
         if (_closeData.toDai) {
             _exchangeData.srcAmount = drawnAmount;
             (, daiSwaped) = _sell(_exchangeData);
-
-            dfsFee = getFee(daiSwaped, _user);
         } else {
-            dfsFee = getFee(_closeData.daiAmount, _user);
-
-            _exchangeData.destAmount = (_closeData.daiAmount + _closeData.flFee + dfsFee);
+            _exchangeData.destAmount = _closeData.daiAmount;
             (, daiSwaped) = _buy(_exchangeData);
         }
-
-        takeFee(dfsFee);
 
         address tokenAddr = getVaultCollAddr(_closeData.joinAddr);
 
@@ -138,25 +131,6 @@ contract MCDCloseFlashLoan is DFSExchangeCore, MCDSaverProxyHelper, FlashLoanRec
         daiJoin.join(urn, _daiAmount);
 
         manager.frob(_cdpId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, _ilk));
-    }
-
-    function takeFee(uint _feeAmount) internal returns (uint) {
-        ERC20(DAI_ADDRESS).transfer(WALLET_ID, _feeAmount);
-    }
-
-    function getFee(uint _amount, address _owner) internal view returns (uint feeAmount) {
-        uint fee = SERVICE_FEE;
-
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_owner)) {
-            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_owner);
-        }
-
-        feeAmount = (fee == 0) ? 0 : (_amount / fee);
-
-        // fee can't go over 20% of the whole amount
-        if (feeAmount > (_amount / 5)) {
-            feeAmount = _amount / 5;
-        }
     }
 
     function getVaultCollAddr(address _joinAddr) internal view returns (address) {

@@ -56,9 +56,7 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
         _exchangeData.dfsFeeDivider = _gasCost > 0 ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
         (, uint daiAmount) = _sell(_exchangeData);
 
-        uint daiAfterFee = sub(daiAmount, getFee(daiAmount, _gasCost, user));
-
-        paybackDebt(_cdpId, ilk, daiAfterFee, user);
+        paybackDebt(_cdpId, ilk, daiAmount, user);
 
         // if there is some eth left (0x fee), return it to user
         if (address(this).balance > 0) {
@@ -81,11 +79,10 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
         bytes32 ilk = manager.ilks(_cdpId);
 
         uint daiDrawn = drawDai(_cdpId, ilk, _exchangeData.srcAmount);
-        uint daiAfterFee = sub(daiDrawn, getFee(daiDrawn, _gasCost, user));
 
         _exchangeData.user = user;
         _exchangeData.dfsFeeDivider = _gasCost > 0 ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
-        _exchangeData.srcAmount = daiAfterFee;
+        _exchangeData.srcAmount = daiDrawn;
         (, uint swapedColl) = _sell(_exchangeData);
 
         addCollateral(_cdpId, _joinAddr, swapedColl);
@@ -201,38 +198,6 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
         daiJoin.join(urn, _daiAmount);
 
         manager.frob(_cdpId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, _ilk));
-    }
-
-    /// @notice Calculates the fee amount
-    /// @param _amount Dai amount that is converted
-    /// @param _gasCost Used for Monitor, estimated gas cost of tx
-    /// @param _owner The address that controlls the DSProxy that owns the CDP
-    function getFee(uint _amount, uint _gasCost, address _owner) internal returns (uint feeAmount) {
-        uint fee = MANUAL_SERVICE_FEE;
-
-        if (BotRegistry(BOT_REGISTRY_ADDRESS).botList(tx.origin)) {
-            fee = AUTOMATIC_SERVICE_FEE;
-        }
-
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_owner)) {
-            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_owner);
-        }
-
-        feeAmount = (fee == 0) ? 0 : (_amount / fee);
-
-        if (_gasCost != 0) {
-            uint ethDaiPrice = getPrice(ETH_ILK);
-            _gasCost = rmul(_gasCost, ethDaiPrice);
-
-            feeAmount = add(feeAmount, _gasCost);
-        }
-
-        // fee can't go over 20% of the whole amount
-        if (feeAmount > (_amount / 5)) {
-            feeAmount = _amount / 5;
-        }
-
-        ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
     }
 
     /// @notice Gets the maximum amount of collateral available to draw

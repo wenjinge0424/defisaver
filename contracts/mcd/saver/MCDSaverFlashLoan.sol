@@ -74,12 +74,8 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         uint maxDebt = getMaxDebt(_saverData.cdpId, manager.ilks(_saverData.cdpId));
         uint daiDrawn = drawDai(_saverData.cdpId, manager.ilks(_saverData.cdpId), maxDebt);
 
-        // Calc. fees
-        uint dsfFee = getFee((daiDrawn + _saverData.loanAmount), _saverData.gasCost, user);
-        uint afterFee = (daiDrawn + _saverData.loanAmount) - dsfFee;
-
         // Swap
-        _exchangeData.srcAmount = afterFee;
+        _exchangeData.srcAmount = daiDrawn + _saverData.loanAmount;
         _exchangeData.user = user;
         _exchangeData.dfsFeeDivider = _saverData.gasCost > 0 ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
         (, uint swapedAmount) = _sell(_exchangeData);
@@ -109,9 +105,8 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         _exchangeData.srcAmount = (_saverData.loanAmount + collDrawn);
         _exchangeData.user = user;
         _exchangeData.dfsFeeDivider = _saverData.gasCost > 0 ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
-        (, uint swapedAmount) = _sell(_exchangeData);
+        (, uint paybackAmount) = _sell(_exchangeData);
 
-        uint paybackAmount = (swapedAmount - getFee(swapedAmount, _saverData.gasCost, user));
         paybackAmount = limitLoanAmount(_saverData.cdpId, ilk, paybackAmount, user);
 
         // Payback the debt
@@ -120,7 +115,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         // Draw collateral to repay the flash loan
         drawCollateral(_saverData.cdpId, _saverData.joinAddr, (_saverData.loanAmount + _saverData.fee));
 
-        logger.Log(address(this), msg.sender, "MCDFlashRepay", abi.encode(_saverData.cdpId, user, _exchangeData.srcAmount, swapedAmount));
+        logger.Log(address(this), msg.sender, "MCDFlashRepay", abi.encode(_saverData.cdpId, user, _exchangeData.srcAmount, paybackAmount));
     }
 
     /// @notice Handles that the amount is not bigger than cdp debt and not dust

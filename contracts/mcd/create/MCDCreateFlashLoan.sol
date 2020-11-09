@@ -57,10 +57,6 @@ contract MCDCreateFlashLoan is DFSExchangeCore, AdminAuth, FlashLoanReceiverBase
         address _proxy,
         ExchangeData memory _exchangeData
     ) public {
-
-        uint dfsFee = getFee(_exchangeData.srcAmount, DSProxy(payable(_proxy)).owner());
-
-        _exchangeData.srcAmount = (_exchangeData.srcAmount - dfsFee);
         (, uint256 collSwaped) = _sell(_exchangeData);
 
         bytes32 ilk = Join(_joinAddr).ilk();
@@ -90,23 +86,6 @@ contract MCDCreateFlashLoan is DFSExchangeCore, AdminAuth, FlashLoanReceiverBase
                 _proxy
             );
         }
-    }
-
-    function getFee(uint _amount, address _owner) internal returns (uint feeAmount) {
-        uint fee = SERVICE_FEE;
-
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_owner)) {
-            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_owner);
-        }
-
-        feeAmount = (fee == 0) ? 0 : (_amount / fee);
-
-        // fee can't go over 20% of the whole amount
-        if (feeAmount > (_amount / 5)) {
-            feeAmount = _amount / 5;
-        }
-
-        ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
     }
 
     /// @notice Checks if the join address is one of the Ether coll. types
