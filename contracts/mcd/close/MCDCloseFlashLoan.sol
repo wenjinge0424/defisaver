@@ -6,6 +6,7 @@ import "../../utils/FlashLoanReceiverBase.sol";
 import "../../auth/AdminAuth.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../mcd/saver/MCDSaverProxyHelper.sol";
+import "./MCDCloseTaker.sol";
 
 contract MCDCloseFlashLoan is DFSExchangeCore, MCDSaverProxyHelper, FlashLoanReceiverBase, AdminAuth {
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
@@ -48,7 +49,20 @@ contract MCDCloseFlashLoan is DFSExchangeCore, MCDSaverProxyHelper, FlashLoanRec
 
         (address proxy, bytes memory packedData) = abi.decode(_params, (address,bytes));
 
-        (CloseData memory closeData, ExchangeData memory exchangeData) = abi.decode(packedData, (CloseData,ExchangeData));
+        (MCDCloseTaker.CloseData memory closeDataSent, ExchangeData memory exchangeData) = abi.decode(packedData, (MCDCloseTaker.CloseData,ExchangeData));
+
+        CloseData memory closeData = CloseData({
+            cdpId: closeDataSent.cdpId,
+            collAmount: closeDataSent.collAmount,
+            daiAmount: closeDataSent.daiAmount,
+            minAccepted: closeDataSent.minAccepted,
+            joinAddr: closeDataSent.joinAddr,
+            proxy: proxy,
+            flFee: _fee,
+            toDai: closeDataSent.toDai,
+            reserve: _reserve,
+            amount: _amount
+        });
 
         address user = DSProxy(payable(closeData.proxy)).owner();
 
