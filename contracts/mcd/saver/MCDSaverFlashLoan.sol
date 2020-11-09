@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "../../mcd/saver/MCDSaverProxy.sol";
 import "../../utils/FlashLoanReceiverBase.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeCore.sol";
 
 contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
 
@@ -80,6 +80,8 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
 
         // Swap
         _exchangeData.srcAmount = afterFee;
+        _exchangeData.user = user;
+        _exchangeData.dfsFeeDivider = _saverData.gasCost > 0 ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
         (, uint swapedAmount) = _sell(_exchangeData);
 
         // Return collateral
@@ -88,7 +90,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         // Draw Dai to repay the flash loan
         drawDai(_saverData.cdpId,  manager.ilks(_saverData.cdpId), (_saverData.loanAmount + _saverData.fee));
 
-        logger.Log(address(this), msg.sender, "MCDFlashBoost", abi.encode(_saverData.cdpId, owner, _exchangeData.srcAmount, swapedAmount));
+        logger.Log(address(this), msg.sender, "MCDFlashBoost", abi.encode(_saverData.cdpId, user, _exchangeData.srcAmount, swapedAmount));
     }
 
     function repayWithLoan(
@@ -105,6 +107,8 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
 
         // Swap
         _exchangeData.srcAmount = (_saverData.loanAmount + collDrawn);
+        _exchangeData.user = user;
+        _exchangeData.dfsFeeDivider = _saverData.gasCost > 0 ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
         (, uint swapedAmount) = _sell(_exchangeData);
 
         uint paybackAmount = (swapedAmount - getFee(swapedAmount, _saverData.gasCost, user));
@@ -116,7 +120,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         // Draw collateral to repay the flash loan
         drawCollateral(_saverData.cdpId, _saverData.joinAddr, (_saverData.loanAmount + _saverData.fee));
 
-        logger.Log(address(this), msg.sender, "MCDFlashRepay", abi.encode(_saverData.cdpId, owner, _exchangeData.srcAmount, swapedAmount));
+        logger.Log(address(this), msg.sender, "MCDFlashRepay", abi.encode(_saverData.cdpId, user, _exchangeData.srcAmount, swapedAmount));
     }
 
     /// @notice Handles that the amount is not bigger than cdp debt and not dust
@@ -145,6 +149,6 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         return _paybackAmount;
     }
 
-    receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}
+    receive() external override(FlashLoanReceiverBase, DFSExchangeCore) payable {}
 
 }
