@@ -1,14 +1,15 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeCore.sol";
 import "./MCDCreateProxyActions.sol";
 import "../../utils/FlashLoanReceiverBase.sol";
 import "../../interfaces/Manager.sol";
 import "../../interfaces/Join.sol";
 import "../../DS/DSProxy.sol";
+import "./MCDCreateTaker.sol";
 
-contract MCDCreateFlashLoan is SaverExchangeCore, AdminAuth, FlashLoanReceiverBase {
+contract MCDCreateFlashLoan is DFSExchangeCore, AdminAuth, FlashLoanReceiverBase {
     address public constant CREATE_PROXY_ACTIONS = 0x6d0984E80a86f26c0dd564ca0CF74a8E9Da03305;
 
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
@@ -33,27 +34,13 @@ contract MCDCreateFlashLoan is SaverExchangeCore, AdminAuth, FlashLoanReceiverBa
         require(_amount <= getBalanceInternal(address(this), _reserve),
             "Invalid balance for the contract");
 
-        (
-            uint[6] memory numData,
-            address[5] memory addrData,
-            bytes memory callData,
-            address proxy
-        )
-         = abi.decode(_params, (uint256[6],address[5],bytes,address));
+        (address proxy, bytes memory packedData) = abi.decode(_params, (address,bytes));
+        (MCDCreateTaker.CreateData memory createData, ExchangeData memory exchangeData) = abi.decode(packedData, (MCDCreateTaker.CreateData,ExchangeData));
 
-        ExchangeData memory exchangeData = ExchangeData({
-            srcAddr: addrData[0],
-            destAddr: addrData[1],
-            srcAmount: numData[2],
-            destAmount: numData[3],
-            minPrice: numData[4],
-            wrapper: addrData[3],
-            exchangeAddr: addrData[2],
-            callData: callData,
-            price0x: numData[5]
-        });
+        exchangeData.dfsFeeDivider = SERVICE_FEE;
+        exchangeData.user = DSProxy(payable(proxy)).owner();
 
-        openAndLeverage(numData[0], numData[1] + _fee, addrData[4], proxy, exchangeData);
+        openAndLeverage(createData.collAmount, createData.daiAmount + _fee, createData.joinAddr, proxy, exchangeData);
 
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
 
@@ -70,10 +57,6 @@ contract MCDCreateFlashLoan is SaverExchangeCore, AdminAuth, FlashLoanReceiverBa
         address _proxy,
         ExchangeData memory _exchangeData
     ) public {
-
-        uint dfsFee = getFee(_exchangeData.srcAmount, DSProxy(payable(_proxy)).owner());
-
-        _exchangeData.srcAmount = (_exchangeData.srcAmount - dfsFee);
         (, uint256 collSwaped) = _sell(_exchangeData);
 
         bytes32 ilk = Join(_joinAddr).ilk();
@@ -105,23 +88,6 @@ contract MCDCreateFlashLoan is SaverExchangeCore, AdminAuth, FlashLoanReceiverBa
         }
     }
 
-    function getFee(uint _amount, address _owner) internal returns (uint feeAmount) {
-        uint fee = SERVICE_FEE;
-
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_owner)) {
-            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_owner);
-        }
-
-        feeAmount = (fee == 0) ? 0 : (_amount / fee);
-
-        // fee can't go over 20% of the whole amount
-        if (feeAmount > (_amount / 5)) {
-            feeAmount = _amount / 5;
-        }
-
-        ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
-    }
-
     /// @notice Checks if the join address is one of the Ether coll. types
     /// @param _joinAddr Join address to check
     function isEthJoinAddr(address _joinAddr) internal view returns (bool) {
@@ -136,5 +102,5 @@ contract MCDCreateFlashLoan is SaverExchangeCore, AdminAuth, FlashLoanReceiverBa
         return false;
     }
 
-    receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}
+    receive() external override(FlashLoanReceiverBase, DFSExchangeCore) payable {}
 }

@@ -22,8 +22,8 @@ contract DFSExchangeData {
         uint256 srcAmount;
         uint256 destAmount;
         uint256 minPrice;
-        uint256 dfsFeeDivider;
-        address user;
+        uint256 dfsFeeDivider; // service fee divider
+        address user; // user to check special fee
         address wrapper;
         bytes wrapperData;
         OffchainData offchainData;

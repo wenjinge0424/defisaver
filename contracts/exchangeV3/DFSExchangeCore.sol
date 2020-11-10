@@ -73,13 +73,13 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
         require(exData.destAmount != 0, ERR_DEST_AMOUNT_MISSING);
 
+        exData.srcAmount -= getFee(exData.srcAmount, exData.user, exData.srcAddr, exData.dfsFeeDivider);
+
         // if selling eth, convert to weth
         if (exData.srcAddr == KYBER_ETH_ADDRESS) {
             exData.srcAddr = ethToWethAddr(exData.srcAddr);
             TokenInterface(WETH_ADDRESS).deposit.value(exData.srcAmount)();
         }
-
-        exData.srcAmount -= getFee(exData.srcAmount, exData.user, exData.srcAddr, exData.dfsFeeDivider);
 
         if (exData.offchainData.price > 0) {
             (success, swapedTokens) = takeOrder(exData, ActionType.BUY);

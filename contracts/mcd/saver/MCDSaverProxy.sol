@@ -1,8 +1,6 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "../../interfaces/ExchangeInterface.sol";
-
 import "../../loggers/DefisaverLogger.sol";
 import "../../utils/Discount.sol";
 
@@ -13,10 +11,10 @@ import "../../interfaces/Join.sol";
 
 import "./MCDSaverProxyHelper.sol";
 import "../../utils/BotRegistry.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeCore.sol";
 
 /// @title Implements Boost and Repay for MCD CDPs
-contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
+contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
 
     uint public constant MANUAL_SERVICE_FEE = 400; // 0.25% Fee
     uint public constant AUTOMATIC_SERVICE_FEE = 333; // 0.3% Fee
@@ -42,47 +40,50 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
     /// @notice Repay - draws collateral, converts to Dai and repays the debt
     /// @dev Must be called by the DSProxy contract that owns the CDP
     function repay(
-        SaverExchangeCore.ExchangeData memory _exchangeData,
+        ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _gasCost,
         address _joinAddr
     ) public payable {
 
-        address owner = getOwner(manager, _cdpId);
+        address user = getOwner(manager, _cdpId);
         bytes32 ilk = manager.ilks(_cdpId);
 
         drawCollateral(_cdpId, _joinAddr, _exchangeData.srcAmount);
 
+        _exchangeData.user = user;
+        _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
         (, uint daiAmount) = _sell(_exchangeData);
 
-        uint daiAfterFee = sub(daiAmount, getFee(daiAmount, _gasCost, owner));
+        daiAmount -= takeFee(_gasCost, daiAmount);
 
-        paybackDebt(_cdpId, ilk, daiAfterFee, owner);
+        paybackDebt(_cdpId, ilk, daiAmount, user);
 
         // if there is some eth left (0x fee), return it to user
         if (address(this).balance > 0) {
             tx.origin.transfer(address(this).balance);
         }
 
-        logger.Log(address(this), msg.sender, "MCDRepay", abi.encode(_cdpId, owner, _exchangeData.srcAmount, daiAmount));
+        logger.Log(address(this), msg.sender, "MCDRepay", abi.encode(_cdpId, user, _exchangeData.srcAmount, daiAmount));
 
     }
 
     /// @notice Boost - draws Dai, converts to collateral and adds to CDP
     /// @dev Must be called by the DSProxy contract that owns the CDP
     function boost(
-        SaverExchangeCore.ExchangeData memory _exchangeData,
+        ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _gasCost,
         address _joinAddr
     ) public payable {
-        address owner = getOwner(manager, _cdpId);
+        address user = getOwner(manager, _cdpId);
         bytes32 ilk = manager.ilks(_cdpId);
 
         uint daiDrawn = drawDai(_cdpId, ilk, _exchangeData.srcAmount);
-        uint daiAfterFee = sub(daiDrawn, getFee(daiDrawn, _gasCost, owner));
 
-        _exchangeData.srcAmount = daiAfterFee;
+        _exchangeData.user = user;
+        _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
+        _exchangeData.srcAmount = daiDrawn - takeFee(_gasCost, daiDrawn);
         (, uint swapedColl) = _sell(_exchangeData);
 
         addCollateral(_cdpId, _joinAddr, swapedColl);
@@ -92,7 +93,7 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
             tx.origin.transfer(address(this).balance);
         }
 
-        logger.Log(address(this), msg.sender, "MCDBoost", abi.encode(_cdpId, owner, _exchangeData.srcAmount, swapedColl));
+        logger.Log(address(this), msg.sender, "MCDBoost", abi.encode(_cdpId, user, _exchangeData.srcAmount, swapedColl));
     }
 
     /// @notice Draws Dai from the CDP
@@ -200,38 +201,6 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
         manager.frob(_cdpId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, _ilk));
     }
 
-    /// @notice Calculates the fee amount
-    /// @param _amount Dai amount that is converted
-    /// @param _gasCost Used for Monitor, estimated gas cost of tx
-    /// @param _owner The address that controlls the DSProxy that owns the CDP
-    function getFee(uint _amount, uint _gasCost, address _owner) internal returns (uint feeAmount) {
-        uint fee = MANUAL_SERVICE_FEE;
-
-        if (BotRegistry(BOT_REGISTRY_ADDRESS).botList(tx.origin)) {
-            fee = AUTOMATIC_SERVICE_FEE;
-        }
-
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_owner)) {
-            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_owner);
-        }
-
-        feeAmount = (fee == 0) ? 0 : (_amount / fee);
-
-        if (_gasCost != 0) {
-            uint ethDaiPrice = getPrice(ETH_ILK);
-            _gasCost = rmul(_gasCost, ethDaiPrice);
-
-            feeAmount = add(feeAmount, _gasCost);
-        }
-
-        // fee can't go over 20% of the whole amount
-        if (feeAmount > (_amount / 5)) {
-            feeAmount = _amount / 5;
-        }
-
-        ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
-    }
-
     /// @notice Gets the maximum amount of collateral available to draw
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
@@ -300,4 +269,26 @@ contract MCDSaverProxy is SaverExchangeCore, MCDSaverProxyHelper {
         price = getPrice(ilk);
     }
 
+    function isAutomation() internal view returns(bool) {
+        return BotRegistry(BOT_REGISTRY_ADDRESS).botList(tx.origin);
+    }
+
+    function takeFee(uint256 _gasCost, uint _amount) internal returns(uint) {
+        if (_gasCost > 0) {
+            uint ethDaiPrice = getPrice(ETH_ILK);
+            uint feeAmount = rmul(_gasCost, ethDaiPrice);
+
+            uint balance = ERC20(DAI_ADDRESS).balanceOf(address(this));
+
+            if (feeAmount > _amount / 10) {
+                feeAmount = _amount / 10;
+            }
+
+            ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
+
+            return feeAmount;
+        }
+
+        return 0;
+    }
 }

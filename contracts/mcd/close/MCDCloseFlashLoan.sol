@@ -4,10 +4,11 @@ pragma experimental ABIEncoderV2;
 import "../../mcd/saver/MCDSaverProxy.sol";
 import "../../utils/FlashLoanReceiverBase.sol";
 import "../../auth/AdminAuth.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../mcd/saver/MCDSaverProxyHelper.sol";
+import "./MCDCloseTaker.sol";
 
-contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanReceiverBase, AdminAuth {
+contract MCDCloseFlashLoan is DFSExchangeCore, MCDSaverProxyHelper, FlashLoanReceiverBase, AdminAuth {
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
     uint public constant SERVICE_FEE = 400; // 0.25% Fee
@@ -46,41 +47,27 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
         bytes calldata _params)
     external override {
 
-        (
-            uint[8] memory numData,
-            address[5] memory addrData,
-            bytes memory callData,
-            address proxy,
-            bool toDai
-        )
-         = abi.decode(_params, (uint256[8],address[5],bytes,address,bool));
+        (address proxy, bytes memory packedData) = abi.decode(_params, (address,bytes));
 
-        ExchangeData memory exchangeData = ExchangeData({
-            srcAddr: addrData[0],
-            destAddr: addrData[1],
-            srcAmount: numData[4],
-            destAmount: numData[5],
-            minPrice: numData[6],
-            wrapper: addrData[3],
-            exchangeAddr: addrData[2],
-            callData: callData,
-            price0x: numData[7]
-        });
+        (MCDCloseTaker.CloseData memory closeDataSent, ExchangeData memory exchangeData) = abi.decode(packedData, (MCDCloseTaker.CloseData,ExchangeData));
 
         CloseData memory closeData = CloseData({
-            cdpId: numData[0],
-            collAmount: numData[1],
-            daiAmount: numData[2],
-            minAccepted: numData[3],
-            joinAddr: addrData[4],
+            cdpId: closeDataSent.cdpId,
+            collAmount: closeDataSent.collAmount,
+            daiAmount: closeDataSent.daiAmount,
+            minAccepted: closeDataSent.minAccepted,
+            joinAddr: closeDataSent.joinAddr,
             proxy: proxy,
             flFee: _fee,
-            toDai: toDai,
+            toDai: closeDataSent.toDai,
             reserve: _reserve,
             amount: _amount
         });
 
         address user = DSProxy(payable(closeData.proxy)).owner();
+
+        exchangeData.dfsFeeDivider = SERVICE_FEE;
+        exchangeData.user = user;
 
         closeCDP(closeData, exchangeData, user);
     }
@@ -95,21 +82,14 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
         uint drawnAmount = drawMaxCollateral(_closeData.cdpId, _closeData.joinAddr, _closeData.collAmount); // draw whole collateral
 
         uint daiSwaped = 0;
-        uint dfsFee = 0;
 
         if (_closeData.toDai) {
             _exchangeData.srcAmount = drawnAmount;
             (, daiSwaped) = _sell(_exchangeData);
-
-            dfsFee = getFee(daiSwaped, _user);
         } else {
-            dfsFee = getFee(_closeData.daiAmount, _user);
-
-            _exchangeData.destAmount = (_closeData.daiAmount + _closeData.flFee + dfsFee);
+            _exchangeData.destAmount = _closeData.daiAmount;
             (, daiSwaped) = _buy(_exchangeData);
         }
-
-        takeFee(dfsFee);
 
         address tokenAddr = getVaultCollAddr(_closeData.joinAddr);
 
@@ -153,25 +133,6 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
         manager.frob(_cdpId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, _ilk));
     }
 
-    function takeFee(uint _feeAmount) internal returns (uint) {
-        ERC20(DAI_ADDRESS).transfer(WALLET_ID, _feeAmount);
-    }
-
-    function getFee(uint _amount, address _owner) internal view returns (uint feeAmount) {
-        uint fee = SERVICE_FEE;
-
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_owner)) {
-            fee = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_owner);
-        }
-
-        feeAmount = (fee == 0) ? 0 : (_amount / fee);
-
-        // fee can't go over 20% of the whole amount
-        if (feeAmount > (_amount / 5)) {
-            feeAmount = _amount / 5;
-        }
-    }
-
     function getVaultCollAddr(address _joinAddr) internal view returns (address) {
         address tokenAddr = address(Join(_joinAddr).gem());
 
@@ -189,6 +150,6 @@ contract MCDCloseFlashLoan is SaverExchangeCore, MCDSaverProxyHelper, FlashLoanR
         return rmul(rmul(spot, spotter.par()), mat);
     }
 
-    receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}
+    receive() external override(FlashLoanReceiverBase, DFSExchangeCore) payable {}
 
 }

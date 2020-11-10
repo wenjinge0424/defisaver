@@ -2,7 +2,7 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../saver/MCDSaverProxy.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeData.sol";
 import "../../utils/GasBurner.sol";
 import "../../interfaces/ILendingPool.sol";
 
@@ -18,7 +18,7 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
     function boostWithLoan(
-        SaverExchangeCore.ExchangeData memory _exchangeData,
+        ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _gasCost,
         address _joinAddr
@@ -51,7 +51,7 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
     }
 
     function repayWithLoan(
-        SaverExchangeCore.ExchangeData memory _exchangeData,
+        ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _gasCost,
         address _joinAddr
@@ -117,33 +117,6 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
         } else {
             liquidity = ERC20(tokenAddr).balanceOf(AAVE_POOL_CORE);
         }
-    }
-
-     function _packData(
-        uint _cdpId,
-        uint _gasCost,
-        address _joinAddr,
-        SaverExchangeCore.ExchangeData memory exchangeData
-    ) internal pure returns (uint[6] memory numData, address[5] memory addrData, bytes memory callData) {
-
-        numData = [
-            exchangeData.srcAmount,
-            exchangeData.destAmount,
-            exchangeData.minPrice,
-            exchangeData.price0x,
-            _cdpId,
-            _gasCost
-        ];
-
-        addrData = [
-            exchangeData.srcAddr,
-            exchangeData.destAddr,
-            exchangeData.exchangeAddr,
-            exchangeData.wrapper,
-            _joinAddr
-        ];
-
-        callData = exchangeData.callData;
     }
 
 }
