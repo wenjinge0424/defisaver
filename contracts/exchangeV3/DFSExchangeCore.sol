@@ -73,6 +73,8 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
         require(exData.destAmount != 0, ERR_DEST_AMOUNT_MISSING);
 
+        exData.srcAmount -= getFee(exData.srcAmount, exData.user, exData.srcAddr, exData.dfsFeeDivider);
+
         // if selling eth, convert to weth
         if (exData.srcAddr == KYBER_ETH_ADDRESS) {
             exData.srcAddr = ethToWethAddr(exData.srcAddr);
@@ -92,8 +94,6 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             swapedTokens = saverSwap(exData, ActionType.BUY);
             wrapper = exData.wrapper;
         }
-
-        getFee(exData.destAmount, exData.user, exData.destAddr, exData.dfsFeeDivider);
 
         require(getBalance(exData.destAddr) >= exData.destAmount, ERR_SLIPPAGE_HIT);
 
