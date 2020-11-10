@@ -51,10 +51,11 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
 
         drawCollateral(_cdpId, _joinAddr, _exchangeData.srcAmount);
 
-
         _exchangeData.user = user;
-        _exchangeData.dfsFeeDivider = _gasCost > 0 ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
+        _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
         (, uint daiAmount) = _sell(_exchangeData);
+
+        daiAmount -= takeFee(_gasCost);
 
         paybackDebt(_cdpId, ilk, daiAmount, user);
 
@@ -81,8 +82,8 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
         uint daiDrawn = drawDai(_cdpId, ilk, _exchangeData.srcAmount);
 
         _exchangeData.user = user;
-        _exchangeData.dfsFeeDivider = _gasCost > 0 ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
-        _exchangeData.srcAmount = daiDrawn;
+        _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
+        _exchangeData.srcAmount = daiDrawn - takeFee(_gasCost);
         (, uint swapedColl) = _sell(_exchangeData);
 
         addCollateral(_cdpId, _joinAddr, swapedColl);
@@ -268,4 +269,24 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
         price = getPrice(ilk);
     }
 
+    function isAutomation() internal view returns(bool) {
+        return BotRegistry(BOT_REGISTRY_ADDRESS).botList(tx.origin);
+    }
+
+    function takeFee(uint256 _gasCost) internal returns(uint) {
+        if (_gasCost > 0) {
+            uint ethDaiPrice = getPrice(ETH_ILK);
+            uint feeAmount = rmul(_gasCost, ethDaiPrice);
+
+            uint balance = ERC20(DAI_ADDRESS).balanceOf(address(this));
+
+            feeAmount = feeAmount > balance ? balance : feeAmount;
+
+            ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
+
+            return feeAmount;
+        }
+
+        return 0;
+    }
 }
