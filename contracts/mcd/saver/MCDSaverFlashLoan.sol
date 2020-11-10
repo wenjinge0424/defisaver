@@ -75,7 +75,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         uint daiDrawn = drawDai(_saverData.cdpId, manager.ilks(_saverData.cdpId), maxDebt);
 
         // Swap
-        _exchangeData.srcAmount = daiDrawn + _saverData.loanAmount - takeFee(_saverData.gasCost);
+        _exchangeData.srcAmount = daiDrawn + _saverData.loanAmount - takeFee(_saverData.gasCost, daiDrawn + _saverData.loanAmount);
         _exchangeData.user = user;
         _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
         (, uint swapedAmount) = _sell(_exchangeData);
@@ -107,7 +107,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
         (, uint paybackAmount) = _sell(_exchangeData);
 
-        paybackAmount -= takeFee(_saverData.gasCost);
+        paybackAmount -= takeFee(_saverData.gasCost, paybackAmount);
         paybackAmount = limitLoanAmount(_saverData.cdpId, ilk, paybackAmount, user);
 
         // Payback the debt

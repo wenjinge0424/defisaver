@@ -55,7 +55,7 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
         _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
         (, uint daiAmount) = _sell(_exchangeData);
 
-        daiAmount -= takeFee(_gasCost);
+        daiAmount -= takeFee(_gasCost, daiAmount);
 
         paybackDebt(_cdpId, ilk, daiAmount, user);
 
@@ -83,7 +83,7 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
 
         _exchangeData.user = user;
         _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
-        _exchangeData.srcAmount = daiDrawn - takeFee(_gasCost);
+        _exchangeData.srcAmount = daiDrawn - takeFee(_gasCost, daiDrawn);
         (, uint swapedColl) = _sell(_exchangeData);
 
         addCollateral(_cdpId, _joinAddr, swapedColl);
@@ -273,14 +273,16 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
         return BotRegistry(BOT_REGISTRY_ADDRESS).botList(tx.origin);
     }
 
-    function takeFee(uint256 _gasCost) internal returns(uint) {
+    function takeFee(uint256 _gasCost, uint _amount) internal returns(uint) {
         if (_gasCost > 0) {
             uint ethDaiPrice = getPrice(ETH_ILK);
             uint feeAmount = rmul(_gasCost, ethDaiPrice);
 
             uint balance = ERC20(DAI_ADDRESS).balanceOf(address(this));
 
-            feeAmount = feeAmount > balance ? balance : feeAmount;
+            if (feeAmount > _amount / 10) {
+                feeAmount = _amount / 10;
+            }
 
             ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
 
