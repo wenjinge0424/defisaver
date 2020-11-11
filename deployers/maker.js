@@ -8,12 +8,19 @@ const { start } = require('./utils/starter');
 const { changeConstantInFile } = require('./utils/utils');
 
 async function main() {
+    await deployContract("MCDCloseFlashLoan");
+    await deployContract("MCDCloseTaker");
+
     const flashLoan = await deployContract("MCDSaverFlashLoan");
     await changeConstantInFile('./contracts/', 'MCDSaverTaker', 'MCD_SAVER_FLASH_LOAN', flashLoan.address);
 
-    // await run('compile');
+    const mcdCreateFlashLoan = await deployContract("MCDCreateFlashLoan");
+    await changeConstantInFile('./contracts/', 'MCDCreateTaker', 'MCD_CREATE_FLASH_LOAN', mcdCreateFlashLoan.address);
 
-    // await deployContract("MCDSaverTaker");
+    await run('compile');
+
+    await deployContract("MCDSaverTaker");
+    await deployContract("MCDCreateTaker");
 }
 
 start(main);

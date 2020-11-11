@@ -11,7 +11,7 @@ contract MCDCreateTaker {
 
     using SafeERC20 for ERC20;
 
-    address payable public constant MCD_CREATE_FLASH_LOAN = 0x78aF7A2Ee6C2240c748aDdc42aBc9A693559dcaF;
+    address payable public constant MCD_CREATE_FLASH_LOAN = 0xF7d60f5F8783279D33552Cf789F0bbE8336e2e2d;
 
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
