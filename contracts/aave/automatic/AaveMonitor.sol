@@ -17,10 +17,10 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
 
     enum Method { Boost, Repay }
 
-    uint public REPAY_GAS_TOKEN = 19;
-    uint public BOOST_GAS_TOKEN = 19;
+    uint public REPAY_GAS_TOKEN = 20;
+    uint public BOOST_GAS_TOKEN = 20;
 
-    uint public MAX_GAS_PRICE = 200000000000; // 200 gwei
+    uint public MAX_GAS_PRICE = 400000000000; // 400 gwei
 
     uint public REPAY_GAS_COST = 2500000;
     uint public BOOST_GAS_COST = 2500000;
