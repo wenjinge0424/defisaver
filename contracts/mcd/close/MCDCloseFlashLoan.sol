@@ -87,7 +87,7 @@ contract MCDCloseFlashLoan is DFSExchangeCore, MCDSaverProxyHelper, FlashLoanRec
             _exchangeData.srcAmount = drawnAmount;
             (, daiSwaped) = _sell(_exchangeData);
         } else {
-            _exchangeData.destAmount = _closeData.daiAmount;
+            _exchangeData.destAmount = (_closeData.daiAmount + _closeData.flFee);
             (, daiSwaped) = _buy(_exchangeData);
         }
 
