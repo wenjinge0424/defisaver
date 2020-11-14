@@ -122,7 +122,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         if (_type == ActionType.SELL) {
             writeUint256(_exData.offchainData.callData, 36, _exData.srcAmount);
         } else {
-            writeUint256(_exData.offchainData.callData, 36, _exData.destAmount);
+            writeUint256(_exData.offchainData.callData, 36, wdiv(_exData.destAmount, _exData.offchainData.price));
         }
 
         uint256 tokensBefore = getBalance(_exData.destAddr);
