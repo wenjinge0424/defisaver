@@ -44,7 +44,7 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
         address protocolAddr2 = shifterRegistry.getAddr(getNameByProtocol(paramData.protocol2));
 
         // Send Flash loan amount to DSProxy
-        sendToProxy(payable(paramData.proxy), _reserve, _amount);
+        sendTokenToProxy(payable(paramData.proxy), _reserve, _amount);
 
         // Execute the Close/Change debt operation
         DSProxyInterface(paramData.proxy).execute(protocolAddr1, paramData.proxyData1);
@@ -53,7 +53,7 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
             exchangeData.srcAmount -= getFee(getBalance(exchangeData.srcAddr), exchangeData.srcAddr, paramData.proxy);
             (, uint amount) = _sell(exchangeData);
 
-            sendToProxy(payable(paramData.proxy), exchangeData.destAddr, amount);
+            sendTokenAndEthToProxy(payable(paramData.proxy), exchangeData.destAddr, amount);
         } else if (paramData.swapType == 2) { // DEBT_SWAP
             exchangeData.srcAmount -= getFee(exchangeData.srcAmount, exchangeData.srcAddr, paramData.proxy);
 
@@ -61,10 +61,10 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
             _buy(exchangeData);
 
             // Send extra to DSProxy
-            sendToProxy(payable(paramData.proxy), exchangeData.srcAddr, ERC20(exchangeData.srcAddr).balanceOf(address(this)));
+            sendTokenAndEthToProxy(payable(paramData.proxy), exchangeData.srcAddr, ERC20(exchangeData.srcAddr).balanceOf(address(this)));
 
         } else { // NO_SWAP just send tokens to proxy
-            sendToProxy(payable(paramData.proxy), exchangeData.srcAddr, getBalance(exchangeData.srcAddr));
+            sendTokenAndEthToProxy(payable(paramData.proxy), exchangeData.srcAddr, getBalance(exchangeData.srcAddr));
         }
 
         // Execute the Open operation
@@ -141,12 +141,20 @@ contract LoanShifterReceiver is SaverExchangeCore, FlashLoanReceiverBase, AdminA
 
     }
 
-    function sendToProxy(address payable _proxy, address _reserve, uint _amount) internal {
+    function sendTokenAndEthToProxy(address payable _proxy, address _reserve, uint _amount) internal {
         if (_reserve != ETH_ADDRESS) {
             ERC20(_reserve).safeTransfer(_proxy, _amount);
         }
 
         _proxy.transfer(address(this).balance);
+    }
+
+    function sendTokenToProxy(address payable _proxy, address _reserve, uint _amount) internal {
+        if (_reserve != ETH_ADDRESS) {
+            ERC20(_reserve).safeTransfer(_proxy, _amount);
+        } else {
+            _proxy.transfer(address(this).balance);
+        }
     }
 
     function getNameByProtocol(uint8 _proto) internal pure returns (string memory) {
