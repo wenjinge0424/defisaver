@@ -135,7 +135,7 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
             supplyRate: liquidityRate,
             borrowRateVariable: variableBorrowRate,
             borrowRateStable: stableBorrowRate,
-            totalSupply: 0, // probably totalSUpply of aToken if really needed
+            totalSupply: ERC20(aToken).totalSupply(),
             availableLiquidity: availableLiquidity,
             totalBorrow: totalVariableDebt+totalStableDebt,
             collateralFactor: ltv,
