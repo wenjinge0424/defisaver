@@ -5,6 +5,8 @@ import "../utils/Discount.sol";
 
 contract DFSExchangeHelper {
 
+    string public constant ERR_OFFCHAIN_DATA_INVALID = "Offchain data invalid";
+
     using SafeERC20 for ERC20;
 
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -84,5 +86,27 @@ contract DFSExchangeHelper {
         }
 
         return x;
+    }
+
+    function writeUint256(bytes memory _b, uint256 _index, uint _input) internal pure {
+        if (_b.length < _index + 32) {
+            revert(ERR_OFFCHAIN_DATA_INVALID);
+        }
+
+        bytes32 input = bytes32(_input);
+
+        _index += 32;
+
+        // Read the bytes32 from array memory
+        assembly {
+            mstore(add(_b, _index), input)
+        }
+    }
+
+
+    /// @notice Converts Kybers Eth address -> Weth
+    /// @param _src Input address
+    function ethToWethAddr(address _src) internal pure returns (address) {
+        return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
     }
 }

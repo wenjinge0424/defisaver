@@ -9,6 +9,7 @@ contract DFSExchangeData {
     enum ActionType { SELL, BUY }
 
     struct OffchainData {
+        address wrapper;
         address exchangeAddr;
         address allowanceTarget;
         uint256 price;
