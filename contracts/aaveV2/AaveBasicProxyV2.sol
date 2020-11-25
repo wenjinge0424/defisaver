@@ -4,20 +4,17 @@ import "../utils/GasBurner.sol";
 import "../interfaces/TokenInterface.sol";
 import "../interfaces/IAToken.sol";
 import "../interfaces/ILendingPoolV2.sol";
-import "../interfaces/IAaveProtocolDataProviderV2.sol";
+import "./AaveHelperV2.sol";
 
 import "../utils/SafeERC20.sol";
 
 /// @title Basic compound interactions through the DSProxy
-contract AaveBasicProxyV2 is GasBurner {
+contract AaveBasicProxyV2 is GasBurner, AaveHelperV2 {
 
     using SafeERC20 for ERC20;
 
-    address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     // address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; // mainnet
     address public constant WETH_ADDRESS = 0xd0A1E359811322d97991E03f863a0C30C2cF029C; // kovan
-
-    uint16 public constant AAVE_REFERRAL_CODE = 64;
 
     /// @notice User deposits tokens to the Aave protocol
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
@@ -152,18 +149,9 @@ contract AaveBasicProxyV2 is GasBurner {
         }
     }
 
-    /// @notice Approves token contract to pull underlying tokens from the DSProxy
-    /// @param _tokenAddr Token we are trying to approve
-    /// @param _caller Address which will gain the approval
-    function approveToken(address _tokenAddr, address _caller) internal {
-        if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).safeApprove(_caller, uint256(-1));
-        }
-    }
-
     function setUserUseReserveAsCollateralIfNeeded(address _market, address _tokenAddr) public {
         address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
-        IAaveProtocolDataProviderV2 dataProvider = IAaveProtocolDataProviderV2(0x744C1aaA95232EeF8A9994C4E0b3a89659D9AB79); // ILendingPoolAddressesProviderV2V2(_market).getProtocolDataProvider();
+        IAaveProtocolDataProviderV2 dataProvider = getDataProvider(_market);
 
         (,,,,,,,,bool collateralEnabled) = dataProvider.getUserReserveData(_tokenAddr, address(this));
 
@@ -191,10 +179,6 @@ contract AaveBasicProxyV2 is GasBurner {
         }
 
         return _token;
-    }
-
-    function min(uint _a, uint _b) private pure returns(uint) {
-        return _a < _b ? _a : _b;
     }
 
 

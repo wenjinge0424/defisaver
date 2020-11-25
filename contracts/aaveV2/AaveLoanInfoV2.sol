@@ -68,16 +68,16 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
     /// @param _tokens Arr. of tokens for which to get the coll. factors
     /// @return collFactors Array of coll. factors
     function getCollFactors(address _market, address[] memory _tokens) public view returns (uint256[] memory collFactors) {
-        address dataProviderAddress = 0x744C1aaA95232EeF8A9994C4E0b3a89659D9AB79; // ILendingPoolAddressesProviderV2(_market).getProtocolDataProvider();
+        IAaveProtocolDataProviderV2 dataProvider = getDataProvider(_market);
         collFactors = new uint256[](_tokens.length);
 
         for (uint256 i = 0; i < _tokens.length; ++i) {
-            (,collFactors[i],,,,,,,,) = IAaveProtocolDataProviderV2(dataProviderAddress).getReserveConfigurationData(_tokens[i]);
+            (,collFactors[i],,,,,,,,) = dataProvider.getReserveConfigurationData(_tokens[i]);
         }
     }
 
     function getTokenBalances(address _market, address _user, address[] memory _tokens) public view returns (UserToken[] memory userTokens) {
-        address dataProviderAddress = 0x744C1aaA95232EeF8A9994C4E0b3a89659D9AB79; // ILendingPoolAddressesProviderV2(_market).getProtocolDataProvider();
+        IAaveProtocolDataProviderV2 dataProvider = getDataProvider(_market);
 
         userTokens = new UserToken[](_tokens.length);
 
@@ -85,7 +85,7 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
             address asset = _tokens[i];
             userTokens[i].token = asset;
 
-            (userTokens[i].balance, userTokens[i].borrowsStable, userTokens[i].borrowsVariable,,,,,,userTokens[i].enabledAsCollateral) = IAaveProtocolDataProviderV2(dataProviderAddress).getUserReserveData(asset, _user);
+            (userTokens[i].balance, userTokens[i].borrowsStable, userTokens[i].borrowsVariable,,,,,,userTokens[i].enabledAsCollateral) = dataProvider.getUserReserveData(asset, _user);
         }
     }
 
@@ -106,14 +106,14 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
     /// @param _tokenAddresses Array of tokens addresses
     /// @return tokens Array of reserves infomartion
     function getTokensInfo(address _market, address[] memory _tokenAddresses) public view returns(TokenInfo[] memory tokens) {
-        address dataProviderAddress = 0x744C1aaA95232EeF8A9994C4E0b3a89659D9AB79; // ILendingPoolAddressesProviderV2(_market).getProtocolDataProvider();
+        IAaveProtocolDataProviderV2 dataProvider = getDataProvider(_market);
         address priceOracleAddress = ILendingPoolAddressesProviderV2(_market).getPriceOracle();
 
         tokens = new TokenInfo[](_tokenAddresses.length);
 
         for (uint256 i = 0; i < _tokenAddresses.length; ++i) {
-            (,uint256 ltv,,,,,,,,) = IAaveProtocolDataProviderV2(dataProviderAddress).getReserveConfigurationData(_tokenAddresses[i]);
-            (address aToken,,) = IAaveProtocolDataProviderV2(dataProviderAddress).getReserveTokensAddresses(_tokenAddresses[i]);
+            (,uint256 ltv,,,,,,,,) = dataProvider.getReserveConfigurationData(_tokenAddresses[i]);
+            (address aToken,,) = dataProvider.getReserveTokensAddresses(_tokenAddresses[i]);
 
             tokens[i] = TokenInfo({
                 aTokenAddress: aToken,
@@ -150,7 +150,7 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
     /// @param _tokenAddresses Array of token addresses
     /// @return tokens Array of reserves infomartion
     function getFullTokensInfo(address _market, address[] memory _tokenAddresses) public view returns(TokenInfoFull[] memory tokens) {
-        IAaveProtocolDataProviderV2 dataProvider = IAaveProtocolDataProviderV2(0x744C1aaA95232EeF8A9994C4E0b3a89659D9AB79); // ILendingPoolAddressesProviderV2(_market).getProtocolDataProvider();
+        IAaveProtocolDataProviderV2 dataProvider = getDataProvider(_market);
         address priceOracleAddress = ILendingPoolAddressesProviderV2(_market).getPriceOracle();
 
         tokens = new TokenInfoFull[](_tokenAddresses.length);
@@ -166,7 +166,7 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
     /// @param _user Address of the user
     /// @return data LoanData information
     function getLoanData(address _market, address _user) public view returns (LoanData memory data) {
-        IAaveProtocolDataProviderV2 dataProvider = IAaveProtocolDataProviderV2(0x744C1aaA95232EeF8A9994C4E0b3a89659D9AB79); // ILendingPoolAddressesProviderV2(_market).getProtocolDataProvider();
+        IAaveProtocolDataProviderV2 dataProvider = getDataProvider(_market);
         address priceOracleAddress = ILendingPoolAddressesProviderV2(_market).getPriceOracle();
 
         IAaveProtocolDataProviderV2.TokenData[] memory reserves = dataProvider.getAllReservesTokens();

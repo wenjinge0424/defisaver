@@ -116,7 +116,7 @@ contract AaveHelperV2 is DSMath {
     /// @param _token Token we are trying to send
     /// @param _user User that should receive funds
     /// @param _amount Amount that should be sent
-    function sendContractBalance(address _token, address _user, uint _amount) public {
+    function sendContractBalance(address _token, address _user, uint _amount) internal {
         if (_amount == 0) return;
 
         if (_token == ETH_ADDR) {
@@ -126,7 +126,7 @@ contract AaveHelperV2 is DSMath {
         }
     }
 
-    function sendFullContractBalance(address _token, address _user) public {
+    function sendFullContractBalance(address _token, address _user) internal {
         if (_token == ETH_ADDR) {
             sendContractBalance(_token, _user, address(this).balance);
         } else {
@@ -138,5 +138,9 @@ contract AaveHelperV2 is DSMath {
         if (_token == ETH_ADDR) return 18;
 
         return ERC20(_token).decimals();
+    }
+
+    function getDataProvider(address _market) internal view returns(IAaveProtocolDataProviderV2) {
+        return IAaveProtocolDataProviderV2(0x744C1aaA95232EeF8A9994C4E0b3a89659D9AB79); // ILendingPoolAddressesProviderV2V2(_market).getProtocolDataProvider();
     }
 }
