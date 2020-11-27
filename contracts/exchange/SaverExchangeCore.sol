@@ -134,7 +134,7 @@ contract SaverExchangeCore is SaverExchangeHelper, DSMath {
         if (_type == ActionType.SELL) {
             writeUint256(_exData.callData, 36, _exData.srcAmount);
         } else {
-            writeUint256(_exData.callData, 36, wdiv(_exData.destAmount, _exData.price0x));
+            writeUint256(_exData.callData, 36, _exData.destAmount);
         }
 
         if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isNonPayableAddr(_exData.exchangeAddr)) {
