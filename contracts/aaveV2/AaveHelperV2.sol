@@ -4,7 +4,7 @@ import "../DS/DSMath.sol";
 import "../DS/DSProxy.sol";
 import "../utils/Discount.sol";
 import "../interfaces/IAToken.sol";
-import "../interfaces/ILendingPool.sol";
+import "../interfaces/ILendingPoolV2.sol";
 import "../interfaces/IPriceOracleGetterAave.sol";
 import "../interfaces/IAaveProtocolDataProviderV2.sol";
 
