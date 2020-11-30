@@ -22,7 +22,7 @@ contract AaveImport is AaveHelper, AdminAuth {
     using SafeERC20 for ERC20;
 
     address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    address public constant BASIC_PROXY = 0x29F4af15ad64C509c4140324cFE71FB728D10d2B;
+    address public constant BASIC_PROXY = 0xF499FB2feb3351aEA373723a6A0e8F6BE6fBF616;
     address public constant AETH_ADDRESS = 0x3a3A65aAb0dd2A17E3F1947bA16138cd37d08c04;
 
     function callFunction(
