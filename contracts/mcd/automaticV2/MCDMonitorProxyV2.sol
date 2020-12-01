@@ -8,6 +8,7 @@ import "../../auth/AdminAuth.sol";
 contract MCDMonitorProxyV2 is AdminAuth {
 
     uint public CHANGE_PERIOD;
+    uint public MIN_CHANGE_PERIOD = 6 * 1 hours;
     address public monitor;
     address public newMonitor;
     address public lastMonitor;
@@ -94,7 +95,7 @@ contract MCDMonitorProxyV2 is AdminAuth {
     }
 
     function setChangePeriod(uint _periodInHours) public onlyOwner {
-        require(_periodInHours * 1 hours > CHANGE_PERIOD);
+        require(_periodInHours * 1 hours > MIN_CHANGE_PERIOD);
 
         CHANGE_PERIOD = _periodInHours * 1 hours;
     }
