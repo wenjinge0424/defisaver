@@ -175,6 +175,11 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
 
 /******************* OWNER ONLY OPERATIONS ********************************/
 
+    /// @notice As the code is new, have a emergancy admin saver proxy change
+    function changeAaveSaverProxy(address _newAaveSaverProxy) public onlyAdmin {
+        aaveSaverProxy = _newAaveSaverProxy;
+    }
+
     /// @notice Allows owner to change gas cost for boost operation, but only up to 3 millions
     /// @param _gasCost New gas cost for boost method
     function changeBoostGasCost(uint _gasCost) public onlyOwner {

@@ -14,6 +14,11 @@ contract AdminAuth {
         _;
     }
 
+    modifier onlyAdmin() {
+        require(admin == msg.sender);
+        _;
+    }
+
     constructor() public {
         owner = msg.sender;
     }
