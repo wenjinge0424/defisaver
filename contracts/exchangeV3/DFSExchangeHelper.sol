@@ -88,7 +88,7 @@ contract DFSExchangeHelper {
         return x;
     }
 
-    function writeUint256(bytes memory _b, uint256 _index, uint _input) internal pure {
+        function writeUint256(bytes memory _b, uint256 _index, uint _input) internal pure {
         if (_b.length < _index + 32) {
             revert(ERR_OFFCHAIN_DATA_INVALID);
         }
@@ -102,7 +102,6 @@ contract DFSExchangeHelper {
             mstore(add(_b, _index), input)
         }
     }
-
 
     /// @notice Converts Kybers Eth address -> Weth
     /// @param _src Input address
