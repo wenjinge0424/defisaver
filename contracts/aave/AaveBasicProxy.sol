@@ -111,9 +111,6 @@ contract AaveBasicProxy is GasBurner {
 
         if (_tokenAddr != ETH_ADDR) {
             ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), amount);
-            if (originationFee > 0) {
-                ERC20(_tokenAddr).safeTransfer(_onBehalf, originationFee);
-            }
             approveToken(_tokenAddr, lendingPoolCore);
         }
 

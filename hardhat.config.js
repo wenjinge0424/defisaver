@@ -13,7 +13,7 @@ module.exports = {
         mainnet: {
             url: process.env.ALCHEMY_NODE,
             accounts: [process.env.PRIV_KEY_OWNER],
-            gasPrice: 18000000000
+            gasPrice: 35000000000
         },
         kovan: {
             url: process.env.KOVAN_INFURA_ENDPOINT,
