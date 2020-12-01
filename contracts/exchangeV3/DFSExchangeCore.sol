@@ -114,8 +114,13 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         ExchangeData memory _exData,
         ActionType _type
     ) private returns (bool success, uint256) {
-        require(SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.wrapper), ERR_WRAPPER_INVALID);
-        require(ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.offchainData.exchangeAddr), ERR_NOT_ZEROX_EXCHANGE);
+        if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.offchainData.exchangeAddr)) {
+            return (false, 0);
+        }
+
+        if (SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.offchainData.wrapper)) {
+            return (false, 0);
+        }
 
         // send src amount
         ERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
