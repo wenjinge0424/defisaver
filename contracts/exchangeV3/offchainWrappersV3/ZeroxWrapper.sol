@@ -8,6 +8,9 @@ import "../DFSExchangeHelper.sol";
 import "../../interfaces/OffchainWrapperInterface.sol";
 
 contract ZeroxWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth, DSMath {
+    string public constant ERR_SRC_AMOUNT = "Not enough funds";
+    string public constant ERR_PROTOCOL_FEE = "Not enough eth for protcol fee";
+
     using SafeERC20 for ERC20;
 
     /// @notice Takes order from 0x and returns bool indicating if it is successful
@@ -18,10 +21,8 @@ contract ZeroxWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth,
         ActionType _type
     ) override public payable returns (bool success, uint256) {
         // check that contract have enough balance for exchange and protocol fee
-        require(getBalance(_exData.srcAddr) >= _exData.srcAmount);
-        require(getBalance(KYBER_ETH_ADDRESS) >= _exData.offchainData.protocolFee);
-        // src address can't be ETH addr, we are always dealing with WETH
-        require(_exData.srcAddr != KYBER_ETH_ADDRESS);
+        require(getBalance(_exData.srcAddr) >= _exData.srcAmount, ERR_SRC_AMOUNT);
+        require(getBalance(KYBER_ETH_ADDRESS) >= _exData.offchainData.protocolFee, ERR_PROTOCOL_FEE);
 
         ERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
         
