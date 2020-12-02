@@ -59,7 +59,7 @@ contract AaveBasicProxyV2 is GasBurner, AaveHelperV2 {
     /// @param _market address provider for specific market
     /// @param _tokenAddr The address of the token to be borrowed
     /// @param _amount Amount of tokens to be borrowed
-    /// @param _type Send 1 for variable rate and 2 for fixed rate
+    /// @param _type Send 1 for stable rate and 2 for variable
     function borrow(address _market, address _tokenAddr, uint256 _amount, uint256 _type) public burnGas(8) {
         address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
         _tokenAddr = changeToWeth(_tokenAddr);
@@ -87,7 +87,7 @@ contract AaveBasicProxyV2 is GasBurner, AaveHelperV2 {
         if (_tokenAddr == WETH_ADDRESS) {
             TokenInterface(WETH_ADDRESS).deposit{value: msg.value}();
         } else {
-            uint amountToPull = min(_amount, ERC20(_tokenAddr).allowance(msg.sender, address(this)));
+            uint amountToPull = min(_amount, ERC20(_tokenAddr).balanceOf(msg.sender));
             ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), amountToPull);
         }
 
