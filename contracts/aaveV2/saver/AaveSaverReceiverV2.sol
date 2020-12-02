@@ -26,6 +26,7 @@ contract AaveSaverReceiverV2 is AaveHelperV2, AdminAuth, DFSExchangeData {
         (
             bytes memory exchangeDataBytes,
             address market,
+            uint256 rateMode,
             uint256 gasCost,
             bool isRepay,
             uint256 ethAmount,
@@ -33,7 +34,7 @@ contract AaveSaverReceiverV2 is AaveHelperV2, AdminAuth, DFSExchangeData {
             address user,
             address proxy
         )
-        = abi.decode(data, (bytes,address,uint256,bool,uint256,uint256,address,address));
+        = abi.decode(data, (bytes,address,uint256,uint256,bool,uint256,uint256,address,address));
 
         // withdraw eth
         TokenInterface(WETH_ADDRESS).withdraw(ethAmount);
@@ -41,7 +42,7 @@ contract AaveSaverReceiverV2 is AaveHelperV2, AdminAuth, DFSExchangeData {
         // deposit eth on behalf of proxy
         DSProxy(payable(proxy)).execute{value: ethAmount}(AAVE_BASIC_PROXY, abi.encodeWithSignature("deposit(address,address,uint256)", market, ETH_ADDR, ethAmount));
         
-        bytes memory functionData = packFunctionCall(market, exchangeDataBytes, gasCost, isRepay);
+        bytes memory functionData = packFunctionCall(market, exchangeDataBytes, rateMode, gasCost, isRepay);
         DSProxy(payable(proxy)).execute{value: txValue}(AAVE_SAVER_PROXY, functionData);
 
         // withdraw deposited eth
@@ -52,15 +53,15 @@ contract AaveSaverReceiverV2 is AaveHelperV2, AdminAuth, DFSExchangeData {
         ERC20(WETH_ADDRESS).safeTransfer(proxy, ethAmount+2);
     }
 
-    function packFunctionCall(address _market, bytes memory _exchangeDataBytes, uint256 _gasCost, bool _isRepay) internal returns (bytes memory) {
+    function packFunctionCall(address _market, bytes memory _exchangeDataBytes, uint256 _rateMode, uint256 _gasCost, bool _isRepay) internal returns (bytes memory) {
         ExchangeData memory exData = unpackExchangeData(_exchangeDataBytes);
 
         bytes memory functionData;
 
         if (_isRepay) {
-            functionData = abi.encodeWithSignature("repay(address,(address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256)", _market, exData, _gasCost);
+            functionData = abi.encodeWithSignature("repay(address,(address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256,uint256)", _market, exData, _rateMode, _gasCost);
         } else {
-            functionData = abi.encodeWithSignature("boost(address,(address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256)", _market, exData, _gasCost);
+            functionData = abi.encodeWithSignature("boost(address,(address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256,uint256)", _market, exData, _rateMode, _gasCost);
         }
 
         return functionData;

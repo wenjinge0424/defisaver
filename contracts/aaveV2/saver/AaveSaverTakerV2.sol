@@ -20,17 +20,17 @@ contract AaveSaverTaker is DydxFlashLoanBase, ProxyPermission, GasBurner, DFSExc
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
     address public constant PROXY_REGISTRY_ADDRESS = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
 
-    function repay(address _market, ExchangeData memory _data, uint256 _gasCost) public payable {
-        _flashLoan(_market, _data, _gasCost, true);
+    function repay(address _market, ExchangeData memory _data, uint _rateMode, uint256 _gasCost) public payable {
+        _flashLoan(_market, _data, _rateMode,_gasCost, true);
     }
 
-    function boost(address _market, ExchangeData memory _data, uint256 _gasCost) public payable {
-        _flashLoan(_market, _data, _gasCost, false);
+    function boost(address _market, ExchangeData memory _data, uint _rateMode, uint256 _gasCost) public payable {
+        _flashLoan(_market, _data, _rateMode, _gasCost, false);
     }
 
     /// @notice Starts the process to move users position 1 collateral and 1 borrow
     /// @dev User must send 2 wei with this transaction
-    function _flashLoan(address _market, ExchangeData memory _data, uint _gasCost, bool _isRepay) internal {
+    function _flashLoan(address _market, ExchangeData memory _data, uint _rateMode, uint _gasCost, bool _isRepay) internal {
         ISoloMargin solo = ISoloMargin(SOLO_MARGIN_ADDRESS);
 
         uint256 ethAmount = ERC20(WETH_ADDR).balanceOf(SOLO_MARGIN_ADDRESS);
@@ -49,7 +49,7 @@ contract AaveSaverTaker is DydxFlashLoanBase, ProxyPermission, GasBurner, DFSExc
         AAVE_RECEIVER.transfer(msg.value);
         bytes memory encodedData = packExchangeData(_data);
         operations[1] = _getCallAction(
-            abi.encode(encodedData, _market, _gasCost, _isRepay, ethAmount, msg.value, proxyOwner(), address(this)),
+            abi.encode(encodedData, _market, _rateMode, _gasCost, _isRepay, ethAmount, msg.value, proxyOwner(), address(this)),
             AAVE_RECEIVER
         );
         operations[2] = _getDepositAction(marketId, repayAmount, address(this));

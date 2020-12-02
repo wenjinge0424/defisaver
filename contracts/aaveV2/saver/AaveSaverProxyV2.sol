@@ -12,10 +12,7 @@ contract AaveSaverProxyV2 is DFSExchangeCore, AaveHelperV2, GasBurner {
 
 	address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
-    uint public constant VARIABLE_RATE = 2;
-
-	function repay(address _market, ExchangeData memory _data, uint _gasCost) public payable burnGas(20) {
-
+	function repay(address _market, ExchangeData memory _data, uint _rateMode, uint _gasCost) public payable burnGas(20) {
 		address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
 		address payable user = payable(getUserAddress());
 
@@ -43,7 +40,7 @@ contract AaveSaverProxyV2 is DFSExchangeCore, AaveHelperV2, GasBurner {
 		}
 
 		approveToken(_data.destAddr, lendingPool);
-		ILendingPoolV2(lendingPool).repay(_data.destAddr, destAmount, VARIABLE_RATE, payable(address(this)));
+		ILendingPoolV2(lendingPool).repay(_data.destAddr, destAmount, _rateMode, payable(address(this)));
 
 		// first return 0x fee to tx.origin as it is the address that actually sent 0x fee
 		sendContractBalance(ETH_ADDR, tx.origin, min(address(this).balance, msg.value));
@@ -53,13 +50,13 @@ contract AaveSaverProxyV2 is DFSExchangeCore, AaveHelperV2, GasBurner {
 		DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "AaveRepay", abi.encode(_data.srcAddr, _data.destAddr, _data.srcAmount, destAmount));
 	}
 
-	function boost(address _market, ExchangeData memory _data, uint _gasCost) public payable burnGas(20) {
+	function boost(address _market, ExchangeData memory _data, uint _rateMode, uint _gasCost) public payable burnGas(20) {
 		address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
 		IAaveProtocolDataProviderV2 dataProvider = getDataProvider(_market);
 		address payable user = payable(getUserAddress());
 
 		// borrow amount
-		ILendingPoolV2(lendingPool).borrow(_data.srcAddr, _data.srcAmount, VARIABLE_RATE, AAVE_REFERRAL_CODE, address(this));
+		ILendingPoolV2(lendingPool).borrow(_data.srcAddr, _data.srcAmount, _rateMode, AAVE_REFERRAL_CODE, address(this));
 
 		// take gas cost at the beginning
 		_data.srcAmount -= getGasCost(ILendingPoolAddressesProviderV2(_market).getPriceOracle(), _data.srcAmount, user, _gasCost, _data.srcAddr);
