@@ -25,8 +25,8 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
 
     uint public MAX_GAS_PRICE = 500000000000; // 500 gwei
 
-    uint public REPAY_GAS_COST = 1800000;
-    uint public BOOST_GAS_COST = 1800000;
+    uint public REPAY_GAS_COST = 1500000;
+    uint public BOOST_GAS_COST = 1500000;
 
     MCDMonitorProxyV2 public monitorProxyContract;
     ISubscriptionsV2 public subscriptionsContract;
@@ -35,9 +35,7 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
     address public constant BOT_REGISTRY_ADDRESS = 0x637726f8b08a7ABE3aE3aCaB01A80E2d8ddeF77B;
 
     address public constant PROXY_PERMISSION_ADDR = 0x5a4f877CA808Cca3cB7c2A194F80Ab8588FAE26B;
-
-    // TODO: change when deployed
-    address public constant NEW_MONITOR_PROXY_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant NEW_MONITOR_PROXY_ADDR = 0x1816A86C4DA59395522a42b871bf11A4E96A1C7a;
 
     Manager public manager = Manager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
     Vat public vat = Vat(0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B);
