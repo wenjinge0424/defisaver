@@ -8,23 +8,16 @@ import "../../auth/AdminAuth.sol";
 contract MCDMonitorProxyV2 is AdminAuth {
 
     uint public CHANGE_PERIOD;
+    uint public MIN_CHANGE_PERIOD = 6 * 1 hours;
     address public monitor;
     address public newMonitor;
     address public lastMonitor;
     uint public changeRequestedTimestamp;
 
-    mapping(address => bool) public allowed;
-
     event MonitorChangeInitiated(address oldMonitor, address newMonitor);
     event MonitorChangeCanceled();
     event MonitorChangeFinished(address monitor);
     event MonitorChangeReverted(address monitor);
-
-    // if someone who is allowed become malicious, owner can't be changed
-    modifier onlyAllowed() {
-        require(allowed[msg.sender] || msg.sender == owner);
-        _;
-    }
 
     modifier onlyMonitor() {
         require (msg.sender == monitor);
@@ -32,7 +25,7 @@ contract MCDMonitorProxyV2 is AdminAuth {
     }
 
     constructor(uint _changePeriod) public {
-        CHANGE_PERIOD = _changePeriod * 1 days;
+        CHANGE_PERIOD = _changePeriod * 1 hours;
     }
 
     /// @notice Only monitor contract is able to call execute on users proxy
@@ -51,7 +44,7 @@ contract MCDMonitorProxyV2 is AdminAuth {
 
     /// @notice Allowed users are able to set Monitor contract without any waiting period first time
     /// @param _monitor Address of Monitor contract
-    function setMonitor(address _monitor) public onlyAllowed {
+    function setMonitor(address _monitor) public onlyOwner {
         require(monitor == address(0));
         monitor = _monitor;
     }
@@ -59,7 +52,7 @@ contract MCDMonitorProxyV2 is AdminAuth {
     /// @notice Allowed users are able to start procedure for changing monitor
     /// @dev after CHANGE_PERIOD needs to call confirmNewMonitor to actually make a change
     /// @param _newMonitor address of new monitor
-    function changeMonitor(address _newMonitor) public onlyAllowed {
+    function changeMonitor(address _newMonitor) public onlyOwner {
         require(changeRequestedTimestamp == 0);
 
         changeRequestedTimestamp = now;
@@ -70,7 +63,7 @@ contract MCDMonitorProxyV2 is AdminAuth {
     }
 
     /// @notice At any point allowed users are able to cancel monitor change
-    function cancelMonitorChange() public onlyAllowed {
+    function cancelMonitorChange() public onlyOwner {
         require(changeRequestedTimestamp > 0);
 
         changeRequestedTimestamp = 0;
@@ -80,7 +73,7 @@ contract MCDMonitorProxyV2 is AdminAuth {
     }
 
     /// @notice Anyone is able to confirm new monitor after CHANGE_PERIOD if process is started
-    function confirmNewMonitor() public onlyAllowed {
+    function confirmNewMonitor() public onlyOwner {
         require((changeRequestedTimestamp + CHANGE_PERIOD) < now);
         require(changeRequestedTimestamp != 0);
         require(newMonitor != address(0));
@@ -93,7 +86,7 @@ contract MCDMonitorProxyV2 is AdminAuth {
     }
 
     /// @notice Its possible to revert monitor to last used monitor
-    function revertMonitor() public onlyAllowed {
+    function revertMonitor() public onlyOwner {
         require(lastMonitor != address(0));
 
         monitor = lastMonitor;
@@ -101,24 +94,10 @@ contract MCDMonitorProxyV2 is AdminAuth {
         emit MonitorChangeReverted(monitor);
     }
 
+    function setChangePeriod(uint _periodInHours) public onlyOwner {
+        require(_periodInHours * 1 hours > MIN_CHANGE_PERIOD);
 
-    /// @notice Allowed users are able to add new allowed user
-    /// @param _user Address of user that will be allowed
-    function addAllowed(address _user) public onlyAllowed {
-        allowed[_user] = true;
-    }
-
-    /// @notice Allowed users are able to remove allowed user
-    /// @dev owner is always allowed even if someone tries to remove it from allowed mapping
-    /// @param _user Address of allowed user
-    function removeAllowed(address _user) public onlyAllowed {
-        allowed[_user] = false;
-    }
-
-    function setChangePeriod(uint _periodInDays) public onlyAllowed {
-        require(_periodInDays * 1 days > CHANGE_PERIOD);
-
-        CHANGE_PERIOD = _periodInDays * 1 days;
+        CHANGE_PERIOD = _periodInHours * 1 hours;
     }
 
 }

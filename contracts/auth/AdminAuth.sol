@@ -14,8 +14,14 @@ contract AdminAuth {
         _;
     }
 
+    modifier onlyAdmin() {
+        require(admin == msg.sender);
+        _;
+    }
+
     constructor() public {
         owner = msg.sender;
+        admin = 0x25eFA336886C74eA8E282ac466BdCd0199f85BB9;
     }
 
     /// @notice Admin is set by owner first time, after that admin is super role and has permission to change owner
