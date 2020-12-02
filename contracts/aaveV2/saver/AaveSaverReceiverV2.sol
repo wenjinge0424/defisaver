@@ -14,9 +14,9 @@ contract AaveSaverReceiverV2 is AaveHelperV2, AdminAuth, DFSExchangeData {
 
     using SafeERC20 for ERC20;
 
-    address public constant AAVE_SAVER_PROXY = 0xCab7ce9148499E0dD8228c3c8cDb9B56Ac2bb57a;
-    address public constant AAVE_BASIC_PROXY = 0xd042D4E9B4186c545648c7FfFe87125c976D110B;
-    address public constant AETH_ADDRESS = 0x3a3A65aAb0dd2A17E3F1947bA16138cd37d08c04;
+    address public constant AAVE_SAVER_PROXY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant AAVE_BASIC_PROXY = 0xC1CD0f5b062b4a7276cfDF8e6f3ea9270d89DF86;
+    address public constant AETH_ADDRESS = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e;
 
     function callFunction(
         address sender,
@@ -38,10 +38,10 @@ contract AaveSaverReceiverV2 is AaveHelperV2, AdminAuth, DFSExchangeData {
 
         // withdraw eth
         TokenInterface(WETH_ADDRESS).withdraw(ethAmount);
-        
+
         // deposit eth on behalf of proxy
         DSProxy(payable(proxy)).execute{value: ethAmount}(AAVE_BASIC_PROXY, abi.encodeWithSignature("deposit(address,address,uint256)", market, ETH_ADDR, ethAmount));
-        
+
         bytes memory functionData = packFunctionCall(market, exchangeDataBytes, rateMode, gasCost, isRepay);
         DSProxy(payable(proxy)).execute{value: txValue}(AAVE_SAVER_PROXY, functionData);
 
@@ -69,7 +69,7 @@ contract AaveSaverReceiverV2 is AaveHelperV2, AdminAuth, DFSExchangeData {
 
     /// @dev if contract receive eth, convert it to WETH
     receive() external payable {
-        // deposit eth and get weth 
+        // deposit eth and get weth
         if (msg.sender == owner) {
             TokenInterface(WETH_ADDRESS).deposit.value(address(this).balance)();
         }
