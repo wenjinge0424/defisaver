@@ -17,8 +17,8 @@ contract AaveHelperV2 is DSMath {
 
     address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
-    // address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; // mainnet
-    address public constant WETH_ADDRESS = 0xd0A1E359811322d97991E03f863a0C30C2cF029C; // kovan
+    address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; // mainnet
+    // address public constant WETH_ADDRESS = 0xd0A1E359811322d97991E03f863a0C30C2cF029C; // kovan
 
     uint public constant MANUAL_SERVICE_FEE = 400; // 0.25% Fee
     uint public constant AUTOMATIC_SERVICE_FEE = 333; // 0.3% Fee
@@ -28,46 +28,6 @@ contract AaveHelperV2 is DSMath {
 	address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     uint public constant NINETY_NINE_PERCENT_WEI = 990000000000000000;
     uint16 public constant AAVE_REFERRAL_CODE = 64;
-
-    /// @notice Calculates the fee amount
-    /// @param _oracleAddress address of oracle used
-    /// @param _amount Amount that is converted
-    /// @param _user Actuall user addr not DSProxy
-    /// @param _gasCost Ether amount of gas we are spending for tx
-    /// @param _tokenAddr token addr. of token we are getting for the fee
-    /// @return feeAmount The amount we took for the fee
-    function getFee(address _oracleAddress, uint _amount, address _user, uint _gasCost, address _tokenAddr) internal returns (uint feeAmount) {
-        uint fee = MANUAL_SERVICE_FEE;
-
-        if (BotRegistry(BOT_REGISTRY_ADDRESS).botList(tx.origin)) {
-            fee = AUTOMATIC_SERVICE_FEE;
-        }
-
-        if (Discount(DISCOUNT_ADDR).isCustomFeeSet(_user)) {
-            fee = Discount(DISCOUNT_ADDR).getCustomServiceFee(_user);
-        }
-
-        feeAmount = (fee == 0) ? 0 : (_amount / fee);
-
-        if (_gasCost != 0) {
-            uint256 price = IPriceOracleGetterAave(_oracleAddress).getAssetPrice(_tokenAddr);
-
-            _gasCost = wdiv(_gasCost, price) / (10 ** (18 - _getDecimals(_tokenAddr)));
-
-            feeAmount = add(feeAmount, _gasCost);
-        }
-
-        // fee can't go over 20% of the whole amount
-        if (feeAmount > (_amount / 5)) {
-            feeAmount = _amount / 5;
-        }
-
-        if (_tokenAddr == ETH_ADDR) {
-            WALLET_ADDR.transfer(feeAmount);
-        } else {
-            ERC20(_tokenAddr).safeTransfer(WALLET_ADDR, feeAmount);
-        }
-    }
 
     /// @notice Calculates the gas cost for transaction
     /// @param _oracleAddress address of oracle used
@@ -85,9 +45,9 @@ contract AaveHelperV2 is DSMath {
             gasCost = _gasCost;
         }
 
-        // fee can't go over 20% of the whole amount
-        if (gasCost > (_amount / 5)) {
-            gasCost = _amount / 5;
+        // gas cost can't go over 10% of the whole amount
+        if (gasCost > (_amount / 10)) {
+            gasCost = _amount / 10;
         }
 
         if (_tokenAddr == ETH_ADDR) {

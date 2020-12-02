@@ -30,7 +30,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         // if selling eth, convert to weth
         if (exData.srcAddr == KYBER_ETH_ADDRESS) {
             exData.srcAddr = ethToWethAddr(exData.srcAddr);
-            TokenInterface(WETH_ADDRESS).deposit{value: exData.srcAmount}();
+            TokenInterface(EXCHANGE_WETH_ADDRESS).deposit{value: exData.srcAmount}();
         }
 
         exData.srcAmount -= getFee(exData.srcAmount, exData.user, exData.srcAddr, exData.dfsFeeDivider);
@@ -53,9 +53,9 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         require(getBalance(exData.destAddr) >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
 
         // if anything is left in weth, pull it to user as eth
-        if (getBalance(WETH_ADDRESS) > 0) {
-            TokenInterface(WETH_ADDRESS).withdraw(
-                TokenInterface(WETH_ADDRESS).balanceOf(address(this))
+        if (getBalance(EXCHANGE_WETH_ADDRESS) > 0) {
+            TokenInterface(EXCHANGE_WETH_ADDRESS).withdraw(
+                TokenInterface(EXCHANGE_WETH_ADDRESS).balanceOf(address(this))
             );
         }
 
@@ -79,7 +79,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         // if selling eth, convert to weth
         if (exData.srcAddr == KYBER_ETH_ADDRESS) {
             exData.srcAddr = ethToWethAddr(exData.srcAddr);
-            TokenInterface(WETH_ADDRESS).deposit{value: exData.srcAmount}();
+            TokenInterface(EXCHANGE_WETH_ADDRESS).deposit{value: exData.srcAmount}();
         }
 
         if (exData.offchainData.price > 0) {
@@ -99,9 +99,9 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         require(getBalance(exData.destAddr) >= exData.destAmount, ERR_SLIPPAGE_HIT);
 
         // if anything is left in weth, pull it to user as eth
-        if (getBalance(WETH_ADDRESS) > 0) {
-            TokenInterface(WETH_ADDRESS).withdraw(
-                TokenInterface(WETH_ADDRESS).balanceOf(address(this))
+        if (getBalance(EXCHANGE_WETH_ADDRESS) > 0) {
+            TokenInterface(EXCHANGE_WETH_ADDRESS).withdraw(
+                TokenInterface(EXCHANGE_WETH_ADDRESS).balanceOf(address(this))
             );
         }
 

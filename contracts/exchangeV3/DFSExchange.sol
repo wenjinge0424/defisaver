@@ -27,6 +27,7 @@ contract DFSExchange is DFSExchangeCore, AdminAuth, GasBurner {
     function sell(ExchangeData memory exData, address payable _user) public payable burnGas(burnAmount) {
 
         exData.dfsFeeDivider = SERVICE_FEE;
+        exData.user = _user;
 
         // Perform the exchange
         (address wrapper, uint destAmount) = _sell(exData);
@@ -45,6 +46,7 @@ contract DFSExchange is DFSExchangeCore, AdminAuth, GasBurner {
     function buy(ExchangeData memory exData, address payable _user) public payable burnGas(burnAmount){
 
         exData.dfsFeeDivider = SERVICE_FEE;
+        exData.user = _user;
 
         // Perform the exchange
         (address wrapper, uint srcAmount) = _buy(exData);
