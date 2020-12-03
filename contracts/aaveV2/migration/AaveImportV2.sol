@@ -76,10 +76,6 @@ contract AaveImportV2 is AaveHelperV2, AdminAuth {
             paybackOnBehalf(market, proxy, globalBorrowAmountStable, borrowToken, user, STABLE_ID);
         }
 
-        if (globalBorrowAmountVariable > 0) {
-            paybackOnBehalf(market, proxy, globalBorrowAmountVariable, borrowToken, user, VARIABLE_ID);
-        }
-
         (address aToken,,) = dataProvider.getReserveTokensAddresses(collateralToken);
         // pull tokens from user to proxy
         ERC20(aToken).safeTransferFrom(user, proxy, ERC20(aToken).balanceOf(user));
