@@ -1,4 +1,4 @@
-// We require the Buidler Runtime Environment explicitly here. This is optional 
+// We require the Buidler Runtime Environment explicitly here. This is optional
 // but useful for running the script in a standalone fashion through `node <script>`.
 // When running the script with `buidler run <script>` you'll find the Buidler
 // Runtime Environment's members available in the global scope.
@@ -7,7 +7,7 @@ const { start } = require('./utils/starter');
 
 async function main() {
  	// await deployContract("AaveLoanInfoV2");
- 	await deployContract("AaveBasicProxyV2");
+ 	await deployContract("AaveSaverReceiverV2");
 }
 
 start(main);
