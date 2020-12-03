@@ -55,22 +55,22 @@ contract AaveImportV2 is AaveHelperV2, AdminAuth {
             (, uint256 borrowsStable, uint256 borrowsVariable,,,,,,) = dataProvider.getUserReserveData(borrowToken, user);
             
             if (borrowsStable > 0) {
-                DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("borrow(address,address,uint256,uint256)", market, borrowToken, borrowsStable, 2));
+                DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("borrow(address,address,uint256,uint256)", market, borrowToken, borrowsStable, 1));
                 globalBorrowAmountStable = borrowsStable;
             }
 
             if (borrowsVariable > 0) {
-                DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("borrow(address,address,uint256,uint256)", market, borrowToken, borrowsVariable, 1));
+                DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("borrow(address,address,uint256,uint256)", market, borrowToken, borrowsVariable, 2));
                 globalBorrowAmountVariable = borrowsVariable;
             }
         }
 
-        if (globalBorrowAmountVariable > 0) {
-            paybackOnBehalf(market, proxy, globalBorrowAmountVariable, borrowToken, user, 1);
-        }
-        
         if (globalBorrowAmountStable > 0) {
-            paybackOnBehalf(market, proxy, globalBorrowAmountStable, borrowToken, user, 2);
+            paybackOnBehalf(market, proxy, globalBorrowAmountStable, borrowToken, user, 1);
+        }
+
+        if (globalBorrowAmountVariable > 0) {
+            paybackOnBehalf(market, proxy, globalBorrowAmountVariable, borrowToken, user, 2);
         }
 
         (address aToken,,) = dataProvider.getReserveTokensAddresses(collateralToken);

@@ -15,10 +15,10 @@ async function main() {
 
  	// need AaveImportV2 and AaveSaverProxyV2
  	// await deployContract("AaveSaverReceiverV2"); // needs funds to be sent for dydx flashloans
- 	// await deployContract("AaveImportTakerV2");
+ 	await deployContract("AaveImportTakerV2");
 
  	// need AaveSaverReceiverV2
- 	await deployContract("AaveSaverTakerV2");
+ 	// await deployContract("AaveSaverTakerV2");
 
  	// send funds to AaveImportV2 and AaveSaverReveiverV2
 }
