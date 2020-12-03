@@ -14,8 +14,8 @@ contract AaveSaverReceiverV2 is AaveHelperV2, AdminAuth, DFSExchangeData {
 
     using SafeERC20 for ERC20;
 
-    address public constant AAVE_SAVER_PROXY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant AAVE_BASIC_PROXY = 0x682868AdbcFC9fECC3506B0A182E7E5D683F83BC;
+    address public constant AAVE_SAVER_PROXY = 0x39cD4380A4cffEa3ACf7b8C84B579E19691c44dF;
+    address public constant AAVE_BASIC_PROXY = 0xc17c8eB12Ba24D62E69fd57cbd504EEf418867f9;
     address public constant AETH_ADDRESS = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e;
 
     function callFunction(

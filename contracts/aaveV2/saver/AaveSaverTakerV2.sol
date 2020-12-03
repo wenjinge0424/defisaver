@@ -13,7 +13,7 @@ import "../../exchangeV3/DFSExchangeData.sol";
 
 /// @title Import Aave position from account to wallet
 /// @dev Contract needs to have enough wei in WETH for all transactions (2 WETH wei per transaction)
-contract AaveSaverTaker is DydxFlashLoanBase, ProxyPermission, GasBurner, DFSExchangeData {
+contract AaveSaverTakerV2 is DydxFlashLoanBase, ProxyPermission, GasBurner, DFSExchangeData {
 
     address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address payable public constant AAVE_RECEIVER = 0x969DfE84ac318531f13B731c7f21af9918802B94;
