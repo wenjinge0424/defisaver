@@ -102,6 +102,6 @@ contract AaveHelperV2 is DSMath {
     }
 
     function getDataProvider(address _market) internal view returns(IAaveProtocolDataProviderV2) {
-        return IAaveProtocolDataProviderV2(0x057835Ad21a177dbdd3090bB1CAE03EaCF78Fc6d); // ILendingPoolAddressesProviderV2V2(_market).getProtocolDataProvider();
+        return IAaveProtocolDataProviderV2(ILendingPoolAddressesProviderV2(_market).getAddress(0x0100000000000000000000000000000000000000000000000000000000000000));
     }
 }
