@@ -21,7 +21,7 @@ contract AaveImportV2 is AaveHelperV2, AdminAuth {
 
     using SafeERC20 for ERC20;
 
-    address public constant BASIC_PROXY = 0x29F4af15ad64C509c4140324cFE71FB728D10d2B;
+    address public constant BASIC_PROXY = 0xc17c8eB12Ba24D62E69fd57cbd504EEf418867f9;
 
     uint public constant STABLE_ID = 1;
     uint public constant VARIABLE_ID = 2;
@@ -69,11 +69,15 @@ contract AaveImportV2 is AaveHelperV2, AdminAuth {
         }
 
         if (globalBorrowAmountVariable > 0) {
-            paybackOnBehalf(market, proxy, globalBorrowAmountVariable, borrowToken, user, 1);
+            paybackOnBehalf(market, proxy, globalBorrowAmountVariable, borrowToken, user, VARIABLE_ID);
         }
 
         if (globalBorrowAmountStable > 0) {
-            paybackOnBehalf(market, proxy, globalBorrowAmountStable, borrowToken, user, 2);
+            paybackOnBehalf(market, proxy, globalBorrowAmountStable, borrowToken, user, STABLE_ID);
+        }
+
+        if (globalBorrowAmountVariable > 0) {
+            paybackOnBehalf(market, proxy, globalBorrowAmountVariable, borrowToken, user, VARIABLE_ID);
         }
 
         (address aToken,,) = dataProvider.getReserveTokensAddresses(collateralToken);

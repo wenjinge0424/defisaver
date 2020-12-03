@@ -24,7 +24,7 @@ async function main() {
 
  	console.log(`const uniswapWrapperAddr = '${uniswap.address}';`);
  	console.log(`const kyberWrapperAddr = '${kyber.address}';`);
- 	console.log(`const oasisTradeWrapperAddr = '${uniswap2.address}';`)
+ 	console.log(`const oasisTradeWrapperAddr = '${oasis.address}';`)
 }
 
 start(main);
