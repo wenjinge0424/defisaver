@@ -59,9 +59,9 @@ contract AaveSaverReceiverV2 is AaveHelperV2, AdminAuth, DFSExchangeData {
         bytes memory functionData;
 
         if (_isRepay) {
-            functionData = abi.encodeWithSignature("repay(address,(address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256,uint256)", _market, exData, _rateMode, _gasCost);
+            functionData = abi.encodeWithSignature("repay(address,(address,address,uint256,uint256,uint256,uint256,address,address,bytes,(address,address,address,uint256,uint256,bytes)),uint256,uint256)", _market, exData, _rateMode, _gasCost);
         } else {
-            functionData = abi.encodeWithSignature("boost(address,(address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256,uint256)", _market, exData, _rateMode, _gasCost);
+            functionData = abi.encodeWithSignature("boost(address,(address,address,uint256,uint256,uint256,uint256,address,address,bytes,(address,address,address,uint256,uint256,bytes)),uint256,uint256)", _market, exData, _rateMode, _gasCost);
         }
 
         return functionData;
