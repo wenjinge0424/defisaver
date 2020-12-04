@@ -14,7 +14,7 @@ contract AaveSaverReceiverV2 is AaveHelperV2, AdminAuth, DFSExchangeData {
 
     using SafeERC20 for ERC20;
 
-    address public constant AAVE_SAVER_PROXY = 0x39cD4380A4cffEa3ACf7b8C84B579E19691c44dF;
+    address public constant AAVE_SAVER_PROXY = 0x16519620A911f5A540cb446b30e020B007A54DB5;
     address public constant AAVE_BASIC_PROXY = 0xc17c8eB12Ba24D62E69fd57cbd504EEf418867f9;
     address public constant AETH_ADDRESS = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e;
 
@@ -59,9 +59,9 @@ contract AaveSaverReceiverV2 is AaveHelperV2, AdminAuth, DFSExchangeData {
         bytes memory functionData;
 
         if (_isRepay) {
-            functionData = abi.encodeWithSignature("repay(address,(address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256,uint256)", _market, exData, _rateMode, _gasCost);
+            functionData = abi.encodeWithSignature("repay(address,(address,address,uint256,uint256,uint256,uint256,address,address,bytes,(address,address,address,uint256,uint256,bytes)),uint256,uint256)", _market, exData, _rateMode, _gasCost);
         } else {
-            functionData = abi.encodeWithSignature("boost(address,(address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256,uint256)", _market, exData, _rateMode, _gasCost);
+            functionData = abi.encodeWithSignature("boost(address,(address,address,uint256,uint256,uint256,uint256,address,address,bytes,(address,address,address,uint256,uint256,bytes)),uint256,uint256)", _market, exData, _rateMode, _gasCost);
         }
 
         return functionData;

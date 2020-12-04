@@ -54,7 +54,7 @@ contract AaveBasicProxy is GasBurner {
     /// @notice User borrows tokens to the Aave protocol
     /// @param _tokenAddr The address of the token to be borrowed
     /// @param _amount Amount of tokens to be borrowed
-    /// @param _type Send 1 for variable rate and 2 for fixed rate
+    /// @param _type Send 1 for stable rate and 2 for variable rate
     function borrow(address _tokenAddr, uint256 _amount, uint256 _type) public burnGas(8) {
         address lendingPool = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getLendingPool();
 

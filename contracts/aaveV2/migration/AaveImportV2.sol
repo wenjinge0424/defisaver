@@ -8,7 +8,7 @@ import "../../DS/DSProxy.sol";
 import "../AaveHelperV2.sol";
 import "../../auth/AdminAuth.sol";
 
-// weth->eth 
+// weth->eth
 // deposit eth for users proxy
 // borrow users token from proxy
 // repay on behalf of user
@@ -22,6 +22,9 @@ contract AaveImportV2 is AaveHelperV2, AdminAuth {
     using SafeERC20 for ERC20;
 
     address public constant BASIC_PROXY = 0xc17c8eB12Ba24D62E69fd57cbd504EEf418867f9;
+
+    uint public constant STABLE_ID = 1;
+    uint public constant VARIABLE_ID = 2;
 
     function callFunction(
         address sender,
@@ -53,24 +56,24 @@ contract AaveImportV2 is AaveHelperV2, AdminAuth {
             DSProxy(payable(proxy)).execute{value: ethAmount}(BASIC_PROXY, abi.encodeWithSignature("deposit(address,address,uint256)", market, ETH_ADDR, ethAmount));
             // borrow needed amount to repay users borrow
             (, uint256 borrowsStable, uint256 borrowsVariable,,,,,,) = dataProvider.getUserReserveData(borrowToken, user);
-            
+
             if (borrowsStable > 0) {
-                DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("borrow(address,address,uint256,uint256)", market, borrowToken, borrowsStable, 2));
+                DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("borrow(address,address,uint256,uint256)", market, borrowToken, borrowsStable, STABLE_ID));
                 globalBorrowAmountStable = borrowsStable;
             }
 
             if (borrowsVariable > 0) {
-                DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("borrow(address,address,uint256,uint256)", market, borrowToken, borrowsVariable, 1));
+                DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("borrow(address,address,uint256,uint256)", market, borrowToken, borrowsVariable, VARIABLE_ID));
                 globalBorrowAmountVariable = borrowsVariable;
             }
         }
 
         if (globalBorrowAmountVariable > 0) {
-            paybackOnBehalf(market, proxy, globalBorrowAmountVariable, borrowToken, user, 1);
+            paybackOnBehalf(market, proxy, globalBorrowAmountVariable, borrowToken, user, VARIABLE_ID);
         }
-        
+
         if (globalBorrowAmountStable > 0) {
-            paybackOnBehalf(market, proxy, globalBorrowAmountStable, borrowToken, user, 2);
+            paybackOnBehalf(market, proxy, globalBorrowAmountStable, borrowToken, user, STABLE_ID);
         }
 
         (address aToken,,) = dataProvider.getReserveTokensAddresses(collateralToken);
@@ -82,7 +85,7 @@ contract AaveImportV2 is AaveHelperV2, AdminAuth {
 
         // withdraw deposited eth
         DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("withdraw(address,address,uint256)", market, ETH_ADDR, ethAmount));
-        
+
 
         // deposit eth, get weth and return to sender
         TokenInterface(WETH_ADDRESS).deposit.value(address(this).balance)();
@@ -93,15 +96,15 @@ contract AaveImportV2 is AaveHelperV2, AdminAuth {
         // payback on behalf of user
         if (_token != ETH_ADDR) {
             ERC20(_token).safeApprove(_proxy, _amount);
-            DSProxy(payable(_proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("paybackOnBehalf(address,address,uint256,uint256,address)", _market, _token, uint(-1), _rateMode, _onBehalf));
+            DSProxy(payable(_proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("paybackOnBehalf(address,address,uint256,uint256,address)", _market, _token, _amount, _rateMode, _onBehalf));
         } else {
-            DSProxy(payable(_proxy)).execute{value: _amount}(BASIC_PROXY, abi.encodeWithSignature("paybackOnBehalf(address,address,uint256,uint256,address)", _market, _token, uint(-1), _rateMode, _onBehalf));
+            DSProxy(payable(_proxy)).execute{value: _amount}(BASIC_PROXY, abi.encodeWithSignature("paybackOnBehalf(address,address,uint256,uint256,address)", _market, _token, _amount, _rateMode, _onBehalf));
         }
     }
 
     /// @dev if contract receive eth, convert it to WETH
     receive() external payable {
-        // deposit eth and get weth 
+        // deposit eth and get weth
         if (msg.sender == owner) {
             TokenInterface(WETH_ADDRESS).deposit.value(address(this).balance)();
         }

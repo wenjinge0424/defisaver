@@ -185,6 +185,11 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
 
 /******************* OWNER ONLY OPERATIONS ********************************/
 
+    /// @notice As the code is new, have a emergancy admin saver proxy change
+    function changeCompoundFlashLoanTaker(address _newCompoundFlashLoanTakerAddress) public onlyAdmin {
+        compoundFlashLoanTakerAddress = _newCompoundFlashLoanTakerAddress;
+    }
+
     /// @notice Allows owner to change gas cost for boost operation, but only up to 3 millions
     /// @param _gasCost New gas cost for boost method
     function changeBoostGasCost(uint _gasCost) public onlyOwner {

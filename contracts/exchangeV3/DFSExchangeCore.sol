@@ -50,7 +50,11 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             wrapper = exData.wrapper;
         }
 
-        require(getBalance(exData.destAddr) >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
+        if (exData.destAddr == EXCHANGE_WETH_ADDRESS) {
+            require(getBalance(KYBER_ETH_ADDRESS) >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
+        } else {
+            require(getBalance(exData.destAddr) >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
+        }
 
         // if anything is left in weth, pull it to user as eth
         if (getBalance(EXCHANGE_WETH_ADDRESS) > 0) {
@@ -96,7 +100,11 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             wrapper = exData.wrapper;
         }
 
-        require(getBalance(exData.destAddr) >= exData.destAmount, ERR_SLIPPAGE_HIT);
+        if (exData.destAddr == EXCHANGE_WETH_ADDRESS) {
+            require(getBalance(KYBER_ETH_ADDRESS) >= exData.destAmount, ERR_SLIPPAGE_HIT);
+        } else {
+            require(getBalance(exData.destAddr) >= exData.destAmount, ERR_SLIPPAGE_HIT);
+        }
 
         // if anything is left in weth, pull it to user as eth
         if (getBalance(EXCHANGE_WETH_ADDRESS) > 0) {
