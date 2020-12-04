@@ -23,9 +23,6 @@ contract AaveImportV2 is AaveHelperV2, AdminAuth {
 
     address public constant BASIC_PROXY = 0xc17c8eB12Ba24D62E69fd57cbd504EEf418867f9;
 
-    uint public constant STABLE_ID = 1;
-    uint public constant VARIABLE_ID = 2;
-
     function callFunction(
         address sender,
         Account.Info memory account,

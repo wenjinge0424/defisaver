@@ -14,6 +14,7 @@ contract AaveSaverProxyV2 is DFSExchangeCore, AaveHelperV2, GasBurner {
 
 	function repay(address _market, ExchangeData memory _data, uint _rateMode, uint _gasCost) public payable burnGas(20) {
 		address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
+		IAaveProtocolDataProviderV2 dataProvider = getDataProvider(_market);
 		address payable user = payable(getUserAddress());
 
 		ILendingPoolV2(lendingPool).withdraw(_data.srcAddr, _data.srcAmount, address(this));
@@ -40,7 +41,15 @@ contract AaveSaverProxyV2 is DFSExchangeCore, AaveHelperV2, GasBurner {
 		}
 
 		approveToken(_data.destAddr, lendingPool);
-		ILendingPoolV2(lendingPool).repay(_data.destAddr, destAmount, _rateMode, payable(address(this)));
+
+		// if destAmount higher than borrow repay whole debt
+		uint borrow;
+		if (_rateMode == STABLE_ID) {
+			(, uint256 borrow,,,,,,,) = dataProvider.getUserReserveData(_data.destAddr, address(this));	
+		} else {
+			(,, uint256 borrow,,,,,,) = dataProvider.getUserReserveData(_data.destAddr, address(this));
+		}
+		ILendingPoolV2(lendingPool).repay(_data.destAddr, destAmount > borrow ? borrow : destAmount, _rateMode, payable(address(this)));
 
 		// first return 0x fee to tx.origin as it is the address that actually sent 0x fee
 		sendContractBalance(ETH_ADDR, tx.origin, min(address(this).balance, msg.value));
