@@ -2,6 +2,9 @@ const fs = require('fs');
 const { resolve } = require('path');
 const fsPromises = fs.promises;
 
+async function getCurrentDir() {
+	return resolve('./', '');
+}
 
 async function getFile(dir, filename) {
   const dirents = await fsPromises.readdir(dir, { withFileTypes: true });
@@ -30,5 +33,6 @@ async function changeConstantInFile(dir, filename, variable, value) {
 
 module.exports = {
 	getFile,
-	changeConstantInFile
+	changeConstantInFile,
+	getCurrentDir
 }
