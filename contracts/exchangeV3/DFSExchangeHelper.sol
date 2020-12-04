@@ -10,7 +10,7 @@ contract DFSExchangeHelper {
     using SafeERC20 for ERC20;
 
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public constant EXCHANGE_WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     address payable public constant WALLET_ID = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDRESS = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
@@ -106,6 +106,6 @@ contract DFSExchangeHelper {
     /// @notice Converts Kybers Eth address -> Weth
     /// @param _src Input address
     function ethToWethAddr(address _src) internal pure returns (address) {
-        return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
+        return _src == KYBER_ETH_ADDRESS ? EXCHANGE_WETH_ADDRESS : _src;
     }
 }

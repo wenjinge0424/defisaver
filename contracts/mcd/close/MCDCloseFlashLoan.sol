@@ -136,7 +136,7 @@ contract MCDCloseFlashLoan is DFSExchangeCore, MCDSaverProxyHelper, FlashLoanRec
     function getVaultCollAddr(address _joinAddr) internal view returns (address) {
         address tokenAddr = address(Join(_joinAddr).gem());
 
-        if (tokenAddr == WETH_ADDRESS) {
+        if (tokenAddr == EXCHANGE_WETH_ADDRESS) {
             return KYBER_ETH_ADDRESS;
         }
 
