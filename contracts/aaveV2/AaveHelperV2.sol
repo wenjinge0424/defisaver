@@ -28,6 +28,9 @@ contract AaveHelperV2 is DSMath {
     uint public constant NINETY_NINE_PERCENT_WEI = 990000000000000000;
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
+    uint public constant STABLE_ID = 1;
+    uint public constant VARIABLE_ID = 2;
+
     /// @notice Calculates the gas cost for transaction
     /// @param _oracleAddress address of oracle used
     /// @param _amount Amount that is converted
