@@ -45,9 +45,9 @@ contract AaveSaverProxyV2 is DFSExchangeCore, AaveHelperV2, GasBurner {
 		// if destAmount higher than borrow repay whole debt
 		uint borrow;
 		if (_rateMode == STABLE_ID) {
-			(, uint256 borrow,,,,,,,) = dataProvider.getUserReserveData(_data.destAddr, address(this));	
+			(,borrow,,,,,,,) = dataProvider.getUserReserveData(_data.destAddr, address(this));	
 		} else {
-			(,, uint256 borrow,,,,,,) = dataProvider.getUserReserveData(_data.destAddr, address(this));
+			(,,borrow,,,,,,) = dataProvider.getUserReserveData(_data.destAddr, address(this));
 		}
 		ILendingPoolV2(lendingPool).repay(_data.destAddr, destAmount > borrow ? borrow : destAmount, _rateMode, payable(address(this)));
 
