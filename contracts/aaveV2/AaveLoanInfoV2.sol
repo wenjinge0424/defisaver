@@ -36,6 +36,17 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
         uint256 liquidationRatio;
         uint256 price;
         bool usageAsCollateralEnabled;
+        bool borrowinEnabled;
+        bool stableBorrowRateEnabled;
+    }
+
+    struct ReserveData {
+        uint256 availableLiquidity;
+        uint256 totalStableDebt;
+        uint256 totalVariableDebt;
+        uint256 liquidityRate;
+        uint256 variableBorrowRate;
+        uint256 stableBorrowRate;
     }
 
     struct UserToken {
@@ -125,25 +136,55 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
     }
 
     function getTokenInfoFull(IAaveProtocolDataProviderV2 _dataProvider, address _priceOracleAddress, address _token) private view returns(TokenInfoFull memory _tokenInfo) {
-        (,uint256 ltv, uint256 liquidationThreshold,,, bool usageAsCollateralEnabled,,,,) = _dataProvider.getReserveConfigurationData(_token);
-        (uint256 availableLiquidity, uint256 totalStableDebt, uint256 totalVariableDebt, uint256 liquidityRate, uint256 variableBorrowRate, uint256 stableBorrowRate,,,,) = _dataProvider.getReserveData(_token);
+        (
+            , // uint256 decimals
+            uint256 ltv,
+            uint256 liquidationThreshold,
+            , //   uint256 liquidationBonus
+            , //   uint256 reserveFactor
+            bool usageAsCollateralEnabled,
+            bool borrowinEnabled,
+            bool stableBorrowRateEnabled,
+            , //   bool isActive
+            //   bool isFrozen
+        ) = _dataProvider.getReserveConfigurationData(_token);
+
+        ReserveData memory t;
+
+        (
+            t.availableLiquidity,
+            t.totalStableDebt,
+            t.totalVariableDebt,
+            t.liquidityRate,
+            t.variableBorrowRate,
+            t.stableBorrowRate,
+            ,
+            ,
+            ,
+
+        ) = _dataProvider.getReserveData(_token);
+
         (address aToken,,) = _dataProvider.getReserveTokensAddresses(_token);
+
+        uint price = IPriceOracleGetterAave(_priceOracleAddress).getAssetPrice(_token);
 
         _tokenInfo = TokenInfoFull({
             aTokenAddress: aToken,
             underlyingTokenAddress: _token,
-            supplyRate: liquidityRate,
-            borrowRateVariable: variableBorrowRate,
-            borrowRateStable: stableBorrowRate,
+            supplyRate: t.liquidityRate,
+            borrowRateVariable: t.variableBorrowRate,
+            borrowRateStable: t.stableBorrowRate,
             totalSupply: ERC20(aToken).totalSupply(),
-            availableLiquidity: availableLiquidity,
-            totalBorrow: totalVariableDebt+totalStableDebt,
+            availableLiquidity: t.availableLiquidity,
+            totalBorrow: t.totalVariableDebt+t.totalStableDebt,
             collateralFactor: ltv,
             liquidationRatio: liquidationThreshold,
-            price: IPriceOracleGetterAave(_priceOracleAddress).getAssetPrice(_token),
-            usageAsCollateralEnabled: usageAsCollateralEnabled
+            price: price,
+            usageAsCollateralEnabled: usageAsCollateralEnabled,
+            borrowinEnabled: borrowinEnabled,
+            stableBorrowRateEnabled: stableBorrowRateEnabled
         });
-    } 
+    }
 
     /// @notice Information about reserves
     /// @param _market Address of LendingPoolAddressesProvider for specific market

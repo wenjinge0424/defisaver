@@ -6,8 +6,8 @@ const { deployContract } = require("./utils/deployer");
 const { start } = require('./utils/starter');
 
 async function main() {
- 	await deployContract("AaveLoanInfoV2");
- 	await deployContract("AaveBasicProxyV2");
+ 	// await deployContract("AaveLoanInfoV2");
+ 	// await deployContract("AaveBasicProxyV2");
 
  	// need AaveBasicProxyV2
  	// await deployContract("AaveImportV2"); // needs funds to be sent for dydx flashloans
@@ -18,7 +18,7 @@ async function main() {
  	// await deployContract("AaveImportTakerV2");
 
  	// need AaveSaverReceiverV2
- 	// await deployContract("AaveSaverTakerV2");
+ 	await deployContract("AaveSaverTakerV2");
 
  	// send funds to AaveImportV2 and AaveSaverReveiverV2
 }

@@ -148,14 +148,14 @@ contract AaveHelper is DSMath {
     /// @param _tokenAddr token addr. of token we are getting for the fee
     /// @return gasCost The amount we took for the gas cost
     function getGasCost(uint _amount, address _user, uint _gasCost, address _tokenAddr) internal returns (uint gasCost) {
+
+        if (_gasCost == 0) return 0;
+
         address priceOracleAddress = ILendingPoolAddressesProvider(AAVE_LENDING_POOL_ADDRESSES).getPriceOracle();
+        uint256 price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr);
 
-        if (_gasCost != 0) {
-            uint256 price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr);
-            _gasCost = wmul(_gasCost, price);
-
-            gasCost = _gasCost;
-        }
+        _gasCost = wmul(_gasCost, price);
+        gasCost = _gasCost;
 
         // fee can't go over 20% of the whole amount
         if (gasCost > (_amount / 5)) {

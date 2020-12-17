@@ -41,6 +41,7 @@ contract CompLeverage is DFSExchangeCore, CompBalance {
 
         // Exchange COMP
         if (exchangeData.srcAddr != address(0)) {
+            exchangeData.user = msg.sender;
             exchangeData.dfsFeeDivider = 400; // 0.25%
             exchangeData.srcAmount = compBalance;
 
