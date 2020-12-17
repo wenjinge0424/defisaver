@@ -39,14 +39,12 @@ contract AaveHelperV2 is DSMath {
     /// @param _tokenAddr token addr. of token we are getting for the fee
     /// @return gasCost The amount we took for the gas cost
     function getGasCost(address _oracleAddress, uint _amount, address _user, uint _gasCost, address _tokenAddr) internal returns (uint gasCost) {
-        if (_gasCost != 0) {
-            uint256 price = IPriceOracleGetterAave(_oracleAddress).getAssetPrice(_tokenAddr);
+        if (_gasCost == 0) return 0;
 
-            _gasCost = wdiv(_gasCost, price) / (10 ** (18 - _getDecimals(_tokenAddr)));
-
-            gasCost = _gasCost;
-        }
-
+        uint256 price = IPriceOracleGetterAave(_oracleAddress).getAssetPrice(_tokenAddr);
+        _gasCost = wdiv(_gasCost, price) / (10 ** (18 - _getDecimals(_tokenAddr)));
+        gasCost = _gasCost;
+    
         // gas cost can't go over 10% of the whole amount
         if (gasCost > (_amount / 10)) {
             gasCost = _amount / 10;

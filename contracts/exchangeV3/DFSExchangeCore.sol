@@ -122,7 +122,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         ExchangeData memory _exData,
         ActionType _type
     ) private returns (bool success, uint256) {
-        if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.offchainData.exchangeAddr)) {
+        if (!ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.offchainData.exchangeAddr)) {
             return (false, 0);
         }
 
