@@ -16,7 +16,7 @@ import "../../exchangeV3/DFSExchangeData.sol";
 contract AaveSaverTakerV2 is DydxFlashLoanBase, ProxyPermission, GasBurner, DFSExchangeData {
 
     address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    address payable public constant AAVE_RECEIVER = 0x8Dcaf2343624B2DC6efabD8CAC1b2B9b2f84822f;
+    address payable public constant AAVE_RECEIVER = 0xff909120396247A7e3a7EB3823f2B5FbE583Bfbc;
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
     address public constant PROXY_REGISTRY_ADDRESS = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
 
