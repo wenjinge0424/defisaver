@@ -50,17 +50,17 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             wrapper = exData.wrapper;
         }
 
-        if (exData.destAddr == EXCHANGE_WETH_ADDRESS) {
-            require(getBalance(KYBER_ETH_ADDRESS) >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
-        } else {
-            require(getBalance(exData.destAddr) >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
-        }
-
         // if anything is left in weth, pull it to user as eth
         if (getBalance(EXCHANGE_WETH_ADDRESS) > 0) {
             TokenInterface(EXCHANGE_WETH_ADDRESS).withdraw(
                 TokenInterface(EXCHANGE_WETH_ADDRESS).balanceOf(address(this))
             );
+        }
+
+        if (exData.destAddr == EXCHANGE_WETH_ADDRESS) {
+            require(getBalance(KYBER_ETH_ADDRESS) >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
+        } else {
+            require(getBalance(exData.destAddr) >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
         }
 
         return (wrapper, swapedTokens);
@@ -100,17 +100,17 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             wrapper = exData.wrapper;
         }
 
-        if (exData.destAddr == EXCHANGE_WETH_ADDRESS) {
-            require(getBalance(KYBER_ETH_ADDRESS) >= exData.destAmount, ERR_SLIPPAGE_HIT);
-        } else {
-            require(getBalance(exData.destAddr) >= exData.destAmount, ERR_SLIPPAGE_HIT);
-        }
-
         // if anything is left in weth, pull it to user as eth
         if (getBalance(EXCHANGE_WETH_ADDRESS) > 0) {
             TokenInterface(EXCHANGE_WETH_ADDRESS).withdraw(
                 TokenInterface(EXCHANGE_WETH_ADDRESS).balanceOf(address(this))
             );
+        }
+
+        if (exData.destAddr == EXCHANGE_WETH_ADDRESS) {
+            require(getBalance(KYBER_ETH_ADDRESS) >= exData.destAmount, ERR_SLIPPAGE_HIT);
+        } else {
+            require(getBalance(exData.destAddr) >= exData.destAmount, ERR_SLIPPAGE_HIT);
         }
 
         return (wrapper, getBalance(exData.destAddr));
@@ -126,12 +126,12 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             return (false, 0);
         }
 
-        if (SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.offchainData.wrapper)) {
+        if (!SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.offchainData.wrapper)) {
             return (false, 0);
         }
 
         // send src amount
-        ERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
+        ERC20(_exData.srcAddr).safeTransfer(_exData.offchainData.wrapper, _exData.srcAmount);
 
         return OffchainWrapperInterface(_exData.offchainData.wrapper).takeOrder{value: _exData.offchainData.protocolFee}(_exData, _type);
     }
