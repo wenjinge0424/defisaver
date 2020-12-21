@@ -36,7 +36,7 @@ contract AaveMonitorProxyV2 is AdminAuth {
     }
 
     constructor(uint _changePeriod) public {
-        CHANGE_PERIOD = _changePeriod * 1 days;
+        CHANGE_PERIOD = _changePeriod * 1 hours;
     }
 
     /// @notice Only monitor contract is able to call execute on users proxy
