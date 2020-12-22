@@ -98,9 +98,9 @@ contract AaveMonitorProxyV2 is AdminAuth {
         emit MonitorChangeReverted(monitor);
     }
 
-    function setChangePeriod(uint _periodInDays) public onlyOwner {
-        require(_periodInDays * 1 hours > CHANGE_PERIOD);
+    function setChangePeriod(uint _periodInHours) public onlyOwner {
+        require(_periodInHours * 1 hours > CHANGE_PERIOD);
 
-        CHANGE_PERIOD = _periodInDays * 1 hours;
+        CHANGE_PERIOD = _periodInHours * 1 hours;
     }
 }
