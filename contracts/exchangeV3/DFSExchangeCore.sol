@@ -96,6 +96,9 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
         // fallback to desired wrapper if 0x failed
         if (!success) {
+            // calculate src amount based on price and add 5%
+            /// @dev this value in exData object will be changed in parent method as well
+            exData.srcAmount = div(mul(wdiv(exData.destAmount, exData.minPrice), 105), 100);
             swapedTokens = saverSwap(exData, ActionType.BUY);
             wrapper = exData.wrapper;
         }
