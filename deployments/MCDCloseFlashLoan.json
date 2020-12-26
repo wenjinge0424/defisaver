@@ -1,9 +1,14 @@
 {
-	"contractName": "AaveSaverReceiverV2",
+	"contractName": "MCDCloseFlashLoan",
 	"abi": [
 		{
 			"inputs": [],
-			"name": "AAVE_BASIC_PROXY",
+			"stateMutability": "nonpayable",
+			"type": "constructor"
+		},
+		{
+			"inputs": [],
+			"name": "DAI_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -16,20 +21,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "AAVE_REFERRAL_CODE",
-			"outputs": [
-				{
-					"internalType": "uint16",
-					"name": "",
-					"type": "uint16"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "AAVE_SAVER_PROXY",
+			"name": "DAI_JOIN_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -42,7 +34,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "AETH_ADDRESS",
+			"name": "DISCOUNT_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -55,7 +47,124 @@
 		},
 		{
 			"inputs": [],
-			"name": "AUTOMATIC_SERVICE_FEE",
+			"name": "ERR_DEST_AMOUNT_MISSING",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_NOT_ZEROX_EXCHANGE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_OFFCHAIN_DATA_INVALID",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_SLIPPAGE_HIT",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_WRAPPER_INVALID",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "EXCHANGE_WETH_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "KYBER_ETH_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "LENDING_POOL_ADDRESS_PROVIDER",
+			"outputs": [
+				{
+					"internalType": "contract ILendingPoolAddressesProvider",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "SAVER_EXCHANGE_REGISTRY",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "SERVICE_FEE",
 			"outputs": [
 				{
 					"internalType": "uint256",
@@ -68,7 +177,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "BOT_REGISTRY_ADDRESS",
+			"name": "SPOTTER_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -81,7 +190,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "DISCOUNT_ADDR",
+			"name": "VAT_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -94,72 +203,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "ETH_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "MANUAL_SERVICE_FEE",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "NINETY_NINE_PERCENT_WEI",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "STABLE_ID",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "VARIABLE_ID",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "WALLET_ADDR",
+			"name": "WALLET_ID",
 			"outputs": [
 				{
 					"internalType": "address payable",
@@ -172,10 +216,23 @@
 		},
 		{
 			"inputs": [],
-			"name": "WETH_ADDRESS",
+			"name": "ZRX_ALLOWLIST_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "addressesProvider",
+			"outputs": [
+				{
+					"internalType": "contract ILendingPoolAddressesProvider",
 					"name": "",
 					"type": "address"
 				}
@@ -197,38 +254,121 @@
 			"type": "function"
 		},
 		{
+			"inputs": [],
+			"name": "daiJoin",
+			"outputs": [
+				{
+					"internalType": "contract DaiJoin",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "sender",
+					"name": "_reserve",
 					"type": "address"
 				},
 				{
-					"components": [
-						{
-							"internalType": "address",
-							"name": "owner",
-							"type": "address"
-						},
-						{
-							"internalType": "uint256",
-							"name": "number",
-							"type": "uint256"
-						}
-					],
-					"internalType": "struct Account.Info",
-					"name": "account",
-					"type": "tuple"
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_fee",
+					"type": "uint256"
 				},
 				{
 					"internalType": "bytes",
-					"name": "data",
+					"name": "_params",
 					"type": "bytes"
 				}
 			],
-			"name": "callFunction",
+			"name": "executeOperation",
 			"outputs": [],
 			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "contract Manager",
+					"name": "_manager",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_cdpId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "_ilk",
+					"type": "bytes32"
+				}
+			],
+			"name": "getCdpInfo",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "contract Manager",
+					"name": "_manager",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_cdpId",
+					"type": "uint256"
+				}
+			],
+			"name": "getOwner",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "_ilk",
+					"type": "bytes32"
+				}
+			],
+			"name": "getPrice",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -236,6 +376,19 @@
 			"name": "kill",
 			"outputs": [],
 			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "manager",
+			"outputs": [
+				{
+					"internalType": "contract Manager",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -394,6 +547,19 @@
 			"type": "function"
 		},
 		{
+			"inputs": [],
+			"name": "spotter",
+			"outputs": [
+				{
+					"internalType": "contract Spotter",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
 			"inputs": [
 				{
 					"internalType": "bytes",
@@ -497,6 +663,19 @@
 			"type": "function"
 		},
 		{
+			"inputs": [],
+			"name": "vat",
+			"outputs": [
+				{
+					"internalType": "contract Vat",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
 			"inputs": [
 				{
 					"internalType": "address",
@@ -521,7 +700,7 @@
 	],
 	"networks": {
 		"mainnet": {
-			"address": "0xff909120396247A7e3a7EB3823f2B5FbE583Bfbc",
+			"address": "0xaD013BA8322edb8bb8915D964830E56b2D212d9c",
 			"args": []
 		}
 	}

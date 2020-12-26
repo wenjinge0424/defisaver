@@ -1,12 +1,38 @@
 {
-	"contractName": "AaveSaverTakerV2",
+	"contractName": "AaveSaverProxyV2",
 	"abi": [
 		{
 			"inputs": [],
-			"name": "AAVE_RECEIVER",
+			"name": "AAVE_REFERRAL_CODE",
 			"outputs": [
 				{
-					"internalType": "address payable",
+					"internalType": "uint16",
+					"name": "",
+					"type": "uint16"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "AUTOMATIC_SERVICE_FEE",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "BOT_REGISTRY_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
 					"name": "",
 					"type": "address"
 				}
@@ -29,7 +55,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "FACTORY_ADDRESS",
+			"name": "DISCOUNT_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -42,7 +68,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "PROXY_REGISTRY_ADDRESS",
+			"name": "DISCOUNT_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -55,7 +81,72 @@
 		},
 		{
 			"inputs": [],
-			"name": "SOLO_MARGIN_ADDRESS",
+			"name": "ERR_DEST_AMOUNT_MISSING",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_NOT_ZEROX_EXCHANGE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_OFFCHAIN_DATA_INVALID",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_SLIPPAGE_HIT",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_WRAPPER_INVALID",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ETH_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -68,7 +159,137 @@
 		},
 		{
 			"inputs": [],
-			"name": "WETH_ADDR",
+			"name": "EXCHANGE_WETH_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "KYBER_ETH_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "MANUAL_SERVICE_FEE",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "NINETY_NINE_PERCENT_WEI",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "SAVER_EXCHANGE_REGISTRY",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "STABLE_ID",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "VARIABLE_ID",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "WALLET_ADDR",
+			"outputs": [
+				{
+					"internalType": "address payable",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "WALLET_ID",
+			"outputs": [
+				{
+					"internalType": "address payable",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "WETH_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ZRX_ALLOWLIST_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -207,19 +428,6 @@
 		{
 			"inputs": [
 				{
-					"internalType": "address",
-					"name": "_contractAddr",
-					"type": "address"
-				}
-			],
-			"name": "givePermission",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
 					"components": [
 						{
 							"internalType": "address",
@@ -318,19 +526,6 @@
 				}
 			],
 			"stateMutability": "pure",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_contractAddr",
-					"type": "address"
-				}
-			],
-			"name": "removePermission",
-			"outputs": [],
-			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
@@ -547,11 +742,15 @@
 			],
 			"stateMutability": "pure",
 			"type": "function"
+		},
+		{
+			"stateMutability": "payable",
+			"type": "receive"
 		}
 	],
 	"networks": {
 		"mainnet": {
-			"address": "0xBEfa2EDE95aadbbD238fCB1DB588ae0336014472",
+			"address": "0x152e85c85CbD72D3949C42527E4073586E56CC1a",
 			"args": []
 		}
 	}
