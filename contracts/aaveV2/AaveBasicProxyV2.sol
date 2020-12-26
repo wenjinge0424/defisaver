@@ -95,8 +95,8 @@ contract AaveBasicProxyV2 is GasBurner, AaveHelperV2 {
         ILendingPoolV2(lendingPool).repay(_tokenAddr, _amount, _rateMode, payable(address(this)));
 
         if (_tokenAddr == WETH_ADDRESS) {
-            // we do this so the user gets eth instead of weth
-            TokenInterface(WETH_ADDRESS).withdraw(_amount);
+            // Pull if we have any eth leftover
+            TokenInterface(WETH_ADDRESS).withdraw(ERC20(WETH_ADDRESS).balanceOf(address(this)));
             _tokenAddr = ETH_ADDR;
         }
 

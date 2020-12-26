@@ -1,6 +1,7 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
+import "../utils/SafeMath.sol";
 import "../savings/dydx/ISoloMargin.sol";
 
 contract DydxFlashLoanBase {
