@@ -60,4 +60,7 @@ contract ScpWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth, D
 
         return (success, tokensSwaped);
     }
+
+    // solhint-disable-next-line no-empty-blocks
+    receive() external virtual payable {}
 }

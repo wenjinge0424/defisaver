@@ -56,4 +56,7 @@ contract ZeroxWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth,
 
         return (success, tokensSwaped);
     }
+
+    // solhint-disable-next-line no-empty-blocks
+    receive() external virtual payable {}
 }
