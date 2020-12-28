@@ -35,7 +35,10 @@ contract ScpWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth, D
             writeUint256(_exData.offchainData.callData, 36, wdiv(_exData.destAmount, _exData.offchainData.price));
         }
 
-        uint256 tokensBefore = getBalance(_exData.destAddr);
+        // we know that it will be eth if dest addr is either weth or eth
+        address destAddr = _exData.destAddr == EXCHANGE_WETH_ADDRESS ? KYBER_ETH_ADDRESS : _exData.destAddr;
+
+        uint256 tokensBefore = getBalance(destAddr);
         (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(_exData.offchainData.callData);
         uint256 tokensSwaped = 0;
 
@@ -46,11 +49,10 @@ contract ScpWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth, D
             );
         }
 
-        // we know that it will be eth if dest addr is either weth or eth
-        address destAddr = _exData.destAddr == EXCHANGE_WETH_ADDRESS ? KYBER_ETH_ADDRESS : _exData.destAddr;
         if (success) {
             // get the current balance of the swaped tokens
             tokensSwaped = getBalance(destAddr) - tokensBefore;
+            require(tokensSwaped > 0);
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)

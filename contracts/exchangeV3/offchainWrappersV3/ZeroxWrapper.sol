@@ -32,8 +32,10 @@ contract ZeroxWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth,
         } else {
             ERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, wdiv(_exData.destAmount, _exData.offchainData.price));
         }
+        // we know that it will be eth if dest addr is either weth or eth
+        address destAddr = _exData.destAddr == EXCHANGE_WETH_ADDRESS ? KYBER_ETH_ADDRESS : _exData.destAddr;
 
-        uint256 tokensBefore = getBalance(_exData.destAddr);
+        uint256 tokensBefore = getBalance(destAddr);
         (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(_exData.offchainData.callData);
         uint256 tokensSwaped = 0;
 
@@ -44,8 +46,6 @@ contract ZeroxWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth,
             );
         }
 
-        // we know that it will be eth if dest addr is either weth or eth
-        address destAddr = _exData.destAddr == EXCHANGE_WETH_ADDRESS ? KYBER_ETH_ADDRESS : _exData.destAddr;
         if (success) {
             // get the current balance of the swaped tokens
             tokensSwaped = getBalance(destAddr) - tokensBefore;
