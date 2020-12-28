@@ -37,16 +37,18 @@ contract ZeroxWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth,
         (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(_exData.offchainData.callData);
         uint256 tokensSwaped = 0;
 
-        if (success) {
-            // get the current balance of the swaped tokens
-            tokensSwaped = getBalance(_exData.destAddr) - tokensBefore;
-        }
-
         // convert weth to eth before sending back
         if (getBalance(EXCHANGE_WETH_ADDRESS) > 0) {
             TokenInterface(EXCHANGE_WETH_ADDRESS).withdraw(
                 TokenInterface(EXCHANGE_WETH_ADDRESS).balanceOf(address(this))
             );
+        }
+
+        // we know that it will be eth if dest addr is either weth or eth
+        address destAddr = _exData.destAddr == EXCHANGE_WETH_ADDRESS ? KYBER_ETH_ADDRESS : _exData.destAddr;
+        if (success) {
+            // get the current balance of the swaped tokens
+            tokensSwaped = getBalance(destAddr) - tokensBefore;
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
