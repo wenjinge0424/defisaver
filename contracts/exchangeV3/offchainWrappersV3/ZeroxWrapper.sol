@@ -6,6 +6,7 @@ import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 import "../DFSExchangeHelper.sol";
 import "../../interfaces/OffchainWrapperInterface.sol";
+import "../../interfaces/TokenInterface.sol";
 
 contract ZeroxWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth, DSMath {
     string public constant ERR_SRC_AMOUNT = "Not enough funds";
@@ -39,6 +40,13 @@ contract ZeroxWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth,
         if (success) {
             // get the current balance of the swaped tokens
             tokensSwaped = getBalance(_exData.destAddr) - tokensBefore;
+        }
+
+        // convert weth to eth before sending back
+        if (getBalance(EXCHANGE_WETH_ADDRESS) > 0) {
+            TokenInterface(EXCHANGE_WETH_ADDRESS).withdraw(
+                TokenInterface(EXCHANGE_WETH_ADDRESS).balanceOf(address(this))
+            );
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
