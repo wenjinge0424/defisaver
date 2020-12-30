@@ -12,6 +12,7 @@ contract ScpWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth, D
 
     string public constant ERR_SRC_AMOUNT = "Not enough funds";
     string public constant ERR_PROTOCOL_FEE = "Not enough eth for protcol fee";
+    string public constant ERR_TOKENS_SWAPED_ZERO = "Order success but amount 0";
 
     using SafeERC20 for ERC20;
 
@@ -27,7 +28,7 @@ contract ScpWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth, D
         require(getBalance(KYBER_ETH_ADDRESS) >= _exData.offchainData.protocolFee, ERR_PROTOCOL_FEE);
 
         ERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
-        
+
         // write in the exact amount we are selling/buing in an order
         if (_type == ActionType.SELL) {
             writeUint256(_exData.offchainData.callData, 36, _exData.srcAmount);
@@ -36,23 +37,17 @@ contract ScpWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth, D
         }
 
         // we know that it will be eth if dest addr is either weth or eth
-        address destAddr = _exData.destAddr == EXCHANGE_WETH_ADDRESS ? KYBER_ETH_ADDRESS : _exData.destAddr;
+        address destAddr = _exData.destAddr == KYBER_ETH_ADDRESS ? EXCHANGE_WETH_ADDRESS : _exData.destAddr;
 
         uint256 tokensBefore = getBalance(destAddr);
         (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(_exData.offchainData.callData);
         uint256 tokensSwaped = 0;
 
-        // convert weth to eth before sending back
-        if (getBalance(EXCHANGE_WETH_ADDRESS) > 0) {
-            TokenInterface(EXCHANGE_WETH_ADDRESS).withdraw(
-                TokenInterface(EXCHANGE_WETH_ADDRESS).balanceOf(address(this))
-            );
-        }
 
         if (success) {
             // get the current balance of the swaped tokens
             tokensSwaped = getBalance(destAddr) - tokensBefore;
-            require(tokensSwaped > 0);
+            require(tokensSwaped > 0, ERR_TOKENS_SWAPED_ZERO);
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)

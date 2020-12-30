@@ -44,6 +44,8 @@ contract CompBalance is Exponential, GasBurner {
             compBalance += getBorrowBalance(_cTokens[i], _user);
         }
 
+        compBalance = add_(comp.compAccrued(_user), compBalance);
+
         compBalance += ERC20(COMP_ADDR).balanceOf(_user);
 
         return compBalance;
@@ -81,7 +83,7 @@ contract CompBalance is Exponential, GasBurner {
         Double memory deltaIndex = sub_(supplyIndex, supplierIndex);
         uint256 supplierTokens = CTokenInterface(_cToken).balanceOf(_supplier);
         uint256 supplierDelta = mul_(supplierTokens, deltaIndex);
-        supplierAccrued = add_(comp.compAccrued(_supplier), supplierDelta);
+        supplierAccrued = supplierDelta;
     }
 
     function getBorrowBalance(address _cToken, address _borrower)
@@ -104,7 +106,7 @@ contract CompBalance is Exponential, GasBurner {
                 marketBorrowIndex
             );
             uint256 borrowerDelta = mul_(borrowerAmount, deltaIndex);
-            borrowerAccrued = add_(comp.compAccrued(_borrower), borrowerDelta);
+            borrowerAccrued = borrowerDelta;
         }
     }
 }
