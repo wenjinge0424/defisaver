@@ -25,8 +25,8 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
 
     uint public MAX_GAS_PRICE = 500000000000; // 500 gwei
 
-    uint public REPAY_GAS_COST = 1500000;
-    uint public BOOST_GAS_COST = 1500000;
+    uint public REPAY_GAS_COST = 1000000;
+    uint public BOOST_GAS_COST = 1000000;
 
     MCDMonitorProxyV2 public monitorProxyContract;
     ISubscriptionsV2 public subscriptionsContract;
