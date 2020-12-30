@@ -31,7 +31,8 @@ contract ZeroxWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth,
         if (_type == ActionType.SELL) {
             ERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
         } else {
-            ERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, wdiv(_exData.destAmount, _exData.offchainData.price));
+            uint srcAmount = wdiv(_exData.destAmount, _exData.offchainData.price) + 1; // + 1 so we round up
+            ERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, srcAmount);
         }
         // we know that it will be eth if dest addr is either weth or eth
         address destAddr = _exData.destAddr == KYBER_ETH_ADDRESS ? EXCHANGE_WETH_ADDRESS : _exData.destAddr;

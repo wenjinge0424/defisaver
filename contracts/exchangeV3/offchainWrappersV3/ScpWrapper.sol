@@ -33,7 +33,8 @@ contract ScpWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth, D
         if (_type == ActionType.SELL) {
             writeUint256(_exData.offchainData.callData, 36, _exData.srcAmount);
         } else {
-            writeUint256(_exData.offchainData.callData, 36, wdiv(_exData.destAmount, _exData.offchainData.price));
+            uint srcAmount = wdiv(_exData.destAmount, _exData.offchainData.price) + 1; // + 1 so we round up
+            writeUint256(_exData.offchainData.callData, 36, srcAmount);
         }
 
         // we know that it will be eth if dest addr is either weth or eth

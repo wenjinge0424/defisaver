@@ -89,7 +89,7 @@ contract CompLeverage is DFSExchangeCore, CompBalance {
         if (_tokenAddr != ETH_ADDRESS) {
             require(CTokenInterface(_cTokenAddr).mint(_amount) == 0);
         } else {
-            CEtherInterface(_cTokenAddr).mint{value: msg.value}(); // reverts on fail
+            CEtherInterface(_cTokenAddr).mint{value: _amount}(); // reverts on fail
         }
     }
 
