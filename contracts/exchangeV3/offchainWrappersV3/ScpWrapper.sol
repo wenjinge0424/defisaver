@@ -52,7 +52,7 @@ contract ScpWrapper is OffchainWrapperInterface, DFSExchangeHelper, AdminAuth, D
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
-        sendLeftover(_exData.srcAddr, _exData.destAddr, msg.sender);
+        sendLeftover(_exData.srcAddr, destAddr, msg.sender);
 
         return (success, tokensSwaped);
     }
