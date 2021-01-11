@@ -54,6 +54,7 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
         uint256 balance;
         uint256 borrowsStable;
         uint256 borrowsVariable;
+        uint256 stableBorrowRate;
         bool enabledAsCollateral;
     }
 
@@ -96,7 +97,7 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
             address asset = _tokens[i];
             userTokens[i].token = asset;
 
-            (userTokens[i].balance, userTokens[i].borrowsStable, userTokens[i].borrowsVariable,,,,,,userTokens[i].enabledAsCollateral) = dataProvider.getUserReserveData(asset, _user);
+            (userTokens[i].balance, userTokens[i].borrowsStable, userTokens[i].borrowsVariable,,,userTokens[i].stableBorrowRate,,,userTokens[i].enabledAsCollateral) = dataProvider.getUserReserveData(asset, _user);
         }
     }
 
