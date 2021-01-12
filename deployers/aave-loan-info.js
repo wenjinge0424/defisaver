@@ -7,6 +7,7 @@ const { start } = require('./utils/starter');
 
 async function main() {
  	await deployContract("AaveLoanInfo");
+ 	await deployContract("AaveLoanInfoV2");
 }
 
 start(main);
