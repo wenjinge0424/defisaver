@@ -1,6 +1,19 @@
 {
-	"contractName": "AaveLoanInfoV2",
+	"contractName": "AaveLoanInfo",
 	"abi": [
+		{
+			"inputs": [],
+			"name": "AAVE_LENDING_POOL_ADDRESSES",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
 		{
 			"inputs": [],
 			"name": "AAVE_REFERRAL_CODE",
@@ -94,32 +107,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "STABLE_ID",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "VARIABLE_ID",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "WALLET_ADDR",
 			"outputs": [
 				{
@@ -132,25 +119,7 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "WETH_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
 			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
 				{
 					"internalType": "address[]",
 					"name": "_tokens",
@@ -170,11 +139,6 @@
 		},
 		{
 			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
 				{
 					"internalType": "address[]",
 					"name": "_tokenAddresses",
@@ -202,7 +166,7 @@
 						},
 						{
 							"internalType": "uint256",
-							"name": "borrowRateVariable",
+							"name": "borrowRate",
 							"type": "uint256"
 						},
 						{
@@ -244,19 +208,9 @@
 							"internalType": "bool",
 							"name": "usageAsCollateralEnabled",
 							"type": "bool"
-						},
-						{
-							"internalType": "bool",
-							"name": "borrowinEnabled",
-							"type": "bool"
-						},
-						{
-							"internalType": "bool",
-							"name": "stableBorrowRateEnabled",
-							"type": "bool"
 						}
 					],
-					"internalType": "struct AaveLoanInfoV2.TokenInfoFull[]",
+					"internalType": "struct AaveLoanInfo.TokenInfoFull[]",
 					"name": "tokens",
 					"type": "tuple[]"
 				}
@@ -266,11 +220,6 @@
 		},
 		{
 			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
 				{
 					"internalType": "address",
 					"name": "_user",
@@ -308,16 +257,11 @@
 						},
 						{
 							"internalType": "uint256[]",
-							"name": "borrowStableAmounts",
-							"type": "uint256[]"
-						},
-						{
-							"internalType": "uint256[]",
-							"name": "borrowVariableAmounts",
+							"name": "borrowAmounts",
 							"type": "uint256[]"
 						}
 					],
-					"internalType": "struct AaveLoanInfoV2.LoanData",
+					"internalType": "struct AaveLoanInfo.LoanData",
 					"name": "data",
 					"type": "tuple"
 				}
@@ -327,11 +271,6 @@
 		},
 		{
 			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
 				{
 					"internalType": "address[]",
 					"name": "_users",
@@ -369,16 +308,11 @@
 						},
 						{
 							"internalType": "uint256[]",
-							"name": "borrowStableAmounts",
-							"type": "uint256[]"
-						},
-						{
-							"internalType": "uint256[]",
-							"name": "borrowVariableAmounts",
+							"name": "borrowAmounts",
 							"type": "uint256[]"
 						}
 					],
-					"internalType": "struct AaveLoanInfoV2.LoanData[]",
+					"internalType": "struct AaveLoanInfo.LoanData[]",
 					"name": "loans",
 					"type": "tuple[]"
 				}
@@ -390,9 +324,81 @@
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "_market",
+					"name": "_borrowAddress",
 					"type": "address"
 				},
+				{
+					"internalType": "address",
+					"name": "_collateralAddress",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "getMaxBoost",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_borrowAddress",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "getMaxBorrow",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_collateralAddress",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "getMaxCollateral",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
 				{
 					"internalType": "address[]",
 					"name": "_tokens",
@@ -414,11 +420,6 @@
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
 					"name": "_user",
 					"type": "address"
 				}
@@ -436,11 +437,6 @@
 		},
 		{
 			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
 				{
 					"internalType": "address[]",
 					"name": "_users",
@@ -462,11 +458,6 @@
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
 					"name": "_user",
 					"type": "address"
 				}
@@ -484,11 +475,6 @@
 		},
 		{
 			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
 				{
 					"internalType": "address",
 					"name": "_user",
@@ -516,17 +502,17 @@
 						},
 						{
 							"internalType": "uint256",
-							"name": "borrowsStable",
+							"name": "borrows",
 							"type": "uint256"
 						},
 						{
 							"internalType": "uint256",
-							"name": "borrowsVariable",
+							"name": "borrowRateMode",
 							"type": "uint256"
 						},
 						{
 							"internalType": "uint256",
-							"name": "stableBorrowRate",
+							"name": "borrowRate",
 							"type": "uint256"
 						},
 						{
@@ -535,7 +521,7 @@
 							"type": "bool"
 						}
 					],
-					"internalType": "struct AaveLoanInfoV2.UserToken[]",
+					"internalType": "struct AaveLoanInfo.UserToken[]",
 					"name": "userTokens",
 					"type": "tuple[]"
 				}
@@ -545,11 +531,6 @@
 		},
 		{
 			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
 				{
 					"internalType": "address[]",
 					"name": "_tokenAddresses",
@@ -581,18 +562,59 @@
 							"type": "uint256"
 						}
 					],
-					"internalType": "struct AaveLoanInfoV2.TokenInfo[]",
+					"internalType": "struct AaveLoanInfo.TokenInfo[]",
 					"name": "tokens",
 					"type": "tuple[]"
 				}
 			],
 			"stateMutability": "view",
 			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_token",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				}
+			],
+			"name": "sendContractBalance",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_token",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "sendFullContractBalance",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
 		}
 	],
 	"networks": {
 		"mainnet": {
-			"address": "0xd0C9ADDABbA270493A6503e74E62794435c8F1D3",
+			"address": "0xE96C9203e7e2B35F375ed780f313957D0cb04237",
 			"args": []
 		}
 	}
