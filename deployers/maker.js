@@ -19,8 +19,10 @@ async function main() {
 
     // await run('compile');
 
-    await deployContract("MCDSaverTaker");
+    // await deployContract("MCDSaverTaker");
     // await deployContract("MCDCreateTaker");
+
+    await deployContract("MCDLoanInfo");
 }
 
 start(main);
