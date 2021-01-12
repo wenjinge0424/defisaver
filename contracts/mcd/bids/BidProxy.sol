@@ -50,6 +50,10 @@ contract BidProxy {
 
         uint amount = Vat(VAT_ADDRESS).gem(ilk, address(this));
 
+        if(Join(_joinAddr).dec() != 18) {
+            amount = amount / (10**(18 - Join(_joinAddr).dec()));
+        }
+
         Vat(VAT_ADDRESS).hope(_joinAddr);
         Gem(_joinAddr).exit(msg.sender, amount);
     }
