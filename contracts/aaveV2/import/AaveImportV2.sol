@@ -22,10 +22,11 @@ contract AaveImportV2 is AaveHelperV2, AdminAuth {
     using SafeERC20 for ERC20;
 
     address public constant BASIC_PROXY = 0xc17c8eB12Ba24D62E69fd57cbd504EEf418867f9;
+    address public constant PULL_TOKENS_PROXY = 0x45431b79F783e0BF0fe7eF32D06A3e061780bfc4;
 
     function callFunction(
-        address sender,
-        Account.Info memory account,
+        address,
+        Account.Info memory,
         bytes memory data
     ) public {
 
@@ -34,15 +35,15 @@ contract AaveImportV2 is AaveHelperV2, AdminAuth {
             address collateralToken,
             address borrowToken,
             uint256 ethAmount,
-            address user,
             address proxy
         )
-        = abi.decode(data, (address,address,address,uint256,address,address));
+        = abi.decode(data, (address,address,address,uint256,address));
+
+        address user = DSProxy(payable(proxy)).owner();
 
         // withdraw eth
         TokenInterface(WETH_ADDRESS).withdraw(ethAmount);
 
-        address lendingPool = ILendingPoolAddressesProviderV2(market).getLendingPool();
         IAaveProtocolDataProviderV2 dataProvider = getDataProvider(market);
 
         uint256 globalBorrowAmountStable = 0;
@@ -74,8 +75,9 @@ contract AaveImportV2 is AaveHelperV2, AdminAuth {
         }
 
         (address aToken,,) = dataProvider.getReserveTokensAddresses(collateralToken);
-        // pull tokens from user to proxy
-        ERC20(aToken).safeTransferFrom(user, proxy, ERC20(aToken).balanceOf(user));
+
+        // pull coll tokens
+        DSProxy(payable(proxy)).execute(PULL_TOKENS_PROXY, abi.encodeWithSignature("pullTokens(address,uint256)", aToken, ERC20(aToken).balanceOf(user)));
 
         // enable as collateral
         DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("setUserUseReserveAsCollateralIfNeeded(address,address)", market, collateralToken));
@@ -83,9 +85,8 @@ contract AaveImportV2 is AaveHelperV2, AdminAuth {
         // withdraw deposited eth
         DSProxy(payable(proxy)).execute(BASIC_PROXY, abi.encodeWithSignature("withdraw(address,address,uint256)", market, ETH_ADDR, ethAmount));
 
-
         // deposit eth, get weth and return to sender
-        TokenInterface(WETH_ADDRESS).deposit.value(address(this).balance)();
+        TokenInterface(WETH_ADDRESS).deposit{value: (address(this).balance)}();
         ERC20(WETH_ADDRESS).safeTransfer(proxy, ethAmount+2);
     }
 
@@ -103,7 +104,7 @@ contract AaveImportV2 is AaveHelperV2, AdminAuth {
     receive() external payable {
         // deposit eth and get weth
         if (msg.sender == owner) {
-            TokenInterface(WETH_ADDRESS).deposit.value(address(this).balance)();
+            TokenInterface(WETH_ADDRESS).deposit{value: (address(this).balance)}();
         }
     }
 }
