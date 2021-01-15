@@ -42,7 +42,7 @@ abstract contract ILendingPool {
             uint256 currentLiquidationThreshold,  // user current average liquidation threshold across all the collaterals deposited
             uint256 ltv,                          // user average Loan-to-Value between all the collaterals
             uint256 healthFactor                  // user current Health Factor
-    );    
+    );
 
     /// @param _reserve underlying token address
     /// @param _user users address
@@ -95,7 +95,7 @@ abstract contract ILendingPool {
         public virtual
         view
         returns (uint256);
-    function getReserveCurrentStableBorrowRate(address _reserve) 
+    function getReserveCurrentStableBorrowRate(address _reserve)
         public virtual
         view
         returns (uint256);
@@ -108,6 +108,10 @@ abstract contract ILendingPool {
         view
         returns (uint256);
     function getReserveTotalBorrowsVariable(address _reserve)
+        public virtual
+        view
+        returns (uint256);
+    function getReserveTotalBorrowsStable(address _reserve)
         public virtual
         view
         returns (uint256);

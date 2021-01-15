@@ -142,7 +142,7 @@ contract AaveLoanInfo is AaveSafetyRatio {
                 borrowRateStable: stableBorrowingEnabled ? ILendingPool(lendingPoolCoreAddress).getReserveCurrentStableBorrowRate(_tokenAddresses[i]) : 0,
                 totalSupply: ILendingPool(lendingPoolCoreAddress).getReserveTotalLiquidity(_tokenAddresses[i]),
                 availableLiquidity: ILendingPool(lendingPoolCoreAddress).getReserveAvailableLiquidity(_tokenAddresses[i]),
-                totalBorrow: ILendingPool(lendingPoolCoreAddress).getReserveTotalBorrowsVariable(_tokenAddresses[i]),
+                totalBorrow: ILendingPool(lendingPoolCoreAddress).getReserveTotalBorrowsVariable(_tokenAddresses[i]) + ILendingPool(lendingPoolCoreAddress).getReserveTotalBorrowsStable(_tokenAddresses[i]),
                 collateralFactor: ltv,
                 liquidationRatio: liqRatio,
                 price: IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddresses[i]),
