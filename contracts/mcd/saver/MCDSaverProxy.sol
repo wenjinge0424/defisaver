@@ -21,7 +21,6 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
 
     bytes32 public constant ETH_ILK = 0x4554482d41000000000000000000000000000000000000000000000000000000;
 
-    address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
     address public constant SPOTTER_ADDRESS = 0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3;
     address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
@@ -30,7 +29,6 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
 
     address public constant BOT_REGISTRY_ADDRESS = 0x637726f8b08a7ABE3aE3aCaB01A80E2d8ddeF77B;
 
-    Manager public constant manager = Manager(MANAGER_ADDRESS);
     Vat public constant vat = Vat(VAT_ADDRESS);
     DaiJoin public constant daiJoin = DaiJoin(DAI_JOIN_ADDRESS);
     Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
@@ -43,13 +41,16 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
         ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _gasCost,
-        address _joinAddr
+        address _joinAddr,
+        ManagerType _managerType
     ) public payable {
 
-        address user = getOwner(manager, _cdpId);
-        bytes32 ilk = manager.ilks(_cdpId);
+        address managerAddr = getManagerAddr(_managerType);
 
-        drawCollateral(_cdpId, _joinAddr, _exchangeData.srcAmount);
+        address user = getOwner(Manager(managerAddr), _cdpId);
+        bytes32 ilk = Manager(managerAddr).ilks(_cdpId);
+
+        drawCollateral(managerAddr, _cdpId, _joinAddr, _exchangeData.srcAmount);
 
         _exchangeData.user = user;
         _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
@@ -57,7 +58,7 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
 
         daiAmount -= takeFee(_gasCost, daiAmount);
 
-        paybackDebt(_cdpId, ilk, daiAmount, user);
+        paybackDebt(managerAddr, _cdpId, ilk, daiAmount, user);
 
         // if there is some eth left (0x fee), return it to user
         if (address(this).balance > 0) {
@@ -74,19 +75,23 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
         ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _gasCost,
-        address _joinAddr
+        address _joinAddr,
+        ManagerType _managerType
     ) public payable {
-        address user = getOwner(manager, _cdpId);
-        bytes32 ilk = manager.ilks(_cdpId);
 
-        uint daiDrawn = drawDai(_cdpId, ilk, _exchangeData.srcAmount);
+        address managerAddr = getManagerAddr(_managerType);
+
+        address user = getOwner(Manager(managerAddr), _cdpId);
+        bytes32 ilk = Manager(managerAddr).ilks(_cdpId);
+
+        uint daiDrawn = drawDai(managerAddr, _cdpId, ilk, _exchangeData.srcAmount);
 
         _exchangeData.user = user;
         _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
         _exchangeData.srcAmount = daiDrawn - takeFee(_gasCost, daiDrawn);
         (, uint swapedColl) = _sell(_exchangeData);
 
-        addCollateral(_cdpId, _joinAddr, swapedColl);
+        addCollateral(managerAddr, _cdpId, _joinAddr, swapedColl);
 
         // if there is some eth left (0x fee), return it to user
         if (address(this).balance > 0) {
@@ -98,21 +103,22 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
 
     /// @notice Draws Dai from the CDP
     /// @dev If _daiAmount is bigger than max available we'll draw max
+    /// @param _managerAddr Address of the CDP Manager
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
     /// @param _daiAmount Amount of Dai to draw
-    function drawDai(uint _cdpId, bytes32 _ilk, uint _daiAmount) internal returns (uint) {
+    function drawDai(address _managerAddr, uint _cdpId, bytes32 _ilk, uint _daiAmount) internal returns (uint) {
         uint rate = Jug(JUG_ADDRESS).drip(_ilk);
-        uint daiVatBalance = vat.dai(manager.urns(_cdpId));
+        uint daiVatBalance = vat.dai(Manager(_managerAddr).urns(_cdpId));
 
-        uint maxAmount = getMaxDebt(_cdpId, _ilk);
+        uint maxAmount = getMaxDebt(_managerAddr, _cdpId, _ilk);
 
         if (_daiAmount >= maxAmount) {
             _daiAmount = sub(maxAmount, 1);
         }
 
-        manager.frob(_cdpId, int(0), normalizeDrawAmount(_daiAmount, rate, daiVatBalance));
-        manager.move(_cdpId, address(this), toRad(_daiAmount));
+        Manager(_managerAddr).frob(_cdpId, int(0), normalizeDrawAmount(_daiAmount, rate, daiVatBalance));
+        Manager(_managerAddr).move(_cdpId, address(this), toRad(_daiAmount));
 
         if (vat.can(address(this), address(DAI_JOIN_ADDRESS)) == 0) {
             vat.hope(DAI_JOIN_ADDRESS);
@@ -124,10 +130,11 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
     }
 
     /// @notice Adds collateral to the CDP
+    /// @param _managerAddr Address of the CDP Manager
     /// @param _cdpId Id of the CDP
     /// @param _joinAddr Address of the join contract for the CDP collateral
     /// @param _amount Amount of collateral to add
-    function addCollateral(uint _cdpId, address _joinAddr, uint _amount) internal {
+    function addCollateral(address _managerAddr, uint _cdpId, address _joinAddr, uint _amount) internal {
         int convertAmount = 0;
 
         if (isEthJoinAddr(_joinAddr)) {
@@ -142,8 +149,8 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
         Join(_joinAddr).join(address(this), _amount);
 
         vat.frob(
-            manager.ilks(_cdpId),
-            manager.urns(_cdpId),
+            Manager(_managerAddr).ilks(_cdpId),
+            Manager(_managerAddr).urns(_cdpId),
             address(this),
             address(this),
             convertAmount,
@@ -153,19 +160,20 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
     }
 
     /// @notice Draws collateral and returns it to DSProxy
+    /// @param _managerAddr Address of the CDP Manager
     /// @dev If _amount is bigger than max available we'll draw max
     /// @param _cdpId Id of the CDP
     /// @param _joinAddr Address of the join contract for the CDP collateral
     /// @param _amount Amount of collateral to draw
-    function drawCollateral(uint _cdpId, address _joinAddr, uint _amount) internal returns (uint) {
+    function drawCollateral(address _managerAddr, uint _cdpId, address _joinAddr, uint _amount) internal returns (uint) {
         uint frobAmount = _amount;
 
         if (Join(_joinAddr).dec() != 18) {
             frobAmount = _amount * (10 ** (18 - Join(_joinAddr).dec()));
         }
 
-        manager.frob(_cdpId, -toPositiveInt(frobAmount), 0);
-        manager.flux(_cdpId, address(this), frobAmount);
+        Manager(_managerAddr).frob(_cdpId, -toPositiveInt(frobAmount), 0);
+        Manager(_managerAddr).flux(_cdpId, address(this), frobAmount);
 
         Join(_joinAddr).exit(address(this), _amount);
 
@@ -177,13 +185,14 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
     }
 
     /// @notice Paybacks Dai debt
+    /// @param _managerAddr Address of the CDP Manager
     /// @dev If the _daiAmount is bigger than the whole debt, returns extra Dai
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
     /// @param _daiAmount Amount of Dai to payback
     /// @param _owner Address that owns the DSProxy that owns the CDP
-    function paybackDebt(uint _cdpId, bytes32 _ilk, uint _daiAmount, address _owner) internal {
-        address urn = manager.urns(_cdpId);
+    function paybackDebt(address _managerAddr, uint _cdpId, bytes32 _ilk, uint _daiAmount, address _owner) internal {
+        address urn = Manager(_managerAddr).urns(_cdpId);
 
         uint wholeDebt = getAllDebt(VAT_ADDRESS, urn, urn, _ilk);
 
@@ -198,18 +207,19 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
 
         daiJoin.join(urn, _daiAmount);
 
-        manager.frob(_cdpId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, _ilk));
+        Manager(_managerAddr).frob(_cdpId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, _ilk));
     }
 
     /// @notice Gets the maximum amount of collateral available to draw
+    /// @param _managerAddr Address of the CDP Manager
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
     /// @param _joinAddr Joind address of collateral
     /// @dev Substracts 10 wei to aviod rounding error later on
-    function getMaxCollateral(uint _cdpId, bytes32 _ilk, address _joinAddr) public view returns (uint) {
+    function getMaxCollateral(address _managerAddr, uint _cdpId, bytes32 _ilk, address _joinAddr) public view returns (uint) {
         uint price = getPrice(_ilk);
 
-        (uint collateral, uint debt) = getCdpInfo(manager, _cdpId, _ilk);
+        (uint collateral, uint debt) = getCdpInfo(Manager(_managerAddr), _cdpId, _ilk);
 
         (, uint mat) = Spotter(SPOTTER_ADDRESS).ilks(_ilk);
 
@@ -222,14 +232,15 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
     }
 
     /// @notice Gets the maximum amount of debt available to generate
+    /// @param _managerAddr Address of the CDP Manager
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
     /// @dev Substracts 10 wei to aviod rounding error later on
-    function getMaxDebt(uint _cdpId, bytes32 _ilk) public virtual view returns (uint) {
+    function getMaxDebt(address _managerAddr, uint _cdpId, bytes32 _ilk) public virtual view returns (uint) {
         uint price = getPrice(_ilk);
 
         (, uint mat) = spotter.ilks(_ilk);
-        (uint collateral, uint debt) = getCdpInfo(manager, _cdpId, _ilk);
+        (uint collateral, uint debt) = getCdpInfo(Manager(_managerAddr), _cdpId, _ilk);
 
         return sub(sub(div(mul(collateral, price), mat), debt), 10);
     }
@@ -243,32 +254,6 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
         return rmul(rmul(spot, spotter.par()), mat);
     }
 
-    /// @notice Gets CDP ratio
-    /// @param _cdpId Id of the CDP
-    /// @param _ilk Ilk of the CDP
-    function getRatio(uint _cdpId, bytes32 _ilk) public view returns (uint) {
-        uint price = getPrice( _ilk);
-
-        (uint collateral, uint debt) = getCdpInfo(manager, _cdpId, _ilk);
-
-        if (debt == 0) return 0;
-
-        return rdiv(wmul(collateral, price), debt);
-    }
-
-    /// @notice Gets CDP info (collateral, debt, price, ilk)
-    /// @param _cdpId Id of the CDP
-    function getCdpDetailedInfo(uint _cdpId) public view returns (uint collateral, uint debt, uint price, bytes32 ilk) {
-        address urn = manager.urns(_cdpId);
-        ilk = manager.ilks(_cdpId);
-
-        (collateral, debt) = vat.urns(ilk, urn);
-        (,uint rate,,,) = vat.ilks(ilk);
-
-        debt = rmul(debt, rate);
-        price = getPrice(ilk);
-    }
-
     function isAutomation() internal view returns(bool) {
         return BotRegistry(BOT_REGISTRY_ADDRESS).botList(tx.origin);
     }
@@ -277,8 +262,6 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
         if (_gasCost > 0) {
             uint ethDaiPrice = getPrice(ETH_ILK);
             uint feeAmount = rmul(_gasCost, ethDaiPrice);
-
-            uint balance = ERC20(DAI_ADDRESS).balanceOf(address(this));
 
             if (feeAmount > _amount / 10) {
                 feeAmount = _amount / 10;

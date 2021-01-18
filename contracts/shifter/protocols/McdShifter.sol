@@ -9,6 +9,8 @@ contract McdShifter is MCDSaverProxy {
 
     using SafeERC20 for ERC20;
 
+    Manager manager = Manager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
+
     address public constant OPEN_PROXY_ACTIONS = 0x6d0984E80a86f26c0dd564ca0CF74a8E9Da03305;
 
     function getLoanAmount(uint _cdpId, address _joinAddr) public view virtual returns(uint loanAmount) {
@@ -35,12 +37,12 @@ contract McdShifter is MCDSaverProxy {
         (uint maxColl, ) = getCdpInfo(manager, _cdpId, ilk);
 
         // repay dai debt cdp
-        paybackDebt(_cdpId, ilk, _loanAmount, owner);
+        paybackDebt(address(manager), _cdpId, ilk, _loanAmount, owner);
 
         maxColl = _collateral > maxColl ? maxColl : _collateral;
 
         // withdraw collateral from cdp
-        drawCollateral(_cdpId, _joinAddr, maxColl);
+        drawCollateral(address(manager), _cdpId, _joinAddr, maxColl);
 
         // send back to msg.sender
         if (isEthJoinAddr(_joinAddr)) {
@@ -69,9 +71,9 @@ contract McdShifter is MCDSaverProxy {
             openAndWithdraw(collAmount, _debtAmount, address(this), _joinAddr);
         } else {
             // add collateral
-            addCollateral(_cdpId, _joinAddr, collAmount);
+            addCollateral(address(manager), _cdpId, _joinAddr, collAmount);
             // draw debt
-            drawDai(_cdpId, manager.ilks(_cdpId), _debtAmount);
+            drawDai(address(manager), _cdpId, manager.ilks(_cdpId), _debtAmount);
         }
 
         // transfer to repay FL

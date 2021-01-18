@@ -6,10 +6,6 @@ import "../../exchangeV3/DFSExchangeData.sol";
 import "../../utils/GasBurner.sol";
 import "../../interfaces/ILendingPool.sol";
 
-// abstract contract ILendingPool {
-//     function flashLoan( address payable _receiver, address _reserve, uint _amount, bytes calldata _params) external virtual;
-// }
-
 contract MCDSaverTaker is MCDSaverProxy, GasBurner {
 
     address payable public constant MCD_SAVER_FLASH_LOAN = 0xD0eB57ff3eA4Def2b74dc29681fd529D1611880f;
@@ -21,9 +17,12 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
         ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _gasCost,
-        address _joinAddr
+        address _joinAddr,
+        ManagerType _managerType
     ) public payable burnGas(25) {
-        uint256 maxDebt = getMaxDebt(_cdpId, manager.ilks(_cdpId));
+        address managerAddr = getManagerAddr(_managerType);
+
+        uint256 maxDebt = getMaxDebt(managerAddr, _cdpId, Manager(managerAddr).ilks(_cdpId));
 
         uint maxLiq = getAvailableLiquidity(DAI_JOIN_ADDRESS);
 
@@ -32,7 +31,7 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
                 _exchangeData.srcAmount = maxDebt;
             }
 
-            boost(_exchangeData, _cdpId, _gasCost, _joinAddr);
+            boost(_exchangeData, _cdpId, _gasCost, _joinAddr, _managerType);
             return;
         }
 
@@ -41,23 +40,25 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
 
         MCD_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
 
-        manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 1);
+        Manager(managerAddr).cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 1);
 
         bytes memory paramsData = abi.encode(packExchangeData(_exchangeData), _cdpId, _gasCost, _joinAddr, false);
 
         lendingPool.flashLoan(MCD_SAVER_FLASH_LOAN, DAI_ADDRESS, loanAmount, paramsData);
 
-        manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 0);
+        Manager(managerAddr).cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 0);
     }
 
     function repayWithLoan(
         ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _gasCost,
-        address _joinAddr
+        address _joinAddr,
+        ManagerType _managerType
     ) public payable burnGas(25) {
-        uint256 maxColl = getMaxCollateral(_cdpId, manager.ilks(_cdpId), _joinAddr);
+        address managerAddr = getManagerAddr(_managerType);
 
+        uint256 maxColl = getMaxCollateral(managerAddr, _cdpId, Manager(managerAddr).ilks(_cdpId), _joinAddr);
 
         uint maxLiq = getAvailableLiquidity(_joinAddr);
 
@@ -66,7 +67,7 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
                 _exchangeData.srcAmount = maxColl;
             }
 
-            repay(_exchangeData, _cdpId, _gasCost, _joinAddr);
+            repay(_exchangeData, _cdpId, _gasCost, _joinAddr, _managerType);
             return;
         }
 
@@ -75,24 +76,25 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
 
         MCD_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
 
-        manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 1);
+        Manager(managerAddr).cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 1);
 
         bytes memory paramsData = abi.encode(packExchangeData(_exchangeData), _cdpId, _gasCost, _joinAddr, true);
 
         lendingPool.flashLoan(MCD_SAVER_FLASH_LOAN, getAaveCollAddr(_joinAddr), loanAmount, paramsData);
 
-        manager.cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 0);
+        Manager(managerAddr).cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 0);
     }
 
 
     /// @notice Gets the maximum amount of debt available to generate
+    /// @param _managerAddr Address of the CDP Manager
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
-    function getMaxDebt(uint256 _cdpId, bytes32 _ilk) public override view returns (uint256) {
+    function getMaxDebt(address _managerAddr, uint256 _cdpId, bytes32 _ilk) public override view returns (uint256) {
         uint256 price = getPrice(_ilk);
 
         (, uint256 mat) = spotter.ilks(_ilk);
-        (uint256 collateral, uint256 debt) = getCdpInfo(manager, _cdpId, _ilk);
+        (uint256 collateral, uint256 debt) = getCdpInfo(Manager(_managerAddr), _cdpId, _ilk);
 
         return sub(wdiv(wmul(collateral, price), mat), debt);
     }
