@@ -9,6 +9,8 @@ import "../../interfaces/Vat.sol";
 /// @title Helper methods for MCDSaverProxy
 contract MCDSaverProxyHelper is DSMath {
 
+    enum ManagerType { MCD, BPROTOCOL }
+
     /// @notice Returns a normalized debt _amount based on the current rate
     /// @param _amount Amount of dai to be normalized
     /// @param _rate Current rate of the stability fee
@@ -111,5 +113,15 @@ contract MCDSaverProxyHelper is DSMath {
         DSProxy proxy = DSProxy(uint160(_manager.owns(_cdpId)));
 
         return proxy.owner();
+    }
+
+    /// @notice Based on the manager type returns the address
+    /// @param _managerType Type of vault manager to use
+    function getManagerAddr(ManagerType _managerType) public pure returns (address) {
+        if (_managerType == ManagerType.MCD) {
+            return 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
+        } else if (_managerType == ManagerType.BPROTOCOL) {
+            return 0x3f30c2381CD8B917Dd96EB2f1A4F96D91324BBed;
+        }
     }
 }

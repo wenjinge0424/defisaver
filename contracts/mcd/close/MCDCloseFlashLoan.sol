@@ -20,7 +20,6 @@ contract MCDCloseFlashLoan is DFSExchangeCore, MCDSaverProxyHelper, FlashLoanRec
     address public constant SPOTTER_ADDRESS = 0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
 
-    Manager public constant manager = Manager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
     DaiJoin public constant daiJoin = DaiJoin(DAI_JOIN_ADDRESS);
     Spotter public constant spotter = Spotter(SPOTTER_ADDRESS);
     Vat public constant vat = Vat(VAT_ADDRESS);
@@ -69,17 +68,20 @@ contract MCDCloseFlashLoan is DFSExchangeCore, MCDSaverProxyHelper, FlashLoanRec
         exchangeData.dfsFeeDivider = SERVICE_FEE;
         exchangeData.user = user;
 
-        closeCDP(closeData, exchangeData, user);
+        address managerAddr = getManagerAddr(closeDataSent.managerType);
+
+        closeCDP(closeData, exchangeData, user, managerAddr);
     }
 
     function closeCDP(
         CloseData memory _closeData,
         ExchangeData memory _exchangeData,
-        address _user
+        address _user,
+        address _managerAddr
     ) internal {
 
-        paybackDebt(_closeData.cdpId, manager.ilks(_closeData.cdpId), _closeData.daiAmount); // payback whole debt
-        uint drawnAmount = drawMaxCollateral(_closeData.cdpId, _closeData.joinAddr, _closeData.collAmount); // draw whole collateral
+        paybackDebt(_managerAddr, _closeData.cdpId, Manager(_managerAddr).ilks(_closeData.cdpId), _closeData.daiAmount); // payback whole debt
+        uint drawnAmount = drawMaxCollateral(_managerAddr, _closeData.cdpId, _closeData.joinAddr, _closeData.collAmount); // draw whole collateral
 
         uint daiSwaped = 0;
 
@@ -105,9 +107,9 @@ contract MCDCloseFlashLoan is DFSExchangeCore, MCDSaverProxyHelper, FlashLoanRec
 
     }
 
-    function drawMaxCollateral(uint _cdpId, address _joinAddr, uint _amount) internal returns (uint) {
-        manager.frob(_cdpId, -toPositiveInt(_amount), 0);
-        manager.flux(_cdpId, address(this), _amount);
+    function drawMaxCollateral(address _managerAddr, uint _cdpId, address _joinAddr, uint _amount) internal returns (uint) {
+        Manager(_managerAddr).frob(_cdpId, -toPositiveInt(_amount), 0);
+        Manager(_managerAddr).flux(_cdpId, address(this), _amount);
 
         uint joinAmount = _amount;
 
@@ -124,13 +126,13 @@ contract MCDCloseFlashLoan is DFSExchangeCore, MCDSaverProxyHelper, FlashLoanRec
         return joinAmount;
     }
 
-    function paybackDebt(uint _cdpId, bytes32 _ilk, uint _daiAmount) internal {
-        address urn = manager.urns(_cdpId);
+    function paybackDebt(address _managerAddr, uint _cdpId, bytes32 _ilk, uint _daiAmount) internal {
+        address urn = Manager(_managerAddr).urns(_cdpId);
 
         daiJoin.dai().approve(DAI_JOIN_ADDRESS, _daiAmount);
         daiJoin.join(urn, _daiAmount);
 
-        manager.frob(_cdpId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, _ilk));
+        Manager(_managerAddr).frob(_cdpId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, _ilk));
     }
 
     function getVaultCollAddr(address _joinAddr) internal view returns (address) {

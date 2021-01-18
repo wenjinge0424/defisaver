@@ -17,6 +17,7 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         uint loanAmount;
         uint fee;
         address joinAddr;
+        ManagerType managerType;
     }
 
     function executeOperation(
@@ -35,9 +36,10 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
             uint cdpId,
             uint gasCost,
             address joinAddr,
-            bool isRepay
+            bool isRepay,
+            uint8 managerType
         )
-         = abi.decode(_params, (bytes,uint256,uint256,address,bool));
+         = abi.decode(_params, (bytes,uint256,uint256,address,bool,uint8));
 
         ExchangeData memory exchangeData = unpackExchangeData(exDataBytes);
 
@@ -46,7 +48,8 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
             gasCost: gasCost,
             loanAmount: _amount,
             fee: _fee,
-            joinAddr: joinAddr
+            joinAddr: joinAddr,
+            managerType: ManagerType(managerType)
         });
 
         if (isRepay) {
@@ -68,11 +71,13 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         SaverData memory _saverData
     ) internal {
 
-        address user = getOwner(manager, _saverData.cdpId);
+        address managerAddr = getManagerAddr(_saverData.managerType);
+
+        address user = getOwner(Manager(managerAddr), _saverData.cdpId);
 
         // Draw users Dai
-        uint maxDebt = getMaxDebt(_saverData.cdpId, manager.ilks(_saverData.cdpId));
-        uint daiDrawn = drawDai(_saverData.cdpId, manager.ilks(_saverData.cdpId), maxDebt);
+        uint maxDebt = getMaxDebt(managerAddr, _saverData.cdpId, Manager(managerAddr).ilks(_saverData.cdpId));
+        uint daiDrawn = drawDai(managerAddr, _saverData.cdpId, Manager(managerAddr).ilks(_saverData.cdpId), maxDebt);
 
         // Swap
         _exchangeData.srcAmount = daiDrawn + _saverData.loanAmount - takeFee(_saverData.gasCost, daiDrawn + _saverData.loanAmount);
@@ -81,10 +86,10 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         (, uint swapedAmount) = _sell(_exchangeData);
 
         // Return collateral
-        addCollateral(_saverData.cdpId, _saverData.joinAddr, swapedAmount);
+        addCollateral(managerAddr, _saverData.cdpId, _saverData.joinAddr, swapedAmount);
 
         // Draw Dai to repay the flash loan
-        drawDai(_saverData.cdpId,  manager.ilks(_saverData.cdpId), (_saverData.loanAmount + _saverData.fee));
+        drawDai(managerAddr, _saverData.cdpId,  Manager(managerAddr).ilks(_saverData.cdpId), (_saverData.loanAmount + _saverData.fee));
 
         logger.Log(address(this), msg.sender, "MCDFlashBoost", abi.encode(_saverData.cdpId, user, _exchangeData.srcAmount, swapedAmount));
     }
@@ -94,12 +99,14 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         SaverData memory _saverData
     ) internal {
 
-        address user = getOwner(manager, _saverData.cdpId);
-        bytes32 ilk = manager.ilks(_saverData.cdpId);
+        address managerAddr = getManagerAddr(_saverData.managerType);
+
+        address user = getOwner(Manager(managerAddr), _saverData.cdpId);
+        bytes32 ilk = Manager(managerAddr).ilks(_saverData.cdpId);
 
         // Draw collateral
-        uint maxColl = getMaxCollateral(_saverData.cdpId, ilk, _saverData.joinAddr);
-        uint collDrawn = drawCollateral(_saverData.cdpId, _saverData.joinAddr, maxColl);
+        uint maxColl = getMaxCollateral(managerAddr, _saverData.cdpId, ilk, _saverData.joinAddr);
+        uint collDrawn = drawCollateral(managerAddr, _saverData.cdpId, _saverData.joinAddr, maxColl);
 
         // Swap
         _exchangeData.srcAmount = (_saverData.loanAmount + collDrawn);
@@ -108,20 +115,20 @@ contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
         (, uint paybackAmount) = _sell(_exchangeData);
 
         paybackAmount -= takeFee(_saverData.gasCost, paybackAmount);
-        paybackAmount = limitLoanAmount(_saverData.cdpId, ilk, paybackAmount, user);
+        paybackAmount = limitLoanAmount(managerAddr, _saverData.cdpId, ilk, paybackAmount, user);
 
         // Payback the debt
-        paybackDebt(_saverData.cdpId, ilk, paybackAmount, user);
+        paybackDebt(managerAddr, _saverData.cdpId, ilk, paybackAmount, user);
 
         // Draw collateral to repay the flash loan
-        drawCollateral(_saverData.cdpId, _saverData.joinAddr, (_saverData.loanAmount + _saverData.fee));
+        drawCollateral(managerAddr, _saverData.cdpId, _saverData.joinAddr, (_saverData.loanAmount + _saverData.fee));
 
         logger.Log(address(this), msg.sender, "MCDFlashRepay", abi.encode(_saverData.cdpId, user, _exchangeData.srcAmount, paybackAmount));
     }
 
     /// @notice Handles that the amount is not bigger than cdp debt and not dust
-    function limitLoanAmount(uint _cdpId, bytes32 _ilk, uint _paybackAmount, address _owner) internal returns (uint256) {
-        uint debt = getAllDebt(address(vat), manager.urns(_cdpId), manager.urns(_cdpId), _ilk);
+    function limitLoanAmount(address _managerAddr, uint _cdpId, bytes32 _ilk, uint _paybackAmount, address _owner) internal returns (uint256) {
+        uint debt = getAllDebt(address(vat), Manager(_managerAddr).urns(_cdpId), Manager(_managerAddr).urns(_cdpId), _ilk);
 
         if (_paybackAmount > debt) {
             ERC20(DAI_ADDRESS).transfer(_owner, (_paybackAmount - debt));

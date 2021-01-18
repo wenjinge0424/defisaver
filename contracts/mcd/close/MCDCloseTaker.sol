@@ -22,9 +22,6 @@ contract MCDCloseTaker is MCDSaverProxyHelper {
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
-    // solhint-disable-next-line const-name-snakecase
-    Manager public constant manager = Manager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
-
     address public constant SPOTTER_ADDRESS = 0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
@@ -40,6 +37,7 @@ contract MCDCloseTaker is MCDSaverProxyHelper {
         uint minAccepted;
         bool wholeDebt;
         bool toDai;
+        ManagerType managerType;
     }
 
     Vat public constant vat = Vat(VAT_ADDRESS);
@@ -52,26 +50,28 @@ contract MCDCloseTaker is MCDSaverProxyHelper {
     ) public payable {
         mcdCloseFlashLoan.transfer(msg.value); // 0x fee
 
+        address managerAddr = getManagerAddr(_closeData.managerType);
+
         if (_closeData.wholeDebt) {
             _closeData.daiAmount = getAllDebt(
                 VAT_ADDRESS,
-                manager.urns(_closeData.cdpId),
-                manager.urns(_closeData.cdpId),
-                manager.ilks(_closeData.cdpId)
+                Manager(managerAddr).urns(_closeData.cdpId),
+                Manager(managerAddr).urns(_closeData.cdpId),
+                Manager(managerAddr).ilks(_closeData.cdpId)
             );
 
             (_closeData.collAmount, )
-                = getCdpInfo(manager, _closeData.cdpId, manager.ilks(_closeData.cdpId));
+                = getCdpInfo(Manager(managerAddr), _closeData.cdpId, Manager(managerAddr).ilks(_closeData.cdpId));
         }
 
-        manager.cdpAllow(_closeData.cdpId, mcdCloseFlashLoan, 1);
+        Manager(managerAddr).cdpAllow(_closeData.cdpId, mcdCloseFlashLoan, 1);
 
         bytes memory packedData  = _packData(_closeData, _exchangeData);
         bytes memory paramsData = abi.encode(address(this), packedData);
 
         lendingPool.flashLoan(mcdCloseFlashLoan, DAI_ADDRESS, _closeData.daiAmount, paramsData);
 
-        manager.cdpAllow(_closeData.cdpId, mcdCloseFlashLoan, 0);
+        Manager(managerAddr).cdpAllow(_closeData.cdpId, mcdCloseFlashLoan, 0);
 
         // If sub. to automatic protection unsubscribe
         unsubscribe(SUBSCRIPTION_ADDRESS_NEW, _closeData.cdpId);
@@ -80,13 +80,14 @@ contract MCDCloseTaker is MCDSaverProxyHelper {
     }
 
     /// @notice Gets the maximum amount of debt available to generate
+    /// @param _managerAddr Address of the CDP Manager
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
-    function getMaxDebt(uint256 _cdpId, bytes32 _ilk) public view returns (uint256) {
+    function getMaxDebt(address _managerAddr, uint256 _cdpId, bytes32 _ilk) public view returns (uint256) {
         uint256 price = getPrice(_ilk);
 
         (, uint256 mat) = spotter.ilks(_ilk);
-        (uint256 collateral, uint256 debt) = getCdpInfo(manager, _cdpId, _ilk);
+        (uint256 collateral, uint256 debt) = getCdpInfo(Manager(_managerAddr), _cdpId, _ilk);
 
         return sub(wdiv(wmul(collateral, price), mat), debt);
     }
