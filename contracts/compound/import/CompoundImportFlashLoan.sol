@@ -1,26 +1,23 @@
 pragma solidity ^0.6.0;
 
+import "../../auth/AdminAuth.sol";
 import "../../utils/FlashLoanReceiverBase.sol";
 import "../../interfaces/ProxyRegistryInterface.sol";
 import "../../interfaces/CTokenInterface.sol";
 import "../../utils/SafeERC20.sol";
 
 /// @title Receives FL from Aave and imports the position to DSProxy
-contract CompoundImportFlashLoan is FlashLoanReceiverBase {
-
+contract CompoundImportFlashLoan is FlashLoanReceiverBase, AdminAuth {
     using SafeERC20 for ERC20;
 
-    ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
+    ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER =
+        ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
     address public constant COMPOUND_BORROW_PROXY = 0xb7EDC39bE76107e2Cc645f0f6a3D164f5e173Ee2;
+    address public constant PULL_TOKENS_PROXY = 0x45431b79F783e0BF0fe7eF32D06A3e061780bfc4;
 
-    address public owner;
-
-    constructor()
-        FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER)
-        public {
-            owner = msg.sender;
-    }
+    // solhint-disable-next-line no-empty-blocks
+    constructor() public FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) {}
 
     /// @notice Called by Aave when sending back the FL amount
     /// @param _reserve The address of the borrowed token
@@ -31,55 +28,66 @@ contract CompoundImportFlashLoan is FlashLoanReceiverBase {
         address _reserve,
         uint256 _amount,
         uint256 _fee,
-        bytes calldata _params)
-    external override {
+        bytes calldata _params
+    ) external override {
+        (address cCollAddr, address cBorrowAddr, address proxy) =
+            abi.decode(_params, (address, address, address));
 
-        (
-            address cCollateralToken,
-            address cBorrowToken,
-            address user,
-            address proxy
-        )
-        = abi.decode(_params, (address,address,address,address));
+        address user = DSProxyInterface(proxy).owner();
+        uint256 usersCTokenBalance = CTokenInterface(cCollAddr).balanceOf(user);
 
         // approve FL tokens so we can repay them
-        ERC20(_reserve).safeApprove(cBorrowToken, 0);
-        ERC20(_reserve).safeApprove(cBorrowToken, uint(-1));
+        ERC20(_reserve).safeApprove(cBorrowAddr, _amount);
 
-        // repay compound debt
-        require(CTokenInterface(cBorrowToken).repayBorrowBehalf(user, uint(-1)) == 0, "Repay borrow behalf fail");
+        // repay compound debt on behalf of the user
+        require(
+            CTokenInterface(cBorrowAddr).repayBorrowBehalf(user, uint256(-1)) == 0,
+            "Repay borrow behalf fail"
+        );
 
-        // transfer cTokens to proxy
-        uint cTokenBalance = CTokenInterface(cCollateralToken).balanceOf(user);
-        require(CTokenInterface(cCollateralToken).transferFrom(user, proxy, cTokenBalance));
+        bytes memory depositProxyCallData = formatDSProxyPullTokensCall(cCollAddr, usersCTokenBalance);
+        DSProxyInterface(proxy).execute(PULL_TOKENS_PROXY, depositProxyCallData);
 
-        // borrow
-        bytes memory proxyData = getProxyData(cCollateralToken, cBorrowToken, _reserve, (_amount + _fee));
-        DSProxyInterface(proxy).execute(COMPOUND_BORROW_PROXY, proxyData);
+        // borrow debt now on ds proxy
+        bytes memory borrowProxyCallData =
+            formatDSProxyBorrowCall(cCollAddr, cBorrowAddr, _reserve, (_amount + _fee));
+        DSProxyInterface(proxy).execute(COMPOUND_BORROW_PROXY, borrowProxyCallData);
 
-        // Repay the loan with the money DSProxy sent back
+        // repay the loan with the money DSProxy sent back
         transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
     }
 
-    /// @notice Formats function data call so we can call it through DSProxy
+    /// @notice Formats function data call to pull tokens to DSProxy
+    /// @param _cTokenAddr CToken address of the collateral
+    /// @param _amount Amount of cTokens to pull
+    function formatDSProxyPullTokensCall(
+        address _cTokenAddr,
+        uint256 _amount
+    ) internal pure returns (bytes memory) {
+        return abi.encodeWithSignature(
+            "pullTokens(address,uint256)",
+            _cTokenAddr,
+            _amount
+        );
+    }
+
+    /// @notice Formats function data call borrow through DSProxy
     /// @param _cCollToken CToken address of collateral
     /// @param _cBorrowToken CToken address we will borrow
     /// @param _borrowToken Token address we will borrow
     /// @param _amount Amount that will be borrowed
-    /// @return proxyData Formated function call data
-    function getProxyData(address _cCollToken, address _cBorrowToken, address _borrowToken, uint _amount) internal pure returns (bytes memory proxyData) {
-        proxyData = abi.encodeWithSignature(
+    function formatDSProxyBorrowCall(
+        address _cCollToken,
+        address _cBorrowToken,
+        address _borrowToken,
+        uint256 _amount
+    ) internal pure returns (bytes memory) {
+        return abi.encodeWithSignature(
             "borrow(address,address,address,uint256)",
-            _cCollToken, _cBorrowToken, _borrowToken, _amount);
-    }
-
-    function withdrawStuckFunds(address _tokenAddr, uint _amount) public {
-        require(owner == msg.sender, "Must be owner");
-
-        if (_tokenAddr == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
-            msg.sender.transfer(_amount);
-        } else {
-            ERC20(_tokenAddr).safeTransfer(owner, _amount);
-        }
+            _cCollToken,
+            _cBorrowToken,
+            _borrowToken,
+            _amount
+        );
     }
 }
