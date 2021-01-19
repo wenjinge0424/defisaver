@@ -42,7 +42,7 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
 
         Manager(managerAddr).cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 1);
 
-        bytes memory paramsData = abi.encode(packExchangeData(_exchangeData), _cdpId, _gasCost, _joinAddr, false);
+        bytes memory paramsData = abi.encode(packExchangeData(_exchangeData), _cdpId, _gasCost, _joinAddr, false, uint8(_managerType));
 
         lendingPool.flashLoan(MCD_SAVER_FLASH_LOAN, DAI_ADDRESS, loanAmount, paramsData);
 
@@ -78,7 +78,7 @@ contract MCDSaverTaker is MCDSaverProxy, GasBurner {
 
         Manager(managerAddr).cdpAllow(_cdpId, MCD_SAVER_FLASH_LOAN, 1);
 
-        bytes memory paramsData = abi.encode(packExchangeData(_exchangeData), _cdpId, _gasCost, _joinAddr, true);
+        bytes memory paramsData = abi.encode(packExchangeData(_exchangeData), _cdpId, _gasCost, _joinAddr, true, uint8(_managerType));
 
         lendingPool.flashLoan(MCD_SAVER_FLASH_LOAN, getAaveCollAddr(_joinAddr), loanAmount, paramsData);
 
