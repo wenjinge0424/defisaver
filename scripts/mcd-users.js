@@ -22,10 +22,22 @@ function chunk(arr, len) {
     }
 
     return chunks;
-  }
+}
+
+const checkAuth = async (authViewContract, sub) => {
+    try {
+        const auth = await authViewContract.methods.hasAuth(sub, newMcdMonitorProxyV2).call();
+
+        return auth;
+    } catch (err) {
+        console.log('Err: ', sub);
+        return false;
+    }
+
+};
 
 (async () => {
-    const web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_ENDPOINT));
+    const web3 = new Web3(new Web3.providers.HttpProvider(process.env.ALCHEMY_NODE));
 
     const account = web3.eth.accounts.privateKeyToAccount('0x'+process.env.PRIV_KEY)
     web3.eth.accounts.wallet.add(account)
@@ -41,41 +53,53 @@ function chunk(arr, len) {
 
     let proxiesToApprove = [];
 
-    // console.log(subs, subs.length);
-    // for (let i = 0; i < subs.length; ++i) {
-    //     const auth = await authViewContract.methods.hasAuth(subs[i], newMcdMonitorProxyV2).call();
+    // const authPromises = subs.map(s => checkAuth(authViewContract, s));
 
-    //     if (!auth) {
-    //         console.log(i);
-    //         proxiesToApprove.push();
-    //     }
-    // }
+    // await Promise.all(authPromises);
+
+    // console.log(subs, subs.length);
+    for (let i = 0; i < subs.length; ++i) {
+        const auth = await checkAuth(authViewContract, subs[i]);
+
+        if (!auth) {
+            console.log(`"${subs[i]}",`);
+            proxiesToApprove.push();
+        } else {
+            console.log(`OK: ${subs[i]}`);
+        }
+    }
 
     // console.log(proxiesToApprove);
 
     // get all dsproxy subed
-    // const auths = await authViewContract.methods.hasAuth('0x5aCC5C8D1148f2B38A0D7ee51B36dBF562f7254e', newMcdMonitorProxyV2).call();
+    // const auths = await authViewContract.methods.hasAuth('0x394831fef3D1f3EDf1dD53bAd8e1B5375D672B4c', oldMcdMonitorProxyV2).call();
 
     // console.log(auths);
 
-    const subInChunks = chunk(subs, 50);
-    console.log(subInChunks);
+    // const subInChunks = chunk(subs, 50);
+    // console.log(subInChunks);
 
-    const GAS_PRICE = 48100000000;
-    let startingNonce = 0;
+    const GAS_PRICE = 62100000000;
+    let startingNonce =14;
 
     // subInChunks.length
 
+    const subInChunks = [
+        [
+
+        ]
+    ]
+
     // get a list of proxies that need permission set
-    for (let i = 0; i < 1; ++i) {
-        console.log(i);
-        // send tx
-        mcdMonitorV2Contract.methods.monitorProxyUpdate(subInChunks[i]).send(
-            {
-                from: account.address,
-                gasPrice: GAS_PRICE,
-                nonce: startingNonce + i,
-                gas: 5500000
-            });
-    }
+    // for (let i = 0; i < subInChunks.length; ++i) {
+    //     console.log(i);
+    //     // send tx
+    //     mcdMonitorV2Contract.methods.monitorProxyUpdate(subInChunks[i]).send(
+    //         {
+    //             from: account.address,
+    //             gasPrice: GAS_PRICE,
+    //             nonce: startingNonce + i,
+    //             gas: 5500000
+    //         });
+    // }
 })();

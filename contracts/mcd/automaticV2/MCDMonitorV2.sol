@@ -35,7 +35,6 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
     address public constant BOT_REGISTRY_ADDRESS = 0x637726f8b08a7ABE3aE3aCaB01A80E2d8ddeF77B;
 
     address public constant PROXY_PERMISSION_ADDR = 0x5a4f877CA808Cca3cB7c2A194F80Ab8588FAE26B;
-    address public constant NEW_MONITOR_PROXY_ADDR = 0x1816A86C4DA59395522a42b871bf11A4E96A1C7a;
 
     Manager public manager = Manager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
     Vat public vat = Vat(0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B);
@@ -115,19 +114,6 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
         returnEth();
 
         logger.Log(address(this), owner, "AutomaticMCDBoost", abi.encode(ratioBefore, ratioAfter));
-    }
-
-    /// @dev One time function used to remove and give new permission
-    function monitorProxyUpdate(address[] memory _proxies) public onlyApproved burnGas(30) {
-        for(uint i = 0; i < _proxies.length; ++i) {
-            monitorProxyContract.callExecute(
-            _proxies[i],
-            PROXY_PERMISSION_ADDR,
-            abi.encodeWithSignature(
-                "givePermission(address)",
-                NEW_MONITOR_PROXY_ADDR
-            ));
-        }
     }
 
 /******************* INTERNAL METHODS ********************************/
