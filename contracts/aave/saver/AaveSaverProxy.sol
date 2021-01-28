@@ -2,13 +2,13 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../AaveHelper.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../interfaces/IAToken.sol";
 import "../../interfaces/ILendingPool.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../../utils/GasBurner.sol";
 
-contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
+contract AaveSaverProxy is GasBurner, DFSExchangeCore, AaveHelper {
 
 	address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
@@ -22,16 +22,18 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 
 		// redeem collateral
 		address aTokenCollateral = ILendingPool(lendingPoolCore).getReserveATokenAddress(_data.srcAddr);
-		// uint256 maxCollateral = IAToken(aTokenCollateral).balanceOf(address(this)); 
+		// uint256 maxCollateral = IAToken(aTokenCollateral).balanceOf(address(this));
 		// don't swap more than maxCollateral
 		// _data.srcAmount = _data.srcAmount > maxCollateral ? maxCollateral : _data.srcAmount;
 		IAToken(aTokenCollateral).redeem(_data.srcAmount);
 
 		uint256 destAmount = _data.srcAmount;
 		if (_data.srcAddr != _data.destAddr) {
+            _data.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
+            _data.user = user;
 			// swap
 			(, destAmount) = _sell(_data);
-			destAmount -= getFee(destAmount, user, _gasCost, _data.destAddr);
+			destAmount -= getGasCost(destAmount, user, _gasCost, _data.destAddr);
 		} else {
 			destAmount -= getGasCost(destAmount, user, _gasCost, _data.destAddr);
 		}
@@ -67,12 +69,17 @@ contract AaveSaverProxy is GasBurner, SaverExchangeCore, AaveHelper {
 
 		uint256 destAmount;
 		if (_data.destAddr != _data.srcAddr) {
-			_data.srcAmount -= getFee(_data.srcAmount, user, _gasCost, _data.srcAddr);
+            _data.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
+            _data.user = user;
+
 			// swap
 			(, destAmount) = _sell(_data);
+            destAmount -= getGasCost(_data.destAmount, user, _gasCost, _data.destAddr);
+
 		} else {
-			_data.srcAmount -= getGasCost(_data.srcAmount, user, _gasCost, _data.srcAddr);
 			destAmount = _data.srcAmount;
+            destAmount -= getGasCost(_data.destAmount, user, _gasCost, _data.destAddr);
+
 		}
 
 		if (_data.destAddr == ETH_ADDR) {

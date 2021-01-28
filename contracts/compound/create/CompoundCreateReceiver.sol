@@ -4,11 +4,12 @@ pragma experimental ABIEncoderV2;
 import "../../DS/DSProxy.sol";
 import "../../utils/FlashLoanReceiverBase.sol";
 import "../../interfaces/DSProxyInterface.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../shifter/ShifterRegistry.sol";
+import "./CompoundCreateTaker.sol";
 
 /// @title Contract that receives the FL from Aave for Creating loans
-contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
+contract CompoundCreateReceiver is FlashLoanReceiverBase, DFSExchangeCore {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
     ShifterRegistry public constant shifterRegistry = ShifterRegistry(0x2E82103bD91053C781aaF39da17aE58ceE39d0ab);
@@ -16,6 +17,8 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
+
+    uint public constant SERVICE_FEE = 400; // 0.25% Fee
 
     // solhint-disable-next-line no-empty-blocks
     constructor() public FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) {}
@@ -47,8 +50,10 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
 
         // If the assets are different
         if (compCreate.cCollAddr != compCreate.cDebtAddr) {
-            (, uint sellAmount) = _sell(exchangeData);
-            getFee(sellAmount, exchangeData.destAddr, compCreate.proxyAddr);
+            exchangeData.dfsFeeDivider = SERVICE_FEE;
+            exchangeData.user = DSProxyInterface(compCreate.proxyAddr).owner();
+
+            _sell(exchangeData);
 
             leveragedAsset = exchangeData.destAddr;
         }
@@ -76,35 +81,22 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
     /// @param _fee Fee of the FL
     /// @param _params Saver proxy params
     function packFunctionCall(uint _amount, uint _fee, bytes memory _params) internal pure  returns (CompCreateData memory compCreate, ExchangeData memory exchangeData) {
-        (
-            uint[4] memory numData, // srcAmount, destAmount, minPrice, price0x
-            address[6] memory cAddresses, // cCollAddr, cDebtAddr, srcAddr, destAddr, exchangeAddr, wrapper
-            bytes memory callData,
-            address proxy
-        )
-        = abi.decode(_params, (uint256[4],address[6],bytes,address));
+
+        CompoundCreateTaker.CreateInfo memory createData;
+        address proxy;
+
+        (createData , exchangeData, proxy)= abi.decode(_params, (CompoundCreateTaker.CreateInfo, ExchangeData, address));
 
         bytes memory proxyData = abi.encodeWithSignature(
             "open(address,address,uint256)",
-                                cAddresses[0], cAddresses[1], (_amount + _fee));
+                                createData.cCollAddress, createData.cBorrowAddress, (_amount + _fee));
 
-         exchangeData = SaverExchangeCore.ExchangeData({
-            srcAddr: cAddresses[2],
-            destAddr: cAddresses[3],
-            srcAmount: numData[0],
-            destAmount: numData[1],
-            minPrice: numData[2],
-            wrapper: cAddresses[5],
-            exchangeAddr: cAddresses[4],
-            callData: callData,
-            price0x: numData[3]
-        });
 
         compCreate = CompCreateData({
             proxyAddr: payable(proxy),
             proxyData: proxyData,
-            cCollAddr: cAddresses[0],
-            cDebtAddr: cAddresses[1]
+            cCollAddr: createData.cCollAddress,
+            cDebtAddr: createData.cBorrowAddress
         });
 
         return (compCreate, exchangeData);
@@ -121,30 +113,6 @@ contract CompoundCreateReceiver is FlashLoanReceiverBase, SaverExchangeCore {
         }
     }
 
-    function getFee(uint _amount, address _tokenAddr, address _proxy) internal returns (uint feeAmount) {
-        uint fee = 400;
-
-        DSProxy proxy = DSProxy(payable(_proxy));
-        address user = proxy.owner();
-
-        if (Discount(DISCOUNT_ADDR).isCustomFeeSet(user)) {
-            fee = Discount(DISCOUNT_ADDR).getCustomServiceFee(user);
-        }
-
-        feeAmount = (fee == 0) ? 0 : (_amount / fee);
-
-        // fee can't go over 20% of the whole amount
-        if (feeAmount > (_amount / 5)) {
-            feeAmount = _amount / 5;
-        }
-
-        if (_tokenAddr == ETH_ADDRESS) {
-            WALLET_ADDR.transfer(feeAmount);
-        } else {
-            ERC20(_tokenAddr).safeTransfer(WALLET_ADDR, feeAmount);
-        }
-    }
-
     // solhint-disable-next-line no-empty-blocks
-    receive() external override(FlashLoanReceiverBase, SaverExchangeCore) payable {}
+    receive() external override(FlashLoanReceiverBase, DFSExchangeCore) payable {}
 }

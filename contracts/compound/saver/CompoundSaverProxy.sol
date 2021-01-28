@@ -1,12 +1,12 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../helpers/CompoundSaverHelper.sol";
 
 /// @title Contract that implements repay/boost functionality
-contract CompoundSaverProxy is CompoundSaverHelper, SaverExchangeCore {
+contract CompoundSaverProxy is CompoundSaverHelper, DFSExchangeCore {
 
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
 
@@ -37,9 +37,11 @@ contract CompoundSaverProxy is CompoundSaverHelper, SaverExchangeCore {
 
         if (collToken != borrowToken) {
             _exData.srcAmount = collAmount;
+            _exData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
+            _exData.user = user;
 
             (, swapAmount) = _sell(_exData);
-            swapAmount -= getFee(swapAmount, user, _gasCost, _cAddresses[1]);
+            swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[1]);
         } else {
             swapAmount = collAmount;
             swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[1]);
@@ -79,10 +81,13 @@ contract CompoundSaverProxy is CompoundSaverHelper, SaverExchangeCore {
         uint swapAmount = 0;
 
         if (collToken != borrowToken) {
-            borrowAmount -= getFee(borrowAmount, user, _gasCost, _cAddresses[1]);
+            _exData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
+            _exData.user = user;
 
             _exData.srcAmount = borrowAmount;
-            (,swapAmount) = _sell(_exData);
+            (, swapAmount) = _sell(_exData);
+
+             swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[1]);
         } else {
             swapAmount = borrowAmount;
             swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[1]);

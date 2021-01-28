@@ -72,7 +72,7 @@ contract MCDCreateFlashLoan is DFSExchangeCore, AdminAuth, FlashLoanReceiverBase
                 _proxy
             );
         } else {
-            ERC20(address(Join(_joinAddr).gem())).safeApprove(CREATE_PROXY_ACTIONS, uint256(-1));
+            ERC20(address(Join(_joinAddr).gem())).safeApprove(CREATE_PROXY_ACTIONS, (_collAmount + collSwaped));
 
             MCDCreateProxyActions(CREATE_PROXY_ACTIONS).openLockGemAndDraw(
                 MANAGER_ADDRESS,

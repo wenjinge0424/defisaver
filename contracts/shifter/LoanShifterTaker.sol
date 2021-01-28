@@ -11,7 +11,7 @@ import "../interfaces/IMCDSubscriptions.sol";
 import "../interfaces/ICompoundSubscriptions.sol";
 import "../auth/AdminAuth.sol";
 import "../auth/ProxyPermission.sol";
-import "../exchange/SaverExchangeCore.sol";
+import "../exchangeV3/DFSExchangeData.sol";
 import "./ShifterRegistry.sol";
 import "../utils/GasBurner.sol";
 import "../loggers/DefisaverLogger.sol";
@@ -23,6 +23,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant CETH_ADDRESS = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     address public constant MCD_SUB_ADDRESS = 0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a;
@@ -58,7 +59,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
     /// @notice Main entry point, it will move or transform a loan
     /// @dev Called through DSProxy
     function moveLoan(
-        SaverExchangeCore.ExchangeData memory _exchangeData,
+        DFSExchangeData.ExchangeData memory _exchangeData,
         LoanShiftData memory _loanShift
     ) public payable burnGas(20) {
         if (_isSameTypeVaults(_loanShift)) {
@@ -73,7 +74,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
     //////////////////////// INTERNAL FUNCTIONS //////////////////////////
 
     function _callCloseAndOpen(
-        SaverExchangeCore.ExchangeData memory _exchangeData,
+        DFSExchangeData.ExchangeData memory _exchangeData,
         LoanShiftData memory _loanShift
     ) internal {
         address protoAddr = shifterRegistry.getAddr(getNameByProtocol(uint8(_loanShift.fromProtocol)));
@@ -82,16 +83,8 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
             _loanShift.debtAmount = ILoanShifter(protoAddr).getLoanAmount(_loanShift.id1, _loanShift.debtAddr1);
         }
 
-        (
-            uint[8] memory numData,
-            address[8] memory addrData,
-            uint8[3] memory enumData,
-            bytes memory callData
-        )
-        = _packData(_loanShift, _exchangeData);
-
         // encode data
-        bytes memory paramsData = abi.encode(numData, addrData, enumData, callData, address(this));
+        bytes memory paramsData = abi.encode(_loanShift, _exchangeData, address(this));
 
         address payable loanShifterReceiverAddr = payable(shifterRegistry.getAddr("LOAN_SHIFTER_RECEIVER"));
 
@@ -142,7 +135,7 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
 
     function getLoanAddr(address _address, Protocols _fromProtocol) internal returns (address) {
         if (_fromProtocol == Protocols.COMPOUND) {
-            return CTokenInterface(_address).underlying();
+            return getUnderlyingAddr(_address);
         } else if (_fromProtocol == Protocols.MCD) {
             return DAI_ADDRESS;
         } else {
@@ -150,8 +143,16 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
         }
     }
 
+    function getUnderlyingAddr(address _cTokenAddress) internal returns (address) {
+        if (_cTokenAddress == CETH_ADDRESS) {
+            return ETH_ADDRESS;
+        } else {
+            return CTokenInterface(_cTokenAddress).underlying();
+        }
+    }
+
     function logEvent(
-        SaverExchangeCore.ExchangeData memory _exchangeData,
+        DFSExchangeData.ExchangeData memory _exchangeData,
         LoanShiftData memory _loanShift
     ) internal {
         address srcAddr = _exchangeData.srcAddr;
@@ -201,42 +202,6 @@ contract LoanShifterTaker is AdminAuth, ProxyPermission, GasBurner {
         if (_protocol == Protocols.COMPOUND) {
             ICompoundSubscriptions(COMPOUND_SUB_ADDRESS).unsubscribe();
         }
-    }
-
-    function _packData(
-        LoanShiftData memory _loanShift,
-        SaverExchangeCore.ExchangeData memory exchangeData
-    ) internal pure returns (uint[8] memory numData, address[8] memory addrData, uint8[3] memory enumData, bytes memory callData) {
-
-        numData = [
-            _loanShift.collAmount,
-            _loanShift.debtAmount,
-            _loanShift.id1,
-            _loanShift.id2,
-            exchangeData.srcAmount,
-            exchangeData.destAmount,
-            exchangeData.minPrice,
-            exchangeData.price0x
-        ];
-
-        addrData = [
-            _loanShift.addrLoan1,
-            _loanShift.addrLoan2,
-            _loanShift.debtAddr1,
-            _loanShift.debtAddr2,
-            exchangeData.srcAddr,
-            exchangeData.destAddr,
-            exchangeData.exchangeAddr,
-            exchangeData.wrapper
-        ];
-
-        enumData = [
-            uint8(_loanShift.fromProtocol),
-            uint8(_loanShift.toProtocol),
-            uint8(_loanShift.swapType)
-        ];
-
-        callData = exchangeData.callData;
     }
 
 }

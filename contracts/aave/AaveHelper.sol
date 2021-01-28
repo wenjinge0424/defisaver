@@ -213,4 +213,8 @@ contract AaveHelper is DSMath {
 
         return ERC20(_token).decimals();
     }
+
+    function isAutomation() internal view returns(bool) {
+        return BotRegistry(BOT_REGISTRY_ADDRESS).botList(tx.origin);
+    }
 }

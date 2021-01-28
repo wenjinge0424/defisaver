@@ -5,7 +5,7 @@ import "../../mcd/saver/MCDSaverProxy.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../../interfaces/ILendingPool.sol";
 import "../../exchangeV3/DFSExchangeData.sol";
-
+import "../../utils/GasBurner.sol";
 
 abstract contract IMCDSubscriptions {
     function unsubscribe(uint256 _cdpId) external virtual ;
@@ -14,7 +14,7 @@ abstract contract IMCDSubscriptions {
 }
 
 
-contract MCDCloseTaker is MCDSaverProxyHelper {
+contract MCDCloseTaker is MCDSaverProxyHelper, GasBurner {
 
     address public constant SUBSCRIPTION_ADDRESS_NEW = 0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a;
 
@@ -47,7 +47,7 @@ contract MCDCloseTaker is MCDSaverProxyHelper {
         DFSExchangeData.ExchangeData memory _exchangeData,
         CloseData memory _closeData,
         address payable mcdCloseFlashLoan
-    ) public payable {
+    ) public payable burnGas(20) {
         mcdCloseFlashLoan.transfer(msg.value); // 0x fee
 
         address managerAddr = getManagerAddr(_closeData.managerType);

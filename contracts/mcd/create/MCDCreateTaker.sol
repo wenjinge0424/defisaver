@@ -6,8 +6,9 @@ import "../../loggers/DefisaverLogger.sol";
 import "../../interfaces/ILendingPool.sol";
 import "../../exchangeV3/DFSExchangeData.sol";
 import "../../utils/SafeERC20.sol";
+import "../../utils/GasBurner.sol";
 
-contract MCDCreateTaker {
+contract MCDCreateTaker is GasBurner {
 
     using SafeERC20 for ERC20;
 
@@ -32,7 +33,7 @@ contract MCDCreateTaker {
     function openWithLoan(
         DFSExchangeData.ExchangeData memory _exchangeData,
         CreateData memory _createData
-    ) public payable {
+    ) public payable burnGas(20) {
 
         MCD_CREATE_FLASH_LOAN.transfer(msg.value); //0x fee
 

@@ -218,4 +218,8 @@ contract CompoundSaverHelper is DSMath, Exponential {
 
         return sub(liquidityInToken, (liquidityInToken / 100)); // cut off 1% due to rounding issues
     }
+
+    function isAutomation() internal view returns(bool) {
+        return BotRegistry(BOT_REGISTRY_ADDRESS).botList(tx.origin);
+    }
 }

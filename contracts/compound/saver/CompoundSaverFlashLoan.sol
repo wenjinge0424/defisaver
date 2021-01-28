@@ -3,10 +3,10 @@ pragma experimental ABIEncoderV2;
 
 import "../../utils/FlashLoanReceiverBase.sol";
 import "../../interfaces/DSProxyInterface.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeData.sol";
 
 /// @title Contract that receives the FL from Aave for Repays/Boost
-contract CompoundSaverFlashLoan is FlashLoanReceiverBase, SaverExchangeCore {
+contract CompoundSaverFlashLoan is FlashLoanReceiverBase, DFSExchangeData {
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
     address payable public COMPOUND_SAVER_FLASH_PROXY = 0xcaB974d1702a056e6FF16f1DaA34646E41Ef485E;
@@ -91,5 +91,5 @@ contract CompoundSaverFlashLoan is FlashLoanReceiverBase, SaverExchangeCore {
         _proxy.transfer(address(this).balance);
     }
 
-    receive() external override(SaverExchangeCore, FlashLoanReceiverBase) payable {}
+    receive() external override(FlashLoanReceiverBase) payable {}
 }

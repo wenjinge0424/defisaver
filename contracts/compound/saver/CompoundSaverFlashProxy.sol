@@ -2,14 +2,14 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../../utils/SafeERC20.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../interfaces/CTokenInterface.sol";
 import "../../utils/Discount.sol";
 import "../helpers/CompoundSaverHelper.sol";
 import "../../loggers/DefisaverLogger.sol";
 
 /// @title Implements the actual logic of Repay/Boost with FL
-contract CompoundSaverFlashProxy is SaverExchangeCore, CompoundSaverHelper  {
+contract CompoundSaverFlashProxy is DFSExchangeCore, CompoundSaverHelper  {
 
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
@@ -44,10 +44,13 @@ contract CompoundSaverFlashProxy is SaverExchangeCore, CompoundSaverHelper  {
         if (collToken != borrowToken) {
             // swap max coll + loanAmount
             _exData.srcAmount = maxColl + _flashLoanData[0];
+            _exData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
+            _exData.user = user;
+
             (,swapAmount) = _sell(_exData);
 
             // get fee
-            swapAmount -= getFee(swapAmount, user, _gasCost, _cAddresses[1]);
+            swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[1]);
         } else {
             swapAmount = (maxColl + _flashLoanData[0]);
             swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[1]);
@@ -92,10 +95,12 @@ contract CompoundSaverFlashProxy is SaverExchangeCore, CompoundSaverHelper  {
 
         if (collToken != borrowToken) {
             // get dfs fee
-            borrowAmount -= getFee((borrowAmount + _flashLoanData[0]), user, _gasCost, _cAddresses[1]);
             _exData.srcAmount = (borrowAmount + _flashLoanData[0]);
+            _exData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
+            _exData.user = user;
 
-            (,swapAmount) = _sell(_exData);
+            (, swapAmount) = _sell(_exData);
+            swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[1]);
         } else {
             swapAmount = (borrowAmount + _flashLoanData[0]);
             swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[1]);

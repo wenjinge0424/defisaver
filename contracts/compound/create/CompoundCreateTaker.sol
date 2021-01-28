@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 import "../../interfaces/ILendingPool.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../../auth/ProxyPermission.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../utils/SafeERC20.sol";
 
 /// @title Opens compound positions with a leverage
@@ -29,7 +29,7 @@ contract CompoundCreateTaker is ProxyPermission {
     /// @param _exchangeData Exchange data struct
     function openLeveragedLoan(
         CreateInfo memory _createInfo,
-        SaverExchangeCore.ExchangeData memory _exchangeData,
+        DFSExchangeCore.ExchangeData memory _exchangeData,
         address payable _compReceiver
     ) public payable {
         uint loanAmount = _exchangeData.srcAmount;
@@ -44,10 +44,7 @@ contract CompoundCreateTaker is ProxyPermission {
         // Send tokens to FL receiver
         sendDeposit(_compReceiver, _exchangeData.destAddr);
 
-        // Pack the struct data
-        (uint[4] memory numData, address[6] memory cAddresses, bytes memory callData)
-                                            = _packData(_createInfo, _exchangeData);
-        bytes memory paramsData = abi.encode(numData, cAddresses, callData, address(this));
+        bytes memory paramsData = abi.encode(_createInfo, _exchangeData, address(this));
 
         givePermission(_compReceiver);
 
@@ -65,29 +62,5 @@ contract CompoundCreateTaker is ProxyPermission {
         }
 
         _compoundReceiver.transfer(address(this).balance);
-    }
-
-    function _packData(
-        CreateInfo memory _createInfo,
-        SaverExchangeCore.ExchangeData memory exchangeData
-    ) internal pure returns (uint[4] memory numData, address[6] memory cAddresses, bytes memory callData) {
-
-        numData = [
-            exchangeData.srcAmount,
-            exchangeData.destAmount,
-            exchangeData.minPrice,
-            exchangeData.price0x
-        ];
-
-        cAddresses = [
-            _createInfo.cCollAddress,
-            _createInfo.cBorrowAddress,
-            exchangeData.srcAddr,
-            exchangeData.destAddr,
-            exchangeData.exchangeAddr,
-            exchangeData.wrapper
-        ];
-
-        callData = exchangeData.callData;
     }
 }
