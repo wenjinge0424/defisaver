@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 import "../../interfaces/ILendingPool.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../../auth/ProxyPermission.sol";
-import "../../exchangeV3/DFSExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeData.sol";
 import "../../utils/SafeERC20.sol";
 
 /// @title Opens compound positions with a leverage
@@ -29,7 +29,7 @@ contract CompoundCreateTaker is ProxyPermission {
     /// @param _exchangeData Exchange data struct
     function openLeveragedLoan(
         CreateInfo memory _createInfo,
-        DFSExchangeCore.ExchangeData memory _exchangeData,
+        DFSExchangeData.ExchangeData memory _exchangeData,
         address payable _compReceiver
     ) public payable {
         uint loanAmount = _exchangeData.srcAmount;
