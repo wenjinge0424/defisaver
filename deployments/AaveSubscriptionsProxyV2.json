@@ -1,0 +1,162 @@
+{
+	"contractName": "AaveSubscriptionsProxyV2",
+	"abi": [
+		{
+			"inputs": [],
+			"name": "AAVE_MONITOR_PROXY",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "AAVE_SUBSCRIPTION_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "FACTORY_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "NAME",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_contractAddr",
+					"type": "address"
+				}
+			],
+			"name": "givePermission",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_contractAddr",
+					"type": "address"
+				}
+			],
+			"name": "removePermission",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint128",
+					"name": "_minRatio",
+					"type": "uint128"
+				},
+				{
+					"internalType": "uint128",
+					"name": "_maxRatio",
+					"type": "uint128"
+				},
+				{
+					"internalType": "uint128",
+					"name": "_optimalRatioBoost",
+					"type": "uint128"
+				},
+				{
+					"internalType": "uint128",
+					"name": "_optimalRatioRepay",
+					"type": "uint128"
+				},
+				{
+					"internalType": "bool",
+					"name": "_boostEnabled",
+					"type": "bool"
+				}
+			],
+			"name": "subscribe",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "unsubscribe",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint128",
+					"name": "_minRatio",
+					"type": "uint128"
+				},
+				{
+					"internalType": "uint128",
+					"name": "_maxRatio",
+					"type": "uint128"
+				},
+				{
+					"internalType": "uint128",
+					"name": "_optimalRatioBoost",
+					"type": "uint128"
+				},
+				{
+					"internalType": "uint128",
+					"name": "_optimalRatioRepay",
+					"type": "uint128"
+				},
+				{
+					"internalType": "bool",
+					"name": "_boostEnabled",
+					"type": "bool"
+				}
+			],
+			"name": "update",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		}
+	],
+	"networks": {
+		"mainnet": {
+			"address": "0xBC7B0ed08eEE88F8C609372639D69F407AaB2331",
+			"args": []
+		}
+	}
+}

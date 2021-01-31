@@ -8,8 +8,8 @@ contract AaveSubscriptionsProxyV2 is ProxyPermission {
 
     string public constant NAME = "AaveSubscriptionsProxyV2";
 
-    address public constant AAVE_SUBSCRIPTION_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant AAVE_MONITOR_PROXY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant AAVE_SUBSCRIPTION_ADDRESS = 0x6B25043BF08182d8e86056C6548847aF607cd7CD;
+    address public constant AAVE_MONITOR_PROXY = 0x380982902872836ceC629171DaeAF42EcC02226e;
 
     /// @notice Calls subscription contract and creates a DSGuard if non existent
     /// @param _minRatio Minimum ratio below which repay is triggered
