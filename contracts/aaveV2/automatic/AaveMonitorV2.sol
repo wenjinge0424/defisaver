@@ -57,7 +57,8 @@ contract AaveMonitorV2 is AdminAuth, DSMath, AaveSafetyRatioV2, GasBurner {
     function repayFor(
         DFSExchangeData.ExchangeData memory _exData,
         address _user,
-        uint256 _rateMode
+        uint256 _rateMode,
+        uint256 _flAmount
     ) public payable onlyApproved burnGas(REPAY_GAS_TOKEN) {
 
         (bool isAllowed, uint ratioBefore) = canCall(Method.Repay, _user);
@@ -69,11 +70,12 @@ contract AaveMonitorV2 is AdminAuth, DSMath, AaveSafetyRatioV2, GasBurner {
             _user,
             aaveSaverProxy,
             abi.encodeWithSignature(
-                "repay(address,(address,address,uint256,uint256,uint256,uint256,address,address,bytes,(address,address,address,uint256,uint256,bytes)),uint256,uint256)",
+                "repay(address,(address,address,uint256,uint256,uint256,uint256,address,address,bytes,(address,address,address,uint256,uint256,bytes)),uint256,uint256,uint256)",
                 AAVE_MARKET_ADDRESS,
                 _exData,
                 _rateMode,
-                gasCost
+                gasCost,
+                _flAmount
             )
         );
 
@@ -92,7 +94,8 @@ contract AaveMonitorV2 is AdminAuth, DSMath, AaveSafetyRatioV2, GasBurner {
     function boostFor(
         DFSExchangeData.ExchangeData memory _exData,
         address _user,
-        uint256 _rateMode
+        uint256 _rateMode,
+        uint256 _flAmount
     ) public payable onlyApproved burnGas(BOOST_GAS_TOKEN) {
 
         (bool isAllowed, uint ratioBefore) = canCall(Method.Boost, _user);
@@ -104,11 +107,12 @@ contract AaveMonitorV2 is AdminAuth, DSMath, AaveSafetyRatioV2, GasBurner {
             _user,
             aaveSaverProxy,
             abi.encodeWithSignature(
-                "boost(address,(address,address,uint256,uint256,uint256,uint256,address,address,bytes,(address,address,address,uint256,uint256,bytes)),uint256,uint256)",
+                "boost(address,(address,address,uint256,uint256,uint256,uint256,address,address,bytes,(address,address,address,uint256,uint256,bytes)),uint256,uint256,uint256)",
                 AAVE_MARKET_ADDRESS,
                 _exData,
                 _rateMode,
-                gasCost
+                gasCost,
+                _flAmount
             )
         );
 
