@@ -34,6 +34,7 @@ contract CompoundLoanInfo is CompoundSafetyRatio {
         uint totalBorrow;
         uint collateralFactor;
         uint price;
+        uint borrowCap;
     }
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -203,7 +204,8 @@ contract CompoundLoanInfo is CompoundSafetyRatio {
                 totalSupply: cToken.totalSupply(),
                 totalBorrow: cToken.totalBorrowsCurrent(),
                 collateralFactor: collFactor,
-                price: CompoundOracleInterface(oracleAddr).getUnderlyingPrice(_cTokenAddresses[i])
+                price: CompoundOracleInterface(oracleAddr).getUnderlyingPrice(_cTokenAddresses[i]),
+                borrowCap: comp.borrowCaps(_cTokenAddresses[i])
             });
         }
     }
