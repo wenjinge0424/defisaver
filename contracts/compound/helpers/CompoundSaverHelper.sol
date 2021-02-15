@@ -4,6 +4,7 @@ import "../../interfaces/CEtherInterface.sol";
 import "../../interfaces/CompoundOracleInterface.sol";
 import "../../interfaces/CTokenInterface.sol";
 import "../../interfaces/ComptrollerInterface.sol";
+import "../../interfaces/IFeeRecipient.sol";
 
 import "../../utils/Discount.sol";
 import "../../DS/DSMath.sol";
@@ -18,7 +19,8 @@ contract CompoundSaverHelper is DSMath, Exponential {
 
     using SafeERC20 for ERC20;
 
-    address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
+    IFeeRecipient public constant feeRecipient = IFeeRecipient(0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A);
+
     address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
 
     uint public constant MANUAL_SERVICE_FEE = 400; // 0.25% Fee
@@ -99,10 +101,12 @@ contract CompoundSaverHelper is DSMath, Exponential {
             feeAmount = _amount / 5;
         }
 
+        address walletAddr = feeRecipient.getFeeAddr();
+
         if (tokenAddr == ETH_ADDRESS) {
-            WALLET_ADDR.transfer(feeAmount);
+            payable(walletAddr).transfer(feeAmount);
         } else {
-            ERC20(tokenAddr).safeTransfer(WALLET_ADDR, feeAmount);
+            ERC20(tokenAddr).safeTransfer(walletAddr, feeAmount);
         }
     }
 
@@ -130,10 +134,12 @@ contract CompoundSaverHelper is DSMath, Exponential {
             feeAmount = _amount / 5;
         }
 
+        address walletAddr = feeRecipient.getFeeAddr();
+
         if (tokenAddr == ETH_ADDRESS) {
-            WALLET_ADDR.transfer(feeAmount);
+            payable(walletAddr).transfer(feeAmount);
         } else {
-            ERC20(tokenAddr).safeTransfer(WALLET_ADDR, feeAmount);
+            ERC20(tokenAddr).safeTransfer(walletAddr, feeAmount);
         }
     }
 

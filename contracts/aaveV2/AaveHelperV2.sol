@@ -3,6 +3,7 @@ pragma solidity ^0.6.0;
 import "../DS/DSMath.sol";
 import "../DS/DSProxy.sol";
 import "../utils/Discount.sol";
+import "../interfaces/IFeeRecipient.sol";
 import "../interfaces/IAToken.sol";
 import "../interfaces/ILendingPoolV2.sol";
 import "../interfaces/IPriceOracleGetterAave.sol";
@@ -15,7 +16,8 @@ contract AaveHelperV2 is DSMath {
 
     using SafeERC20 for ERC20;
 
-    address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
+    IFeeRecipient public constant feeRecipient = IFeeRecipient(0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A);
+
     address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
     address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; // mainnet
 
@@ -44,16 +46,18 @@ contract AaveHelperV2 is DSMath {
         uint256 price = IPriceOracleGetterAave(_oracleAddress).getAssetPrice(_tokenAddr);
         _gasCost = wdiv(_gasCost, price) / (10 ** (18 - _getDecimals(_tokenAddr)));
         gasCost = _gasCost;
-    
+
         // gas cost can't go over 10% of the whole amount
         if (gasCost > (_amount / 10)) {
             gasCost = _amount / 10;
         }
 
+        address walletAddr = feeRecipient.getFeeAddr();
+
         if (_tokenAddr == ETH_ADDR) {
-            WALLET_ADDR.transfer(gasCost);
+            payable(walletAddr).transfer(gasCost);
         } else {
-            ERC20(_tokenAddr).safeTransfer(WALLET_ADDR, gasCost);
+            ERC20(_tokenAddr).safeTransfer(walletAddr, gasCost);
         }
     }
 

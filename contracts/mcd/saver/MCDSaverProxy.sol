@@ -267,7 +267,9 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
                 feeAmount = _amount / 10;
             }
 
-            ERC20(DAI_ADDRESS).transfer(WALLET_ID, feeAmount);
+            address walletAddr = _feeRecipient.getFeeAddr();
+
+            ERC20(DAI_ADDRESS).transfer(walletAddr, feeAmount);
 
             return feeAmount;
         }

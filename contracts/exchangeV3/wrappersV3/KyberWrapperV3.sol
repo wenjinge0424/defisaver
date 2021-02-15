@@ -2,6 +2,7 @@ pragma solidity ^0.6.0;
 
 import "../../utils/SafeERC20.sol";
 import "../../interfaces/KyberNetworkProxyInterface.sol";
+import "../../interfaces/IFeeRecipient.sol";
 import "../../interfaces/ExchangeInterfaceV3.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
@@ -10,7 +11,8 @@ contract KyberWrapperV3 is DSMath, ExchangeInterfaceV3, AdminAuth {
 
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant KYBER_INTERFACE = 0x9AAb3f75489902f3a48495025729a0AF77d4b11e;
-    address payable public constant WALLET_ID = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
+
+    IFeeRecipient public constant feeRecipient = IFeeRecipient(0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A);
 
     using SafeERC20 for ERC20;
 
@@ -22,6 +24,8 @@ contract KyberWrapperV3 is DSMath, ExchangeInterfaceV3, AdminAuth {
     function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) external override payable returns (uint) {
         ERC20 srcToken = ERC20(_srcAddr);
         ERC20 destToken = ERC20(_destAddr);
+
+        address walletAddr = feeRecipient.getFeeAddr();
 
         KyberNetworkProxyInterface kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
 
@@ -36,7 +40,7 @@ contract KyberWrapperV3 is DSMath, ExchangeInterfaceV3, AdminAuth {
             msg.sender,
             uint(-1),
             0,
-            WALLET_ID
+            walletAddr
         );
 
         return destAmount;
@@ -50,6 +54,8 @@ contract KyberWrapperV3 is DSMath, ExchangeInterfaceV3, AdminAuth {
     function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory _additionalData) external override payable returns(uint) {
         ERC20 srcToken = ERC20(_srcAddr);
         ERC20 destToken = ERC20(_destAddr);
+
+        address walletAddr = feeRecipient.getFeeAddr();
 
         uint srcAmount = 0;
         if (_srcAddr != KYBER_ETH_ADDRESS) {
@@ -71,7 +77,7 @@ contract KyberWrapperV3 is DSMath, ExchangeInterfaceV3, AdminAuth {
             msg.sender,
             _destAmount,
             0,
-            WALLET_ID
+            walletAddr
         );
 
         require(destAmount == _destAmount, "Wrong dest amount");

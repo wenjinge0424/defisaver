@@ -10,7 +10,6 @@ import "./LoanShifterTaker.sol";
 
 /// @title LoanShifterReceiver Recevies the Aave flash loan and calls actions through users DSProxy
 contract LoanShifterReceiver is DFSExchangeCore, FlashLoanReceiverBase, AdminAuth {
-    address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
     address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER =
