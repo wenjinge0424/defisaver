@@ -10,7 +10,7 @@ import "../../auth/AdminAuth.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../../utils/GasBurner.sol";
 import "../../utils/BotRegistry.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeData.sol";
 
 import "./ISubscriptionsV2.sol";
 import "./StaticV2.sol";
@@ -59,7 +59,7 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
     /// @notice Bots call this method to repay for user when conditions are met
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     function repayFor(
-        SaverExchangeCore.ExchangeData memory _exchangeData,
+        DFSExchangeData.ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _nextPrice,
         address _joinAddr
@@ -75,7 +75,7 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
         monitorProxyContract.callExecute{value: msg.value}(
             owner,
             mcdSaverTakerAddress,
-            abi.encodeWithSelector(REPAY_SELECTOR, _exchangeData, _cdpId, gasCost, _joinAddr));
+            abi.encodeWithSelector(REPAY_SELECTOR, _exchangeData, _cdpId, gasCost, _joinAddr, 0));
 
 
         (bool isGoodRatio, uint ratioAfter) = ratioGoodAfter(Method.Repay, _cdpId, _nextPrice);
@@ -89,7 +89,7 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
     /// @notice Bots call this method to boost for user when conditions are met
     /// @dev If the contract ownes gas token it will try and use it for gas price reduction
     function boostFor(
-        SaverExchangeCore.ExchangeData memory _exchangeData,
+        DFSExchangeData.ExchangeData memory _exchangeData,
         uint _cdpId,
         uint _nextPrice,
         address _joinAddr
@@ -105,7 +105,7 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
         monitorProxyContract.callExecute{value: msg.value}(
             owner,
             mcdSaverTakerAddress,
-            abi.encodeWithSelector(BOOST_SELECTOR, _exchangeData, _cdpId, gasCost, _joinAddr));
+            abi.encodeWithSelector(BOOST_SELECTOR, _exchangeData, _cdpId, gasCost, _joinAddr, 0));
 
         (bool isGoodRatio, uint ratioAfter) = ratioGoodAfter(Method.Boost, _cdpId, _nextPrice);
         require(isGoodRatio);

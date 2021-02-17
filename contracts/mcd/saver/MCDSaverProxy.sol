@@ -263,8 +263,8 @@ contract MCDSaverProxy is DFSExchangeCore, MCDSaverProxyHelper {
             uint ethDaiPrice = getPrice(ETH_ILK);
             uint feeAmount = rmul(_gasCost, ethDaiPrice);
 
-            if (feeAmount > _amount / 10) {
-                feeAmount = _amount / 10;
+            if (feeAmount > _amount / 5) {
+                feeAmount = _amount / 5;
             }
 
             address walletAddr = _feeRecipient.getFeeAddr();
