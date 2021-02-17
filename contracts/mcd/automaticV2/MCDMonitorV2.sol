@@ -28,6 +28,9 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
     uint public REPAY_GAS_COST = 1000000;
     uint public BOOST_GAS_COST = 1000000;
 
+    bytes4 public REPAY_SELECTOR = 0xf360ce20;
+    bytes4 public BOOST_SELECTOR = 0x8ec2ae25;
+
     MCDMonitorProxyV2 public monitorProxyContract;
     ISubscriptionsV2 public subscriptionsContract;
     address public mcdSaverTakerAddress;
@@ -72,9 +75,7 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
         monitorProxyContract.callExecute{value: msg.value}(
             owner,
             mcdSaverTakerAddress,
-            abi.encodeWithSignature(
-            "repayWithLoan((address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256,uint256,address)",
-            _exchangeData, _cdpId, gasCost, _joinAddr));
+            abi.encodeWithSelector(REPAY_SELECTOR, _exchangeData, _cdpId, gasCost, _joinAddr));
 
 
         (bool isGoodRatio, uint ratioAfter) = ratioGoodAfter(Method.Repay, _cdpId, _nextPrice);
@@ -104,9 +105,7 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
         monitorProxyContract.callExecute{value: msg.value}(
             owner,
             mcdSaverTakerAddress,
-            abi.encodeWithSignature(
-            "boostWithLoan((address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256,uint256,address)",
-            _exchangeData, _cdpId, gasCost, _joinAddr));
+            abi.encodeWithSelector(BOOST_SELECTOR, _exchangeData, _cdpId, gasCost, _joinAddr));
 
         (bool isGoodRatio, uint ratioAfter) = ratioGoodAfter(Method.Boost, _cdpId, _nextPrice);
         require(isGoodRatio);
