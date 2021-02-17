@@ -3,6 +3,7 @@ pragma solidity ^0.6.0;
 import "../DS/DSMath.sol";
 import "../DS/DSProxy.sol";
 import "../utils/Discount.sol";
+import "../interfaces/IFeeRecipient.sol";
 import "../interfaces/IAToken.sol";
 import "../interfaces/ILendingPool.sol";
 import "../interfaces/ILendingPoolAddressesProvider.sol";
@@ -15,7 +16,8 @@ contract AaveHelper is DSMath {
 
     using SafeERC20 for ERC20;
 
-    address payable public constant WALLET_ADDR = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
+    IFeeRecipient public constant feeRecipient = IFeeRecipient(0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A);
+
     address public constant DISCOUNT_ADDR = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
 
     uint public constant MANUAL_SERVICE_FEE = 400; // 0.25% Fee
@@ -134,10 +136,12 @@ contract AaveHelper is DSMath {
             feeAmount = _amount / 5;
         }
 
+        address walletAddr = feeRecipient.getFeeAddr();
+
         if (_tokenAddr == ETH_ADDR) {
-            WALLET_ADDR.transfer(feeAmount);
+            payable(walletAddr).transfer(feeAmount);
         } else {
-            ERC20(_tokenAddr).safeTransfer(WALLET_ADDR, feeAmount);
+            ERC20(_tokenAddr).safeTransfer(walletAddr, feeAmount);
         }
     }
 
@@ -162,10 +166,12 @@ contract AaveHelper is DSMath {
             gasCost = _amount / 5;
         }
 
+        address walletAddr = feeRecipient.getFeeAddr();
+
         if (_tokenAddr == ETH_ADDR) {
-            WALLET_ADDR.transfer(gasCost);
+            payable(walletAddr).transfer(gasCost);
         } else {
-            ERC20(_tokenAddr).safeTransfer(WALLET_ADDR, gasCost);
+            ERC20(_tokenAddr).safeTransfer(walletAddr, gasCost);
         }
     }
 

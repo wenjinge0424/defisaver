@@ -2,6 +2,7 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "../interfaces/GasTokenInterface.sol";
+import "../interfaces/IFeeRecipient.sol";
 import "./SaverExchangeCore.sol";
 import "../DS/DSMath.sol";
 import "../loggers/DefisaverLogger.sol";
@@ -14,6 +15,8 @@ contract SaverExchange is SaverExchangeCore, AdminAuth, GasBurner {
     using SafeERC20 for ERC20;
 
     uint256 public constant SERVICE_FEE = 800; // 0.125% Fee
+
+    IFeeRecipient public constant _feeRecipient = IFeeRecipient(0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A);
 
     // solhint-disable-next-line const-name-snakecase
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
@@ -74,11 +77,13 @@ contract SaverExchange is SaverExchangeCore, AdminAuth, GasBurner {
         if (fee == 0) {
             feeAmount = 0;
         } else {
+            address walletAddr = _feeRecipient.getFeeAddr();
+
             feeAmount = _amount / fee;
             if (_token == KYBER_ETH_ADDRESS) {
-                WALLET_ID.transfer(feeAmount);
+                payable(walletAddr).transfer(feeAmount);
             } else {
-                ERC20(_token).safeTransfer(WALLET_ID, feeAmount);
+                ERC20(_token).safeTransfer(walletAddr, feeAmount);
             }
         }
     }
