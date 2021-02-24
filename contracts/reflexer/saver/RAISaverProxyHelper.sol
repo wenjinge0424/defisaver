@@ -49,7 +49,7 @@ contract RAISaverProxyHelper is DSMath {
     function normalizePaybackAmount(address _safeEngine, address _urn, bytes32 _ilk) internal view returns (int amount) {
         uint dai = ISAFEEngine(_safeEngine).coinBalance(_urn);
 
-        (, uint rate,,,) = ISAFEEngine(_safeEngine).collateralTypes(_ilk);
+        (, uint rate,,,,) = ISAFEEngine(_safeEngine).collateralTypes(_ilk);
         (, uint art) = ISAFEEngine(_safeEngine).safes(_ilk, _urn);
 
         amount = toPositiveInt(dai / rate);
@@ -62,7 +62,7 @@ contract RAISaverProxyHelper is DSMath {
     /// @param _urn Urn of the Cdp
     /// @param _ilk Ilk of the Cdp
     function getAllDebt(address _safeEngine, address _usr, address _urn, bytes32 _ilk) internal view returns (uint daiAmount) {
-        (, uint rate,,,) = ISAFEEngine(_safeEngine).collateralTypes(_ilk);
+        (, uint rate,,,,) = ISAFEEngine(_safeEngine).collateralTypes(_ilk);
         (, uint art) = ISAFEEngine(_safeEngine).safes(_ilk, _urn);
         uint dai = ISAFEEngine(_safeEngine).coinBalance(_usr);
 
@@ -101,7 +101,7 @@ contract RAISaverProxyHelper is DSMath {
         address urn = _manager.safes(_cdpId);
 
         (uint collateral, uint debt) = ISAFEEngine(vat).safes(_ilk, urn);
-        (,uint rate,,,) = ISAFEEngine(vat).collateralTypes(_ilk);
+        (,uint rate,,,,) = ISAFEEngine(vat).collateralTypes(_ilk);
 
         return (collateral, rmul(debt, rate));
     }

@@ -90,7 +90,7 @@ contract RAISaverTaker is RAISaverProxy, GasBurner {
     /// @param _managerAddr Address of the CDP Manager
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
-    function getMaxDebt(address _managerAddr, uint256 _cdpId, bytes32 _ilk) public override view returns (uint256) {
+    function getMaxDebt(address _managerAddr, uint256 _cdpId, bytes32 _ilk) public override returns (uint256) {
         uint256 price = getPrice(_ilk);
 
         (, uint256 mat) = oracleRelayer.collateralTypes(_ilk);

@@ -137,7 +137,7 @@ contract RAISaverFlashLoan is RAISaverProxy, AdminAuth, FlashLoanReceiverBase {
 
         uint debtLeft = debt - _paybackAmount;
 
-        (,,,, uint dust) = safeEngine.collateralTypes(_ilk);
+        (,,,, uint dust,) = safeEngine.collateralTypes(_ilk);
         dust = dust / 10**27;
 
         // Less than dust value

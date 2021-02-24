@@ -215,7 +215,7 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
     /// @param _ilk Ilk of the CDP
     /// @param _joinAddr Joind address of collateral
     /// @dev Substracts 10 wei to aviod rounding error later on
-    function getMaxCollateral(address _managerAddr, uint _cdpId, bytes32 _ilk, address _joinAddr) public view returns (uint) {
+    function getMaxCollateral(address _managerAddr, uint _cdpId, bytes32 _ilk, address _joinAddr) public returns (uint) {
         uint price = getPrice(_ilk);
 
         (uint collateral, uint debt) = getCdpInfo(ISAFEManager(_managerAddr), _cdpId, _ilk);
@@ -235,7 +235,7 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
     /// @dev Substracts 10 wei to aviod rounding error later on
-    function getMaxDebt(address _managerAddr, uint _cdpId, bytes32 _ilk) public virtual view returns (uint) {
+    function getMaxDebt(address _managerAddr, uint _cdpId, bytes32 _ilk) public virtual returns (uint) {
         uint price = getPrice(_ilk);
 
         (, uint mat) = oracleRelayer.collateralTypes(_ilk);
@@ -246,9 +246,9 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
 
     /// @notice Gets a price of the asset
     /// @param _ilk Ilk of the CDP
-    function getPrice(bytes32 _ilk) public view returns (uint) {
+    function getPrice(bytes32 _ilk) public returns (uint) {
         (, uint mat) = oracleRelayer.collateralTypes(_ilk);
-        (,,uint spot,,) = safeEngine.collateralTypes(_ilk);
+        (,,uint spot,,,) = safeEngine.collateralTypes(_ilk);
 
         return rmul(rmul(spot, oracleRelayer.redemptionPrice()), mat);
     }
