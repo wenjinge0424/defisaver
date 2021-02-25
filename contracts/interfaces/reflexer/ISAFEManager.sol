@@ -10,7 +10,7 @@ abstract contract ISAFEManager {
     function safeEngine() virtual public view returns (address);
     function openSAFE(bytes32, address) virtual public returns (uint);
     function transferSAFEOwnership(uint, address) virtual public;
-    function safeAllowed(uint, address, uint) virtual public;
+    function allowSAFE(uint, address, uint) virtual public;
     function handlerAllowed(address, uint) virtual public;
     function modifySAFECollateralization(uint, int, int) virtual public;
     function transferCollateral(uint, address, uint) virtual public;

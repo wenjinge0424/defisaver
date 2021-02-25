@@ -86,6 +86,8 @@ const fundIfNeeded = async (web3, fundAccAddress, accAddress, minBal=5, addBal=1
 const getProxy = async (registry, acc, web3) => {
     let proxyAddr = await registry.proxies(acc);
 
+    console.log(acc);
+
     if (proxyAddr === nullAddress) {
         await registry.build(acc, {from: acc});
         proxyAddr = await registry.proxies(acc);

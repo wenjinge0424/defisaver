@@ -1,134 +1,122 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
+import "./RAISaverTaker.sol";
 import "../saver/RAISaverProxy.sol";
-import "../../utils/FlashLoanReceiverBase.sol";
+import "../../savings/dydx/ISoloMargin.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 
-contract RAISaverFlashLoan is RAISaverProxy, AdminAuth, FlashLoanReceiverBase {
+import "hardhat/console.sol";
 
-    ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
+contract RAISaverFlashLoan is RAISaverProxy, AdminAuth {
 
-    constructor() FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) public {}
+    address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
-    struct SaverData {
-        uint cdpId;
-        uint gasCost;
-        uint loanAmount;
-        uint fee;
-        address joinAddr;
-        ManagerType managerType;
-    }
+    function callFunction(
+        address,
+        Account.Info memory,
+        bytes memory _params
+    ) public {
 
-    function executeOperation(
-        address _reserve,
-        uint256 _amount,
-        uint256 _fee,
-        bytes calldata _params)
-    external override {
-
-        //check the contract has the specified balance
-        require(_amount <= getBalanceInternal(address(this), _reserve),
-            "Invalid balance for the contract");
+        console.log("WETH balance at start: ", ERC20(WETH_ADDR).balanceOf(address(this)));
 
         (
-            bytes memory exDataBytes,
-            uint cdpId,
-            uint gasCost,
-            address joinAddr,
-            bool isRepay,
-            uint8 managerType
+            bytes memory exDataBytes ,
+            RAISaverTaker.SaverData memory saverData
         )
-         = abi.decode(_params, (bytes,uint256,uint256,address,bool,uint8));
+         = abi.decode(_params, (bytes, RAISaverTaker.SaverData));
+
 
         ExchangeData memory exchangeData = unpackExchangeData(exDataBytes);
 
-        SaverData memory saverData = SaverData({
-            cdpId: cdpId,
-            gasCost: gasCost,
-            loanAmount: _amount,
-            fee: _fee,
-            joinAddr: joinAddr,
-            managerType: ManagerType(managerType)
-        });
+        address managerAddr = getManagerAddr(saverData.managerType);
+        address userProxy = ISAFEManager(managerAddr).ownsSAFE(saverData.safeId);
 
-        if (isRepay) {
+        if (saverData.isRepay) {
             repayWithLoan(exchangeData, saverData);
         } else {
             boostWithLoan(exchangeData, saverData);
         }
 
-        transferFundsBackToPoolInternal(_reserve, _amount.add(_fee));
+        console.log("Paying back the loan", (saverData.flAmount + 2), ERC20(WETH_ADDR).balanceOf(address(this)));
 
-        // if there is some eth left (0x fee), return it to user
-        if (address(this).balance > 0) {
-            tx.origin.transfer(address(this).balance);
-        }
+        // payback FL, assumes we have weth
+        TokenInterface(WETH_ADDR).deposit{value: (address(this).balance)}();
+        ERC20(WETH_ADDR).safeTransfer(userProxy, (saverData.flAmount + 2));
     }
 
     function boostWithLoan(
         ExchangeData memory _exchangeData,
-        SaverData memory _saverData
+        RAISaverTaker.SaverData memory _saverData
     ) internal {
 
         address managerAddr = getManagerAddr(_saverData.managerType);
+        address user = getOwner(ISAFEManager(managerAddr), _saverData.safeId);
+        bytes32 collType = ISAFEManager(managerAddr).collateralTypes(_saverData.safeId);
 
-        address user = getOwner(ISAFEManager(managerAddr), _saverData.cdpId);
+        addCollateral(managerAddr, _saverData.safeId, _saverData.joinAddr, _saverData.flAmount, false);
 
-        // Draw users Dai
-        uint maxDebt = getMaxDebt(managerAddr, _saverData.cdpId, ISAFEManager(managerAddr).collateralTypes(_saverData.cdpId));
-        uint daiDrawn = drawDai(managerAddr, _saverData.cdpId, ISAFEManager(managerAddr).collateralTypes(_saverData.cdpId), maxDebt);
+        // Draw users Rai
+        uint raiDrawn = drawRai(managerAddr, _saverData.safeId, collType, _exchangeData.srcAmount);
 
         // Swap
-        _exchangeData.srcAmount = daiDrawn + _saverData.loanAmount - takeFee(_saverData.gasCost, daiDrawn + _saverData.loanAmount);
+        _exchangeData.srcAmount = raiDrawn - takeFee(_saverData.gasCost, raiDrawn);
         _exchangeData.user = user;
         _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
+
         (, uint swapedAmount) = _sell(_exchangeData);
 
         // Return collateral
-        addCollateral(managerAddr, _saverData.cdpId, _saverData.joinAddr, swapedAmount);
+        addCollateral(managerAddr, _saverData.safeId, _saverData.joinAddr, swapedAmount, true);
+        // Draw collateral to repay the flash loan
+        drawCollateral(managerAddr, _saverData.safeId, _saverData.joinAddr, _saverData.flAmount, false);
 
-        // Draw Dai to repay the flash loan
-        drawDai(managerAddr, _saverData.cdpId, ISAFEManager(managerAddr).collateralTypes(_saverData.cdpId), (_saverData.loanAmount + _saverData.fee));
-
-        logger.Log(address(this), msg.sender, "RAIFlashBoost", abi.encode(_saverData.cdpId, user, _exchangeData.srcAmount, swapedAmount));
+        logger.Log(address(this), msg.sender, "RAIFlashBoost", abi.encode(_saverData.safeId, user, _exchangeData.srcAmount, swapedAmount));
     }
 
     function repayWithLoan(
         ExchangeData memory _exchangeData,
-        SaverData memory _saverData
+        RAISaverTaker.SaverData memory _saverData
     ) internal {
+
+        TokenInterface(WETH_ADDR).withdraw(_saverData.flAmount);
 
         address managerAddr = getManagerAddr(_saverData.managerType);
 
-        address user = getOwner(ISAFEManager(managerAddr), _saverData.cdpId);
-        bytes32 ilk = ISAFEManager(managerAddr).collateralTypes(_saverData.cdpId);
-
-        // Draw collateral
-        uint maxColl = getMaxCollateral(managerAddr, _saverData.cdpId, ilk, _saverData.joinAddr);
-        uint collDrawn = drawCollateral(managerAddr, _saverData.cdpId, _saverData.joinAddr, maxColl);
+        address user = getOwner(ISAFEManager(managerAddr), _saverData.safeId);
+        bytes32 collType = ISAFEManager(managerAddr).collateralTypes(_saverData.safeId);
 
         // Swap
-        _exchangeData.srcAmount = (_saverData.loanAmount + collDrawn);
+        _exchangeData.srcAmount = _saverData.flAmount;
         _exchangeData.user = user;
+
         _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
+
+        console.log("repayWithLoan sell");
+
         (, uint paybackAmount) = _sell(_exchangeData);
 
         paybackAmount -= takeFee(_saverData.gasCost, paybackAmount);
-        paybackAmount = limitLoanAmount(managerAddr, _saverData.cdpId, ilk, paybackAmount, user);
+        paybackAmount = limitLoanAmount(managerAddr, _saverData.safeId, collType, paybackAmount, user);
+
+        console.log("after fee");
 
         // Payback the debt
-        paybackDebt(managerAddr, _saverData.cdpId, ilk, paybackAmount, user);
+        paybackDebt(managerAddr, _saverData.safeId, collType, paybackAmount, user);
+
+        console.log("after payback: ", paybackAmount);
 
         // Draw collateral to repay the flash loan
-        drawCollateral(managerAddr, _saverData.cdpId, _saverData.joinAddr, (_saverData.loanAmount + _saverData.fee));
+        drawCollateral(managerAddr, _saverData.safeId, _saverData.joinAddr, _saverData.flAmount, false);
 
-        logger.Log(address(this), msg.sender, "RAIFlashRepay", abi.encode(_saverData.cdpId, user, _exchangeData.srcAmount, paybackAmount));
+        logger.Log(address(this), msg.sender, "RAIFlashRepay", abi.encode(_saverData.safeId, user, _exchangeData.srcAmount, paybackAmount));
     }
 
     /// @notice Handles that the amount is not bigger than cdp debt and not dust
-    function limitLoanAmount(address _managerAddr, uint _cdpId, bytes32 _ilk, uint _paybackAmount, address _owner) internal returns (uint256) {
-        uint debt = getAllDebt(address(safeEngine), ISAFEManager(_managerAddr).safes(_cdpId), ISAFEManager(_managerAddr).safes(_cdpId), _ilk);
+    function limitLoanAmount(address _managerAddr, uint _safeId, bytes32 _collType, uint _paybackAmount, address _owner) internal returns (uint256) {
+        uint debt = getAllDebt(address(safeEngine), ISAFEManager(_managerAddr).safes(_safeId), ISAFEManager(_managerAddr).safes(_safeId), _collType);
+
+        console.log(_paybackAmount, debt);
 
         if (_paybackAmount > debt) {
             ERC20(RAI_ADDRESS).transfer(_owner, (_paybackAmount - debt));
@@ -137,7 +125,9 @@ contract RAISaverFlashLoan is RAISaverProxy, AdminAuth, FlashLoanReceiverBase {
 
         uint debtLeft = debt - _paybackAmount;
 
-        (,,,, uint dust,) = safeEngine.collateralTypes(_ilk);
+        console.log(debtLeft);
+
+        (,,,, uint dust,) = safeEngine.collateralTypes(_collType);
         dust = dust / 10**27;
 
         // Less than dust value
@@ -152,6 +142,6 @@ contract RAISaverFlashLoan is RAISaverProxy, AdminAuth, FlashLoanReceiverBase {
         return _paybackAmount;
     }
 
-    receive() external override(FlashLoanReceiverBase, DFSExchangeCore) payable {}
+    receive() external override(DFSExchangeCore) payable {}
 
 }

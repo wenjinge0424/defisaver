@@ -5,6 +5,7 @@ import "../../DS/DSProxy.sol";
 import "../../interfaces/reflexer/IBasicTokenAdapters.sol";
 import "../../interfaces/reflexer/ISAFEManager.sol";
 import "../../interfaces/reflexer/ISAFEEngine.sol";
+import "../../interfaces/reflexer/ITaxCollector.sol";
 
 /// @title Helper methods for RAISaverProxy
 contract RAISaverProxyHelper is DSMath {
@@ -56,6 +57,54 @@ contract RAISaverProxyHelper is DSMath {
         amount = uint(amount) <= art ? - amount : - toPositiveInt(art);
     }
 
+    /// @notice Gets delta debt generated (Total Safe debt minus available safeHandler COIN balance)
+    /// @param safeEngine address
+    /// @param taxCollector address
+    /// @param safeHandler address
+    /// @param collateralType bytes32
+    /// @return deltaDebt
+    function _getGeneratedDeltaDebt(
+        address safeEngine,
+        address taxCollector,
+        address safeHandler,
+        bytes32 collateralType,
+        uint wad
+    ) internal returns (int deltaDebt) {
+        // Updates stability fee rate
+        uint rate = ITaxCollector(taxCollector).taxSingle(collateralType);
+        require(rate > 0, "invalid-collateral-type");
+
+        // Gets COIN balance of the handler in the safeEngine
+        uint coin = ISAFEEngine(safeEngine).coinBalance(safeHandler);
+
+        // If there was already enough COIN in the safeEngine balance, just exits it without adding more debt
+        if (coin < mul(wad, RAY)) {
+            // Calculates the needed deltaDebt so together with the existing coins in the safeEngine is enough to exit wad amount of COIN tokens
+            deltaDebt = toPositiveInt(sub(mul(wad, RAY), coin) / rate);
+            // This is neeeded due lack of precision. It might need to sum an extra deltaDebt wei (for the given COIN wad amount)
+            deltaDebt = mul(uint(deltaDebt), rate) < mul(wad, RAY) ? deltaDebt + 1 : deltaDebt;
+        }
+    }
+
+    function _getRepaidDeltaDebt(
+        address safeEngine,
+        uint coin,
+        address safe,
+        bytes32 collateralType
+    ) internal view returns (int deltaDebt) {
+        // Gets actual rate from the safeEngine
+        (, uint rate,,,,) = ISAFEEngine(safeEngine).collateralTypes(collateralType);
+        require(rate > 0, "invalid-collateral-type");
+
+        // Gets actual generatedDebt value of the safe
+        (, uint generatedDebt) = ISAFEEngine(safeEngine).safes(collateralType, safe);
+
+        // Uses the whole coin balance in the safeEngine to reduce the debt
+        deltaDebt = toPositiveInt(coin / rate);
+        // Checks the calculated deltaDebt is not higher than safe.generatedDebt (total debt), otherwise uses its value
+        deltaDebt = uint(deltaDebt) <= generatedDebt ? - deltaDebt : - toPositiveInt(generatedDebt);
+    }
+
     /// @notice Gets the whole debt of the CDP
     /// @param _safeEngine Address of Vat contract
     /// @param _usr Address of the Dai holder
@@ -82,7 +131,7 @@ contract RAISaverProxyHelper is DSMath {
     /// @param _joinAddr Join address to check
     function isEthJoinAddr(address _joinAddr) internal view returns (bool) {
         // if it's dai_join_addr don't check gem() it will fail
-        if (_joinAddr == 0x9759A6Ac90977b93B58547b4A71c78317f391A28) return false;
+        if (_joinAddr == 0x0A5653CCa4DB1B6E265F47CAf6969e64f1CFdC45) return false;
 
         // if coll is weth it's and eth type coll
         if (address(IBasicTokenAdapters(_joinAddr).collateral()) == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) {

@@ -5,6 +5,9 @@ require("@nomiclabs/hardhat-etherscan");
 
 module.exports = {
     networks: {
+        local: {
+			url: 'http://127.0.0.1:8545'
+	    },
         moonnet: {
             url: process.env.MOON_NET_NODE,
             accounts: [process.env.PRIV_KEY_DEV],

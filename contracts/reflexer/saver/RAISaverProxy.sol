@@ -12,7 +12,9 @@ import "./RAISaverProxyHelper.sol";
 import "../../utils/BotRegistry.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 
-/// @title Implements Boost and Repay for Reflexer CDPs
+import "hardhat/console.sol";
+
+/// @title Implements Boost and Repay for Reflexer Safes
 contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
 
     uint public constant MANUAL_SERVICE_FEE = 400; // 0.25% Fee
@@ -34,11 +36,11 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
 
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
 
-    /// @notice Repay - draws collateral, converts to Dai and repays the debt
-    /// @dev Must be called by the DSProxy contract that owns the CDP
+    /// @notice Repay - draws collateral, converts to Rai and repays the debt
+    /// @dev Must be called by the DSProxy contract that owns the Safe
     function repay(
         ExchangeData memory _exchangeData,
-        uint _cdpId,
+        uint _safeId,
         uint _gasCost,
         address _joinAddr,
         ManagerType _managerType
@@ -46,33 +48,33 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
 
         address managerAddr = getManagerAddr(_managerType);
 
-        address user = getOwner(ISAFEManager(managerAddr), _cdpId);
-        bytes32 ilk = ISAFEManager(managerAddr).collateralTypes(_cdpId);
+        address user = getOwner(ISAFEManager(managerAddr), _safeId);
+        bytes32 ilk = ISAFEManager(managerAddr).collateralTypes(_safeId);
 
-        drawCollateral(managerAddr, _cdpId, _joinAddr, _exchangeData.srcAmount);
+        drawCollateral(managerAddr, _safeId, _joinAddr, _exchangeData.srcAmount, true);
 
         _exchangeData.user = user;
         _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
-        (, uint daiAmount) = _sell(_exchangeData);
+        (, uint raiAmount) = _sell(_exchangeData);
 
-        daiAmount -= takeFee(_gasCost, daiAmount);
+        raiAmount -= takeFee(_gasCost, raiAmount);
 
-        paybackDebt(managerAddr, _cdpId, ilk, daiAmount, user);
+        paybackDebt(managerAddr, _safeId, ilk, raiAmount, user);
 
         // if there is some eth left (0x fee), return it to user
         if (address(this).balance > 0) {
             tx.origin.transfer(address(this).balance);
         }
 
-        logger.Log(address(this), msg.sender, "RAIRepay", abi.encode(_cdpId, user, _exchangeData.srcAmount, daiAmount));
+        logger.Log(address(this), msg.sender, "RAIRepay", abi.encode(_safeId, user, _exchangeData.srcAmount, raiAmount));
 
     }
 
-    /// @notice Boost - draws Dai, converts to collateral and adds to CDP
-    /// @dev Must be called by the DSProxy contract that owns the CDP
+    /// @notice Boost - draws Rai, converts to collateral and adds to Safe
+    /// @dev Must be called by the DSProxy contract that owns the Safe
     function boost(
         ExchangeData memory _exchangeData,
-        uint _cdpId,
+        uint _safeId,
         uint _gasCost,
         address _joinAddr,
         ManagerType _managerType
@@ -80,64 +82,67 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
 
         address managerAddr = getManagerAddr(_managerType);
 
-        address user = getOwner(ISAFEManager(managerAddr), _cdpId);
-        bytes32 ilk = ISAFEManager(managerAddr).collateralTypes(_cdpId);
+        address user = getOwner(ISAFEManager(managerAddr), _safeId);
+        bytes32 ilk = ISAFEManager(managerAddr).collateralTypes(_safeId);
 
-        uint daiDrawn = drawDai(managerAddr, _cdpId, ilk, _exchangeData.srcAmount);
+        uint raiDrawn = drawRai(managerAddr, _safeId, ilk, _exchangeData.srcAmount);
 
         _exchangeData.user = user;
         _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
-        _exchangeData.srcAmount = daiDrawn - takeFee(_gasCost, daiDrawn);
+        _exchangeData.srcAmount = raiDrawn - takeFee(_gasCost, raiDrawn);
         (, uint swapedColl) = _sell(_exchangeData);
 
-        addCollateral(managerAddr, _cdpId, _joinAddr, swapedColl);
+        addCollateral(managerAddr, _safeId, _joinAddr, swapedColl, true);
 
         // if there is some eth left (0x fee), return it to user
         if (address(this).balance > 0) {
             tx.origin.transfer(address(this).balance);
         }
 
-        logger.Log(address(this), msg.sender, "RAIBoost", abi.encode(_cdpId, user, _exchangeData.srcAmount, swapedColl));
+        console.log(_safeId, user, _exchangeData.srcAmount, swapedColl);
+
+        logger.Log(address(this), msg.sender, "RAIBoost", abi.encode(_safeId, user, _exchangeData.srcAmount, swapedColl));
     }
 
-    /// @notice Draws Dai from the CDP
-    /// @dev If _daiAmount is bigger than max available we'll draw max
-    /// @param _managerAddr Address of the CDP Manager
-    /// @param _cdpId Id of the CDP
-    /// @param _ilk Ilk of the CDP
-    /// @param _daiAmount Amount of Dai to draw
-    function drawDai(address _managerAddr, uint _cdpId, bytes32 _ilk, uint _daiAmount) internal returns (uint) {
-        uint rate = ITaxCollector(TAX_COLLECTOR_ADDRESS).taxSingle(_ilk);
-        uint daiVatBalance = safeEngine.coinBalance(ISAFEManager(_managerAddr).safes(_cdpId));
+    /// @notice Draws Rai from the Safe
+    /// @dev If _raiAmount is bigger than max available we'll draw max
+    /// @param _managerAddr Address of the Safe Manager
+    /// @param _safeId Id of the Safe
+    /// @param _collType Coll type of the Safe
+    /// @param _raiAmount Amount of Rai to draw
+    function drawRai(address _managerAddr, uint _safeId, bytes32 _collType, uint _raiAmount) internal returns (uint) {
+        uint rate = ITaxCollector(TAX_COLLECTOR_ADDRESS).taxSingle(_collType);
+        uint raiVatBalance = safeEngine.coinBalance(ISAFEManager(_managerAddr).safes(_safeId));
 
-        uint maxAmount = getMaxDebt(_managerAddr, _cdpId, _ilk);
+        uint maxAmount = getMaxDebt(_managerAddr, _safeId, _collType);
 
-        if (_daiAmount >= maxAmount) {
-            _daiAmount = sub(maxAmount, 1);
+        if (_raiAmount >= maxAmount) {
+            _raiAmount = sub(maxAmount, 1);
         }
 
-        ISAFEManager(_managerAddr).modifySAFECollateralization(_cdpId, int(0), normalizeDrawAmount(_daiAmount, rate, daiVatBalance));
-        ISAFEManager(_managerAddr).transferInternalCoins(_cdpId, address(this), toRad(_daiAmount));
+        ISAFEManager(_managerAddr).modifySAFECollateralization(_safeId, int(0), normalizeDrawAmount(_raiAmount, rate, raiVatBalance));
+        ISAFEManager(_managerAddr).transferInternalCoins(_safeId, address(this), toRad(_raiAmount));
 
         if (safeEngine.safeRights(address(this), address(RAI_JOIN_ADDRESS)) == 0) {
             safeEngine.approveSAFEModification(RAI_JOIN_ADDRESS);
         }
 
-        ICoinJoin(RAI_JOIN_ADDRESS).exit(address(this), _daiAmount);
+        ICoinJoin(RAI_JOIN_ADDRESS).exit(address(this), _raiAmount);
 
-        return _daiAmount;
+        return _raiAmount;
     }
 
-    /// @notice Adds collateral to the CDP
-    /// @param _managerAddr Address of the CDP Manager
-    /// @param _cdpId Id of the CDP
-    /// @param _joinAddr Address of the join contract for the CDP collateral
+    /// @notice Adds collateral to the Safe
+    /// @param _managerAddr Address of the Safe Manager
+    /// @param _safeId Id of the Safe
+    /// @param _joinAddr Address of the join contract for the Safe collateral
     /// @param _amount Amount of collateral to add
-    function addCollateral(address _managerAddr, uint _cdpId, address _joinAddr, uint _amount) internal {
+    /// @param _toWeth Should we convert to Weth
+    function addCollateral(address _managerAddr, uint _safeId, address _joinAddr, uint _amount, bool _toWeth) internal {
         int convertAmount = 0;
 
-        if (isEthJoinAddr(_joinAddr)) {
-            // IBasicTokenAdapters(_joinAddr).collateral().deposit{value: _amount}();
+        if (isEthJoinAddr(_joinAddr) && _toWeth) {
+            TokenInterface(IBasicTokenAdapters(_joinAddr).collateral()).deposit{value: _amount}();
             convertAmount = toPositiveInt(_amount);
         } else {
             convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
@@ -148,8 +153,8 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
         IBasicTokenAdapters(_joinAddr).join(address(this), _amount);
 
         safeEngine.modifySAFECollateralization(
-            ISAFEManager(_managerAddr).collateralTypes(_cdpId),
-            ISAFEManager(_managerAddr).safes(_cdpId),
+            ISAFEManager(_managerAddr).collateralTypes(_safeId),
+            ISAFEManager(_managerAddr).safes(_safeId),
             address(this),
             address(this),
             convertAmount,
@@ -159,70 +164,87 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
     }
 
     /// @notice Draws collateral and returns it to DSProxy
-    /// @param _managerAddr Address of the CDP Manager
+    /// @param _managerAddr Address of the Safe Manager
     /// @dev If _amount is bigger than max available we'll draw max
-    /// @param _cdpId Id of the CDP
-    /// @param _joinAddr Address of the join contract for the CDP collateral
+    /// @param _safeId Id of the Safe
+    /// @param _joinAddr Address of the join contract for the Safe collateral
     /// @param _amount Amount of collateral to draw
-    function drawCollateral(address _managerAddr, uint _cdpId, address _joinAddr, uint _amount) internal returns (uint) {
+    /// @param _toEth Boolean if we should unwrap Ether
+    function drawCollateral(address _managerAddr, uint _safeId, address _joinAddr, uint _amount, bool _toEth) internal returns (uint) {
         uint frobAmount = _amount;
 
         if (IBasicTokenAdapters(_joinAddr).decimals() != 18) {
             frobAmount = _amount * (10 ** (18 - IBasicTokenAdapters(_joinAddr).decimals()));
         }
 
-        ISAFEManager(_managerAddr).modifySAFECollateralization(_cdpId, -toPositiveInt(frobAmount), 0);
-        ISAFEManager(_managerAddr).transferCollateral(_cdpId, address(this), frobAmount);
+        bytes32 ilk = ISAFEManager(_managerAddr).collateralTypes(_safeId);
+
+
+        console.log("Draw amount: ", frobAmount);
+        (uint coll, uint debt) = getCdpInfo(ISAFEManager(_managerAddr), _safeId,  ilk);
+        console.log("coll: ", coll, "debt: ", debt);
+
+        ISAFEManager(_managerAddr).modifySAFECollateralization(_safeId, -toPositiveInt(frobAmount), 0);
+        ISAFEManager(_managerAddr).transferCollateral(_safeId, address(this), frobAmount);
+
+        console.log("Safe operacije");
 
         IBasicTokenAdapters(_joinAddr).exit(address(this), _amount);
 
-        if (isEthJoinAddr(_joinAddr)) {
-            // IBasicTokenAdapters(_joinAddr).gem().withdraw(_amount); // Weth -> Eth
+        if (isEthJoinAddr(_joinAddr) && _toEth) {
+            TokenInterface(IBasicTokenAdapters(_joinAddr).collateral()).withdraw(_amount); // Weth -> Eth
         }
 
         return _amount;
     }
 
-    /// @notice Paybacks Dai debt
-    /// @param _managerAddr Address of the CDP Manager
-    /// @dev If the _daiAmount is bigger than the whole debt, returns extra Dai
-    /// @param _cdpId Id of the CDP
-    /// @param _ilk Ilk of the CDP
-    /// @param _daiAmount Amount of Dai to payback
-    /// @param _owner Address that owns the DSProxy that owns the CDP
-    function paybackDebt(address _managerAddr, uint _cdpId, bytes32 _ilk, uint _daiAmount, address _owner) internal {
-        address urn = ISAFEManager(_managerAddr).safes(_cdpId);
+    /// @notice Paybacks Rai debt
+    /// @param _managerAddr Address of the Safe Manager
+    /// @dev If the _raiAmount is bigger than the whole debt, returns extra Rai
+    /// @param _safeId Id of the Safe
+    /// @param _collType Coll type of the Safe
+    /// @param _raiAmount Amount of Rai to payback
+    /// @param _owner Address that owns the DSProxy that owns the Safe
+    function paybackDebt(address _managerAddr, uint _safeId, bytes32 _collType, uint _raiAmount, address _owner) internal {
+        address urn = ISAFEManager(_managerAddr).safes(_safeId);
 
-        uint wholeDebt = getAllDebt(SAFE_ENGINE_ADDRESS, urn, urn, _ilk);
+        uint wholeDebt = getAllDebt(SAFE_ENGINE_ADDRESS, urn, urn, _collType);
 
-        if (_daiAmount > wholeDebt) {
-            ERC20(RAI_ADDRESS).transfer(_owner, sub(_daiAmount, wholeDebt));
-            _daiAmount = wholeDebt;
+        if (_raiAmount > wholeDebt) {
+            ERC20(RAI_ADDRESS).transfer(_owner, sub(_raiAmount, wholeDebt));
+            _raiAmount = wholeDebt;
         }
 
         if (ERC20(RAI_ADDRESS).allowance(address(this), RAI_JOIN_ADDRESS) == 0) {
             ERC20(RAI_ADDRESS).approve(RAI_JOIN_ADDRESS, uint(-1));
         }
 
-        raiJoin.join(urn, _daiAmount);
+        console.log("PAYBACK AMNT: ", _raiAmount);
 
-        ISAFEManager(_managerAddr).modifySAFECollateralization(_cdpId, 0, normalizePaybackAmount(SAFE_ENGINE_ADDRESS, urn, _ilk));
+        raiJoin.join(urn, _raiAmount);
+
+        int paybackAmnt = _getRepaidDeltaDebt(SAFE_ENGINE_ADDRESS, ISAFEEngine(safeEngine).coinBalance(urn), urn, _collType);
+        console.log("paybackAmnt: ");
+        console.logInt(paybackAmnt);
+
+        ISAFEManager(_managerAddr).modifySAFECollateralization(_safeId, 0, paybackAmnt);
     }
 
     /// @notice Gets the maximum amount of collateral available to draw
-    /// @param _managerAddr Address of the CDP Manager
-    /// @param _cdpId Id of the CDP
-    /// @param _ilk Ilk of the CDP
+    /// @param _managerAddr Address of the Safe Manager
+    /// @param _safeId Id of the Safe
+    /// @param _collType Coll type of the Safe
     /// @param _joinAddr Joind address of collateral
-    /// @dev Substracts 10 wei to aviod rounding error later on
-    function getMaxCollateral(address _managerAddr, uint _cdpId, bytes32 _ilk, address _joinAddr) public returns (uint) {
-        uint price = getPrice(_ilk);
+    /// @dev Substracts 1% to aviod rounding error later on
+    function getMaxCollateral(address _managerAddr, uint _safeId, bytes32 _collType, address _joinAddr) public view returns (uint) {
+        (uint collateral, uint debt) = getCdpInfo(ISAFEManager(_managerAddr), _safeId, _collType);
 
-        (uint collateral, uint debt) = getCdpInfo(ISAFEManager(_managerAddr), _cdpId, _ilk);
+        (, , uint256 safetyPrice, , , ) =
+            ISAFEEngine(SAFE_ENGINE_ADDRESS).collateralTypes(_collType);
 
-        (, uint mat) = oracleRelayer.collateralTypes(_ilk);
+        uint maxCollateral = sub(collateral, wmul(wdiv(RAY, safetyPrice), debt));
 
-        uint maxCollateral = sub(collateral, (div(mul(mat, debt), price)));
+        console.log("maxCollateral: ", maxCollateral, debt, safetyPrice);
 
         uint normalizeMaxCollateral = maxCollateral / (10 ** (18 - IBasicTokenAdapters(_joinAddr).decimals()));
 
@@ -231,26 +253,33 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
     }
 
     /// @notice Gets the maximum amount of debt available to generate
-    /// @param _managerAddr Address of the CDP Manager
-    /// @param _cdpId Id of the CDP
-    /// @param _ilk Ilk of the CDP
+    /// @param _managerAddr Address of the Safe Manager
+    /// @param _safeId Id of the Safe
+    /// @param _collType Coll type of the Safe
     /// @dev Substracts 10 wei to aviod rounding error later on
-    function getMaxDebt(address _managerAddr, uint _cdpId, bytes32 _ilk) public virtual returns (uint) {
-        uint price = getPrice(_ilk);
+    function getMaxDebt(
+        address _managerAddr,
+        uint256 _safeId,
+        bytes32 _collType
+    ) public view virtual returns (uint256) {
+        (uint256 collateral, uint256 debt) =
+            getCdpInfo(ISAFEManager(_managerAddr), _safeId, _collType);
 
-        (, uint mat) = oracleRelayer.collateralTypes(_ilk);
-        (uint collateral, uint debt) = getCdpInfo(ISAFEManager(_managerAddr), _cdpId, _ilk);
+        (, , uint256 safetyPrice, , , ) =
+            ISAFEEngine(SAFE_ENGINE_ADDRESS).collateralTypes(_collType);
 
-        return sub(sub(div(mul(collateral, price), mat), debt), 10);
+        return sub(sub(rmul(collateral, safetyPrice), debt), 10);
     }
 
-    /// @notice Gets a price of the asset
-    /// @param _ilk Ilk of the CDP
-    function getPrice(bytes32 _ilk) public returns (uint) {
-        (, uint mat) = oracleRelayer.collateralTypes(_ilk);
-        (,,uint spot,,,) = safeEngine.collateralTypes(_ilk);
+    function getPrice(bytes32 _collType) public returns (uint256) {
+        (, uint256 safetyCRatio) =
+            IOracleRelayer(ORACLE_RELAYER_ADDRESS).collateralTypes(_collType);
+        (, , uint256 safetyPrice, , , ) =
+            ISAFEEngine(SAFE_ENGINE_ADDRESS).collateralTypes(_collType);
 
-        return rmul(rmul(spot, oracleRelayer.redemptionPrice()), mat);
+        uint256 redemptionPrice = IOracleRelayer(ORACLE_RELAYER_ADDRESS).redemptionPrice();
+
+        return rmul(rmul(safetyPrice, redemptionPrice), safetyCRatio);
     }
 
     function isAutomation() internal view returns(bool) {
@@ -259,8 +288,8 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
 
     function takeFee(uint256 _gasCost, uint _amount) internal returns(uint) {
         if (_gasCost > 0) {
-            uint ethDaiPrice = getPrice(ETH_COLL_TYPE);
-            uint feeAmount = rmul(_gasCost, ethDaiPrice);
+            uint ethRaiPrice = getPrice(ETH_COLL_TYPE);
+            uint feeAmount = rmul(_gasCost, ethRaiPrice);
 
             if (feeAmount > _amount / 5) {
                 feeAmount = _amount / 5;

@@ -5,120 +5,160 @@ import "../saver/RAISaverProxy.sol";
 import "../../exchangeV3/DFSExchangeData.sol";
 import "../../utils/GasBurner.sol";
 import "../../interfaces/ILendingPool.sol";
+import "../../utils/DydxFlashLoanBase.sol";
 
-contract RAISaverTaker is RAISaverProxy, GasBurner {
+import "hardhat/console.sol";
 
-    address payable public constant RAI_SAVER_FLASH_LOAN = 0x9222c4f253bD0bdb387Fc97D44e5A6b90cDF4389;
-    address public constant AAVE_POOL_CORE = 0x3dfd23A6c5E8BbcFc9581d2E864a68feb6a076d3;
+contract RAISaverTaker is RAISaverProxy, DydxFlashLoanBase, GasBurner {
+    // address payable public constant RAI_SAVER_FLASH_LOAN =
+    //     0x4c5859f0F772848b2D91F1D83E2Fe57935;
+    address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
-    ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
+    struct SaverData {
+        uint256 flAmount;
+        bool isRepay;
+        uint256 safeId;
+        uint256 gasCost;
+        address joinAddr;
+        ManagerType managerType;
+    }
 
     function boostWithLoan(
         ExchangeData memory _exchangeData,
-        uint _cdpId,
-        uint _gasCost,
+        uint256 _safeId,
+        uint256 _gasCost,
         address _joinAddr,
-        ManagerType _managerType
+        ManagerType _managerType,
+        address RAI_SAVER_FLASH_LOAN
     ) public payable burnGas(25) {
         address managerAddr = getManagerAddr(_managerType);
 
-        uint256 maxDebt = getMaxDebt(managerAddr, _cdpId, ISAFEManager(managerAddr).collateralTypes(_cdpId));
+        uint256 maxDebt =
+            getMaxDebt(managerAddr, _safeId, ISAFEManager(managerAddr).collateralTypes(_safeId));
 
-        uint maxLiq = getAvailableLiquidity(RAI_JOIN_ADDRESS);
-
-        if (maxDebt >= _exchangeData.srcAmount || maxLiq == 0) {
+        if (maxDebt >= _exchangeData.srcAmount) {
             if (_exchangeData.srcAmount > maxDebt) {
                 _exchangeData.srcAmount = maxDebt;
             }
 
-            boost(_exchangeData, _cdpId, _gasCost, _joinAddr, _managerType);
+            boost(_exchangeData, _safeId, _gasCost, _joinAddr, _managerType);
             return;
         }
 
-        uint256 loanAmount = sub(_exchangeData.srcAmount, maxDebt);
-        loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
+        uint256 loanAmount = getAvailableEthLiquidity();
 
-        RAI_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
+        SaverData memory saverData =
+            SaverData({
+                flAmount: loanAmount,
+                isRepay: false,
+                safeId: _safeId,
+                gasCost: _gasCost,
+                joinAddr: _joinAddr,
+                managerType: _managerType
+            });
 
-        ISAFEManager(managerAddr).safeAllowed(_cdpId, RAI_SAVER_FLASH_LOAN, 1);
+        console.log("Call flash loan");
 
-        bytes memory paramsData = abi.encode(packExchangeData(_exchangeData), _cdpId, _gasCost, _joinAddr, false, uint8(_managerType));
-
-        lendingPool.flashLoan(RAI_SAVER_FLASH_LOAN, RAI_ADDRESS, loanAmount, paramsData);
-
-        ISAFEManager(managerAddr).safeAllowed(_cdpId, RAI_SAVER_FLASH_LOAN, 0);
+        _flashLoan(RAI_SAVER_FLASH_LOAN, _exchangeData, saverData);
     }
 
     function repayWithLoan(
         ExchangeData memory _exchangeData,
-        uint _cdpId,
-        uint _gasCost,
+        uint256 _safeId,
+        uint256 _gasCost,
         address _joinAddr,
-        ManagerType _managerType
+        ManagerType _managerType,
+        address RAI_SAVER_FLASH_LOAN
     ) public payable burnGas(25) {
         address managerAddr = getManagerAddr(_managerType);
 
-        uint256 maxColl = getMaxCollateral(managerAddr, _cdpId, ISAFEManager(managerAddr).collateralTypes(_cdpId), _joinAddr);
+        uint256 maxColl =
+            getMaxCollateral(
+                managerAddr,
+                _safeId,
+                ISAFEManager(managerAddr).collateralTypes(_safeId),
+                _joinAddr
+            );
 
-        uint maxLiq = getAvailableLiquidity(_joinAddr);
-
-        if (maxColl >= _exchangeData.srcAmount || maxLiq == 0) {
+        if (maxColl >= _exchangeData.srcAmount) {
             if (_exchangeData.srcAmount > maxColl) {
                 _exchangeData.srcAmount = maxColl;
             }
 
-            repay(_exchangeData, _cdpId, _gasCost, _joinAddr, _managerType);
+            repay(_exchangeData, _safeId, _gasCost, _joinAddr, _managerType);
             return;
         }
 
-        uint256 loanAmount = sub(_exchangeData.srcAmount, maxColl);
-        loanAmount = loanAmount > maxLiq ? maxLiq : loanAmount;
+        uint256 loanAmount = _exchangeData.srcAmount;
 
-        RAI_SAVER_FLASH_LOAN.transfer(msg.value); // 0x fee
+        SaverData memory saverData =
+            SaverData({
+                flAmount: loanAmount,
+                isRepay: true,
+                safeId: _safeId,
+                gasCost: _gasCost,
+                joinAddr: _joinAddr,
+                managerType: _managerType
+            });
 
-        ISAFEManager(managerAddr).safeAllowed(_cdpId, RAI_SAVER_FLASH_LOAN, 1);
+        console.log("Call flash loan");
 
-        bytes memory paramsData = abi.encode(packExchangeData(_exchangeData), _cdpId, _gasCost, _joinAddr, true, uint8(_managerType));
-
-        lendingPool.flashLoan(RAI_SAVER_FLASH_LOAN, getAaveCollAddr(_joinAddr), loanAmount, paramsData);
-
-        ISAFEManager(managerAddr).safeAllowed(_cdpId, RAI_SAVER_FLASH_LOAN, 0);
+        _flashLoan(RAI_SAVER_FLASH_LOAN, _exchangeData, saverData);
     }
-
 
     /// @notice Gets the maximum amount of debt available to generate
     /// @param _managerAddr Address of the CDP Manager
-    /// @param _cdpId Id of the CDP
-    /// @param _ilk Ilk of the CDP
-    function getMaxDebt(address _managerAddr, uint256 _cdpId, bytes32 _ilk) public override returns (uint256) {
-        uint256 price = getPrice(_ilk);
+    /// @param _safeId Id of the CDP
+    /// @param _collType Coll type of the CDP
+    function getMaxDebt(
+        address _managerAddr,
+        uint256 _safeId,
+        bytes32 _collType
+    ) public override view returns (uint256) {
+        (uint256 collateral, uint256 debt) =
+            getCdpInfo(ISAFEManager(_managerAddr), _safeId, _collType);
 
-        (, uint256 mat) = oracleRelayer.collateralTypes(_ilk);
-        (uint256 collateral, uint256 debt) = getCdpInfo(ISAFEManager(_managerAddr), _cdpId, _ilk);
+        (, , uint256 safetyPrice, , , ) =
+            ISAFEEngine(SAFE_ENGINE_ADDRESS).collateralTypes(_collType);
 
-        return sub(wdiv(wmul(collateral, price), mat), debt);
+        return sub(rmul(collateral, safetyPrice), debt);
     }
 
-    function getAaveCollAddr(address _joinAddr) internal view returns (address) {
-        if (isEthJoinAddr(_joinAddr)
-            || _joinAddr == 0x775787933e92b709f2a3C70aa87999696e74A9F8) {
-            return KYBER_ETH_ADDRESS;
-        } else if (_joinAddr == RAI_JOIN_ADDRESS) {
-            return RAI_ADDRESS;
-        } else
-         {
-            return getCollateralAddr(_joinAddr);
-        }
+    /// @notice Fetches Eth Dydx liqudity
+    function getAvailableEthLiquidity() internal view returns (uint256 liquidity) {
+        liquidity = ERC20(WETH_ADDR).balanceOf(SOLO_MARGIN_ADDRESS);
     }
 
-    function getAvailableLiquidity(address _joinAddr) internal view returns (uint liquidity) {
-        address tokenAddr = getAaveCollAddr(_joinAddr);
+    /// @notice Starts the process to move users position 1 collateral and 1 borrow
+    /// @dev User must send 2 wei with this transaction
+    function _flashLoan(address RAI_SAVER_FLASH_LOAN, ExchangeData memory _exchangeData, SaverData memory _saverData) internal {
+        ISoloMargin solo = ISoloMargin(SOLO_MARGIN_ADDRESS);
 
-        if (tokenAddr == KYBER_ETH_ADDRESS) {
-            liquidity = AAVE_POOL_CORE.balance;
-        } else {
-            liquidity = ERC20(tokenAddr).balanceOf(AAVE_POOL_CORE);
-        }
+        address managerAddr = getManagerAddr(_saverData.managerType);
+
+        // Get marketId from token address
+        uint256 marketId = _getMarketIdFromTokenAddress(WETH_ADDR);
+
+        // Calculate repay amount (_amount + (2 wei))
+        // Approve transfer from
+        uint256 repayAmount = _getRepaymentAmountInternal(_saverData.flAmount);
+        ERC20(WETH_ADDR).approve(SOLO_MARGIN_ADDRESS, repayAmount);
+
+        Actions.ActionArgs[] memory operations = new Actions.ActionArgs[](3);
+
+        operations[0] = _getWithdrawAction(marketId, _saverData.flAmount, RAI_SAVER_FLASH_LOAN);
+        payable(RAI_SAVER_FLASH_LOAN).transfer(msg.value); // 0x fee
+
+        bytes memory exchangeData = packExchangeData(_exchangeData);
+        operations[1] = _getCallAction(abi.encode(exchangeData, _saverData), RAI_SAVER_FLASH_LOAN);
+
+        operations[2] = _getDepositAction(marketId, repayAmount, address(this));
+
+        Account.Info[] memory accountInfos = new Account.Info[](1);
+        accountInfos[0] = _getAccountInfo();
+
+        ISAFEManager(managerAddr).allowSAFE(_saverData.safeId, RAI_SAVER_FLASH_LOAN, 1);
+        solo.operate(accountInfos, operations);
+        ISAFEManager(managerAddr).allowSAFE(_saverData.safeId, RAI_SAVER_FLASH_LOAN, 0);
     }
-
 }
