@@ -10,18 +10,18 @@ import "../interfaces/reflexer/IMedianOracle.sol";
 
 contract RaiLoanInfo is DSMath {
     // mainnet
-    // address public constant GET_SAFES_ADDR = 0xdf4BC9aA98cC8eCd90Ba2BEe73aD4a1a9C8d202B;
-    // address public constant MANAGER_ADDR = 0xEfe0B4cA532769a3AE758fD82E1426a03A94F185;
-    // address public constant SAFE_ENGINE_ADDRESS = 0xCC88a9d330da1133Df3A7bD823B95e52511A6962;
-    // address public constant ORACLE_RELAYER_ADDRESS = 0x4ed9C0dCa0479bC64d8f4EB3007126D5791f7851;
-    // address public constant MEDIAN_ORACLE_ADDRESS = 0x12A5E1c81B10B264A575930aEae80681DDF595fe;
+    address public constant GET_SAFES_ADDR = 0xdf4BC9aA98cC8eCd90Ba2BEe73aD4a1a9C8d202B;
+    address public constant MANAGER_ADDR = 0xEfe0B4cA532769a3AE758fD82E1426a03A94F185;
+    address public constant SAFE_ENGINE_ADDRESS = 0xCC88a9d330da1133Df3A7bD823B95e52511A6962;
+    address public constant ORACLE_RELAYER_ADDRESS = 0x4ed9C0dCa0479bC64d8f4EB3007126D5791f7851;
+    address public constant MEDIAN_ORACLE_ADDRESS = 0x12A5E1c81B10B264A575930aEae80681DDF595fe;
 
     // kovan
-    address public constant GET_SAFES_ADDR = 0x702dcf4a8C3bBBd243477D5704fc45F2762D3826;
-    address public constant MANAGER_ADDR = 0x807C8eCb73d9c8203d2b1369E678098B9370F2EA;
-    address public constant SAFE_ENGINE_ADDRESS = 0x7f63fE955fFF8EA474d990f1Fc8979f2C650edbE;
-    address public constant ORACLE_RELAYER_ADDRESS = 0xE5Ae4E49bEA485B5E5172EE6b1F99243cB15225c;
-    address public constant MEDIAN_ORACLE_ADDRESS = 0x82bEAd00751EFA3286c9Dd17e4Ea2570916B3944;
+    // address public constant GET_SAFES_ADDR = 0x702dcf4a8C3bBBd243477D5704fc45F2762D3826;
+    // address public constant MANAGER_ADDR = 0x807C8eCb73d9c8203d2b1369E678098B9370F2EA;
+    // address public constant SAFE_ENGINE_ADDRESS = 0x7f63fE955fFF8EA474d990f1Fc8979f2C650edbE;
+    // address public constant ORACLE_RELAYER_ADDRESS = 0xE5Ae4E49bEA485B5E5172EE6b1F99243cB15225c;
+    // address public constant MEDIAN_ORACLE_ADDRESS = 0x82bEAd00751EFA3286c9Dd17e4Ea2570916B3944;
 
     struct SafeInfo {
         uint256 safeId;
@@ -74,6 +74,13 @@ contract RaiLoanInfo is DSMath {
             liqRatio: liqRatio
         });
     }
+
+    function getCollAndRaiInfo(bytes32 _collType)
+        public
+        returns (CollInfo memory collInfo, RaiInfo memory raiInfo) {
+            collInfo = getCollateralTypeInfo(_collType);
+            raiInfo = getRaiInfo();
+        }
 
     function getPrice(bytes32 _collType) public returns (uint256) {
         (, uint256 safetyCRatio) =

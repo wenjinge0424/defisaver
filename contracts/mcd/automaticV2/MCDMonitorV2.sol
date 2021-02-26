@@ -23,7 +23,7 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
     uint public REPAY_GAS_TOKEN = 25;
     uint public BOOST_GAS_TOKEN = 25;
 
-    uint public MAX_GAS_PRICE = 500000000000; // 500 gwei
+    uint public MAX_GAS_PRICE = 800000000000; // 800 gwei
 
     uint public REPAY_GAS_COST = 1000000;
     uint public BOOST_GAS_COST = 1000000;
@@ -239,7 +239,7 @@ contract MCDMonitorV2 is DSMath, AdminAuth, GasBurner, StaticV2 {
     /// @notice Allows owner to change max gas price
     /// @param _maxGasPrice New max gas price
     function changeMaxGasPrice(uint _maxGasPrice) public onlyOwner {
-        require(_maxGasPrice < 500000000000);
+        require(_maxGasPrice < 1000000000000);
 
         MAX_GAS_PRICE = _maxGasPrice;
     }
