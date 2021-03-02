@@ -6,8 +6,6 @@ import "../saver/RAISaverProxy.sol";
 import "../../savings/dydx/ISoloMargin.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 
-import "hardhat/console.sol";
-
 contract RAISaverFlashLoan is RAISaverProxy, AdminAuth {
 
     address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -17,8 +15,6 @@ contract RAISaverFlashLoan is RAISaverProxy, AdminAuth {
         Account.Info memory,
         bytes memory _params
     ) public {
-
-        console.log("WETH balance at start: ", ERC20(WETH_ADDR).balanceOf(address(this)));
 
         (
             bytes memory exDataBytes ,
@@ -37,8 +33,6 @@ contract RAISaverFlashLoan is RAISaverProxy, AdminAuth {
         } else {
             boostWithLoan(exchangeData, saverData);
         }
-
-        console.log("Paying back the loan", (saverData.flAmount + 2), ERC20(WETH_ADDR).balanceOf(address(this)));
 
         // payback FL, assumes we have weth
         TokenInterface(WETH_ADDR).deposit{value: (address(this).balance)}();
@@ -92,19 +86,13 @@ contract RAISaverFlashLoan is RAISaverProxy, AdminAuth {
 
         _exchangeData.dfsFeeDivider = isAutomation() ? AUTOMATIC_SERVICE_FEE : MANUAL_SERVICE_FEE;
 
-        console.log("repayWithLoan sell");
-
         (, uint paybackAmount) = _sell(_exchangeData);
 
         paybackAmount -= takeFee(_saverData.gasCost, paybackAmount);
         paybackAmount = limitLoanAmount(managerAddr, _saverData.safeId, collType, paybackAmount, user);
 
-        console.log("after fee");
-
         // Payback the debt
         paybackDebt(managerAddr, _saverData.safeId, collType, paybackAmount, user);
-
-        console.log("after payback: ", paybackAmount);
 
         // Draw collateral to repay the flash loan
         drawCollateral(managerAddr, _saverData.safeId, _saverData.joinAddr, _saverData.flAmount, false);
@@ -116,16 +104,12 @@ contract RAISaverFlashLoan is RAISaverProxy, AdminAuth {
     function limitLoanAmount(address _managerAddr, uint _safeId, bytes32 _collType, uint _paybackAmount, address _owner) internal returns (uint256) {
         uint debt = getAllDebt(address(safeEngine), ISAFEManager(_managerAddr).safes(_safeId), ISAFEManager(_managerAddr).safes(_safeId), _collType);
 
-        console.log(_paybackAmount, debt);
-
         if (_paybackAmount > debt) {
             ERC20(RAI_ADDRESS).transfer(_owner, (_paybackAmount - debt));
             return debt;
         }
 
         uint debtLeft = debt - _paybackAmount;
-
-        console.log(debtLeft);
 
         (,,,, uint dust,) = safeEngine.collateralTypes(_collType);
         dust = dust / 10**27;

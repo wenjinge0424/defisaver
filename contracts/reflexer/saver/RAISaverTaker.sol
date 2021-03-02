@@ -7,11 +7,7 @@ import "../../utils/GasBurner.sol";
 import "../../interfaces/ILendingPool.sol";
 import "../../utils/DydxFlashLoanBase.sol";
 
-import "hardhat/console.sol";
-
 contract RAISaverTaker is RAISaverProxy, DydxFlashLoanBase, GasBurner {
-    // address payable public constant RAI_SAVER_FLASH_LOAN =
-    //     0x4c5859f0F772848b2D91F1D83E2Fe57935;
     address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     struct SaverData {
@@ -29,7 +25,7 @@ contract RAISaverTaker is RAISaverProxy, DydxFlashLoanBase, GasBurner {
         uint256 _gasCost,
         address _joinAddr,
         ManagerType _managerType,
-        address RAI_SAVER_FLASH_LOAN
+        address _raiSaverFlashLoan
     ) public payable burnGas(25) {
         address managerAddr = getManagerAddr(_managerType);
 
@@ -57,9 +53,7 @@ contract RAISaverTaker is RAISaverProxy, DydxFlashLoanBase, GasBurner {
                 managerType: _managerType
             });
 
-        console.log("Call flash loan");
-
-        _flashLoan(RAI_SAVER_FLASH_LOAN, _exchangeData, saverData);
+        _flashLoan(_raiSaverFlashLoan, _exchangeData, saverData);
     }
 
     function repayWithLoan(
@@ -68,7 +62,7 @@ contract RAISaverTaker is RAISaverProxy, DydxFlashLoanBase, GasBurner {
         uint256 _gasCost,
         address _joinAddr,
         ManagerType _managerType,
-        address RAI_SAVER_FLASH_LOAN
+        address _raiSaverFlashLoan
     ) public payable burnGas(25) {
         address managerAddr = getManagerAddr(_managerType);
 
@@ -101,9 +95,7 @@ contract RAISaverTaker is RAISaverProxy, DydxFlashLoanBase, GasBurner {
                 managerType: _managerType
             });
 
-        console.log("Call flash loan");
-
-        _flashLoan(RAI_SAVER_FLASH_LOAN, _exchangeData, saverData);
+        _flashLoan(_raiSaverFlashLoan, _exchangeData, saverData);
     }
 
     /// @notice Gets the maximum amount of debt available to generate
@@ -116,7 +108,7 @@ contract RAISaverTaker is RAISaverProxy, DydxFlashLoanBase, GasBurner {
         bytes32 _collType
     ) public override view returns (uint256) {
         (uint256 collateral, uint256 debt) =
-            getCdpInfo(ISAFEManager(_managerAddr), _safeId, _collType);
+            getSafeInfo(ISAFEManager(_managerAddr), _safeId, _collType);
 
         (, , uint256 safetyPrice, , , ) =
             ISAFEEngine(SAFE_ENGINE_ADDRESS).collateralTypes(_collType);

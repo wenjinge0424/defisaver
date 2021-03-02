@@ -12,8 +12,6 @@ import "./RAISaverProxyHelper.sol";
 import "../../utils/BotRegistry.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 
-import "hardhat/console.sol";
-
 /// @title Implements Boost and Repay for Reflexer Safes
 contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
 
@@ -99,8 +97,6 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
             tx.origin.transfer(address(this).balance);
         }
 
-        console.log(_safeId, user, _exchangeData.srcAmount, swapedColl);
-
         logger.Log(address(this), msg.sender, "RAIBoost", abi.encode(_safeId, user, _exchangeData.srcAmount, swapedColl));
     }
 
@@ -177,17 +173,8 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
             frobAmount = _amount * (10 ** (18 - IBasicTokenAdapters(_joinAddr).decimals()));
         }
 
-        bytes32 ilk = ISAFEManager(_managerAddr).collateralTypes(_safeId);
-
-
-        console.log("Draw amount: ", frobAmount);
-        (uint coll, uint debt) = getCdpInfo(ISAFEManager(_managerAddr), _safeId,  ilk);
-        console.log("coll: ", coll, "debt: ", debt);
-
         ISAFEManager(_managerAddr).modifySAFECollateralization(_safeId, -toPositiveInt(frobAmount), 0);
         ISAFEManager(_managerAddr).transferCollateral(_safeId, address(this), frobAmount);
-
-        console.log("Safe operacije");
 
         IBasicTokenAdapters(_joinAddr).exit(address(this), _amount);
 
@@ -219,13 +206,9 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
             ERC20(RAI_ADDRESS).approve(RAI_JOIN_ADDRESS, uint(-1));
         }
 
-        console.log("PAYBACK AMNT: ", _raiAmount);
-
         raiJoin.join(urn, _raiAmount);
 
         int paybackAmnt = _getRepaidDeltaDebt(SAFE_ENGINE_ADDRESS, ISAFEEngine(safeEngine).coinBalance(urn), urn, _collType);
-        console.log("paybackAmnt: ");
-        console.logInt(paybackAmnt);
 
         ISAFEManager(_managerAddr).modifySAFECollateralization(_safeId, 0, paybackAmnt);
     }
@@ -237,14 +220,12 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
     /// @param _joinAddr Joind address of collateral
     /// @dev Substracts 1% to aviod rounding error later on
     function getMaxCollateral(address _managerAddr, uint _safeId, bytes32 _collType, address _joinAddr) public view returns (uint) {
-        (uint collateral, uint debt) = getCdpInfo(ISAFEManager(_managerAddr), _safeId, _collType);
+        (uint collateral, uint debt) = getSafeInfo(ISAFEManager(_managerAddr), _safeId, _collType);
 
         (, , uint256 safetyPrice, , , ) =
             ISAFEEngine(SAFE_ENGINE_ADDRESS).collateralTypes(_collType);
 
         uint maxCollateral = sub(collateral, wmul(wdiv(RAY, safetyPrice), debt));
-
-        console.log("maxCollateral: ", maxCollateral, debt, safetyPrice);
 
         uint normalizeMaxCollateral = maxCollateral / (10 ** (18 - IBasicTokenAdapters(_joinAddr).decimals()));
 
@@ -263,7 +244,7 @@ contract RAISaverProxy is DFSExchangeCore, RAISaverProxyHelper {
         bytes32 _collType
     ) public view virtual returns (uint256) {
         (uint256 collateral, uint256 debt) =
-            getCdpInfo(ISAFEManager(_managerAddr), _safeId, _collType);
+            getSafeInfo(ISAFEManager(_managerAddr), _safeId, _collType);
 
         (, , uint256 safetyPrice, , , ) =
             ISAFEEngine(SAFE_ENGINE_ADDRESS).collateralTypes(_collType);

@@ -15,7 +15,7 @@ contract RAISaverProxyHelper is DSMath {
     /// @notice Returns a normalized debt _amount based on the current rate
     /// @param _amount Amount of dai to be normalized
     /// @param _rate Current rate of the stability fee
-    /// @param _daiVatBalance Balance od Dai in the Vat for that CDP
+    /// @param _daiVatBalance Balance od Dai in the Vat for that Safe
     function normalizeDrawAmount(uint _amount, uint _rate, uint _daiVatBalance) internal pure returns (int dart) {
         if (_daiVatBalance < mul(_amount, RAY)) {
             dart = toPositiveInt(sub(mul(_amount, RAY), _daiVatBalance) / _rate);
@@ -43,15 +43,15 @@ contract RAISaverProxyHelper is DSMath {
         require(y >= 0, "int-overflow");
     }
 
-    /// @notice Gets Dai amount in Vat which can be added to Cdp
+    /// @notice Gets Dai amount in Vat which can be added to Safe
     /// @param _safeEngine Address of Vat contract
-    /// @param _urn Urn of the Cdp
-    /// @param _ilk Ilk of the Cdp
-    function normalizePaybackAmount(address _safeEngine, address _urn, bytes32 _ilk) internal view returns (int amount) {
+    /// @param _urn Urn of the Safe
+    /// @param _collType CollType of the Safe
+    function normalizePaybackAmount(address _safeEngine, address _urn, bytes32 _collType) internal view returns (int amount) {
         uint dai = ISAFEEngine(_safeEngine).coinBalance(_urn);
 
-        (, uint rate,,,,) = ISAFEEngine(_safeEngine).collateralTypes(_ilk);
-        (, uint art) = ISAFEEngine(_safeEngine).safes(_ilk, _urn);
+        (, uint rate,,,,) = ISAFEEngine(_safeEngine).collateralTypes(_collType);
+        (, uint art) = ISAFEEngine(_safeEngine).safes(_collType, _urn);
 
         amount = toPositiveInt(dai / rate);
         amount = uint(amount) <= art ? - amount : - toPositiveInt(art);
@@ -105,14 +105,14 @@ contract RAISaverProxyHelper is DSMath {
         deltaDebt = uint(deltaDebt) <= generatedDebt ? - deltaDebt : - toPositiveInt(generatedDebt);
     }
 
-    /// @notice Gets the whole debt of the CDP
+    /// @notice Gets the whole debt of the Safe
     /// @param _safeEngine Address of Vat contract
     /// @param _usr Address of the Dai holder
-    /// @param _urn Urn of the Cdp
-    /// @param _ilk Ilk of the Cdp
-    function getAllDebt(address _safeEngine, address _usr, address _urn, bytes32 _ilk) internal view returns (uint daiAmount) {
-        (, uint rate,,,,) = ISAFEEngine(_safeEngine).collateralTypes(_ilk);
-        (, uint art) = ISAFEEngine(_safeEngine).safes(_ilk, _urn);
+    /// @param _urn Urn of the Safe
+    /// @param _collType CollType of the Safe
+    function getAllDebt(address _safeEngine, address _usr, address _urn, bytes32 _collType) internal view returns (uint daiAmount) {
+        (, uint rate,,,,) = ISAFEEngine(_safeEngine).collateralTypes(_collType);
+        (, uint art) = ISAFEEngine(_safeEngine).safes(_collType, _urn);
         uint dai = ISAFEEngine(_safeEngine).coinBalance(_usr);
 
         uint rad = sub(mul(art, rate), dai);
@@ -141,25 +141,25 @@ contract RAISaverProxyHelper is DSMath {
         return false;
     }
 
-    /// @notice Gets CDP info (collateral, debt)
+    /// @notice Gets Safe info (collateral, debt)
     /// @param _manager Manager contract
-    /// @param _cdpId Id of the CDP
-    /// @param _ilk Ilk of the CDP
-    function getCdpInfo(ISAFEManager _manager, uint _cdpId, bytes32 _ilk) public view returns (uint, uint) {
+    /// @param _safeId Id of the Safe
+    /// @param _collType CollType of the Safe
+    function getSafeInfo(ISAFEManager _manager, uint _safeId, bytes32 _collType) public view returns (uint, uint) {
         address vat = _manager.safeEngine();
-        address urn = _manager.safes(_cdpId);
+        address urn = _manager.safes(_safeId);
 
-        (uint collateral, uint debt) = ISAFEEngine(vat).safes(_ilk, urn);
-        (,uint rate,,,,) = ISAFEEngine(vat).collateralTypes(_ilk);
+        (uint collateral, uint debt) = ISAFEEngine(vat).safes(_collType, urn);
+        (,uint rate,,,,) = ISAFEEngine(vat).collateralTypes(_collType);
 
         return (collateral, rmul(debt, rate));
     }
 
-    /// @notice Address that owns the DSProxy that owns the CDP
+    /// @notice Address that owns the DSProxy that owns the Safe
     /// @param _manager Manager contract
-    /// @param _cdpId Id of the CDP
-    function getOwner(ISAFEManager _manager, uint _cdpId) public view returns (address) {
-        DSProxy proxy = DSProxy(uint160(_manager.ownsSAFE(_cdpId)));
+    /// @param _safeId Id of the Safe
+    function getOwner(ISAFEManager _manager, uint _safeId) public view returns (address) {
+        DSProxy proxy = DSProxy(uint160(_manager.ownsSAFE(_safeId)));
 
         return proxy.owner();
     }
