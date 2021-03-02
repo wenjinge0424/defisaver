@@ -11,8 +11,7 @@ contract AllowanceProxy is AdminAuth {
 
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    // TODO: Real saver exchange address
-    DFSExchange dfsExchange = DFSExchange(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    DFSExchange dfsExchange = DFSExchange(0xc2Ce04e2FB4DD20964b4410FcE718b95963a1587);
 
     function callSell(DFSExchangeCore.ExchangeData memory exData) public payable {
         pullAndSendTokens(exData.srcAddr, exData.srcAmount);
