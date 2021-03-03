@@ -7,6 +7,7 @@ import "../interfaces/reflexer/ISAFEEngine.sol";
 import "../interfaces/reflexer/ISAFEManager.sol";
 import "../interfaces/reflexer/IOracleRelayer.sol";
 import "../interfaces/reflexer/IMedianOracle.sol";
+import "../interfaces/reflexer/ITaxCollector.sol";
 
 contract RaiLoanInfo is DSMath {
     // mainnet
@@ -15,6 +16,7 @@ contract RaiLoanInfo is DSMath {
     address public constant SAFE_ENGINE_ADDRESS = 0xCC88a9d330da1133Df3A7bD823B95e52511A6962;
     address public constant ORACLE_RELAYER_ADDRESS = 0x4ed9C0dCa0479bC64d8f4EB3007126D5791f7851;
     address public constant MEDIAN_ORACLE_ADDRESS = 0x12A5E1c81B10B264A575930aEae80681DDF595fe;
+    address public constant TAX_COLLECTOR_ADDRESS = 0xcDB05aEda142a1B0D6044C09C64e4226c1a281EB;
 
     // kovan
     // address public constant GET_SAFES_ADDR = 0x702dcf4a8C3bBBd243477D5704fc45F2762D3826;
@@ -22,6 +24,7 @@ contract RaiLoanInfo is DSMath {
     // address public constant SAFE_ENGINE_ADDRESS = 0x7f63fE955fFF8EA474d990f1Fc8979f2C650edbE;
     // address public constant ORACLE_RELAYER_ADDRESS = 0xE5Ae4E49bEA485B5E5172EE6b1F99243cB15225c;
     // address public constant MEDIAN_ORACLE_ADDRESS = 0x82bEAd00751EFA3286c9Dd17e4Ea2570916B3944;
+    // address public constant TAX_COLLECTOR_ADDRESS = 0xc1a94C5ad9FCD79b03F79B34d8C0B0C8192fdc16;
 
     struct SafeInfo {
         uint256 safeId;
@@ -40,6 +43,7 @@ contract RaiLoanInfo is DSMath {
         uint256 liqPrice;
         uint256 assetPrice;
         uint256 liqRatio;
+        uint256 stabilityFee;
     }
 
     struct RaiInfo {
@@ -63,6 +67,9 @@ contract RaiLoanInfo is DSMath {
 
         (, uint liqRatio) = IOracleRelayer(ORACLE_RELAYER_ADDRESS).collateralTypes(_collType);
 
+        (uint stabilityFee,) = ITaxCollector(TAX_COLLECTOR_ADDRESS).collateralTypes(_collType);
+
+
         collInfo = CollInfo({
             debtCeiling: debtCeiling,
             currDebtAmount: debtAmount,
@@ -71,7 +78,8 @@ contract RaiLoanInfo is DSMath {
             safetyPrice: safetyPrice,
             liqPrice: liquidationPrice,
             assetPrice: getPrice(_collType),
-            liqRatio: liqRatio
+            liqRatio: liqRatio,
+            stabilityFee: stabilityFee
         });
     }
 
