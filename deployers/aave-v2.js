@@ -18,9 +18,14 @@ async function main() {
  	// await deployContract("AaveImportTakerV2");
 
  	// need AaveSaverReceiverV2
- 	await deployContract("AaveSaverTakerV2");
+ 	// await deployContract("AaveSaverTakerV2");
 
  	// send funds to AaveImportV2 and AaveSaverReveiverV2
+
+
+ 	// optimized
+ 	// await deployContract("AaveSaverReceiverOV2");
+ 	await deployContract("AaveSaverTakerOV2");
 }
 
 start(main);
