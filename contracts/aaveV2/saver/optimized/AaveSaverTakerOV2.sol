@@ -16,7 +16,7 @@ import "../../../exchangeV3/DFSExchangeData.sol";
 /// @dev Contract needs to have enough wei in WETH for all transactions (2 WETH wei per transaction)
 contract AaveSaverTakerOV2 is ProxyPermission, GasBurner, DFSExchangeData, AaveHelperV2 {
 
-    address payable public constant AAVE_RECEIVER = 0x7C110fA40017F0Ea8bFa1195f18bF3417016A4FC;
+    address payable public constant AAVE_RECEIVER = 0x3A2b208d41d28e1bB13fB1BdAD6eDD2930b9CaCD;
 
     // leaving _flAmount to be the same as the older version
     function repay(address _market, ExchangeData memory _data, uint _rateMode, uint256 _gasCost, uint _flAmount) public payable burnGas(10) {

@@ -23,8 +23,11 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
  
         // if its eth we need to send it to the basic proxy, if not, we need to approve basic proxy to pull tokens
         uint256 msgValue = 0;
+        address token = _exchangeData.destAddr;
+        // sell always return eth, but deposit differentiate eth vs weth, so we change weth address to eth when we are depoisting
         if (_exchangeData.destAddr == ETH_ADDR || _exchangeData.destAddr == WETH_ADDRESS) {
             msgValue = swappedAmount;
+            token = ETH_ADDR;
         } else {
             ERC20(_exchangeData.destAddr).safeApprove(_proxy, swappedAmount);
         }
@@ -34,7 +37,7 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
             abi.encodeWithSignature(
                 "deposit(address,address,uint256)",
                 _market,
-                _exchangeData.destAddr,
+                token,
                 swappedAmount
                 )
             );
