@@ -23,7 +23,7 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
  
         // if its eth we need to send it to the basic proxy, if not, we need to approve basic proxy to pull tokens
         uint256 msgValue = 0;
-        if (_exchangeData.destAddr == ETH_ADDR) {
+        if (_exchangeData.destAddr == ETH_ADDR || _exchangeData.destAddr == WETH_ADDRESS) {
             msgValue = swappedAmount;
         } else {
             ERC20(_exchangeData.destAddr).safeApprove(_proxy, swappedAmount);
@@ -48,7 +48,7 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
 
         // if its eth we need to send it to the basic proxy, if not, we need to approve basic proxy to pull tokens
         uint256 msgValue = 0;
-        if (_exchangeData.destAddr == ETH_ADDR) {
+        if (_exchangeData.destAddr == ETH_ADDR || _exchangeData.destAddr == WETH_ADDRESS) {
             msgValue = swappedAmount;
         } else {
             ERC20(_exchangeData.destAddr).safeApprove(_proxy, swappedAmount);
@@ -103,7 +103,7 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
             repay(exData, market, gasCost, proxy, rateMode, totalValueToReturn);
             
             address token = exData.srcAddr;
-            if (token == ETH_ADDR) {
+            if (token == ETH_ADDR || token == WETH_ADDRESS) {
                 // deposit eth, get weth and return to sender
                 TokenInterface(WETH_ADDRESS).deposit.value(totalValueToReturn)();
                 token = WETH_ADDRESS;
