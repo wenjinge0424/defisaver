@@ -5,6 +5,8 @@ import "../../mcd/saver/MCDSaverProxy.sol";
 import "../../utils/FlashLoanReceiverBase.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 
+/// @title Receiver of Dydx flash loan and performs the fl repay/boost logic
+/// @notice Must have a dust amount of WETH on the contract for 2 wei dydx fee
 contract MCDSaverFlashLoan is MCDSaverProxy, AdminAuth, FlashLoanReceiverBase {
 
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);

@@ -4,11 +4,16 @@ const dotenv = require('dotenv').config();
 const { write } = require('./writer');
 
 const getGasPrice = async (exGasPrice) => {
+	let defaultGasPrice = 10000000000;
+	let newGasPrice = defaultGasPrice;
+
 	if (exGasPrice.gt("0")) {
 		newGasPrice = exGasPrice.add(exGasPrice.div("8"));
 	} else {
-		const defaultGasPrice = ethers.BigNumber.from(bre.network.config.gasPrice);
-		newGasPrice = defaultGasPrice.gt("0") ? defaultGasPrice : await provider.getGasPrice();
+		if (bre.network.name == 'mainnet') {
+			defaultGasPrice = ethers.BigNumber.from(bre.network.config.gasPrice);
+			newGasPrice = defaultGasPrice.gt("0") ? defaultGasPrice : await provider.getGasPrice();
+		}
 	}
 
 	if (exGasPrice.gte(newGasPrice)) {
@@ -37,7 +42,7 @@ const deploy = async (contractName, action, gasPrice, nonce, ...args) => {
 
 	  	console.log(`${action} ${contractName}: ${contract.deployTransaction.hash}`);
 	  	console.log(`Gas price: ${parseInt(gasPrice.toString())/1e9}`);
-	  	
+
 	  	await contract.deployed();
 	  	const tx = await contract.deployTransaction.wait(1);
 
@@ -51,14 +56,14 @@ const deploy = async (contractName, action, gasPrice, nonce, ...args) => {
 	} catch (e) {
 		console.log(e);
 		return null;
-	}	
+	}
 }
 
 const deployWithResend = (contractName, action, exGasPrice, nonce, ...args) => new Promise((resolve) => {
 	getGasPrice(exGasPrice).then((gasPrice) => {
 		let deployPromise = deploy(contractName, action, gasPrice, nonce, ...args);
 		const timeoutId = setTimeout(() => resolve(deployWithResend(contractName, 'Resending', gasPrice, nonce, ...args)),  parseFloat(process.env.TIMEOUT_MINUTES) * 60 * 1000);
-		
+
 		deployPromise.then((contract) => {
 			clearTimeout(timeoutId);
 
