@@ -43,7 +43,12 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
             );
     }
 
-    function repay(ExchangeData memory _exchangeData, address _market, uint256 _gasCost, address _proxy, uint256 _rateMode, uint _withdrawValue) private {
+    function repay(ExchangeData memory _exchangeData, address _market, uint256 _gasCost, address _proxy, uint256 _rateMode, uint _fee) private {
+        // we will withdraw exactly the srcAmount, as fee we keep before selling
+        uint valueToWithdraw = _exchangeData.srcAmount;
+        // take out the fee wee need to pay and sell the rest
+        _exchangeData.srcAmount = _exchangeData.srcAmount - _fee;
+
         (, uint swappedAmount) = _sell(_exchangeData);
 
         address user = DSAuth(_proxy).owner();
@@ -69,7 +74,7 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
             );
 
         // pull the amount we flash loaned in collateral to be able to payback the debt
-        DSProxy(payable(_proxy)).execute(AAVE_BASIC_PROXY, abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _exchangeData.srcAddr, _withdrawValue));
+        DSProxy(payable(_proxy)).execute(AAVE_BASIC_PROXY, abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _exchangeData.srcAddr, valueToWithdraw));
     }
 
     function executeOperation(
@@ -99,11 +104,12 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
         }
 
         // this is to avoid stack too deep
-        uint totalValueToReturn = exData.srcAmount + premiums[0];
+        uint fee = premiums[0];
+        uint totalValueToReturn = exData.srcAmount + fee;
 
         // if its repay, we are using regular flash loan and payback the premiums
         if (isRepay) {
-            repay(exData, market, gasCost, proxy, rateMode, totalValueToReturn);
+            repay(exData, market, gasCost, proxy, rateMode, fee);
             
             address token = exData.srcAddr;
             if (token == ETH_ADDR || token == WETH_ADDRESS) {
