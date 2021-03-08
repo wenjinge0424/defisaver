@@ -20,7 +20,7 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
 
         address user = DSAuth(_proxy).owner();
         swappedAmount -= getGasCost(ILendingPoolAddressesProviderV2(_market).getPriceOracle(), swappedAmount, user, _gasCost, _exchangeData.destAddr);
- 
+
         // if its eth we need to send it to the basic proxy, if not, we need to approve users proxy to pull tokens
         uint256 msgValue = 0;
         address token = _exchangeData.destAddr;
@@ -52,7 +52,7 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
         (, uint swappedAmount) = _sell(_exchangeData);
 
         // set protocol fee left to eth balance of this address
-        // but if destAddr is eth or weth, this also includes that value so we need to substract it 
+        // but if destAddr is eth or weth, this also includes that value so we need to substract it
         uint protocolFeeLeft = address(this).balance;
 
         address user = DSAuth(_proxy).owner();
@@ -111,10 +111,13 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
         )
         = abi.decode(params, (bytes,address,uint256,uint256,bool,address));
 
+        address lendingPool = ILendingPoolAddressesProviderV2(market).getLendingPool();
+
+        require(msg.sender == lendingPool, "Callbacks only allowed from Aave");
         require(initiator == proxy, "initiator isn't proxy");
 
         ExchangeData memory exData = unpackExchangeData(exchangeDataBytes);
-        exData.user = DSAuth(proxy).owner();    
+        exData.user = DSAuth(proxy).owner();
         exData.dfsFeeDivider = MANUAL_SERVICE_FEE;
         if (BotRegistry(BOT_REGISTRY_ADDRESS).botList(tx.origin)) {
             exData.dfsFeeDivider = AUTOMATIC_SERVICE_FEE;
@@ -127,7 +130,7 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
         // if its repay, we are using regular flash loan and payback the premiums
         if (isRepay) {
             repay(exData, market, gasCost, proxy, rateMode, fee);
-            
+
             address token = exData.srcAddr;
             if (token == ETH_ADDR || token == WETH_ADDRESS) {
                 // deposit eth, get weth and return to sender
@@ -135,11 +138,11 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
                 token = WETH_ADDRESS;
             }
 
-            ERC20(token).safeApprove(ILendingPoolAddressesProviderV2(market).getLendingPool(), totalValueToReturn);
+            ERC20(token).safeApprove(lendingPool, totalValueToReturn);
         } else {
             boost(exData, market, gasCost, proxy);
         }
-        
+
         tx.origin.transfer(address(this).balance);
 
         return true;
