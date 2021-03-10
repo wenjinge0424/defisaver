@@ -224,9 +224,8 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
         });
 
         uint64 collPos = 0;
-        uint64 borrowStablePos = 0;
-        uint64 borrowVariablePos = 0;
-
+        uint64 borrowPos = 0;
+        
         for (uint64 i = 0; i < reserves.length; i++) {
             address reserve = reserves[i].tokenAddress;
 
@@ -243,17 +242,19 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
             // Sum up debt in Eth
             if (borrowsStable > 0) {
                 uint256 userBorrowBalanceEth = wmul(borrowsStable, price) * (10 ** (18 - _getDecimals(reserve)));
-                data.borrowAddr[borrowStablePos] = reserve;
-                data.borrowStableAmounts[borrowStablePos] = userBorrowBalanceEth;
-                borrowStablePos++;
+                data.borrowAddr[borrowPos] = reserve;
+                data.borrowStableAmounts[borrowPos] = userBorrowBalanceEth;
             }
 
             // Sum up debt in Eth
             if (borrowsVariable > 0) {
                 uint256 userBorrowBalanceEth = wmul(borrowsVariable, price) * (10 ** (18 - _getDecimals(reserve)));
-                data.borrowAddr[borrowVariablePos] = reserve;
-                data.borrowVariableAmounts[borrowVariablePos] = userBorrowBalanceEth;
-                borrowVariablePos++;
+                data.borrowAddr[borrowPos] = reserve;
+                data.borrowVariableAmounts[borrowPos] = userBorrowBalanceEth;
+            }
+
+            if (borrowsStable > 0 || borrowsVariable > 0) {
+                borrowPos++;
             }
         }
 
