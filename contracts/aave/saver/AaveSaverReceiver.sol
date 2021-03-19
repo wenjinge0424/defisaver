@@ -7,14 +7,15 @@ import "../../interfaces/TokenInterface.sol";
 import "../../DS/DSProxy.sol";
 import "../AaveHelper.sol";
 import "../../auth/AdminAuth.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeData.sol";
 
 /// @title Import Aave position from account to wallet
-contract AaveSaverReceiver is AaveHelper, AdminAuth, SaverExchangeCore {
+contract AaveSaverReceiver is AaveHelper, AdminAuth, DFSExchangeData {
 
     using SafeERC20 for ERC20;
 
-    address public constant AAVE_SAVER_PROXY = 0xCab7ce9148499E0dD8228c3c8cDb9B56Ac2bb57a;
+    address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public constant AAVE_SAVER_PROXY = 0x2a3B273695A045EC263970e3C86c23800a0F04FC;
     address public constant AAVE_BASIC_PROXY = 0xd042D4E9B4186c545648c7FfFe87125c976D110B;
     address public constant AETH_ADDRESS = 0x3a3A65aAb0dd2A17E3F1947bA16138cd37d08c04;
 
@@ -61,16 +62,16 @@ contract AaveSaverReceiver is AaveHelper, AdminAuth, SaverExchangeCore {
         bytes memory functionData;
 
         if (_isRepay) {
-            functionData = abi.encodeWithSignature("repay((address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256)", exData, _gasCost);
+            functionData = abi.encodeWithSignature("repay((address,address,uint256,uint256,uint256,uint256,address,address,bytes,(address,address,address,uint256,uint256,bytes)),uint256)", exData, _gasCost);
         } else {
-            functionData = abi.encodeWithSignature("boost((address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256)", exData, _gasCost);
+            functionData = abi.encodeWithSignature("boost((address,address,uint256,uint256,uint256,uint256,address,address,bytes,(address,address,address,uint256,uint256,bytes)),uint256)", exData, _gasCost);
         }
 
         return functionData;
     }
 
     /// @dev if contract receive eth, convert it to WETH
-    receive() external override payable {
+    receive() external payable {
         // deposit eth and get weth 
         if (msg.sender == owner) {
             TokenInterface(WETH_ADDRESS).deposit.value(address(this).balance)();
