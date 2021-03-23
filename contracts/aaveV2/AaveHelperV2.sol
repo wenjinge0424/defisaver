@@ -50,9 +50,9 @@ contract AaveHelperV2 is DSMath {
         _gasCost = wdiv(_gasCost, price) / (10 ** (18 - _getDecimals(_tokenAddr)));
         gasCost = _gasCost;
 
-        // gas cost can't go over 10% of the whole amount
-        if (gasCost > (_amount / 10)) {
-            gasCost = _amount / 10;
+        // gas cost can't go over 20% of the whole amount
+        if (gasCost > (_amount / 20)) {
+            gasCost = _amount / 20;
         }
 
         address walletAddr = feeRecipient.getFeeAddr();
