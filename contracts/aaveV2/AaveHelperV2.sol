@@ -43,7 +43,10 @@ contract AaveHelperV2 is DSMath {
     function getGasCost(address _oracleAddress, uint _amount, address _user, uint _gasCost, address _tokenAddr) internal returns (uint gasCost) {
         if (_gasCost == 0) return 0;
 
-        uint256 price = IPriceOracleGetterAave(_oracleAddress).getAssetPrice(_tokenAddr);
+        // in case its ETH, we need to get price for WETH
+        // everywhere else  we still use ETH as thats the token we have in this moment
+        address priceToken = _tokenAddr == ETH_ADDR ? WETH_ADDRESS : _tokenAddr;
+        uint256 price = IPriceOracleGetterAave(_oracleAddress).getAssetPrice(priceToken);
         _gasCost = wdiv(_gasCost, price) / (10 ** (18 - _getDecimals(_tokenAddr)));
         gasCost = _gasCost;
 
