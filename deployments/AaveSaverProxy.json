@@ -1,9 +1,9 @@
 {
-	"contractName": "AaveSaverReceiverOV2",
+	"contractName": "AaveSaverProxy",
 	"abi": [
 		{
 			"inputs": [],
-			"name": "AAVE_BASIC_PROXY",
+			"name": "AAVE_LENDING_POOL_ADDRESSES",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -43,6 +43,19 @@
 		{
 			"inputs": [],
 			"name": "BOT_REGISTRY_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "DEFISAVER_LOGGER",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -224,38 +237,12 @@
 		},
 		{
 			"inputs": [],
-			"name": "STABLE_ID",
+			"name": "VARIABLE_RATE",
 			"outputs": [
 				{
 					"internalType": "uint256",
 					"name": "",
 					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "VARIABLE_ID",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "WETH_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -288,55 +275,105 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "admin",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
 			"inputs": [
 				{
-					"internalType": "address[]",
-					"name": "",
-					"type": "address[]"
+					"components": [
+						{
+							"internalType": "address",
+							"name": "srcAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "destAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "srcAmount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "destAmount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "minPrice",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "dfsFeeDivider",
+							"type": "uint256"
+						},
+						{
+							"internalType": "address",
+							"name": "user",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "wrapper",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes",
+							"name": "wrapperData",
+							"type": "bytes"
+						},
+						{
+							"components": [
+								{
+									"internalType": "address",
+									"name": "wrapper",
+									"type": "address"
+								},
+								{
+									"internalType": "address",
+									"name": "exchangeAddr",
+									"type": "address"
+								},
+								{
+									"internalType": "address",
+									"name": "allowanceTarget",
+									"type": "address"
+								},
+								{
+									"internalType": "uint256",
+									"name": "price",
+									"type": "uint256"
+								},
+								{
+									"internalType": "uint256",
+									"name": "protocolFee",
+									"type": "uint256"
+								},
+								{
+									"internalType": "bytes",
+									"name": "callData",
+									"type": "bytes"
+								}
+							],
+							"internalType": "struct DFSExchangeData.OffchainData",
+							"name": "offchainData",
+							"type": "tuple"
+						}
+					],
+					"internalType": "struct DFSExchangeData.ExchangeData",
+					"name": "_data",
+					"type": "tuple"
 				},
 				{
-					"internalType": "uint256[]",
-					"name": "amounts",
-					"type": "uint256[]"
-				},
-				{
-					"internalType": "uint256[]",
-					"name": "premiums",
-					"type": "uint256[]"
-				},
-				{
-					"internalType": "address",
-					"name": "initiator",
-					"type": "address"
-				},
-				{
-					"internalType": "bytes",
-					"name": "params",
-					"type": "bytes"
+					"internalType": "uint256",
+					"name": "_gasCost",
+					"type": "uint256"
 				}
 			],
-			"name": "executeOperation",
-			"outputs": [
-				{
-					"internalType": "bool",
-					"name": "",
-					"type": "bool"
-				}
-			],
-			"stateMutability": "nonpayable",
+			"name": "boost",
+			"outputs": [],
+			"stateMutability": "payable",
 			"type": "function"
 		},
 		{
@@ -354,19 +391,89 @@
 		},
 		{
 			"inputs": [],
-			"name": "kill",
-			"outputs": [],
-			"stateMutability": "nonpayable",
+			"name": "gasToken",
+			"outputs": [
+				{
+					"internalType": "contract GasTokenInterface",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "owner",
-			"outputs": [
+			"inputs": [
 				{
 					"internalType": "address",
-					"name": "",
+					"name": "_borrowAddress",
 					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_collateralAddress",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "getMaxBoost",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_borrowAddress",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "getMaxBorrow",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_collateralAddress",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "getMaxCollateral",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
 				}
 			],
 			"stateMutability": "view",
@@ -478,12 +585,124 @@
 		{
 			"inputs": [
 				{
-					"internalType": "address",
-					"name": "_admin",
-					"type": "address"
+					"components": [
+						{
+							"internalType": "address",
+							"name": "srcAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "destAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "srcAmount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "destAmount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "minPrice",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "dfsFeeDivider",
+							"type": "uint256"
+						},
+						{
+							"internalType": "address",
+							"name": "user",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "wrapper",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes",
+							"name": "wrapperData",
+							"type": "bytes"
+						},
+						{
+							"components": [
+								{
+									"internalType": "address",
+									"name": "wrapper",
+									"type": "address"
+								},
+								{
+									"internalType": "address",
+									"name": "exchangeAddr",
+									"type": "address"
+								},
+								{
+									"internalType": "address",
+									"name": "allowanceTarget",
+									"type": "address"
+								},
+								{
+									"internalType": "uint256",
+									"name": "price",
+									"type": "uint256"
+								},
+								{
+									"internalType": "uint256",
+									"name": "protocolFee",
+									"type": "uint256"
+								},
+								{
+									"internalType": "bytes",
+									"name": "callData",
+									"type": "bytes"
+								}
+							],
+							"internalType": "struct DFSExchangeData.OffchainData",
+							"name": "offchainData",
+							"type": "tuple"
+						}
+					],
+					"internalType": "struct DFSExchangeData.ExchangeData",
+					"name": "_data",
+					"type": "tuple"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_gasCost",
+					"type": "uint256"
 				}
 			],
-			"name": "setAdminByAdmin",
+			"name": "repay",
+			"outputs": [],
+			"stateMutability": "payable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_token",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				}
+			],
+			"name": "sendContractBalance",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
@@ -492,24 +711,16 @@
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "_admin",
+					"name": "_token",
 					"type": "address"
-				}
-			],
-			"name": "setAdminByOwner",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
+				},
 				{
 					"internalType": "address",
-					"name": "_owner",
+					"name": "_user",
 					"type": "address"
 				}
 			],
-			"name": "setOwnerByAdmin",
+			"name": "sendFullContractBalance",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
@@ -618,31 +829,13 @@
 			"type": "function"
 		},
 		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_token",
-					"type": "address"
-				},
-				{
-					"internalType": "uint256",
-					"name": "_amount",
-					"type": "uint256"
-				}
-			],
-			"name": "withdrawStuckFunds",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
 			"stateMutability": "payable",
 			"type": "receive"
 		}
 	],
 	"networks": {
 		"mainnet": {
-			"address": "0xD6F7171a0f873262267CF99e010C8B08Bcdd199f",
+			"address": "0x2a3B273695A045EC263970e3C86c23800a0F04FC",
 			"args": []
 		}
 	}

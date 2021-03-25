@@ -12,7 +12,7 @@ async function main() {
 
  	const monitorProxy = '0x380982902872836ceC629171DaeAF42EcC02226e';
  	const subscription = '0x6B25043BF08182d8e86056C6548847aF607cd7CD';
- 	const saverProxy = '0x2de7c22e104ca305780995F991D980E818f33361';
+ 	const saverProxy = '0x83719f6408938bde08944819DC0DA4302bdAC854';
 
  	// await deployContract("AaveSubscriptionsProxyV2");
  	await deployContract("AaveMonitorV2", monitorProxy, subscription, saverProxy);
