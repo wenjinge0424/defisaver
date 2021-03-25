@@ -36,14 +36,18 @@ contract CompoundImportFlashLoan is FlashLoanReceiverBase, AdminAuth {
         address user = DSProxyInterface(proxy).owner();
         uint256 usersCTokenBalance = CTokenInterface(cCollAddr).balanceOf(user);
 
-        // approve FL tokens so we can repay them
-        ERC20(_reserve).safeApprove(cBorrowAddr, _amount);
+        if (_reserve != EthAddressLib.ethAddress()) {
+            // approve FL tokens so we can repay them
+            ERC20(_reserve).safeApprove(cBorrowAddr, _amount);
 
-        // repay compound debt on behalf of the user
-        require(
-            CTokenInterface(cBorrowAddr).repayBorrowBehalf(user, uint256(-1)) == 0,
-            "Repay borrow behalf fail"
-        );
+            // repay compound debt on behalf of the user
+            require(
+                CTokenInterface(cBorrowAddr).repayBorrowBehalf(user, uint256(-1)) == 0,
+                "Repay borrow behalf fail"
+            );
+        } else {
+            CTokenInterface(cBorrowAddr).repayBorrow{value: _amount}(); // reverts on fail
+        }
 
         bytes memory depositProxyCallData = formatDSProxyPullTokensCall(cCollAddr, usersCTokenBalance);
         DSProxyInterface(proxy).execute(PULL_TOKENS_PROXY, depositProxyCallData);
