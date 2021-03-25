@@ -56,22 +56,28 @@ contract LoanShifterReceiver is DFSExchangeCore, FlashLoanReceiverBase, AdminAut
         exchangeData.user = DSProxyInterface(paramData.proxy).owner();
 
         if (paramData.swapType == 1) {
-            // COLL_SWAP
-            (, uint256 amount) = _sell(exchangeData);
+            uint256 amount = exchangeData.srcAmount;
+
+            if (exchangeData.srcAddr != exchangeData.destAddr) {
+                // COLL_SWAP
+                (, amount) = _sell(exchangeData);
+            }
 
             sendTokenAndEthToProxy(payable(paramData.proxy), exchangeData.destAddr, amount);
         } else if (paramData.swapType == 2) {
             // DEBT_SWAP
 
-            exchangeData.destAmount = (_amount + _fee);
-            _buy(exchangeData);
+            if (exchangeData.srcAddr != exchangeData.destAddr) {
+                exchangeData.destAmount = (_amount + _fee);
+                _buy(exchangeData);
 
-            // Send extra to DSProxy
-            sendTokenToProxy(
-                payable(paramData.proxy),
-                exchangeData.srcAddr,
-                ERC20(exchangeData.srcAddr).balanceOf(address(this))
-            );
+                // Send extra to DSProxy
+                sendTokenToProxy(
+                    payable(paramData.proxy),
+                    exchangeData.srcAddr,
+                    ERC20(exchangeData.srcAddr).balanceOf(address(this))
+                );
+            }
         } else {
             // NO_SWAP just send tokens to proxy
             sendTokenAndEthToProxy(
