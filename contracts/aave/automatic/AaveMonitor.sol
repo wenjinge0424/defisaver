@@ -8,7 +8,7 @@ import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../AaveSafetyRatio.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeData.sol";
 
 /// @title Contract implements logic of calling boost/repay in the automatic system
 contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
@@ -52,7 +52,7 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
     /// @param _exData Exchange data
     /// @param _user The actual address that owns the Aave position
     function repayFor(
-        SaverExchangeCore.ExchangeData memory _exData,
+        DFSExchangeData.ExchangeData memory _exData,
         address _user
     ) public payable onlyApproved burnGas(REPAY_GAS_TOKEN) {
 
@@ -65,7 +65,7 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
             _user,
             aaveSaverProxy,
             abi.encodeWithSignature(
-                "repay((address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256)",
+                "repay((address,address,uint256,uint256,uint256,uint256,address,address,bytes,(address,address,address,uint256,uint256,bytes)),uint256)",
                 _exData,
                 gasCost
             )
@@ -84,7 +84,7 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
     /// @param _exData Exchange data
     /// @param _user The actual address that owns the Aave position
     function boostFor(
-        SaverExchangeCore.ExchangeData memory _exData,
+        DFSExchangeData.ExchangeData memory _exData,
         address _user
     ) public payable onlyApproved burnGas(BOOST_GAS_TOKEN) {
 
@@ -97,7 +97,7 @@ contract AaveMonitor is AdminAuth, DSMath, AaveSafetyRatio, GasBurner {
             _user,
             aaveSaverProxy,
             abi.encodeWithSignature(
-                "boost((address,address,uint256,uint256,uint256,address,address,bytes,uint256),uint256)",
+                "boost((address,address,uint256,uint256,uint256,uint256,address,address,bytes,(address,address,address,uint256,uint256,bytes)),uint256)",
                 _exData,
                 gasCost
             )
