@@ -71,7 +71,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
             _user,
             compoundFlashLoanTakerAddress,
             abi.encodeWithSignature(
-                "repayWithLoan((address,address,uint256,uint256,uint256,address,address,bytes,uint256),address[2],uint256)",
+                "repayWithLoan((address,address,uint256,uint256,uint256,uint256,address,address,bytes,(address,address,address,uint256,uint256,bytes)),address[2],uint256)",
                 _exData,
                 _cAddresses,
                 gasCost
@@ -106,7 +106,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
             _user,
             compoundFlashLoanTakerAddress,
             abi.encodeWithSignature(
-                "boostWithLoan((address,address,uint256,uint256,uint256,address,address,bytes,uint256),address[2],uint256)",
+                "boostWithLoan((address,address,uint256,uint256,uint256,uint256,address,address,bytes,(address,address,address,uint256,uint256,bytes)),address[2],uint256)",
                 _exData,
                 _cAddresses,
                 gasCost
