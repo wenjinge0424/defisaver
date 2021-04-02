@@ -9,7 +9,7 @@ import "../../exchangeV3/DFSExchangeData.sol";
 contract CompoundSaverFlashLoan is FlashLoanReceiverBase, DFSExchangeData {
     ILendingPoolAddressesProvider public LENDING_POOL_ADDRESS_PROVIDER = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
 
-    address payable public COMPOUND_SAVER_FLASH_PROXY = 0xcaB974d1702a056e6FF16f1DaA34646E41Ef485E;
+    address payable public COMPOUND_SAVER_FLASH_PROXY = 0x1597E7dbb1e69Ec2a64C756Fec0DB01F463aa881;
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address public owner;

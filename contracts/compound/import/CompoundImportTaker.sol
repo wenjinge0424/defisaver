@@ -15,7 +15,7 @@ contract CompoundImportTaker is CompoundSaverHelper, ProxyPermission, GasBurner 
 
     ILendingPool public constant lendingPool = ILendingPool(0x398eC7346DcD622eDc5ae82352F02bE94C62d119);
 
-    address payable public constant COMPOUND_IMPORT_FLASH_LOAN = 0x1DB68Ba0B85800FD323387E8B69d9AE867e00B94;
+    address payable public constant COMPOUND_IMPORT_FLASH_LOAN = 0x7C6338A5F64A77c0FAeC16487b95F8E7D621c5e5;
     address public constant PROXY_REGISTRY_ADDRESS = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
 
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);

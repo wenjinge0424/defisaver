@@ -13,7 +13,7 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
 
     using SafeERC20 for ERC20;
 
-    address public constant AAVE_BASIC_PROXY = 0xc17c8eB12Ba24D62E69fd57cbd504EEf418867f9;
+    address public constant AAVE_BASIC_PROXY = 0x234e8219f25F6AF4bE90d40C79DEdE31B1f21d4f;
 
     function boost(ExchangeData memory _exchangeData, address _market, uint256 _gasCost, address _proxy) internal {
         (, uint swappedAmount) = _sell(_exchangeData);

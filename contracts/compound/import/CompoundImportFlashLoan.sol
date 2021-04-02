@@ -46,7 +46,7 @@ contract CompoundImportFlashLoan is FlashLoanReceiverBase, AdminAuth {
                 "Repay borrow behalf fail"
             );
         } else {
-            CTokenInterface(cBorrowAddr).repayBorrow{value: _amount}(); // reverts on fail
+            CTokenInterface(cBorrowAddr).repayBorrowBehalf{value: _amount}(user); // reverts on fail
         }
 
         bytes memory depositProxyCallData = formatDSProxyPullTokensCall(cCollAddr, usersCTokenBalance);
