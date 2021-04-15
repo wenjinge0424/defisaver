@@ -41,10 +41,10 @@ contract CompoundSaverProxy is CompoundSaverHelper, DFSExchangeCore {
             _exData.user = user;
 
             (, swapAmount) = _sell(_exData);
-            swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[1]);
+            swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[0]);
         } else {
             swapAmount = collAmount;
-            swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[1]);
+            swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[0]);
         }
 
         paybackDebt(swapAmount, _cAddresses[1], borrowToken, user);

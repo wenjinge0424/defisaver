@@ -100,10 +100,10 @@ contract CompoundSaverFlashProxy is DFSExchangeCore, CompoundSaverHelper  {
             _exData.user = user;
 
             (, swapAmount) = _sell(_exData);
-            swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[1]);
+            swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[0]);
         } else {
             swapAmount = (borrowAmount + _flashLoanData[0]);
-            swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[1]);
+            swapAmount -= getGasCost(swapAmount, _gasCost, _cAddresses[0]);
         }
 
         // deposit swaped collateral
