@@ -51,8 +51,8 @@ contract AaveHelperV2 is DSMath {
         gasCost = _gasCost;
 
         // gas cost can't go over 20% of the whole amount
-        if (gasCost > (_amount / 20)) {
-            gasCost = _amount / 20;
+        if (gasCost > (_amount / 5)) {
+            gasCost = _amount / 5;
         }
 
         address walletAddr = feeRecipient.getFeeAddr();

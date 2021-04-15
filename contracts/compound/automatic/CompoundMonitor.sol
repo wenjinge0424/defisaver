@@ -10,7 +10,7 @@ import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 import "../../loggers/DefisaverLogger.sol";
 import "../CompoundSafetyRatio.sol";
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchangeV3/DFSExchangeData.sol";
 
 /// @title Contract implements logic of calling boost/repay in the automatic system
 contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
@@ -57,7 +57,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
     /// @param _cAddresses cTokens addreses and exchange [cCollAddress, cBorrowAddress, exchangeAddress]
     /// @param _user The actual address that owns the Compound position
     function repayFor(
-        SaverExchangeCore.ExchangeData memory _exData,
+        DFSExchangeData.ExchangeData memory _exData,
         address[2] memory _cAddresses, // cCollAddress, cBorrowAddress
         address _user
     ) public payable onlyApproved burnGas(REPAY_GAS_TOKEN) {
@@ -92,7 +92,7 @@ contract CompoundMonitor is AdminAuth, DSMath, CompoundSafetyRatio, GasBurner {
     /// @param _cAddresses cTokens addreses and exchange [cCollAddress, cBorrowAddress, exchangeAddress]
     /// @param _user The actual address that owns the Compound position
     function boostFor(
-        SaverExchangeCore.ExchangeData memory _exData,
+        DFSExchangeData.ExchangeData memory _exData,
         address[2] memory _cAddresses, // cCollAddress, cBorrowAddress
         address _user
     ) public payable onlyApproved burnGas(BOOST_GAS_TOKEN) {

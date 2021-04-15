@@ -6,25 +6,11 @@ const { deployContract } = require("./utils/deployer");
 const { start } = require('./utils/starter');
 
 async function main() {
+  const compoundMonitorProxyAddress = '0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a';
+  const subscriptionsAddress = '0x52015EFFD577E08f498a0CCc11905925D58D6207';
+  const compoundFlashLoanTakerAddress = '0x602613C7fa3b0c0B6DD4977E16DD5F00d00648f2';
 
-  // before running, change CompoundSubscriptionsProxy.sol
-  // before running, change these addresses below
-
-  const compoundMonitorProxyAddress = '0x2612Af3A521c2df9EAF28422Ca335b04AdF3ac66';
-  const subscriptionsAddress = '0x67B5656d60a809915323Bf2C40A8bEF15A152e3e';
-  const compoundFlashLoanTakerAddress = '0x1c214eCB456D0D4403984E5593BE7992CF8B9eB8';
-
-  // We get the contract to deploy
-  await deploy("CompoundSubscriptionsProxy");
-  const monitor = await deployContract("CompoundMonitor", compoundMonitorProxyAddress, subscriptionsAddress, compoundFlashLoanTakerAddress);
-
-  const CompoundMonitorProxy = await ethers.getContractFactory("CompoundMonitorProxy");
-  const monitorProxy = await CompoundMonitorProxy.attach(compoundMonitorProxyAddress);
-
-  console.log('setting monitor');
-  await monitorProxy.setMonitor(monitor.address);
-  console.log('adding caller');
-  await monitor.addCaller('0x6c259ea1fCa0D1883e3FFFdDeb8a0719E1D7265f');
+  await deployContract("CompoundMonitor", compoundMonitorProxyAddress, subscriptionsAddress, compoundFlashLoanTakerAddress);
 }
 
 start(main);
