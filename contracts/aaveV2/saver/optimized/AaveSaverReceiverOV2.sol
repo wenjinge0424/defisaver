@@ -73,10 +73,6 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
 
         (, uint256 swappedAmount) = _sell(_exchangeData);
 
-        // set protocol fee left to eth balance of this address
-        // but if destAddr is eth or weth, this also includes that value so we need to substract it
-        uint256 protocolFeeLeft = address(this).balance;
-
         address user = DSAuth(_proxy).owner();
         swappedAmount -= getGasCost(
             ILendingPoolAddressesProviderV2(_market).getPriceOracle(),
@@ -85,6 +81,11 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
             _gasCost,
             _exchangeData.destAddr
         );
+
+        // set protocol fee left to eth balance of this address
+        // but if destAddr is eth or weth, this also includes that value so we need to substract it
+        // doing this after taking gas cost so it doesn't take it into account
+        uint256 protocolFeeLeft = address(this).balance;
 
         // if its eth we need to send it to the basic proxy, if not, we need to approve basic proxy to pull tokens
         uint256 msgValue = 0;
