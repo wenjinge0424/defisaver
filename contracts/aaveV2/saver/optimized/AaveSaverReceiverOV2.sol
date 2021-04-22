@@ -7,19 +7,32 @@ import "../../../DS/DSProxy.sol";
 import "../../AaveHelperV2.sol";
 import "../../../auth/AdminAuth.sol";
 import "../../../exchangeV3/DFSExchangeCore.sol";
+import "../../../loggers/DefisaverLogger.sol";
 
 /// @title Import Aave position from account to wallet
 contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
-
     using SafeERC20 for ERC20;
+
+    address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
     address public constant AAVE_BASIC_PROXY = 0x234e8219f25F6AF4bE90d40C79DEdE31B1f21d4f;
 
-    function boost(ExchangeData memory _exchangeData, address _market, uint256 _gasCost, address _proxy) internal {
-        (, uint swappedAmount) = _sell(_exchangeData);
+    function boost(
+        ExchangeData memory _exchangeData,
+        address _market,
+        uint256 _gasCost,
+        address _proxy
+    ) internal {
+        (, uint256 swappedAmount) = _sell(_exchangeData);
 
         address user = DSAuth(_proxy).owner();
-        swappedAmount -= getGasCost(ILendingPoolAddressesProviderV2(_market).getPriceOracle(), swappedAmount, user, _gasCost, _exchangeData.destAddr);
+        swappedAmount -= getGasCost(
+            ILendingPoolAddressesProviderV2(_market).getPriceOracle(),
+            swappedAmount,
+            user,
+            _gasCost,
+            _exchangeData.destAddr
+        );
 
         // if its eth we need to send it to the basic proxy, if not, we need to approve users proxy to pull tokens
         uint256 msgValue = 0;
@@ -39,24 +52,39 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
                 _market,
                 token,
                 swappedAmount
-                )
-            );
+            )
+        );
+
+        logEvent("AaveV2Boost", _exchangeData, swappedAmount);
     }
 
-    function repay(ExchangeData memory _exchangeData, address _market, uint256 _gasCost, address _proxy, uint256 _rateMode, uint _aaveFlashlLoanFee) internal {
+    function repay(
+        ExchangeData memory _exchangeData,
+        address _market,
+        uint256 _gasCost,
+        address _proxy,
+        uint256 _rateMode,
+        uint256 _aaveFlashlLoanFee
+    ) internal {
         // we will withdraw exactly the srcAmount, as fee we keep before selling
-        uint valueToWithdraw = _exchangeData.srcAmount;
+        uint256 valueToWithdraw = _exchangeData.srcAmount;
         // take out the fee wee need to pay and sell the rest
         _exchangeData.srcAmount = _exchangeData.srcAmount - _aaveFlashlLoanFee;
 
-        (, uint swappedAmount) = _sell(_exchangeData);
+        (, uint256 swappedAmount) = _sell(_exchangeData);
 
         // set protocol fee left to eth balance of this address
         // but if destAddr is eth or weth, this also includes that value so we need to substract it
-        uint protocolFeeLeft = address(this).balance;
+        uint256 protocolFeeLeft = address(this).balance;
 
         address user = DSAuth(_proxy).owner();
-        swappedAmount -= getGasCost(ILendingPoolAddressesProviderV2(_market).getPriceOracle(), swappedAmount, user, _gasCost, _exchangeData.destAddr);
+        swappedAmount -= getGasCost(
+            ILendingPoolAddressesProviderV2(_market).getPriceOracle(),
+            swappedAmount,
+            user,
+            _gasCost,
+            _exchangeData.destAddr
+        );
 
         // if its eth we need to send it to the basic proxy, if not, we need to approve basic proxy to pull tokens
         uint256 msgValue = 0;
@@ -76,8 +104,8 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
                 _exchangeData.destAddr,
                 swappedAmount,
                 _rateMode
-                )
-            );
+            )
+        );
 
         // if some tokens left after payback (full repay) we need to return it back to the proxy owner
         require(user != address(0)); // be sure that we fetched the user correctly
@@ -86,12 +114,22 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
             payable(user).transfer(address(this).balance - protocolFeeLeft);
         } else {
             // in case its a token, just return whole value back to the user, as protocol fee is always in eth
-            uint amount = ERC20(_exchangeData.destAddr).balanceOf(address(this));
+            uint256 amount = ERC20(_exchangeData.destAddr).balanceOf(address(this));
             ERC20(_exchangeData.destAddr).safeTransfer(user, amount);
         }
 
         // pull the amount we flash loaned in collateral to be able to payback the debt
-        DSProxy(payable(_proxy)).execute(AAVE_BASIC_PROXY, abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _exchangeData.srcAddr, valueToWithdraw));
+        DSProxy(payable(_proxy)).execute(
+            AAVE_BASIC_PROXY,
+            abi.encodeWithSignature(
+                "withdraw(address,address,uint256)",
+                _market,
+                _exchangeData.srcAddr,
+                valueToWithdraw
+            )
+        );
+
+        logEvent("AaveV2Repay", _exchangeData, swappedAmount);
     }
 
     function executeOperation(
@@ -108,8 +146,7 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
             uint256 rateMode,
             bool isRepay,
             address proxy
-        )
-        = abi.decode(params, (bytes,address,uint256,uint256,bool,address));
+        ) = abi.decode(params, (bytes, address, uint256, uint256, bool, address));
 
         address lendingPool = ILendingPoolAddressesProviderV2(market).getLendingPool();
 
@@ -124,8 +161,8 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
         }
 
         // this is to avoid stack too deep
-        uint fee = premiums[0];
-        uint totalValueToReturn = exData.srcAmount + fee;
+        uint256 fee = premiums[0];
+        uint256 totalValueToReturn = exData.srcAmount + fee;
 
         // if its repay, we are using regular flash loan and payback the premiums
         if (isRepay) {
@@ -148,6 +185,15 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
         return true;
     }
 
+    function logEvent(string memory _name, ExchangeData memory _exchangeData, uint _swappedAmount) internal {
+        DefisaverLogger(DEFISAVER_LOGGER).Log(
+            address(this),
+            msg.sender,
+            _name,
+            abi.encode(_exchangeData.srcAddr, _exchangeData.destAddr, _exchangeData.srcAmount, _swappedAmount)
+        );
+    }
+
     /// @dev allow contract to receive eth from sell
-    receive() external override payable {}
+    receive() external payable override {}
 }
