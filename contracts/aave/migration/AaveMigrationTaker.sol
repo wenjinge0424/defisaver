@@ -25,7 +25,7 @@ contract AaveMigrationTaker is ProxyPermission {
     address public constant AAVE_V2_MONITOR_PROXY = 0x380982902872836ceC629171DaeAF42EcC02226e;
 
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
-    DefisaverLogger public logger = DefisaverLogger(DEFISAVER_LOGGER);
+    DefisaverLogger public constant logger = DefisaverLogger(DEFISAVER_LOGGER);
 
     address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
