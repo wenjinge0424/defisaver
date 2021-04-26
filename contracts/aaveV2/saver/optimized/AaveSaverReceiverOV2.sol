@@ -23,7 +23,10 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
         uint256 _gasCost,
         address _proxy
     ) internal {
-        (, uint256 swappedAmount) = _sell(_exchangeData);
+        uint256 swappedAmount = _exchangeData.srcAmount;
+        if (_exchangeData.srcAddr != _exchangeData.destAddr) {
+            (, swappedAmount) = _sell(_exchangeData);    
+        }
 
         address user = DSAuth(_proxy).owner();
         swappedAmount -= getGasCost(
@@ -71,7 +74,11 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
         // take out the fee wee need to pay and sell the rest
         _exchangeData.srcAmount = _exchangeData.srcAmount - _aaveFlashlLoanFee;
 
-        (, uint256 swappedAmount) = _sell(_exchangeData);
+        uint256 swappedAmount = _exchangeData.srcAmount;
+        // don't sell if its the same token
+        if (_exchangeData.srcAddr != _exchangeData.destAddr) {
+            (, swappedAmount) = _sell(_exchangeData);
+        }
 
         address user = DSAuth(_proxy).owner();
         swappedAmount -= getGasCost(
