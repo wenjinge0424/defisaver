@@ -27,6 +27,8 @@ contract AaveMigrationTaker is ProxyPermission {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
     DefisaverLogger public logger = DefisaverLogger(DEFISAVER_LOGGER);
 
+    address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     struct FlMigrationData {
         address market;
         address[] collTokens;
@@ -134,6 +136,10 @@ contract AaveMigrationTaker is ProxyPermission {
 
             (, uint256 borrowBalance, , uint256 borrowRateMode, , , uint256 originationFee, , , ) =
                 ILendingPool(lendingPoolAddress).getUserReserveData(reserve, _user);
+
+            if (reserve == ETH_ADDR) {
+                reserve = WETH_ADDRESS;
+            }
 
             borrowAddr[i] = reserve;
             borrowAmounts[i] = borrowBalance + originationFee;

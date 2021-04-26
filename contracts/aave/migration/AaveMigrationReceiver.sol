@@ -12,7 +12,7 @@ import "./AaveMigrationTaker.sol";
 contract AaveMigrationReceiver is AdminAuth {
     using SafeERC20 for ERC20;
 
-    address public AAVE_MIGRATION_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public AAVE_MIGRATION_ADDR = 0x08c28BddD974bE326838cB1CAE064796335480CE;
     address public constant AAVE_V2_LENDING_POOL = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
 
     function executeOperation(

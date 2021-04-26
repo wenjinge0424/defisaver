@@ -46,7 +46,7 @@ describe("AAVE-Migration", function() {
     const ethAddr = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
     const UNISWAP_WRAPPER = '0x6403BD92589F825FfeF6b62177FCe9149947cb9f';
 
-    const user = '';
+    const user = '0x87eAF3d9E59b50a237Ae7C8F58C21fE68d4065A4';
 
     const marketAddr = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 

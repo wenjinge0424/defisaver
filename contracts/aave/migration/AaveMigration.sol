@@ -137,10 +137,11 @@ contract AaveMigration {
 
         uint256 ethAmount = 0;
 
-        if (_tokenAddr != ETH_ADDR) {
+        if (_tokenAddr != WETH_ADDRESS) {
             ERC20(_tokenAddr).safeApprove(_lendingPoolCore, uint(-1));
         } else {
             ethAmount = _amount;
+            TokenInterface(WETH_ADDRESS).withdraw(ethAmount);
         }
 
         ILendingPool(lendingPool).repay{value: ethAmount}(
