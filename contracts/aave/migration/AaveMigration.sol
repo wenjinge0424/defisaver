@@ -27,15 +27,14 @@ contract AaveMigration {
     struct MigrateLoanData {
         address market;
         address[] collAssets;
+        bool[] isColl;
         address[] borrowAssets;
         uint256[] borrowAmounts;
         uint256[] fees;
         uint256[] modes;
     }
 
-    function migrateLoan(
-        MigrateLoanData memory _loanData
-    ) public {
+    function migrateLoan(MigrateLoanData memory _loanData) public {
         address lendingPoolCoreV1 =
             ILendingPoolAddressesProvider(AAVE_V1_LENDING_POOL_ADDRESSES).getLendingPoolCore();
 
@@ -43,16 +42,24 @@ contract AaveMigration {
 
         // payback AaveV1 loans
         for (uint256 i = 0; i < _loanData.borrowAssets.length; ++i) {
-            paybackAaveV1(lendingPoolCoreV1, _loanData.borrowAssets[i]);
+            paybackAaveV1(lendingPoolCoreV1, _loanData.borrowAssets[i], _loanData.borrowAmounts[i]);
         }
 
         // withdraw from AaveV1 and deposit to V2
         for (uint256 i = 0; i < _loanData.collAssets.length; ++i) {
             address aTokenAddr =
-                ILendingPool(lendingPoolCoreV1).getReserveATokenAddress(_loanData.borrowAssets[i]);
+                ILendingPool(lendingPoolCoreV1).getReserveATokenAddress(_loanData.collAssets[i]);
 
             uint256 withdrawnAmount = withdrawAaveV1(aTokenAddr);
-            depositAaveV2(lendingPoolV2, _loanData.market, _loanData.collAssets[i], withdrawnAmount);
+
+            depositAaveV2(
+                lendingPoolV2,
+                _loanData.market,
+                _loanData.collAssets[i],
+                withdrawnAmount,
+                _loanData.isColl[i]
+
+            );
         }
 
         // borrow debt from AaveV2
@@ -70,7 +77,8 @@ contract AaveMigration {
         address _lendingPoolV2,
         address _market,
         address _tokenAddr,
-        uint256 _amount
+        uint256 _amount,
+        bool _isColl
     ) internal {
         // handle weth
         if (_tokenAddr == ETH_ADDR) {
@@ -86,7 +94,9 @@ contract AaveMigration {
             AAVE_REFERRAL_CODE
         );
 
-        setUserUseReserveAsCollateralIfNeeded(_lendingPoolV2, _market, _tokenAddr);
+        if (_isColl) {
+            setUserUseReserveAsCollateralIfNeeded(_lendingPoolV2, _market, _tokenAddr);
+        }
     }
 
     function borrowAaveV2(
@@ -102,36 +112,40 @@ contract AaveMigration {
             _amount,
             _type,
             AAVE_REFERRAL_CODE,
-            msg.sender
+            address(this)
         );
+
+        ERC20(_tokenAddr).safeTransfer(msg.sender, _amount);
     }
 
-    function withdrawAaveV1(address _aTokenAddr) internal returns (uint256 amount) {
+    function withdrawAaveV1(address _aTokenAddr)
+        internal
+        returns (uint256 amount)
+    {
         amount = ERC20(_aTokenAddr).balanceOf(address(this));
 
         IAToken(_aTokenAddr).redeem(amount);
     }
 
-    function paybackAaveV1(address _lendingPoolCore, address _tokenAddr) internal {
+    function paybackAaveV1(
+        address _lendingPoolCore,
+        address _tokenAddr,
+        uint256 _amount
+    ) internal {
         address lendingPool =
             ILendingPoolAddressesProvider(AAVE_V1_LENDING_POOL_ADDRESSES).getLendingPool();
 
-        (, uint256 borrowAmount, , , , , uint256 originationFee, , , ) =
-            ILendingPool(lendingPool).getUserReserveData(_tokenAddr, address(this));
-
-        uint256 amount = borrowAmount + originationFee;
         uint256 ethAmount = 0;
 
         if (_tokenAddr != ETH_ADDR) {
-            ERC20(_tokenAddr).safeTransferFrom(msg.sender, address(this), amount);
-            ERC20(_tokenAddr).safeApprove(_lendingPoolCore, amount);
+            ERC20(_tokenAddr).safeApprove(_lendingPoolCore, uint(-1));
         } else {
-            ethAmount = amount;
+            ethAmount = _amount;
         }
 
         ILendingPool(lendingPool).repay{value: ethAmount}(
             _tokenAddr,
-            amount,
+            _amount,
             payable(address(this))
         );
     }

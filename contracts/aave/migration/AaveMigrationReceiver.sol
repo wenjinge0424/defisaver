@@ -7,11 +7,12 @@ import "../../utils/SafeERC20.sol";
 import "../../DS/DSProxy.sol";
 import "../../auth/AdminAuth.sol";
 import "./AaveMigration.sol";
+import "./AaveMigrationTaker.sol";
 
 contract AaveMigrationReceiver is AdminAuth {
     using SafeERC20 for ERC20;
 
-    address public constant AAVE_MIGRATION_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public AAVE_MIGRATION_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant AAVE_V2_LENDING_POOL = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
 
     function executeOperation(
@@ -21,29 +22,32 @@ contract AaveMigrationReceiver is AdminAuth {
         address initiator,
         bytes calldata params
     ) public returns (bool) {
-        (address market, address[] memory collTokens, uint256[] memory modes) =
-            abi.decode(params, (address, address[], uint256[]));
 
         // send loan tokens to proxy
         for (uint256 i = 0; i < borrowAssets.length; i++) {
-            ERC20(borrowAssets[i]).transfer(AAVE_MIGRATION_ADDR, amounts[i]);
+            ERC20(borrowAssets[i]).safeTransfer(initiator, amounts[i]);
         }
+
+        (AaveMigrationTaker.FlMigrationData memory flData) =
+            abi.decode(params, (AaveMigrationTaker.FlMigrationData));
 
         AaveMigration.MigrateLoanData memory migrateLoanData =
             AaveMigration.MigrateLoanData({
-                market: market,
-                collAssets: collTokens,
+                market: flData.market,
+                collAssets: flData.collTokens,
+                isColl: flData.isColl,
                 borrowAssets: borrowAssets,
                 borrowAmounts: amounts,
                 fees: fees,
-                modes: modes
+                modes: flData.modes
             });
 
-        // call ds proxy
+
+        // call DsProxy
         DSProxy(payable(initiator)).execute{value: address(this).balance}(
             AAVE_MIGRATION_ADDR,
             abi.encodeWithSignature(
-                "migrateLoan((address,address[],address[],uint256[],uint256[],uint256[]))",
+                "migrateLoan((address,address[],bool[],address[],uint256[],uint256[],uint256[]))",
                 migrateLoanData
             )
         );
@@ -58,12 +62,15 @@ contract AaveMigrationReceiver is AdminAuth {
         uint256[] memory _amounts,
         uint256[] memory _fees
     ) internal {
-        // return FL
         for (uint256 i = 0; i < _borrowAssets.length; i++) {
             ERC20(_borrowAssets[i]).safeApprove(AAVE_V2_LENDING_POOL, (_amounts[i] + _fees[i]));
         }
     }
 
-    /// @dev allow contract to receive eth from sell
+    function setAaveMigrationAddr(address _aaveMigrationAddr) public onlyOwner {
+        AAVE_MIGRATION_ADDR = _aaveMigrationAddr;
+    }
+
+    /// @dev Allow contract to receive eth
     receive() external payable {}
 }
