@@ -32,6 +32,8 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
         uint256 totalSupply;
         uint256 availableLiquidity;
         uint256 totalBorrow;
+        uint256 totalBorrowVar;
+        uint256 totalBorrowStab;
         uint256 collateralFactor;
         uint256 liquidationRatio;
         uint256 price;
@@ -178,6 +180,8 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
             totalSupply: ERC20(aToken).totalSupply(),
             availableLiquidity: t.availableLiquidity,
             totalBorrow: t.totalVariableDebt+t.totalStableDebt,
+            totalBorrowVar: t.totalVariableDebt,
+            totalBorrowStab: t.totalStableDebt,
             collateralFactor: ltv,
             liquidationRatio: liquidationThreshold,
             price: price,
@@ -225,7 +229,7 @@ contract AaveLoanInfoV2 is AaveSafetyRatioV2 {
 
         uint64 collPos = 0;
         uint64 borrowPos = 0;
-        
+
         for (uint64 i = 0; i < reserves.length; i++) {
             address reserve = reserves[i].tokenAddress;
 
