@@ -22,7 +22,7 @@ async function main() {
     // await deployContract("MCDSaverTaker");
     // await deployContract("MCDCreateTaker");
 
-    await deployContract("LoanShifterReceiver");
+    await deployContract("AaveMigrationTaker");
 }
 
 start(main);

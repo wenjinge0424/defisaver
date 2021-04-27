@@ -36,13 +36,9 @@ contract BidProxy {
     }
 
     function closeBid(uint _bidId, address _flipper, address _joinAddr) public {
-        bytes32 ilk = Join(_joinAddr).ilk();
-
         Flipper(_flipper).deal(_bidId);
-        uint amount = Vat(VAT_ADDRESS).gem(ilk, address(this));
 
-        Vat(VAT_ADDRESS).hope(_joinAddr);
-        Gem(_joinAddr).exit(msg.sender, amount);
+        exitCollateral(_joinAddr);
     }
 
     function exitCollateral(address _joinAddr) public {

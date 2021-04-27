@@ -442,40 +442,6 @@
 		{
 			"inputs": [
 				{
-					"internalType": "contract ISAFEManager",
-					"name": "_manager",
-					"type": "address"
-				},
-				{
-					"internalType": "uint256",
-					"name": "_cdpId",
-					"type": "uint256"
-				},
-				{
-					"internalType": "bytes32",
-					"name": "_ilk",
-					"type": "bytes32"
-				}
-			],
-			"name": "getCdpInfo",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				},
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
 					"internalType": "enum RAISaverProxyHelper.ManagerType",
 					"name": "_managerType",
 					"type": "uint8"
@@ -564,7 +530,7 @@
 				},
 				{
 					"internalType": "uint256",
-					"name": "_cdpId",
+					"name": "_safeId",
 					"type": "uint256"
 				}
 			],
@@ -596,6 +562,40 @@
 				}
 			],
 			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "contract ISAFEManager",
+					"name": "_manager",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_safeId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "_collType",
+					"type": "bytes32"
+				}
+			],
+			"name": "getSafeInfo",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -1057,7 +1057,7 @@
 	],
 	"networks": {
 		"local": {
-			"address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+			"address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 			"args": []
 		}
 	}
