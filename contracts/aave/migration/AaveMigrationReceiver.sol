@@ -52,19 +52,7 @@ contract AaveMigrationReceiver is AdminAuth {
             )
         );
 
-        returnFL(borrowAssets, amounts, fees);
-
         return true;
-    }
-
-    function returnFL(
-        address[] memory _borrowAssets,
-        uint256[] memory _amounts,
-        uint256[] memory _fees
-    ) internal {
-        for (uint256 i = 0; i < _borrowAssets.length; i++) {
-            ERC20(_borrowAssets[i]).safeApprove(AAVE_V2_LENDING_POOL, (_amounts[i] + _fees[i]));
-        }
     }
 
     function setAaveMigrationAddr(address _aaveMigrationAddr) public onlyOwner {

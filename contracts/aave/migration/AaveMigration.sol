@@ -61,16 +61,6 @@ contract AaveMigration {
 
             );
         }
-
-        // borrow debt from AaveV2
-        for (uint256 i = 0; i < _loanData.borrowAssets.length; ++i) {
-            borrowAaveV2(
-                lendingPoolV2,
-                _loanData.borrowAssets[i],
-                (_loanData.borrowAmounts[i] + _loanData.fees[i]),
-                _loanData.modes[i]
-            );
-        }
     }
 
     function depositAaveV2(
@@ -97,25 +87,6 @@ contract AaveMigration {
         if (_isColl) {
             setUserUseReserveAsCollateralIfNeeded(_lendingPoolV2, _market, _tokenAddr);
         }
-    }
-
-    function borrowAaveV2(
-        address _lendingPoolV2,
-        address _tokenAddr,
-        uint256 _amount,
-        uint256 _type
-    ) internal {
-        _tokenAddr = _tokenAddr == ETH_ADDR ? WETH_ADDRESS : _tokenAddr;
-
-        ILendingPoolV2(_lendingPoolV2).borrow(
-            _tokenAddr,
-            _amount,
-            _type,
-            AAVE_REFERRAL_CODE,
-            address(this)
-        );
-
-        ERC20(_tokenAddr).safeTransfer(msg.sender, _amount);
     }
 
     function withdrawAaveV1(address _aTokenAddr)

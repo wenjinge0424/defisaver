@@ -41,7 +41,7 @@ contract AaveMigrationTaker is ProxyPermission {
     /// @param _collTokens Underlying supply addresses where user has non 0 balance
     /// @param _isColl Bool array indicating if the collTokens are set as collateral
     /// @param _borrowTokens Underlying borrow addresses where user has non 0 debt
-    /// @param _flModes Type of aave V2 loan (array of 0 same size as borrowTokens)
+    /// @param _flModes Type of aave V2 loan (array the same size as borrowTokens)
     /// @param _aaveMigrationReceiverAddr Receiver address for aave fl
     function migrateV1Position(
         address _market,
