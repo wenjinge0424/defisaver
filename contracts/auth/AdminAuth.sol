@@ -20,7 +20,7 @@ contract AdminAuth {
     }
 
     constructor() public {
-        owner = msg.sender;
+        owner = 0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00;
         admin = 0x25eFA336886C74eA8E282ac466BdCd0199f85BB9;
     }
 
