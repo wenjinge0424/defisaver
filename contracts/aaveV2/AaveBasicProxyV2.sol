@@ -76,11 +76,22 @@ contract AaveBasicProxyV2 is GasBurner, AaveHelperV2 {
     }
 
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
+    /// @dev Leaving this method so it doesn't break anything for frontend
     /// @notice User paybacks tokens to the Aave protocol
     /// @param _market address provider for specific market
     /// @param _tokenAddr The address of the token to be paybacked
     /// @param _amount Amount of tokens to be payed back
     function payback(address _market, address _tokenAddr, uint256 _amount, uint256 _rateMode) public burnGas(3) payable {
+        paybackAndReturnToUser(_market, _tokenAddr, _amount, _rateMode, msg.sender);
+    }
+
+    /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
+    /// @notice User paybacks tokens to the Aave protocol
+    /// @param _market address provider for specific market
+    /// @param _tokenAddr The address of the token to be paybacked
+    /// @param _amount Amount of tokens to be payed back
+    /// @param _user Address that will receive tokens if something left
+    function paybackAndReturnToUser(address _market, address _tokenAddr, uint256 _amount, uint256 _rateMode, address payable _user) public burnGas(3) payable {
         address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
         _tokenAddr = changeToWeth(_tokenAddr);
 
@@ -100,7 +111,7 @@ contract AaveBasicProxyV2 is GasBurner, AaveHelperV2 {
             _tokenAddr = ETH_ADDR;
         }
 
-        withdrawTokens(_tokenAddr);
+        withdrawTokensToUser(_tokenAddr, _user);
     }
 
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
@@ -131,19 +142,26 @@ contract AaveBasicProxyV2 is GasBurner, AaveHelperV2 {
         withdrawTokens(_tokenAddr);
     }
 
+    /// @notice Helper method to withdraw tokens from the DSProxy to the specific user
+    /// @param _tokenAddr Address of the token to be withdrawn
+    /// @param _user Address of user that will receive the funds
+    function withdrawTokensToUser(address _tokenAddr, address payable _user) public {
+        uint256 amount = _tokenAddr == ETH_ADDR ? _user.balance : ERC20(_tokenAddr).balanceOf(address(this));
+
+        if (amount > 0) {
+            if (_tokenAddr != ETH_ADDR) {
+                ERC20(_tokenAddr).safeTransfer(_user, amount);
+            } else {
+                _user.transfer(amount);
+            }
+        }
+    }
+
 
     /// @notice Helper method to withdraw tokens from the DSProxy
     /// @param _tokenAddr Address of the token to be withdrawn
     function withdrawTokens(address _tokenAddr) public {
-        uint256 amount = _tokenAddr == ETH_ADDR ? address(this).balance : ERC20(_tokenAddr).balanceOf(address(this));
-
-        if (amount > 0) {
-            if (_tokenAddr != ETH_ADDR) {
-                ERC20(_tokenAddr).safeTransfer(msg.sender, amount);
-            } else {
-                msg.sender.transfer(amount);
-            }
-        }
+        withdrawTokensToUser(_tokenAddr, msg.sender);
     }
 
     function setUserUseReserveAsCollateralIfNeeded(address _market, address _tokenAddr) public {

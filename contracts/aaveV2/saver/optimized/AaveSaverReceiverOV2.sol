@@ -104,27 +104,18 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
         }
 
         // first payback the loan with swapped amount
+        // this payback will return funds that left directly to the user
         DSProxy(payable(_proxy)).execute{value: msgValue}(
             AAVE_BASIC_PROXY,
             abi.encodeWithSignature(
-                "payback(address,address,uint256,uint256)",
+                "paybackAndReturnToUser(address,address,uint256,uint256,address)",
                 _market,
                 _exchangeData.destAddr,
                 swappedAmount,
-                _rateMode
+                _rateMode,
+                user
             )
         );
-
-        // if some tokens left after payback (full repay) we need to return it back to the proxy owner
-        require(user != address(0)); // be sure that we fetched the user correctly
-        if (_exchangeData.destAddr == ETH_ADDR || _exchangeData.destAddr == WETH_ADDRESS) {
-            // keep protocol fee for tx.origin, but the rest of the balance return to the user
-            payable(user).transfer(address(this).balance - protocolFeeLeft);
-        } else {
-            // in case its a token, just return whole value back to the user, as protocol fee is always in eth
-            uint256 amount = ERC20(_exchangeData.destAddr).balanceOf(address(this));
-            ERC20(_exchangeData.destAddr).safeTransfer(user, amount);
-        }
 
         // pull the amount we flash loaned in collateral to be able to payback the debt
         DSProxy(payable(_proxy)).execute(
