@@ -15,7 +15,7 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
 
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
-    address public constant AAVE_BASIC_PROXY = 0x234e8219f25F6AF4bE90d40C79DEdE31B1f21d4f;
+    address public constant AAVE_BASIC_PROXY = 0xCD47e74A717B882EFb54A3e17B59A5b1e31fd3c3;
 
     function boost(
         ExchangeData memory _exchangeData,
@@ -25,7 +25,7 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
     ) internal {
         uint256 swappedAmount = _exchangeData.srcAmount;
         if (_exchangeData.srcAddr != _exchangeData.destAddr) {
-            (, swappedAmount) = _sell(_exchangeData);    
+            (, swappedAmount) = _sell(_exchangeData);
         }
 
         address user = DSAuth(_proxy).owner();
