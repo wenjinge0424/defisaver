@@ -74,11 +74,11 @@ contract AaveSaverProxy is GasBurner, DFSExchangeCore, AaveHelper {
 
 			// swap
 			(, destAmount) = _sell(_data);
-            destAmount -= getGasCost(_data.destAmount, user, _gasCost, _data.destAddr);
+            destAmount -= getGasCost(destAmount, user, _gasCost, _data.destAddr);
 
 		} else {
 			destAmount = _data.srcAmount;
-            destAmount -= getGasCost(_data.destAmount, user, _gasCost, _data.destAddr);
+            destAmount -= getGasCost(destAmount, user, _gasCost, _data.destAddr);
 
 		}
 
