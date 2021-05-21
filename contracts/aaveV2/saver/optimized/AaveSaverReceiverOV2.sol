@@ -15,7 +15,7 @@ contract AaveSaverReceiverOV2 is AaveHelperV2, AdminAuth, DFSExchangeCore {
 
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
-    address public constant AAVE_BASIC_PROXY = 0xCD47e74A717B882EFb54A3e17B59A5b1e31fd3c3;
+    address public constant AAVE_BASIC_PROXY = 0xFF40D4FB79b3B5AD3b0cc2d29D2436A488cA45Ef;
 
     function boost(
         ExchangeData memory _exchangeData,

@@ -146,7 +146,7 @@ contract AaveBasicProxyV2 is GasBurner, AaveHelperV2 {
     /// @param _tokenAddr Address of the token to be withdrawn
     /// @param _user Address of user that will receive the funds
     function withdrawTokensToUser(address _tokenAddr, address payable _user) public {
-        uint256 amount = _tokenAddr == ETH_ADDR ? _user.balance : ERC20(_tokenAddr).balanceOf(address(this));
+        uint256 amount = _tokenAddr == ETH_ADDR ? address(this).balance : ERC20(_tokenAddr).balanceOf(address(this));
 
         if (amount > 0) {
             if (_tokenAddr != ETH_ADDR) {
