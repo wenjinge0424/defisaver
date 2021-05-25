@@ -34,6 +34,7 @@ contract CompoundLoanInfo is CompoundSafetyRatio {
         uint totalBorrow;
         uint collateralFactor;
         uint price;
+        uint compSpeed;
         uint borrowCap;
     }
 
@@ -205,6 +206,7 @@ contract CompoundLoanInfo is CompoundSafetyRatio {
                 totalBorrow: cToken.totalBorrowsCurrent(),
                 collateralFactor: collFactor,
                 price: CompoundOracleInterface(oracleAddr).getUnderlyingPrice(_cTokenAddresses[i]),
+                compSpeed: comp.compSpeeds(_cTokenAddresses[i]),
                 borrowCap: comp.borrowCaps(_cTokenAddresses[i])
             });
         }

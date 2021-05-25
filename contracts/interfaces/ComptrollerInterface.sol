@@ -30,5 +30,7 @@ abstract contract ComptrollerInterface {
 
     function oracle() public virtual view returns (address);
 
-    function borrowCaps(address) external virtual returns (uint256);
+    mapping(address => uint) public compSpeeds;
+
+    mapping(address => uint) public borrowCaps;
 }
